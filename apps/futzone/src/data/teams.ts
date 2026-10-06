@@ -1,0 +1,27 @@
+import type { Team } from '@/types/catalog';
+
+/**
+ * Times disponíveis no catálogo. Para adicionar um time, inclua um item aqui
+ * e referencie o `id` no campo `teamId` do produto.
+ */
+export const teams: Team[] = [
+  { id: 'flamengo', slug: 'flamengo', name: 'Flamengo', country: 'Brasil', kind: 'clube', colors: { primary: '#C8102E', secondary: '#111111' } },
+  { id: 'palmeiras', slug: 'palmeiras', name: 'Palmeiras', country: 'Brasil', kind: 'clube', colors: { primary: '#006437', secondary: '#FFFFFF' } },
+  { id: 'corinthians', slug: 'corinthians', name: 'Corinthians', country: 'Brasil', kind: 'clube', colors: { primary: '#F4F4F4', secondary: '#111111' } },
+  { id: 'sao-paulo', slug: 'sao-paulo', name: 'São Paulo', country: 'Brasil', kind: 'clube', colors: { primary: '#F4F4F4', secondary: '#D50000' } },
+  { id: 'fluminense', slug: 'fluminense', name: 'Fluminense', country: 'Brasil', kind: 'clube', colors: { primary: '#7A0C2E', secondary: '#00613C' } },
+  { id: 'vasco', slug: 'vasco', name: 'Vasco da Gama', country: 'Brasil', kind: 'clube', colors: { primary: '#111111', secondary: '#F4F4F4' } },
+  { id: 'real-madrid', slug: 'real-madrid', name: 'Real Madrid', country: 'Espanha', kind: 'clube', colors: { primary: '#F4F4F4', secondary: '#1B2A4A' } },
+  { id: 'barcelona', slug: 'barcelona', name: 'Barcelona', country: 'Espanha', kind: 'clube', colors: { primary: '#A50044', secondary: '#004D98' } },
+  { id: 'manchester-city', slug: 'manchester-city', name: 'Manchester City', country: 'Inglaterra', kind: 'clube', colors: { primary: '#6CABDD', secondary: '#FFFFFF' } },
+  { id: 'liverpool', slug: 'liverpool', name: 'Liverpool', country: 'Inglaterra', kind: 'clube', colors: { primary: '#C8102E', secondary: '#F4F4F4' } },
+  { id: 'psg', slug: 'psg', name: 'Paris Saint-Germain', country: 'França', kind: 'clube', colors: { primary: '#004170', secondary: '#DA291C' } },
+  { id: 'bayern', slug: 'bayern', name: 'Bayern de Munique', country: 'Alemanha', kind: 'clube', colors: { primary: '#DC052D', secondary: '#F4F4F4' } },
+  { id: 'milan', slug: 'milan', name: 'Milan', country: 'Itália', kind: 'clube', colors: { primary: '#FB090B', secondary: '#111111' } },
+  { id: 'boca-juniors', slug: 'boca-juniors', name: 'Boca Juniors', country: 'Argentina', kind: 'clube', colors: { primary: '#003C8F', secondary: '#F3B229' } },
+  { id: 'brasil', slug: 'brasil', name: 'Brasil', country: 'Brasil', kind: 'selecao', colors: { primary: '#FFDF00', secondary: '#009C3B' } },
+  { id: 'argentina', slug: 'argentina', name: 'Argentina', country: 'Argentina', kind: 'selecao', colors: { primary: '#75AADB', secondary: '#FFFFFF' } },
+  { id: 'franca', slug: 'franca', name: 'França', country: 'França', kind: 'selecao', colors: { primary: '#1C2B4A', secondary: '#E1000F' } },
+  { id: 'portugal', slug: 'portugal', name: 'Portugal', country: 'Portugal', kind: 'selecao', colors: { primary: '#C8102E', secondary: '#046A38' } },
+  { id: 'holanda', slug: 'holanda', name: 'Holanda', country: 'Holanda', kind: 'selecao', colors: { primary: '#F36C21', secondary: '#FFFFFF' } },
+];
