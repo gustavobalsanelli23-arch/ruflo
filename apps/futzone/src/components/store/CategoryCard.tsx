@@ -8,21 +8,28 @@ interface CategoryCardProps {
   description: string;
   href: string;
   count?: number;
+  /** Foto real de capa. Sem foto, usa a ilustração da categoria. */
+  image?: string;
 }
 
-export function CategoryCard({ id, title, description, href, count }: CategoryCardProps) {
+export function CategoryCard({ id, title, description, href, count, image }: CategoryCardProps) {
   return (
     <Link
       href={href}
       className="group relative flex h-full flex-col overflow-hidden rounded-[var(--radius-card)] border border-line bg-surface transition-all duration-300 hover:-translate-y-1 hover:border-brand-500/60 hover:shadow-[0_24px_50px_-28px_var(--color-brand-500)]"
     >
-      <div className="relative grid aspect-[5/4] place-items-center overflow-hidden bg-[radial-gradient(90%_80%_at_50%_100%,color-mix(in_oklab,var(--color-brand-500)_22%,transparent),transparent_70%)]">
-        <div className="pitch-lines absolute inset-0 opacity-60" />
-        <div className="grid h-full w-full place-items-center transition-transform duration-500 group-hover:scale-105">
-          <CategoryArt id={id} />
-        </div>
+      <div className="relative aspect-[4/5] overflow-hidden bg-surface-2">
+        {image ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={image} alt="" loading="lazy" className="h-full w-full object-cover object-top transition-transform duration-500 group-hover:scale-105" />
+        ) : (
+          <div className="grid h-full w-full place-items-center bg-[radial-gradient(90%_80%_at_50%_100%,color-mix(in_oklab,var(--color-brand-500)_22%,transparent),transparent_70%)] transition-transform duration-500 group-hover:scale-105">
+            <CategoryArt id={id} />
+          </div>
+        )}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" aria-hidden />
         {count !== undefined && (
-          <span className="absolute left-3 top-3 rounded-full bg-black/50 px-2.5 py-1 text-[0.65rem] font-bold uppercase tracking-wider text-fg-2 backdrop-blur">
+          <span className="absolute left-3 top-3 rounded-full bg-black/55 px-2.5 py-1 text-[0.65rem] font-bold uppercase tracking-wider text-white/90 backdrop-blur">
             {count} {count === 1 ? 'modelo' : 'modelos'}
           </span>
         )}

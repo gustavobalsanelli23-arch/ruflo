@@ -7,10 +7,10 @@ import type { Product, ProductTag } from '@/types/catalog';
 import { categories } from '@/data/categories';
 import { usePublicProducts } from '@/context/StoreDataContext';
 import { sortProducts } from '@/lib/catalog';
-import { isOnSale } from '@/lib/product';
+import { findByRef, isOnSale } from '@/lib/product';
+import { categoryCovers, retroShowcase } from '@/data/site';
 import { LinkButton } from '@/components/ui/Button';
 import { SectionHeading } from '@/components/ui/Feedback';
-import { JerseyArt } from '@/components/brand/JerseyArt';
 import { CategoryCard } from './CategoryCard';
 import { ProductGrid } from './ProductCard';
 
@@ -30,6 +30,12 @@ export function HomeSections() {
   );
 
   const countBy = (id: string) => products.filter((p) => p.category === id).length;
+  const cover = (key: string) => {
+    const ref = categoryCovers[key];
+    return ref ? findByRef(products, ref)?.images[0]?.src : undefined;
+  };
+  const onSaleCount = products.filter(isOnSale).length;
+  const retro = retroShowcase.map((ref) => findByRef(products, ref)).filter((p) => p?.images.length);
 
   return (
     <>
@@ -37,9 +43,13 @@ export function HomeSections() {
         <SectionHeading eyebrow="Explore" title="Categorias" />
         <div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 lg:grid-cols-6">
           {categories.map((c) => (
-            <CategoryCard key={c.id} id={c.id} title={c.shortName} description={c.description} href={c.href} count={countBy(c.id)} />
+            <CategoryCard key={c.id} id={c.id} title={c.shortName} description={c.description} href={c.href} count={countBy(c.id)} image={cover(c.id)} />
           ))}
-          <CategoryCard id="promocoes" title="Promoções" description="Camisas com preço especial por tempo limitado." href="/promocoes" count={products.filter(isOnSale).length} />
+          {onSaleCount > 0 ? (
+            <CategoryCard id="promocoes" title="Promoções" description="Camisas com preço especial por tempo limitado." href="/promocoes" count={onSaleCount} />
+          ) : (
+            <CategoryCard id="clubes" title="Times" description="Encontre as camisas do seu time do coração." href="/times" image={cover('times')} />
+          )}
         </div>
       </section>
 
@@ -56,9 +66,23 @@ export function HomeSections() {
               Ver retrô <ArrowRight className="size-4" />
             </LinkButton>
           </div>
-          <div className="relative hidden min-h-72 md:block" aria-hidden>
+          <div className="relative hidden min-h-80 md:block" aria-hidden>
             <div className="absolute inset-10 rounded-full bg-brand-500/20 blur-3xl" />
-            <JerseyArt primary="#efe9dc" secondary="var(--color-brand-600)" cut="retro" className="absolute left-1/2 top-1/2 h-[85%] -translate-x-1/2 -translate-y-1/2 -rotate-6" />
+            {retro.map((p, i) => (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                key={p!.id}
+                src={p!.images[0].src}
+                alt=""
+                loading="lazy"
+                className={[
+                  'absolute top-1/2 aspect-[3/4] w-[34%] -translate-y-1/2 rounded-2xl border border-white/10 object-cover shadow-2xl',
+                  i === 0 && 'left-[6%] -rotate-6',
+                  i === 1 && 'left-1/2 z-10 w-[38%] -translate-x-1/2',
+                  i === 2 && 'right-[6%] rotate-6',
+                ].filter(Boolean).join(' ')}
+              />
+            ))}
           </div>
         </div>
       </section>

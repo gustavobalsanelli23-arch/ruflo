@@ -46,4 +46,8 @@ export const STOCK_LABEL: Record<StockLevel, string> = {
   esgotado: 'Esgotado',
 };
 
+/** Busca um produto pela referência (time + slug). */
+export const findByRef = (products: Product[], ref: { teamId: string; slug: string }): Product | undefined =>
+  products.find((p) => p.teamId === ref.teamId && p.slug === ref.slug);
+
 export const isPublic = (p: Product): boolean => p.status === 'published';

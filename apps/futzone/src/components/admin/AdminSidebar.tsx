@@ -24,7 +24,7 @@ export function AdminSidebar({ onNavigate }: { onNavigate?(): void }) {
   return (
     <div className="flex h-full flex-col">
       <div className="flex h-16 items-center gap-3 border-b border-line px-5">
-        <Logo href="/admin" />
+        <Logo href="/admin" imgClassName="h-6 sm:h-6" />
         <span className="rounded-md bg-brand-500/15 px-1.5 py-0.5 text-[0.6rem] font-bold uppercase tracking-wider text-brand-300">Admin</span>
       </div>
       <nav aria-label="Administração" className="flex-1 overflow-y-auto px-3 py-5">

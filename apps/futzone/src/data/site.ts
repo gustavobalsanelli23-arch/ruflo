@@ -3,14 +3,39 @@
 export const site = {
   name: 'FUTZONE',
   tagline: 'Vista a paixão pelo futebol.',
-  /**
-   * Imagem do hero. Quando `null`, o hero usa a composição ilustrada da marca.
-   * Substitua por uma foto licenciada (ex.: '/brand/hero.jpg' em /public).
-   */
-  heroImage: null as string | null,
   contactEmail: 'contato@futzone.com.br',
   freeShippingFrom: 29900,
 };
+
+/** Referência a um produto do catálogo pelo time e slug (ex.: URL /camisas/brasil/...). */
+export interface ProductRef {
+  teamId: string;
+  slug: string;
+}
+
+/** Vitrine do hero (3 camisas): esquerda, centro (destaque) e direita. */
+export const heroShowcase: ProductRef[] = [
+  { teamId: 'flamengo', slug: 'camisa-jogador-flamengo-listrada-i-26-27' },
+  { teamId: 'brasil', slug: 'camisa-torcedor-selecao-brasil-amarela-i-26-27' },
+  { teamId: 'barcelona', slug: 'camisa-jogador-barcelona-listrada-i-25-26' },
+];
+
+/** Foto de capa dos cards de categoria na Home. */
+export const categoryCovers: Record<string, ProductRef> = {
+  clubes: { teamId: 'fluminense', slug: 'camisa-fluminense-tricolor-i-26-27' },
+  retro: { teamId: 'flamengo', slug: 'camisa-retro-flamengo-1992-93' },
+  kits: { teamId: 'flamengo', slug: 'kit-regata-e-short-flamengo-treino-amarelo' },
+  selecoes: { teamId: 'holanda', slug: 'camisa-holanda-laranja-i-26-27' },
+  femininas: { teamId: 'flamengo', slug: 'camisa-feminina-flamengo-listrada-i-26-27' },
+  times: { teamId: 'palmeiras', slug: 'camisa-palmeiras-verde-i-26-27' },
+};
+
+/** Fotos do banner da coleção retrô. */
+export const retroShowcase: ProductRef[] = [
+  { teamId: 'milan', slug: 'camisa-retro-ac-milan-2006-07-kaka' },
+  { teamId: 'psg', slug: 'camisa-retro-psg-i-ronaldinho-2001-02' },
+  { teamId: 'flamengo', slug: 'camisa-retro-flamengo-1997' },
+];
 
 export interface NavLink {
   label: string;
