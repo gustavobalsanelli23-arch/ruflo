@@ -1,8 +1,11 @@
 import type { Metadata } from 'next';
-import { AdminShell } from '@/components/admin/AdminShell';
 
-export const metadata: Metadata = { title: { default: 'Admin', template: '%s · Admin FutZone' }, robots: { index: false } };
+export const metadata: Metadata = {
+  title: { default: 'Painel', template: '%s · Painel FutZone' },
+  robots: { index: false, follow: false, nocache: true },
+};
 
-export default function AdminLayout({ children }: { children: React.ReactNode }) {
-  return <AdminShell>{children}</AdminShell>;
+/** Área administrativa: separada da loja (sem cabeçalho, rodapé ou carrinho públicos). */
+export default function AdminRootLayout({ children }: { children: React.ReactNode }) {
+  return children;
 }

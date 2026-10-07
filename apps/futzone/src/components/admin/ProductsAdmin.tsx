@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from 'react';
 import Link from 'next/link';
-import { Eye, EyeOff, Pencil, Plus, Search, Trash2 } from 'lucide-react';
+import { Eye, EyeOff, Pencil, Plus, Trash2 } from 'lucide-react';
 import type { CategoryId, Product, ProductStatus } from '@/types/catalog';
 import { categories, categoryById } from '@/data/categories';
 import { useStoreData } from '@/context/StoreDataContext';
@@ -11,18 +11,17 @@ import { matchesSearch } from '@/lib/catalog';
 import { formatPrice } from '@/lib/format';
 import { STATUS_META } from '@/lib/productLabels';
 import { productHref, stockLevel, teamById, totalStock } from '@/lib/product';
-import { Badge } from '@/components/ui/Badge';
-import { Button, LinkButton } from '@/components/ui/Button';
 import { EmptyState } from '@/components/ui/Feedback';
 import { Select } from '@/components/ui/Form';
-import { ConfirmDialog, Modal } from '@/components/ui/Modal';
 import { ProductImage } from '@/components/products/ProductImage';
-import { AdminPageHeader, AdminTable, Panel } from './AdminUI';
+import { AdminBadge, AdminSearch, AdminButton, AdminCard, AdminConfirm, AdminLinkButton, AdminModal, AdminPageHeader, AdminTable } from './AdminUI';
+import { useAdmin } from './AdminGuard';
 
 const STOCK_CLASS = { disponivel: 'text-fg', baixo: 'text-warn', esgotado: 'text-danger' } as const;
 
 export function ProductsAdmin() {
   const { products, setProductStatus, deleteProduct, settings } = useStoreData();
+  const { log } = useAdmin();
   const { notify } = useToast();
   const [q, setQ] = useState('');
   const [category, setCategory] = useState<CategoryId | ''>('');
@@ -38,23 +37,24 @@ export function ProductsAdmin() {
   const toggle = (p: Product) => {
     const next: ProductStatus = p.status === 'published' ? 'inactive' : 'published';
     setProductStatus(p.id, next);
+    log('produto', next === 'published' ? `ativou o produto "${p.name}"` : `desativou o produto "${p.name}"`);
     notify(next === 'published' ? `"${p.name}" publicado na loja.` : `"${p.name}" desativado — não aparece mais na loja.`, next === 'published' ? 'success' : 'info');
   };
 
   const actions = (p: Product) => (
     <div className="flex items-center justify-end gap-1">
-      <Button size="icon" variant="ghost" className="size-8" onClick={() => setViewing(p)} aria-label={`Visualizar ${p.name}`} title="Visualizar">
+      <AdminButton size="icon" variant="ghost" className="size-8" onClick={() => setViewing(p)} aria-label={`Visualizar ${p.name}`} title="Visualizar">
         <Eye className="size-4" />
-      </Button>
-      <Link href={`/admin/produtos/${p.id}`} className="grid size-8 place-items-center rounded-xl text-fg-2 hover:bg-surface-3 hover:text-fg" aria-label={`Editar ${p.name}`} title="Editar">
+      </AdminButton>
+      <Link href={`/admin/produtos/${p.id}`} className="grid size-8 place-items-center rounded-lg text-fg-2 hover:bg-white/[0.06] hover:text-fg" aria-label={`Editar ${p.name}`} title="Editar">
         <Pencil className="size-4" />
       </Link>
-      <Button size="icon" variant="ghost" className="size-8" onClick={() => toggle(p)} aria-label={p.status === 'published' ? `Desativar ${p.name}` : `Publicar ${p.name}`} title={p.status === 'published' ? 'Desativar' : 'Publicar'}>
+      <AdminButton size="icon" variant="ghost" className="size-8" onClick={() => toggle(p)} aria-label={p.status === 'published' ? `Desativar ${p.name}` : `Publicar ${p.name}`} title={p.status === 'published' ? 'Desativar' : 'Publicar'}>
         {p.status === 'published' ? <EyeOff className="size-4" /> : <Eye className="size-4 text-brand-400" />}
-      </Button>
-      <Button size="icon" variant="ghost" className="size-8 hover:text-danger" onClick={() => setRemoving(p)} aria-label={`Excluir ${p.name}`} title="Excluir">
+      </AdminButton>
+      <AdminButton size="icon" variant="ghost" className="size-8 hover:text-danger" onClick={() => setRemoving(p)} aria-label={`Excluir ${p.name}`} title="Excluir">
         <Trash2 className="size-4" />
-      </Button>
+      </AdminButton>
     </div>
   );
 
@@ -64,18 +64,15 @@ export function ProductsAdmin() {
         title="Produtos"
         description={`${products.length} produtos cadastrados · alterações salvas localmente neste navegador`}
         actions={
-          <LinkButton href="/admin/produtos/novo">
+          <AdminLinkButton href="/admin/produtos/novo">
             <Plus className="size-4" /> Adicionar produto
-          </LinkButton>
+          </AdminLinkButton>
         }
       />
 
-      <Panel>
-        <div className="flex flex-col gap-3 border-b border-line p-4 sm:flex-row">
-          <div className="relative flex-1">
-            <Search className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-muted" />
-            <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Buscar por nome, time ou temporada" aria-label="Buscar produtos" className="h-11 w-full rounded-xl border border-line bg-surface-2 pl-10 pr-3 text-sm focus:border-brand-500 focus:outline-none" />
-          </div>
+      <AdminCard>
+        <div className="flex flex-col gap-3 border-b border-white/[0.06] p-4 sm:flex-row">
+          <AdminSearch value={q} onChange={setQ} placeholder="Buscar por nome, time ou temporada" label="Buscar produtos" className="flex-1 sm:max-w-none" />
           <Select value={category} onChange={(e) => setCategory(e.target.value as CategoryId | '')} aria-label="Filtrar por categoria" className="sm:w-44">
             <option value="">Todas as categorias</option>
             {categories.map((c) => <option key={c.id} value={c.id}>{c.shortName}</option>)}
@@ -91,7 +88,7 @@ export function ProductsAdmin() {
         ) : (
           <>
             <div className="hidden md:block">
-              <AdminTable head={['Produto', 'Categoria', 'Time', 'Preço', 'Estoque', 'Status', <span key="a" className="sr-only">Ações</span>]} minWidth={880}>
+              <AdminTable head={['Produto', 'Time', 'Categoria', 'Preço', 'Estoque', 'Status', <span key="a" className="sr-only">Ações</span>]} minWidth={880}>
                 {list.map((p) => {
                   const level = stockLevel(p, settings.lowStockThreshold);
                   return (
@@ -105,14 +102,14 @@ export function ProductsAdmin() {
                           </div>
                         </div>
                       </td>
-                      <td className="text-fg-2">{categoryById(p.category)?.shortName}</td>
                       <td className="text-fg-2">{teamById(p.teamId)?.name}</td>
+                      <td className="text-fg-2">{categoryById(p.category)?.shortName}</td>
                       <td className="whitespace-nowrap tabular-nums">
                         <span className="font-semibold">{formatPrice(p.price)}</span>
                         {p.compareAtPrice && p.compareAtPrice > p.price && <span className="block text-xs text-muted line-through">{formatPrice(p.compareAtPrice)}</span>}
                       </td>
                       <td className={`font-bold tabular-nums ${STOCK_CLASS[level]}`}>{totalStock(p)}</td>
-                      <td><Badge tone={STATUS_META[p.status].tone} dot>{STATUS_META[p.status].label}</Badge></td>
+                      <td><AdminBadge tone={STATUS_META[p.status].tone} dot>{STATUS_META[p.status].label}</AdminBadge></td>
                       <td>{actions(p)}</td>
                     </tr>
                   );
@@ -129,7 +126,7 @@ export function ProductsAdmin() {
                     <div className="mt-1.5 flex flex-wrap items-center gap-2">
                       <span className="text-sm font-bold">{formatPrice(p.price)}</span>
                       <span className={`text-xs font-bold ${STOCK_CLASS[stockLevel(p, settings.lowStockThreshold)]}`}>{totalStock(p)} un.</span>
-                      <Badge tone={STATUS_META[p.status].tone}>{STATUS_META[p.status].label}</Badge>
+                      <AdminBadge tone={STATUS_META[p.status].tone}>{STATUS_META[p.status].label}</AdminBadge>
                     </div>
                     <div className="mt-2 -ml-2">{actions(p)}</div>
                   </div>
@@ -138,9 +135,9 @@ export function ProductsAdmin() {
             </ul>
           </>
         )}
-      </Panel>
+      </AdminCard>
 
-      <Modal
+      <AdminModal
         open={!!viewing}
         onClose={() => setViewing(null)}
         title={viewing?.name ?? ''}
@@ -149,8 +146,8 @@ export function ProductsAdmin() {
         footer={
           viewing && (
             <>
-              {viewing.status === 'published' && <LinkButton href={productHref(viewing)} variant="secondary" target="_blank">Ver na loja</LinkButton>}
-              <LinkButton href={`/admin/produtos/${viewing.id}`}>Editar produto</LinkButton>
+              {viewing.status === 'published' && <AdminLinkButton href={productHref(viewing)} variant="secondary" target="_blank">Ver na loja</AdminLinkButton>}
+              <AdminLinkButton href={`/admin/produtos/${viewing.id}`}>Editar produto</AdminLinkButton>
             </>
           )
         }
@@ -160,7 +157,7 @@ export function ProductsAdmin() {
             <ProductImage product={viewing} className="aspect-[3/4] w-full rounded-2xl border border-line" />
             <div className="space-y-4 text-sm">
               <div className="flex flex-wrap gap-2">
-                <Badge tone={STATUS_META[viewing.status].tone} dot>{STATUS_META[viewing.status].label}</Badge>
+                <AdminBadge tone={STATUS_META[viewing.status].tone} dot>{STATUS_META[viewing.status].label}</AdminBadge>
                 <span className="font-bold">{formatPrice(viewing.price)}</span>
                 {viewing.compareAtPrice && <span className="text-muted line-through">{formatPrice(viewing.compareAtPrice)}</span>}
               </div>
@@ -179,9 +176,9 @@ export function ProductsAdmin() {
             </div>
           </div>
         )}
-      </Modal>
+      </AdminModal>
 
-      <ConfirmDialog
+      <AdminConfirm
         open={!!removing}
         title="Excluir produto?"
         description={`"${removing?.name}" será removido do catálogo local. Esta ação pode ser desfeita apenas restaurando os dados de exemplo em Configurações.`}
@@ -190,6 +187,7 @@ export function ProductsAdmin() {
         onConfirm={() => {
           if (removing) {
             deleteProduct(removing.id);
+            log('produto', `excluiu o produto "${removing.name}"`);
             notify(`"${removing.name}" excluído.`, 'info');
           }
           setRemoving(null);

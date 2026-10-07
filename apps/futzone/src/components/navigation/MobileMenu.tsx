@@ -2,7 +2,7 @@
 
 import { useEffect } from 'react';
 import Link from 'next/link';
-import { ArrowRight, LayoutDashboard, ShoppingBag, UserRound, X } from 'lucide-react';
+import { ArrowRight, ShoppingBag, UserRound, X } from 'lucide-react';
 import { mainNav } from '@/data/site';
 import { collections, collectionHref } from '@/data/collections';
 import { cn } from '@/lib/format';
@@ -81,11 +81,10 @@ export function MobileMenu({ open, onClose, pathname }: MobileMenuProps) {
           </div>
         </div>
 
-        <div className="grid grid-cols-3 gap-1 border-t border-white/[0.06] p-3 text-xs">
+        <div className="grid grid-cols-2 gap-1 border-t border-white/[0.06] p-3 text-xs">
           {[
             { href: '/conta', label: 'Conta', icon: UserRound },
             { href: '/carrinho', label: 'Carrinho', icon: ShoppingBag },
-            { href: '/admin', label: 'Admin', icon: LayoutDashboard },
           ].map(({ href, label, icon: Icon }) => (
             <Link key={href} href={href} onClick={onClose} className="flex flex-col items-center gap-1.5 rounded-xl py-2.5 text-fg-2 transition-colors hover:bg-white/[0.05] hover:text-fg">
               <Icon className="size-5" />

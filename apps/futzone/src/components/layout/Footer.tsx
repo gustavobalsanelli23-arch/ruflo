@@ -66,7 +66,7 @@ export function Footer() {
         <FooterColumn title="Loja" links={[{ label: 'Início', href: '/' }, ...mainNav.map((l) => ({ label: l.label, href: l.href })), { label: 'Promoções', href: '/promocoes' }]} />
         <FooterColumn title="Coleções" links={collections.map((c) => ({ label: c.name, href: collectionHref(c.id) }))} />
         <FooterColumn title="Atendimento" links={SUPPORT} />
-        <FooterColumn title="Minha conta" links={[...accountNav, { label: 'Carrinho', href: '/carrinho' }, { label: 'Painel administrativo', href: '/admin' }]} />
+        <FooterColumn title="Minha conta" links={[...accountNav, { label: 'Carrinho', href: '/carrinho' }]} />
       </div>
 
       <div className="border-t border-white/[0.06] py-6">
