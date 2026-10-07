@@ -81,12 +81,16 @@ export const seedProducts: Product[] = [
     { n: '002', name: 'Camisa Retrô Arsenal Vinho 2005/06', slug: 'camisa-retro-arsenal-vinho-2005-06', teamId: 'arsenal', category: 'retro', season: '2005/06', price: 25990, tags: ['popular'] },
     { n: '003', name: 'Kit Infantil Flamengo Listrado I 26/27', slug: 'kit-infantil-flamengo-listrado-i-26-27', teamId: 'flamengo', category: 'kits', season: '26/27', price: 24990, tags: ['mais-vendido', 'lancamento'] },
     { n: '004', name: 'Camisa Sport Listrada I 2026/27', slug: 'camisa-sport-listrada-i-2026-27', teamId: 'sport', category: 'clubes', season: '2026/27', price: 34990, tags: ['lancamento'] },
+    // Nomes provisórios (sem nome na foto) — confirmar com o catálogo:
+    { n: '005', name: 'Camisa Feminina Internacional Branca', slug: 'camisa-feminina-internacional-branca', teamId: 'internacional', category: 'femininas', season: '', price: 32990, tags: [] },
+    { n: '006', name: 'Camisa Cruzeiro Branca', slug: 'camisa-cruzeiro-branca', teamId: 'cruzeiro', category: 'clubes', season: '', price: 34990, tags: [] },
     { n: '007', name: 'Camisa Goleiro Botafogo Azul 26/27', slug: 'camisa-goleiro-botafogo-azul-26-27', teamId: 'botafogo', category: 'clubes', season: '26/27', price: 34990, tags: ['lancamento'] },
     { n: '008', name: 'Camisa Olympique de Marseille I 25/26', slug: 'camisa-olympique-de-marseille-i-25-26', teamId: 'marseille', category: 'clubes', season: '25/26', price: 42990, tags: ['popular'] },
     { n: '009', name: 'Camisa PSG I 2026/27 Azul e Vermelho', slug: 'camisa-psg-i-2026-27-azul-e-vermelho', teamId: 'psg', category: 'clubes', season: '2026/27', price: 42990, tags: ['mais-vendido', 'lancamento'] },
     { n: '010', name: 'Camisa Real Madrid Goleiro 25/26', slug: 'camisa-real-madrid-goleiro-25-26', teamId: 'real-madrid', category: 'clubes', season: '25/26', price: 42990, tags: [] },
     { n: '011', name: 'Camisa Real Madrid II 25/26', slug: 'camisa-real-madrid-ii-25-26', teamId: 'real-madrid', category: 'clubes', season: '25/26', price: 42990, tags: ['popular'] },
     { n: '012', name: 'Camisa Palmeiras Listrada 25/26', slug: 'camisa-palmeiras-listrada-25-26', teamId: 'palmeiras', category: 'clubes', season: '25/26', price: 34990, tags: ['mais-vendido'] },
+    { n: '013', name: 'Camisa Retrô PSG Opel', slug: 'camisa-retro-psg-opel', teamId: 'psg', category: 'retro', season: '', price: 25990, tags: [] }, // nome provisório
     { n: '014', name: 'Camisa Retrô Corinthians 2011/12', slug: 'camisa-retro-corinthians-2011-12', teamId: 'corinthians', category: 'retro', season: '2011/12', price: 25990, tags: ['mais-vendido'] },
     { n: '015', name: 'Kit Infantil Cruzeiro I - Short azul', slug: 'kit-infantil-cruzeiro-i-short-azul', teamId: 'cruzeiro', category: 'kits', season: '', price: 24990, tags: ['popular'] },
   ].map((r, i) =>

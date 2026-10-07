@@ -22,6 +22,7 @@ export const teams: Team[] = [
   { id: 'sport', slug: 'sport', name: 'Sport', country: 'Brasil', kind: 'clube', colors: { primary: '#E30613', secondary: '#111111' } },
   { id: 'botafogo', slug: 'botafogo', name: 'Botafogo', country: 'Brasil', kind: 'clube', colors: { primary: '#111111', secondary: '#F4F4F4' } },
   { id: 'cruzeiro', slug: 'cruzeiro', name: 'Cruzeiro', country: 'Brasil', kind: 'clube', colors: { primary: '#003DA5', secondary: '#F4F4F4' } },
+  { id: 'internacional', slug: 'internacional', name: 'Internacional', country: 'Brasil', kind: 'clube', colors: { primary: '#E5050F', secondary: '#F4F4F4' } },
   { id: 'arsenal', slug: 'arsenal', name: 'Arsenal', country: 'Inglaterra', kind: 'clube', colors: { primary: '#EF0107', secondary: '#F4F4F4' } },
   { id: 'marseille', slug: 'marseille', name: 'Olympique de Marseille', country: 'França', kind: 'clube', colors: { primary: '#F4F4F4', secondary: '#2FAEE0' } },
   { id: 'brasil', slug: 'brasil', name: 'Brasil', country: 'Brasil', kind: 'selecao', colors: { primary: '#FFDF00', secondary: '#009C3B' } },
