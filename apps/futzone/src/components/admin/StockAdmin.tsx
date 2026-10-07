@@ -8,11 +8,11 @@ import { useStoreData } from '@/context/StoreDataContext';
 import { matchesSearch } from '@/lib/catalog';
 import { cn } from '@/lib/format';
 import { sizeStockLevel, stockLevel, STOCK_LABEL, totalStock, type StockLevel } from '@/lib/product';
-import { Badge } from '@/components/ui/Badge';
 import { EmptyState } from '@/components/ui/Feedback';
 import { Select } from '@/components/ui/Form';
 import { ProductImage } from '@/components/products/ProductImage';
-import { AdminPageHeader, Panel } from './AdminUI';
+import { AdminBadge, AdminCard, AdminPageHeader } from './AdminUI';
+import { useAdmin } from './AdminGuard';
 
 type Filter = StockLevel | 'todos';
 
@@ -25,6 +25,7 @@ const CELL = {
 
 export function StockAdmin() {
   const { products, setStock, settings } = useStoreData();
+  const { log } = useAdmin();
   const threshold = settings.lowStockThreshold;
   const [q, setQ] = useState('');
   const [filter, setFilter] = useState<Filter>('todos');
@@ -68,7 +69,7 @@ export function StockAdmin() {
         ))}
       </div>
 
-      <Panel>
+      <AdminCard>
         <div className="flex flex-col gap-3 border-b border-line p-4 sm:flex-row">
           <div className="relative flex-1">
             <Search className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-muted" />
@@ -97,7 +98,7 @@ export function StockAdmin() {
                     <div className="min-w-0">
                       <p className="truncate text-sm font-semibold">{p.name}</p>
                       <div className="mt-1 flex items-center gap-2">
-                        <Badge tone={LEVEL_TONE[level]} dot>{STOCK_LABEL[level]}</Badge>
+                        <AdminBadge tone={LEVEL_TONE[level]} dot>{STOCK_LABEL[level]}</AdminBadge>
                         <span className="text-xs text-muted">Total: <b className="text-fg">{totalStock(p)}</b></span>
                       </div>
                     </div>
@@ -114,6 +115,11 @@ export function StockAdmin() {
                             min={0}
                             value={qty}
                             onChange={(e) => setStock(p.id, s, Number(e.target.value))}
+                            onFocus={(e) => (e.currentTarget.dataset.initial = String(qty))}
+                            onBlur={(e) => {
+                              const before = e.currentTarget.dataset.initial;
+                              if (before !== undefined && before !== String(qty)) log('estoque', `alterou o estoque de "${p.name}" (${s}): ${before} → ${qty}`);
+                            }}
                             aria-label={`Estoque de ${p.name}, tamanho ${s}`}
                             className="w-full min-w-0 bg-transparent text-right text-sm font-bold tabular-nums focus:outline-none"
                           />
@@ -126,7 +132,7 @@ export function StockAdmin() {
             })}
           </ul>
         )}
-      </Panel>
+      </AdminCard>
       <p className="mt-3 text-xs text-muted">Edite as quantidades diretamente nas células — as alterações são salvas localmente e refletem na loja imediatamente.</p>
     </>
   );

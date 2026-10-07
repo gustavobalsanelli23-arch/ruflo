@@ -12,11 +12,11 @@ import { useToast } from '@/context/ToastContext';
 import { centsToInput, parsePrice, slugify } from '@/lib/format';
 import { STATUS_META, TAG_LABEL } from '@/lib/productLabels';
 import { teamById } from '@/lib/product';
-import { Button, LinkButton } from '@/components/ui/Button';
 import { Chip, Field, Input, Select, Textarea } from '@/components/ui/Form';
 import { DemoNotice } from '@/components/ui/Feedback';
 import { ProductImage } from '@/components/products/ProductImage';
-import { Panel } from './AdminUI';
+import { AdminButton, AdminCard, AdminLinkButton } from './AdminUI';
+import { useAdmin } from './AdminGuard';
 
 interface FormState {
   name: string;
@@ -58,6 +58,7 @@ const fromProduct = (p?: Product): FormState => ({
 export function ProductForm({ product }: { product?: Product }) {
   const router = useRouter();
   const { saveProduct, products } = useStoreData();
+  const { log } = useAdmin();
   const { notify } = useToast();
   const [form, setForm] = useState<FormState>(() => fromProduct(product));
   const [errors, setErrors] = useState<Errors>({});
@@ -134,6 +135,7 @@ export function ProductForm({ product }: { product?: Product }) {
     }
     const saved = saveProduct(input);
     notify(product ? `"${saved.name}" atualizado.` : `"${saved.name}" cadastrado.`);
+    log('produto', product ? `editou o produto "${saved.name}"` : `adicionou o produto "${saved.name}"`);
     router.push('/admin/produtos');
   };
 
@@ -142,7 +144,7 @@ export function ProductForm({ product }: { product?: Product }) {
   return (
     <form onSubmit={submit} noValidate className="grid grid-cols-1 gap-6 xl:grid-cols-[1fr_340px]">
       <div className="space-y-6">
-        <Panel title="Informações">
+        <AdminCard title="Informações">
           <div className="grid gap-5 p-5 sm:grid-cols-2">
             <Field label="Nome" error={errors.name} className="sm:col-span-2">
               {(id, d) => (
@@ -185,9 +187,9 @@ export function ProductForm({ product }: { product?: Product }) {
               {(id, d) => <Input id={id} aria-describedby={d} value={form.season} onChange={(e) => set('season', e.target.value)} placeholder="26/27" />}
             </Field>
           </div>
-        </Panel>
+        </AdminCard>
 
-        <Panel title="Preço">
+        <AdminCard title="Preço">
           <div className="grid gap-5 p-5 sm:grid-cols-2">
             <Field label="Preço (R$)" error={errors.price} hint="Valor cobrado do cliente.">
               {(id, d) => <Input id={id} inputMode="decimal" aria-describedby={d} aria-invalid={!!errors.price} value={form.price} onChange={(e) => set('price', e.target.value)} placeholder="349,90" />}
@@ -196,9 +198,9 @@ export function ProductForm({ product }: { product?: Product }) {
               {(id, d) => <Input id={id} inputMode="decimal" aria-describedby={d} aria-invalid={!!errors.compareAtPrice} value={form.compareAtPrice} onChange={(e) => set('compareAtPrice', e.target.value)} placeholder="399,90" />}
             </Field>
           </div>
-        </Panel>
+        </AdminCard>
 
-        <Panel title="Tamanhos e estoque">
+        <AdminCard title="Tamanhos e estoque">
           <div className="space-y-5 p-5">
             {[{ label: 'Adulto', sizes: ADULT_SIZES }, { label: 'Infantil', sizes: KIDS_SIZES }].map((g) => (
               <div key={g.label}>
@@ -226,9 +228,9 @@ export function ProductForm({ product }: { product?: Product }) {
               </div>
             )}
           </div>
-        </Panel>
+        </AdminCard>
 
-        <Panel title="Imagens">
+        <AdminCard title="Imagens">
           <div className="space-y-4 p-5">
             <DemoNotice>Sem imagens cadastradas, a loja exibe um placeholder ilustrativo nas cores do time. Use somente fotos reais e autorizadas do produto.</DemoNotice>
             {form.images.length > 0 && (
@@ -250,22 +252,22 @@ export function ProductForm({ product }: { product?: Product }) {
                 <Link2 className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-muted" />
                 <Input className="pl-10" value={imageUrl} onChange={(e) => setImageUrl(e.target.value)} placeholder="https://… URL da imagem" aria-label="URL da imagem" />
               </div>
-              <Button variant="secondary" onClick={() => {
+              <AdminButton variant="secondary" onClick={() => {
                 if (!/^https?:\/\/\S+$/i.test(imageUrl.trim())) return notify('Informe uma URL de imagem válida (http/https).', 'warning');
                 addImage(imageUrl.trim());
                 setImageUrl('');
-              }}>Adicionar URL</Button>
+              }}>Adicionar URL</AdminButton>
               <label className="inline-flex h-11 cursor-pointer items-center justify-center gap-2 rounded-xl border border-dashed border-line-strong px-4 text-xs font-bold uppercase tracking-wider text-fg-2 hover:border-brand-500 hover:text-brand-300">
                 <ImagePlus className="size-4" /> Enviar arquivo
                 <input type="file" accept="image/*" className="sr-only" onChange={onFile} />
               </label>
             </div>
           </div>
-        </Panel>
+        </AdminCard>
       </div>
 
       <div className="space-y-6 xl:sticky xl:top-24 xl:self-start">
-        <Panel title="Publicação">
+        <AdminCard title="Publicação">
           <div className="space-y-4 p-5">
             <div className="grid gap-2" role="radiogroup" aria-label="Status de publicação">
               {(Object.keys(STATUS_META) as ProductStatus[]).map((s) => (
@@ -286,17 +288,17 @@ export function ProductForm({ product }: { product?: Product }) {
               </div>
             </div>
           </div>
-        </Panel>
-        <Panel title="Pré-visualização">
+        </AdminCard>
+        <AdminCard title="Pré-visualização">
           <div className="p-5">
             <ProductImage product={preview} className="aspect-[3/4] w-full rounded-xl border border-line" />
             <p className="mt-3 font-semibold">{preview.name}</p>
             <p className="text-sm text-brand-300">{Number.isFinite(parsePrice(form.price)) ? `R$ ${form.price}` : '—'}</p>
           </div>
-        </Panel>
+        </AdminCard>
         <div className="flex gap-3">
-          <LinkButton href="/admin/produtos" variant="secondary" className="flex-1">Cancelar</LinkButton>
-          <Button type="submit" className="flex-1">{product ? 'Salvar' : 'Cadastrar'}</Button>
+          <AdminLinkButton href="/admin/produtos" variant="secondary" className="flex-1">Cancelar</AdminLinkButton>
+          <AdminButton type="submit" className="flex-1">{product ? 'Salvar' : 'Cadastrar'}</AdminButton>
         </div>
       </div>
     </form>

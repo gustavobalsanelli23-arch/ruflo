@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { SettingsAdmin } from '@/components/admin/MiscAdmin';
+import { SettingsAdmin } from '@/components/admin/SettingsAdmin';
 
 export const metadata: Metadata = { title: 'Configurações' };
 
