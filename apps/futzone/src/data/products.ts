@@ -139,7 +139,7 @@ export const seedProducts: Product[] = [
     { n: '057', name: 'Camisa Baseball Flamengo', slug: 'camisa-baseball-flamengo', teamId: 'flamengo', category: 'clubes', season: '', price: 34990, tags: [] },
     { n: '058', name: 'Camisa Jogador Flamengo', slug: 'camisa-jogador-flamengo', teamId: 'flamengo', category: 'clubes', season: '', price: 42990, tags: [] },
     { n: '059', name: 'Camisa França Azul', slug: 'camisa-franca-azul', teamId: 'franca', category: 'selecoes', season: '', price: 39990, tags: [] },
-    { n: '060', name: 'Camisa Vasco Branca', slug: 'camisa-vasco-branca', teamId: 'vasco', category: 'clubes', season: '', price: 34990, tags: [] },
+    { n: '060', name: 'Camisa Vasco Branca', slug: 'camisa-vasco-branca', teamId: 'vasco', category: 'clubes', season: '', price: 34990, tags: [], photos: 2 }, // foto 2 veio no lote 76–86
     // ── Lote 61–75 (capturas desalinhadas): nomes provisórios — confirmar ──
     { n: '061', name: 'Camisa Botafogo Listrada I 26/27', slug: 'camisa-botafogo-listrada-i-26-27', teamId: 'botafogo', category: 'clubes', season: '26/27', price: 34990, tags: ['lancamento'] },
     { n: '062', name: 'Camisa Bahia Listrada II 26/27', slug: 'camisa-bahia-listrada-ii-26-27', teamId: 'bahia', category: 'clubes', season: '26/27', price: 34990, tags: ['lancamento'] },
@@ -150,6 +150,10 @@ export const seedProducts: Product[] = [
     { n: '073', name: 'Camisa Santa Cruz Branca', slug: 'camisa-santa-cruz-branca', teamId: 'santa-cruz', category: 'clubes', season: '', price: 34990, tags: [] },
     { n: '074', name: 'Camisa Grêmio Celeste', slug: 'camisa-gremio-celeste', teamId: 'gremio', category: 'clubes', season: '', price: 34990, tags: [] },
     { n: '075', name: 'Camisa Atlético Mineiro Branca', slug: 'camisa-atletico-mineiro-branca', teamId: 'atletico-mineiro', category: 'clubes', season: '', price: 34990, tags: [] },
+    // ── Lote 76–86: nomes provisórios pelo escudo — confirmar ──
+    { n: '077', name: 'Camisa Fluminense Azul-Marinho', slug: 'camisa-fluminense-azul-marinho', teamId: 'fluminense', category: 'clubes', season: '', price: 34990, tags: [] },
+    { n: '078', name: 'Camisa Real Madrid Branca', slug: 'camisa-real-madrid-branca', teamId: 'real-madrid', category: 'clubes', season: '', price: 42990, tags: [] },
+    { n: '081', name: 'Camisa Brasil Amarela', slug: 'camisa-brasil-amarela', teamId: 'brasil', category: 'selecoes', season: '', price: 39990, tags: [] },
   ].map((r, i) =>
     define({
       id: `fz-${r.n}`,
@@ -165,7 +169,7 @@ export const seedProducts: Product[] = [
       tags: r.tags as ProductTag[],
       salesCount: 1500 - i * 10,
       createdAt: '2026-10-07',
-      images: [`/produtos/${r.slug}/1.jpg`],
+      images: Array.from({ length: r.photos ?? 1 }, (_, k) => `/produtos/${r.slug}/${k + 1}.jpg`),
     }),
   ),
 
