@@ -1,3 +1,4 @@
+import { existsSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import { seedProducts } from '@/data/products';
 import { EMPTY_QUERY, filterProducts, paramsFromQuery, queryCatalog, queryFromParams, sortProducts } from '@/lib/catalog';
@@ -9,7 +10,12 @@ describe('catálogo', () => {
   it('cada produto tem id único e URL amigável única', () => {
     expect(new Set(seedProducts.map((p) => p.id)).size).toBe(seedProducts.length);
     expect(new Set(seedProducts.map(productHref)).size).toBe(seedProducts.length);
-    expect(productHref(seedProducts[0])).toBe('/camisas/flamengo/camisa-flamengo-26-27');
+    expect(productHref(seedProducts.find((p) => p.id === 'p-001')!)).toBe('/camisas/flamengo/camisa-flamengo-26-27');
+  });
+
+  it('todas as fotos cadastradas existem em /public', () => {
+    const missing = seedProducts.flatMap((p) => p.images.map((i) => i.src)).filter((src) => !existsSync(`public${src}`));
+    expect(missing).toEqual([]);
   });
 
   it('busca por nome ignora acentos e caixa', () => {

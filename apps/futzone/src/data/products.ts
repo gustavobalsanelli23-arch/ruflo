@@ -40,6 +40,8 @@ interface Seed {
   createdAt: string;
   palette?: { primary: string; secondary: string };
   status?: Product['status'];
+  /** Fotos reais em /public (ex.: '/produtos/<slug>/1.jpg'). */
+  images?: string[];
 }
 
 function define(seed: Seed): Product {
@@ -62,7 +64,7 @@ function define(seed: Seed): Product {
     compareAtPrice: seed.compareAtPrice,
     sizes,
     stock,
-    images: [],
+    images: (seed.images ?? []).map((src, i) => ({ src, alt: i === 0 ? seed.name : `${seed.name} — foto ${i + 1}` })),
     palette: seed.palette ?? team.colors,
     status: seed.status ?? 'published',
     tags: seed.tags ?? [],
@@ -72,6 +74,40 @@ function define(seed: Seed): Product {
 }
 
 export const seedProducts: Product[] = [
+  // ── Catálogo FutZone (fotos reais) ────────────────────────
+  // Preços e estoques destes itens são PROVISÓRIOS — ajustar com os valores reais.
+  ...[
+    { n: '001', name: 'Camisa Feminina Palmeiras Azul III 26/27', slug: 'camisa-feminina-palmeiras-azul-iii-26-27', teamId: 'palmeiras', category: 'femininas', season: '26/27', price: 32990, tags: ['lancamento'] },
+    { n: '002', name: 'Camisa Retrô Arsenal Vinho 2005/06', slug: 'camisa-retro-arsenal-vinho-2005-06', teamId: 'arsenal', category: 'retro', season: '2005/06', price: 25990, tags: ['popular'] },
+    { n: '003', name: 'Kit Infantil Flamengo Listrado I 26/27', slug: 'kit-infantil-flamengo-listrado-i-26-27', teamId: 'flamengo', category: 'kits', season: '26/27', price: 24990, tags: ['mais-vendido', 'lancamento'] },
+    { n: '004', name: 'Camisa Sport Listrada I 2026/27', slug: 'camisa-sport-listrada-i-2026-27', teamId: 'sport', category: 'clubes', season: '2026/27', price: 34990, tags: ['lancamento'] },
+    { n: '007', name: 'Camisa Goleiro Botafogo Azul 26/27', slug: 'camisa-goleiro-botafogo-azul-26-27', teamId: 'botafogo', category: 'clubes', season: '26/27', price: 34990, tags: ['lancamento'] },
+    { n: '008', name: 'Camisa Olympique de Marseille I 25/26', slug: 'camisa-olympique-de-marseille-i-25-26', teamId: 'marseille', category: 'clubes', season: '25/26', price: 42990, tags: ['popular'] },
+    { n: '009', name: 'Camisa PSG I 2026/27 Azul e Vermelho', slug: 'camisa-psg-i-2026-27-azul-e-vermelho', teamId: 'psg', category: 'clubes', season: '2026/27', price: 42990, tags: ['mais-vendido', 'lancamento'] },
+    { n: '010', name: 'Camisa Real Madrid Goleiro 25/26', slug: 'camisa-real-madrid-goleiro-25-26', teamId: 'real-madrid', category: 'clubes', season: '25/26', price: 42990, tags: [] },
+    { n: '011', name: 'Camisa Real Madrid II 25/26', slug: 'camisa-real-madrid-ii-25-26', teamId: 'real-madrid', category: 'clubes', season: '25/26', price: 42990, tags: ['popular'] },
+    { n: '012', name: 'Camisa Palmeiras Listrada 25/26', slug: 'camisa-palmeiras-listrada-25-26', teamId: 'palmeiras', category: 'clubes', season: '25/26', price: 34990, tags: ['mais-vendido'] },
+    { n: '014', name: 'Camisa Retrô Corinthians 2011/12', slug: 'camisa-retro-corinthians-2011-12', teamId: 'corinthians', category: 'retro', season: '2011/12', price: 25990, tags: ['mais-vendido'] },
+    { n: '015', name: 'Kit Infantil Cruzeiro I - Short azul', slug: 'kit-infantil-cruzeiro-i-short-azul', teamId: 'cruzeiro', category: 'kits', season: '', price: 24990, tags: ['popular'] },
+  ].map((r, i) =>
+    define({
+      id: `fz-${r.n}`,
+      name: r.name,
+      slug: r.slug,
+      teamId: r.teamId,
+      category: r.category as CategoryId,
+      season: r.season,
+      price: r.price,
+      description: `${r.name}. Produto do catálogo FutZone.`,
+      stock: r.category === 'kits' ? [3, 5, 6, 5, 4, 2] : [3, 8, 10, 8, 5, 2],
+      tags: r.tags as ProductTag[],
+      salesCount: 1500 - i * 10,
+      createdAt: '2026-10-07',
+      images: [`/produtos/${r.slug}/1.jpg`],
+    }),
+  ),
+
+  // ── Produtos de demonstração (sem foto) ───────────────────
   // ── Clubes ────────────────────────────────────────────────
   define({ id: 'p-001', name: 'Camisa Flamengo 26/27 I', slug: 'camisa-flamengo-26-27', teamId: 'flamengo', category: 'clubes', season: '26/27', price: 34990, description: 'O manto rubro-negro da nova temporada. Leve, confortável e pronta para o Maracanã lotado.', stock: [4, 12, 18, 15, 8, 3], tags: ['mais-vendido', 'lancamento'], salesCount: 980, createdAt: '2026-09-20' }),
   define({ id: 'p-002', name: 'Camisa Palmeiras 26/27 I', slug: 'camisa-palmeiras-26-27', teamId: 'palmeiras', category: 'clubes', season: '26/27', price: 34990, description: 'O verde alviverde em sua versão mais atual, com tecido respirável para os 90 minutos.', stock: [3, 10, 14, 11, 6, 2], tags: ['mais-vendido'], salesCount: 870, createdAt: '2026-08-28' }),

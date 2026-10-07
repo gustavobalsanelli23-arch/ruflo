@@ -87,7 +87,7 @@ export function ProductDetail({ teamSlug, slug }: { teamSlug: string; slug: stri
             <div className="mb-3 flex flex-wrap items-center gap-2">
               <Link href={`/camisas/${team?.slug}`} className="eyebrow hover:text-brand-300">{team?.name}</Link>
               <span className="text-subtle">·</span>
-              <span className="text-xs uppercase tracking-wider text-muted">{category?.shortName} · Temporada {product.season}</span>
+              <span className="text-xs uppercase tracking-wider text-muted">{category?.shortName}{product.season && ` · Temporada ${product.season}`}</span>
             </div>
             <h1 className="heading-display text-4xl sm:text-5xl">{product.name}</h1>
           </div>

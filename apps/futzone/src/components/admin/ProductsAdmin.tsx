@@ -101,7 +101,7 @@ export function ProductsAdmin() {
                           <ProductImage product={p} className="h-14 w-12 shrink-0 rounded-lg" />
                           <div className="min-w-0">
                             <p className="max-w-64 truncate font-semibold">{p.name}</p>
-                            <p className="text-xs text-muted">{p.id} · {p.season}</p>
+                            <p className="text-xs text-muted">{p.id}{p.season && ` · ${p.season}`}</p>
                           </div>
                         </div>
                       </td>
