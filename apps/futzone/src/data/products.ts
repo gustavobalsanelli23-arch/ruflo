@@ -111,6 +111,10 @@ export const seedProducts: Product[] = [
     { n: '028', name: 'Kit Regata e Short Manchester United Preto', slug: 'kit-regata-e-short-manchester-united-preto', teamId: 'manchester-united', category: 'kits', season: '', price: 27990, tags: [] },
     { n: '029', name: 'Kit Regata e Short PSG Branco Treino', slug: 'kit-regata-e-short-psg-branco-treino', teamId: 'psg', category: 'kits', season: '', price: 27990, tags: [] },
     { n: '030', name: 'Kit Regata e Short PSG Preto Treino', slug: 'kit-regata-e-short-psg-preto-treino', teamId: 'psg', category: 'kits', season: '', price: 27990, tags: ['lancamento'] },
+    // ── Lote 16–30 (2º arquivo): apenas as camisas novas; o restante repetia o lote anterior ──
+    { n: '016b', name: 'Camisa Retrô São Paulo', slug: 'camisa-retro-sao-paulo', teamId: 'sao-paulo', category: 'retro', season: '', price: 25990, tags: [] }, // nome cortado na foto — confirmar
+    { n: '019b', name: 'Camisa Retrô Flamengo 1995', slug: 'camisa-retro-flamengo-1995', teamId: 'flamengo', category: 'retro', season: '1995', price: 25990, tags: [] },
+    { n: '020b', name: 'Camisa Retrô Flamengo 1992/93', slug: 'camisa-retro-flamengo-1992-93', teamId: 'flamengo', category: 'retro', season: '1992/93', price: 25990, tags: [] },
   ].map((r, i) =>
     define({
       id: `fz-${r.n}`,
