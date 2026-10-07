@@ -88,12 +88,12 @@ export function SizeSelector({ product, value, onChange, compact, invalid }: Siz
             disabled={out}
             onClick={() => onChange(s)}
             className={cn(
-              'relative grid place-items-center rounded-lg border font-bold tabular-nums transition-all',
+              'relative grid place-items-center rounded-xl border font-bold tabular-nums transition-[background-color,border-color,color,transform,box-shadow] duration-150 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-400 focus-visible:ring-offset-2 focus-visible:ring-offset-bg',
               compact ? 'h-7 min-w-7 px-1.5 text-[0.68rem]' : 'h-12 min-w-12 px-3 text-sm',
               selected
-                ? 'border-brand-500 bg-brand-500 text-white shadow-[0_6px_18px_-8px_var(--color-brand-500)]'
+                ? 'animate-pop border-brand-500 bg-brand-500 text-white shadow-[0_6px_18px_-8px_var(--color-brand-500)]'
                 : invalid
-                  ? 'border-danger/60 text-fg-2'
+                  ? 'animate-shake border-danger/60 text-fg-2'
                   : 'border-line text-fg-2 hover:border-brand-400 hover:text-fg',
               out && 'cursor-not-allowed border-line/60 text-subtle line-through decoration-subtle hover:border-line/60 hover:text-subtle',
             )}

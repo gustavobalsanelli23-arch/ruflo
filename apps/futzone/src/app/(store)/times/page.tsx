@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { TeamsGrid } from '@/components/store/TeamsGrid';
+import { TeamsGrid } from '@/components/catalog/TeamsGrid';
 import { PageHeader } from '../PageHeader';
 
 export const metadata: Metadata = { title: 'Times' };

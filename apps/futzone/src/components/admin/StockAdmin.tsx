@@ -11,7 +11,7 @@ import { sizeStockLevel, stockLevel, STOCK_LABEL, totalStock, type StockLevel } 
 import { Badge } from '@/components/ui/Badge';
 import { EmptyState } from '@/components/ui/Feedback';
 import { Select } from '@/components/ui/Form';
-import { ProductImage } from '@/components/store/ProductImage';
+import { ProductImage } from '@/components/products/ProductImage';
 import { AdminPageHeader, Panel } from './AdminUI';
 
 type Filter = StockLevel | 'todos';

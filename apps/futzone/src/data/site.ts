@@ -3,7 +3,14 @@
 export const site = {
   name: 'FUTZONE',
   tagline: 'Vista a paixão pelo futebol.',
+  description: 'Camisas de clubes, seleções, retrô e kits — para quem vive o futebol dentro e fora do estádio.',
   contactEmail: 'contato@futzone.com.br',
+  /** Perfis oficiais. Deixe `href` vazio até o perfil existir — links vazios não aparecem. */
+  social: [
+    { name: 'Instagram', href: '' },
+    { name: 'TikTok', href: '' },
+    { name: 'WhatsApp', href: '' },
+  ] as Array<{ name: string; href: string }>,
   freeShippingFrom: 29900,
 };
 
@@ -45,12 +52,11 @@ export interface NavLink {
 }
 
 export const mainNav: NavLink[] = [
-  { label: 'Início', href: '/' },
   { label: 'Camisas', href: '/camisas', match: ['/camisas'] },
   { label: 'Times', href: '/times', match: ['/times'] },
+  { label: 'Seleções', href: '/selecoes', match: ['/selecoes'] },
   { label: 'Retrô', href: '/retro', match: ['/retro'] },
   { label: 'Kits', href: '/kits', match: ['/kits'] },
-  { label: 'Promoções', href: '/promocoes', match: ['/promocoes'] },
 ];
 
 export const accountNav: NavLink[] = [

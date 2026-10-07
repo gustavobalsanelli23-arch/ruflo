@@ -22,19 +22,19 @@
   --color-brand-900: #052156;
   --color-brand-950: #021231;
 
-  /* Base azul-marinho (fundo da logo) / grafite */
-  --color-bg: #050a17;
-  --color-surface: #0b1222;
-  --color-surface-2: #10192d;
-  --color-surface-3: #172339;
-  --color-line: #1e2a42;
-  --color-line-strong: #2a3854;
+  /* Base grafite/preto com leve toque frio — o azul fica como destaque */
+  --color-bg: #07090d;
+  --color-surface: #0e1117;
+  --color-surface-2: #141821;
+  --color-surface-3: #1b202b;
+  --color-line: #1f2430;
+  --color-line-strong: #2c3240;
 
   /* Texto */
-  --color-fg: #f3f5f8;
-  --color-fg-2: #c5cad3;
-  --color-muted: #8b929e;
-  --color-subtle: #5d6470;
+  --color-fg: #f5f7fa;
+  --color-fg-2: #c9ced8;
+  --color-muted: #8c93a1;
+  --color-subtle: #5f6675;
 
   /* Estados (status de pedidos e estoque) */
   --color-success: #2fbf71;
@@ -46,12 +46,23 @@
   --font-display: var(--font-fz-display), 'Arial Narrow', sans-serif;
   --font-sans: var(--font-fz-body), system-ui, sans-serif;
 
-  --radius-card: 1rem;
+  --radius-card: 1.125rem;
 
-  --animate-fade-up: fade-up 0.6s cubic-bezier(0.2, 0.7, 0.2, 1) both;
-  --animate-toast: toast-in 0.25s ease-out both;
-  --animate-drawer: drawer-in 0.3s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  /* Movimento: rápido e fluido (150–300ms) */
+  --ease-out-fz: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-in-out-fz: cubic-bezier(0.65, 0, 0.35, 1);
+
+  --animate-fade-up: fade-up 0.3s var(--ease-out-fz) both;
+  --animate-toast: toast-in 0.25s var(--ease-out-fz) both;
+  --animate-drawer: drawer-in 0.3s var(--ease-out-fz) both;
+  --animate-drawer-left: drawer-left-in 0.3s var(--ease-out-fz) both;
+  --animate-shake: shake 0.32s var(--ease-out-fz) both;
+  --animate-sheet: sheet-in 0.3s var(--ease-out-fz) both;
   --animate-fade: fade-in 0.2s ease-out both;
+  --animate-page: page-in 0.25s var(--ease-out-fz) backwards;
+  --animate-bump: bump 0.45s var(--ease-out-fz);
+  --animate-pop: pop 0.3s var(--ease-out-fz) both;
+  --animate-hero-image: hero-image 0.6s var(--ease-out-fz) 80ms both;
 
   @keyframes fade-up {
     from { opacity: 0; transform: translateY(14px); }
@@ -64,6 +75,40 @@
   @keyframes drawer-in {
     from { transform: translateX(100%); }
     to { transform: translateX(0); }
+  }
+  @keyframes drawer-left-in {
+    from { transform: translateX(-100%); }
+    to { transform: translateX(0); }
+  }
+  @keyframes sheet-in {
+    from { transform: translateY(100%); }
+    to { transform: translateY(0); }
+  }
+  @keyframes page-in {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: none; }
+  }
+  @keyframes bump {
+    0%, 100% { transform: scale(1); }
+    35% { transform: scale(1.22); }
+    65% { transform: scale(0.94); }
+  }
+  @keyframes pop {
+    from { opacity: 0; transform: scale(0.92); }
+    to { opacity: 1; transform: scale(1); }
+  }
+  @keyframes hero-image {
+    from { opacity: 0; transform: scale(1.04) translateY(10px); }
+    to { opacity: 1; transform: none; }
+  }
+  @keyframes shake {
+  20%, 60% { transform: translateX(-3px); }
+  40%, 80% { transform: translateX(3px); }
+}
+
+@keyframes shimmer {
+    from { background-position: 150% 0; }
+    to { background-position: -50% 0; }
   }
   @keyframes fade-in {
     from { opacity: 0; }
@@ -114,8 +159,9 @@
   font-family: var(--font-display);
   text-transform: uppercase;
   letter-spacing: 0.01em;
-  line-height: 0.92;
+  line-height: 0.9;
   font-weight: 800;
+  text-wrap: balance;
 }
 
 @utility eyebrow {
@@ -139,7 +185,56 @@
   }
 }
 
+/* Aparição ao rolar (Reveal). Só esconde quando há JS — sem JS tudo aparece. */
+.js [data-reveal] {
+  opacity: 0;
+  transform: translateY(18px);
+  transition:
+    opacity 0.3s var(--ease-out-fz) var(--reveal-delay, 0ms),
+    transform 0.3s var(--ease-out-fz) var(--reveal-delay, 0ms);
+}
+.js [data-reveal='fade'] {
+  transform: none;
+}
+.js [data-reveal='scale'] {
+  transform: scale(0.97);
+}
+.js [data-reveal][data-visible='true'] {
+  opacity: 1;
+  transform: none;
+}
+
+/* Skeleton com brilho suave */
+@utility skeleton {
+  background: linear-gradient(100deg, var(--color-surface-2) 30%, var(--color-surface-3) 50%, var(--color-surface-2) 70%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s linear infinite;
+}
+
+/* Link com sublinhado animado */
+@utility link-underline {
+  background-image: linear-gradient(currentColor, currentColor);
+  background-size: 0% 1px;
+  background-position: 0 100%;
+  background-repeat: no-repeat;
+  transition: background-size 0.25s var(--ease-out-fz), color 0.2s;
+  &:hover {
+    background-size: 100% 1px;
+  }
+}
+
+/* Superfície translúcida (header, barras fixas) */
+@utility glass {
+  background: color-mix(in oklab, var(--color-bg) 72%, transparent);
+  backdrop-filter: blur(14px) saturate(1.4);
+  -webkit-backdrop-filter: blur(14px) saturate(1.4);
+}
+
 @media (prefers-reduced-motion: reduce) {
+  .js [data-reveal] {
+    opacity: 1;
+    transform: none;
+  }
   *,
   *::before,
   *::after {

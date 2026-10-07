@@ -16,7 +16,7 @@ import { Button, LinkButton } from '@/components/ui/Button';
 import { EmptyState } from '@/components/ui/Feedback';
 import { Select } from '@/components/ui/Form';
 import { ConfirmDialog, Modal } from '@/components/ui/Modal';
-import { ProductImage } from '@/components/store/ProductImage';
+import { ProductImage } from '@/components/products/ProductImage';
 import { AdminPageHeader, AdminTable, Panel } from './AdminUI';
 
 const STOCK_CLASS = { disponivel: 'text-fg', baixo: 'text-warn', esgotado: 'text-danger' } as const;

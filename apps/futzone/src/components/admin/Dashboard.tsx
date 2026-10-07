@@ -8,7 +8,7 @@ import { formatCompactPrice, formatDateTime, formatPrice } from '@/lib/format';
 import { ORDER_STATUS_META } from '@/lib/orders';
 import { stockLevel, totalStock } from '@/lib/product';
 import { OrderStatusBadge } from '@/components/orders/OrderCard';
-import { ProductImage } from '@/components/store/ProductImage';
+import { ProductImage } from '@/components/products/ProductImage';
 import { AdminPageHeader, AdminTable, Panel, StatCard } from './AdminUI';
 import { BarChart, StackedBar } from './Charts';
 
