@@ -3,12 +3,13 @@
  * Produtos são sempre dados — nunca marcação escrita dentro dos componentes.
  */
 
-export type AdultSize = 'PP' | 'P' | 'M' | 'G' | 'GG' | 'XGG';
-export type KidsSize = '4' | '6' | '8' | '10' | '12' | '14';
+/** Grade de tamanhos do fornecedor (adulto P–4GG; infantil T18–T28). */
+export type AdultSize = 'P' | 'M' | 'G' | 'GG' | '2GG' | '3GG' | '4GG';
+export type KidsSize = 'T18' | 'T20' | 'T22' | 'T24' | 'T26' | 'T28';
 export type Size = AdultSize | KidsSize;
 
-export const ADULT_SIZES: AdultSize[] = ['PP', 'P', 'M', 'G', 'GG', 'XGG'];
-export const KIDS_SIZES: KidsSize[] = ['4', '6', '8', '10', '12', '14'];
+export const ADULT_SIZES: AdultSize[] = ['P', 'M', 'G', 'GG', '2GG', '3GG', '4GG'];
+export const KIDS_SIZES: KidsSize[] = ['T18', 'T20', 'T22', 'T24', 'T26', 'T28'];
 export const ALL_SIZES: Size[] = [...ADULT_SIZES, ...KIDS_SIZES];
 
 export type CategoryId = 'clubes' | 'retro' | 'kits' | 'selecoes' | 'femininas';

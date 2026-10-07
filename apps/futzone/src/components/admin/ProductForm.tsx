@@ -236,7 +236,7 @@ export function ProductForm({ product }: { product?: Product }) {
                 {form.images.map((img, i) => (
                   <li key={img.src.slice(0, 64) + i} className="group relative overflow-hidden rounded-xl border border-line">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={img.src} alt={img.alt} className="aspect-[4/5] w-full bg-surface-2 object-contain" />
+                    <img src={img.src} alt={img.alt} className="aspect-[3/4] w-full bg-surface-2 object-contain" />
                     {i === 0 && <span className="absolute left-1.5 top-1.5 rounded bg-brand-500 px-1.5 text-[0.6rem] font-bold uppercase text-white">Capa</span>}
                     <button type="button" onClick={() => set('images', form.images.filter((_, j) => j !== i))} className="absolute right-1.5 top-1.5 grid size-7 place-items-center rounded-lg bg-black/70 text-white hover:bg-danger" aria-label={`Remover imagem ${i + 1}`}>
                       <Trash2 className="size-3.5" />
@@ -289,7 +289,7 @@ export function ProductForm({ product }: { product?: Product }) {
         </Panel>
         <Panel title="Pré-visualização">
           <div className="p-5">
-            <ProductImage product={preview} className="aspect-[4/5] w-full rounded-xl border border-line" />
+            <ProductImage product={preview} className="aspect-[3/4] w-full rounded-xl border border-line" />
             <p className="mt-3 font-semibold">{preview.name}</p>
             <p className="text-sm text-brand-300">{Number.isFinite(parsePrice(form.price)) ? `R$ ${form.price}` : '—'}</p>
           </div>

@@ -27,17 +27,22 @@ describe('carrinho', () => {
   });
 
   it('calcula subtotais e total e ignora produtos indisponíveis', () => {
+    const [a, b, c] = seedProducts;
+    const draft = { ...c, id: 'rascunho', status: 'draft' as const };
+    const products = [a, b, draft];
     const items = [
-      { productId: 'p-001', size: 'M' as const, quantity: 2 },
-      { productId: 'p-003', size: 'G' as const, quantity: 1 },
-      { productId: 'p-029', size: 'M' as const, quantity: 1 }, // rascunho: não entra
+      { productId: a.id, size: a.sizes[0], quantity: 2 },
+      { productId: b.id, size: b.sizes[0], quantity: 1 },
+      { productId: draft.id, size: draft.sizes[0], quantity: 1 }, // rascunho: não entra
       { productId: 'inexistente', size: 'M' as const, quantity: 1 },
     ];
-    const lines = resolveCart(items, seedProducts);
+    const lines = resolveCart(items, products);
     expect(lines).toHaveLength(2);
     const totals = cartTotals(lines);
     expect(totals.count).toBe(3);
-    expect(totals.subtotal).toBe(34990 * 2 + 29990);
-    expect(totals.savings).toBe(34990 - 29990);
+    expect(totals.subtotal).toBe(a.price * 2 + b.price);
+
+    const onSale = { ...a, compareAtPrice: a.price + 5000 };
+    expect(cartTotals(resolveCart([{ productId: a.id, size: a.sizes[0], quantity: 1 }], [onSale])).savings).toBe(5000);
   });
 });

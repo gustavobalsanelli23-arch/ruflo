@@ -36,9 +36,9 @@ export function removeKey(key: string): void {
 
 /** Chaves versionadas: ao mudar o formato dos dados, incremente a versão. */
 export const STORAGE_KEYS = {
-  cart: 'cart:v1',
-  products: 'products:v2',
-  orders: 'orders:v1',
+  cart: 'cart:v2',
+  products: 'products:v3',
+  orders: 'orders:v2',
   customer: 'customer:v1',
   settings: 'settings:v1',
 } as const;
