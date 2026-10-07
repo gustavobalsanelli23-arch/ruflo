@@ -50,7 +50,7 @@ export function ProductCard({ product }: { product: Product }) {
       <Link href={href} className="relative block" aria-label={product.name} tabIndex={-1}>
         <ProductImage
           product={product}
-          className="aspect-[4/5] w-full"
+          className="aspect-[3/4] w-full"
           imageClassName={cn('transition-transform duration-500 group-hover:scale-[1.04]', soldOut && 'opacity-50 grayscale')}
         />
         <div className="absolute left-2.5 top-2.5 flex flex-col items-start gap-1.5 sm:left-3 sm:top-3">

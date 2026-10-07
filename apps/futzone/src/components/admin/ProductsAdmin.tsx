@@ -157,7 +157,7 @@ export function ProductsAdmin() {
       >
         {viewing && (
           <div className="grid gap-6 sm:grid-cols-[200px_1fr]">
-            <ProductImage product={viewing} className="aspect-[4/5] w-full rounded-2xl border border-line" />
+            <ProductImage product={viewing} className="aspect-[3/4] w-full rounded-2xl border border-line" />
             <div className="space-y-4 text-sm">
               <div className="flex flex-wrap gap-2">
                 <Badge tone={STATUS_META[viewing.status].tone} dot>{STATUS_META[viewing.status].label}</Badge>

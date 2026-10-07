@@ -52,7 +52,7 @@ export function ProductGallery({ product }: { product: Product }) {
       </div>
 
       <div className="relative flex-1 overflow-hidden rounded-3xl border border-line">
-        <ProductImage key={slide.key} product={product} index={slide.index} view={slide.view} className="animate-fade aspect-[4/5] w-full" />
+        <ProductImage key={slide.key} product={product} index={slide.index} view={slide.view} className="animate-fade aspect-[3/4] w-full" />
         {slides.length > 1 && (
           <>
             <button type="button" onClick={() => go(-1)} className="absolute left-3 top-1/2 grid size-10 -translate-y-1/2 place-items-center rounded-full bg-black/50 text-white backdrop-blur transition hover:bg-brand-500" aria-label="Imagem anterior">
