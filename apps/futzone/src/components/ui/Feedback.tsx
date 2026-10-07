@@ -1,5 +1,6 @@
 import { Info } from 'lucide-react';
 import { cn } from '@/lib/format';
+import { Reveal } from './Reveal';
 
 interface EmptyStateProps {
   icon?: React.ReactNode;
@@ -11,11 +12,16 @@ interface EmptyStateProps {
 
 export function EmptyState({ icon, title, description, action, className }: EmptyStateProps) {
   return (
-    <div className={cn('flex flex-col items-center justify-center rounded-2xl border border-dashed border-line px-6 py-14 text-center', className)}>
-      {icon && <div className="mb-4 grid size-14 place-items-center rounded-2xl bg-brand-500/10 text-brand-400">{icon}</div>}
-      <h3 className="text-lg font-bold">{title}</h3>
-      {description && <p className="mt-2 max-w-sm text-sm text-muted">{description}</p>}
-      {action && <div className="mt-6">{action}</div>}
+    <div className={cn('animate-fade-up flex flex-col items-center justify-center rounded-3xl bg-surface/60 px-6 py-16 text-center sm:py-20', className)}>
+      {icon && (
+        <div className="relative mb-6 grid size-16 place-items-center rounded-full bg-brand-500/10 text-brand-400 ring-1 ring-brand-500/25">
+          <span className="absolute inset-0 animate-ping rounded-full bg-brand-500/10 [animation-duration:2.4s]" aria-hidden />
+          {icon}
+        </div>
+      )}
+      <h3 className="heading-display text-3xl text-fg">{title}</h3>
+      {description && <p className="mt-3 max-w-sm text-sm leading-relaxed text-muted">{description}</p>}
+      {action && <div className="mt-7 flex flex-wrap justify-center gap-3">{action}</div>}
     </div>
   );
 }
@@ -33,21 +39,24 @@ export function DemoNotice({ children, className }: { children: React.ReactNode;
 export function SectionHeading({
   eyebrow,
   title,
+  description,
   action,
   className,
 }: {
   eyebrow?: string;
   title: string;
+  description?: string;
   action?: React.ReactNode;
   className?: string;
 }) {
   return (
-    <div className={cn('mb-6 flex items-end justify-between gap-4 sm:mb-8', className)}>
-      <div>
-        {eyebrow && <p className="eyebrow mb-2">{eyebrow}</p>}
-        <h2 className="heading-display text-3xl sm:text-4xl lg:text-5xl">{title}</h2>
+    <Reveal className={cn('mb-7 flex items-end justify-between gap-6 sm:mb-9', className)}>
+      <div className="max-w-2xl">
+        {eyebrow && <p className="eyebrow mb-3">{eyebrow}</p>}
+        <h2 className="heading-display text-[2.1rem] text-fg sm:text-5xl">{title}</h2>
+        {description && <p className="mt-3 text-sm text-muted sm:text-base">{description}</p>}
       </div>
-      {action}
-    </div>
+      {action && <div className="shrink-0">{action}</div>}
+    </Reveal>
   );
 }

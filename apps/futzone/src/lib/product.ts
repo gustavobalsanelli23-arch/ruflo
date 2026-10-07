@@ -50,4 +50,22 @@ export const STOCK_LABEL: Record<StockLevel, string> = {
 export const findByRef = (products: Product[], ref: { teamId: string; slug: string }): Product | undefined =>
   products.find((p) => p.teamId === ref.teamId && p.slug === ref.slug);
 
+export type BadgeKind = 'esgotado' | 'promo' | 'novo' | 'mais-vendido' | 'destaque' | 'retro' | 'kit' | 'infantil';
+
+/**
+ * Selos do card, em ordem de importância (no máximo `max`).
+ * Só aparecem quando o dado do produto justifica — nunca aleatórios.
+ */
+export function badgesFor(p: Product, max = 2): BadgeKind[] {
+  if (totalStock(p) === 0) return ['esgotado'];
+  const list: BadgeKind[] = [];
+  if (isOnSale(p)) list.push('promo');
+  if (p.tags.includes('lancamento')) list.push('novo');
+  if (p.tags.includes('mais-vendido')) list.push('mais-vendido');
+  else if (p.tags.includes('popular')) list.push('destaque');
+  if (p.category === 'retro') list.push('retro');
+  if (p.category === 'kits') list.push(p.gender === 'infantil' ? 'infantil' : 'kit');
+  return list.slice(0, max);
+}
+
 export const isPublic = (p: Product): boolean => p.status === 'published';

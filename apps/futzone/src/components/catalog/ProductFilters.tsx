@@ -5,8 +5,9 @@ import { ChevronDown, Search } from 'lucide-react';
 import type { CategoryId, Product, Size } from '@/types/catalog';
 import { ADULT_SIZES, KIDS_SIZES } from '@/types/catalog';
 import { categories } from '@/data/categories';
+import { collections, type CollectionId } from '@/data/collections';
 import { teams } from '@/data/teams';
-import { PRICE_RANGES, type CatalogQuery } from '@/lib/catalog';
+import { inCollection, PRICE_RANGES, type CatalogQuery } from '@/lib/catalog';
 import { cn } from '@/lib/format';
 import { Chip, Switch } from '@/components/ui/Form';
 
@@ -31,12 +32,30 @@ export function ProductFilters({ query, onChange, products, locked = {} }: Produ
     return counts;
   }, [products]);
 
+  const collectionCounts = useMemo(
+    () => new Map(collections.map((c) => [c.id, products.filter((p) => inCollection(p, c.id)).length])),
+    [products],
+  );
+
   const visibleTeams = teams.filter(
     (t) => teamCounts.has(t.id) && t.name.toLowerCase().includes(teamSearch.toLowerCase()),
   );
 
   return (
-    <div className="divide-y divide-line">
+    <div className="divide-y divide-white/[0.06]">
+      <FilterGroup title="Coleções">
+        <div className="flex flex-wrap gap-2">
+          {collections
+            .filter((c) => (collectionCounts.get(c.id) ?? 0) > 0 || query.collections.includes(c.id))
+            .map((c) => (
+              <Chip key={c.id} selected={query.collections.includes(c.id)} onClick={() => set({ collections: toggle<CollectionId>(query.collections, c.id) })}>
+                {c.name}
+                <span className="ml-1 text-[0.65rem] opacity-60">{collectionCounts.get(c.id)}</span>
+              </Chip>
+            ))}
+        </div>
+      </FilterGroup>
+
       {!locked.category && (
         <FilterGroup title="Categoria">
           <div className="flex flex-wrap gap-2">
@@ -58,7 +77,7 @@ export function ProductFilters({ query, onChange, products, locked = {} }: Produ
               onChange={(e) => setTeamSearch(e.target.value)}
               placeholder="Filtrar times"
               aria-label="Filtrar lista de times"
-              className="h-9 w-full rounded-lg border border-line bg-surface-2 pl-8 pr-3 text-xs focus:border-brand-500 focus:outline-none"
+              className="h-9 w-full rounded-full border border-line bg-surface-2 pl-8 pr-3 text-xs transition-colors focus:border-brand-500 focus:outline-none"
             />
           </div>
           <ul className="max-h-60 space-y-0.5 overflow-y-auto pr-1">
@@ -66,7 +85,7 @@ export function ProductFilters({ query, onChange, products, locked = {} }: Produ
               const checked = query.teams.includes(t.id);
               return (
                 <li key={t.id}>
-                  <label className="flex cursor-pointer items-center gap-3 rounded-lg px-2 py-1.5 text-sm text-fg-2 transition-colors hover:bg-surface-2 hover:text-fg">
+                  <label className="flex cursor-pointer items-center gap-3 rounded-lg px-2 py-1.5 text-sm text-fg-2 transition-colors duration-150 hover:bg-white/[0.04] hover:text-fg">
                     <input type="checkbox" checked={checked} onChange={() => set({ teams: toggle(query.teams, t.id) })} className="size-4 rounded accent-[var(--color-brand-500)]" />
                     <span className={cn('flex-1', checked && 'font-semibold text-brand-200')}>{t.name}</span>
                     <span className="text-xs text-subtle">{teamCounts.get(t.id)}</span>
@@ -120,11 +139,15 @@ function FilterGroup({ title, children }: { title: string; children: React.React
   const [open, setOpen] = useState(true);
   return (
     <section className="py-5 first:pt-0">
-      <button type="button" onClick={() => setOpen((v) => !v)} className="mb-3 flex w-full items-center justify-between text-left" aria-expanded={open}>
-        <h3 className="text-xs font-bold uppercase tracking-[0.18em] text-fg">{title}</h3>
-        <ChevronDown className={cn('size-4 text-muted transition-transform', open && 'rotate-180')} />
+      <button type="button" onClick={() => setOpen((v) => !v)} className="group flex w-full items-center justify-between text-left" aria-expanded={open}>
+        <h3 className="text-[0.7rem] font-bold uppercase tracking-[0.18em] text-fg-2 transition-colors group-hover:text-fg">{title}</h3>
+        <ChevronDown className={cn('size-4 text-muted transition-transform duration-200', open && 'rotate-180')} />
       </button>
-      {open && children}
+      <div className={cn('grid transition-[grid-template-rows,opacity] duration-250 ease-[var(--ease-out-fz)]', open ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0')} inert={!open}>
+        <div className="min-h-0 overflow-hidden">
+          <div className="pt-3.5">{children}</div>
+        </div>
+      </div>
     </section>
   );
 }

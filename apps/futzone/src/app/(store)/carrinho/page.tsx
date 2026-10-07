@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { CartPageView } from '@/components/store/CartPageView';
+import { CartPageView } from '@/components/cart/CartPageView';
 import { PageHeader } from '../PageHeader';
 
 export const metadata: Metadata = { title: 'Carrinho' };

@@ -1,6 +1,6 @@
-import { Header } from '@/components/store/Header';
-import { Footer } from '@/components/store/Footer';
-import { CartDrawer } from '@/components/store/CartDrawer';
+import { Header } from '@/components/layout/Header';
+import { Footer } from '@/components/layout/Footer';
+import { CartDrawer } from '@/components/cart/CartDrawer';
 
 export default function StoreLayout({ children }: { children: React.ReactNode }) {
   return (

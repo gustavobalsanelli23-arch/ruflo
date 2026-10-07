@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { seedProducts } from '@/data/products';
 import { productHref } from '@/lib/product';
-import { ProductDetail } from '@/components/store/ProductDetail';
+import { ProductDetail } from '@/components/products/ProductDetail';
 
 /** Pré-gera as URLs do catálogo inicial; produtos criados no painel renderizam sob demanda. */
 export const generateStaticParams = () =>

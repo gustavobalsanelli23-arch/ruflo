@@ -15,7 +15,7 @@ import { teamById } from '@/lib/product';
 import { Button, LinkButton } from '@/components/ui/Button';
 import { Chip, Field, Input, Select, Textarea } from '@/components/ui/Form';
 import { DemoNotice } from '@/components/ui/Feedback';
-import { ProductImage } from '@/components/store/ProductImage';
+import { ProductImage } from '@/components/products/ProductImage';
 import { Panel } from './AdminUI';
 
 interface FormState {

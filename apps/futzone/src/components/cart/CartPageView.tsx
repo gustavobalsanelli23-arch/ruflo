@@ -6,13 +6,30 @@ import { useStoreData } from '@/context/StoreDataContext';
 import { formatPrice } from '@/lib/format';
 import { Button, LinkButton } from '@/components/ui/Button';
 import { EmptyState } from '@/components/ui/Feedback';
+import { Skeleton } from '@/components/ui/Skeleton';
 import { CartLineItem } from './CartDrawer';
 
 export function CartPageView() {
   const { lines, count, subtotal, savings, clear } = useCart();
   const { hydrated } = useStoreData();
 
-  if (!hydrated) return <div className="h-80 animate-pulse rounded-3xl bg-surface" aria-busy="true" />;
+  if (!hydrated)
+    return (
+      <div role="status" aria-label="Carregando carrinho" className="grid grid-cols-1 gap-8 lg:grid-cols-[1fr_380px] lg:gap-12">
+        <div className="space-y-5">
+          {[0, 1].map((i) => (
+            <div key={i} className="flex gap-4">
+              <Skeleton className="h-36 w-28" />
+              <div className="flex-1 space-y-3">
+                <Skeleton className="h-4 w-3/4" />
+                <Skeleton className="h-3 w-1/3" />
+              </div>
+            </div>
+          ))}
+        </div>
+        <Skeleton className="h-72 rounded-3xl" />
+      </div>
+    );
 
   if (lines.length === 0) {
     return (
@@ -28,7 +45,7 @@ export function CartPageView() {
   return (
     <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1fr_380px] lg:gap-12">
       <section aria-label="Produtos no carrinho" className="min-w-0">
-        <div className="flex items-center justify-between border-b border-line pb-4">
+        <div className="flex items-center justify-between border-b border-white/[0.06] pb-4">
           <p className="text-sm text-muted">
             <span className="font-bold text-fg">{count}</span> {count === 1 ? 'item' : 'itens'}
           </p>
@@ -36,7 +53,7 @@ export function CartPageView() {
             <Trash2 className="size-4" /> Esvaziar
           </Button>
         </div>
-        <ul className="divide-y divide-line">
+        <ul className="divide-y divide-white/[0.06]">
           {lines.map((line) => (
             <CartLineItem key={`${line.productId}-${line.size}`} line={line} variant="page" />
           ))}
@@ -46,8 +63,8 @@ export function CartPageView() {
         </LinkButton>
       </section>
 
-      <aside className="lg:sticky lg:top-28 lg:self-start">
-        <div className="rounded-3xl border border-line bg-surface p-6">
+      <aside className="lg:sticky lg:top-24 lg:self-start">
+        <div className="animate-fade-up rounded-3xl bg-surface p-6">
           <h2 className="heading-display mb-6 text-3xl">Resumo</h2>
           <dl className="space-y-3 text-sm">
             <div className="flex justify-between">
@@ -64,7 +81,7 @@ export function CartPageView() {
               <dt className="text-fg-2">Frete</dt>
               <dd className="text-muted">Calculado na próxima etapa</dd>
             </div>
-            <div className="flex items-baseline justify-between border-t border-line pt-4">
+            <div className="flex items-baseline justify-between border-t border-white/[0.06] pt-4">
               <dt className="font-bold">Total dos produtos</dt>
               <dd className="text-2xl font-extrabold tabular-nums">{formatPrice(subtotal)}</dd>
             </div>

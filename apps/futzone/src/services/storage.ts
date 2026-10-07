@@ -41,4 +41,5 @@ export const STORAGE_KEYS = {
   orders: 'orders:v2',
   customer: 'customer:v1',
   settings: 'settings:v1',
+  recentSearches: 'recent-searches:v1',
 } as const;

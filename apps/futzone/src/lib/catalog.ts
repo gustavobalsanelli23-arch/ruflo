@@ -1,4 +1,6 @@
 import type { CategoryId, Product, Size } from '@/types/catalog';
+import { categories } from '@/data/categories';
+import { collectionById, collections, type CollectionId } from '@/data/collections';
 import { isOnSale, stockFor, teamById } from './product';
 
 /**
@@ -33,6 +35,7 @@ export interface CatalogQuery {
   q: string;
   teams: string[];
   categories: CategoryId[];
+  collections: CollectionId[];
   sizes: Size[];
   price: string | null;
   onSale: boolean;
@@ -43,6 +46,7 @@ export const EMPTY_QUERY: CatalogQuery = {
   q: '',
   teams: [],
   categories: [],
+  collections: [],
   sizes: [],
   price: null,
   onSale: false,
@@ -52,12 +56,29 @@ export const EMPTY_QUERY: CatalogQuery = {
 export const normalize = (s: string): string =>
   s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().trim();
 
+/** Texto pesquisável: nome (inclui jogadores, ex.: "Ronaldinho"), time, temporada, categoria e coleções. */
+const searchCache = new WeakMap<Product, string>();
+function searchText(product: Product): string {
+  let text = searchCache.get(product);
+  if (text === undefined) {
+    const team = teamById(product.teamId);
+    const category = categories.find((c) => c.id === product.category);
+    const inCollections = collections.filter((c) => c.matches(product, team)).flatMap((c) => [c.name, ...c.keywords]);
+    text = normalize([product.name, team?.name ?? '', product.season, category?.name ?? '', ...inCollections].join(' '));
+    searchCache.set(product, text);
+  }
+  return text;
+}
+
 export function matchesSearch(product: Product, q: string): boolean {
   const terms = normalize(q).split(/\s+/).filter(Boolean);
   if (terms.length === 0) return true;
-  const team = teamById(product.teamId);
-  const haystack = normalize([product.name, team?.name ?? '', product.season, product.category].join(' '));
+  const haystack = searchText(product);
   return terms.every((t) => haystack.includes(t));
+}
+
+export function inCollection(product: Product, id: CollectionId): boolean {
+  return collectionById(id)?.matches(product, teamById(product.teamId)) ?? false;
 }
 
 export function filterProducts(products: Product[], query: CatalogQuery): Product[] {
@@ -66,6 +87,7 @@ export function filterProducts(products: Product[], query: CatalogQuery): Produc
     if (!matchesSearch(p, query.q)) return false;
     if (query.teams.length && !query.teams.includes(p.teamId)) return false;
     if (query.categories.length && !query.categories.includes(p.category)) return false;
+    if (query.collections.length && !query.collections.some((c) => inCollection(p, c))) return false;
     if (query.sizes.length && !query.sizes.some((s) => stockFor(p, s) > 0)) return false;
     if (query.onSale && !isOnSale(p)) return false;
     if (range) {
@@ -102,6 +124,7 @@ export function queryFromParams(params: URLSearchParams): CatalogQuery {
     q: params.get('q') ?? '',
     teams: list('time'),
     categories: list('categoria') as CategoryId[],
+    collections: list('colecao').filter((c) => collectionById(c)) as CollectionId[],
     sizes: list('tamanho') as Size[],
     price: params.get('preco'),
     onSale: params.get('promo') === '1',
@@ -114,6 +137,7 @@ export function paramsFromQuery(query: CatalogQuery): URLSearchParams {
   if (query.q) params.set('q', query.q);
   if (query.teams.length) params.set('time', query.teams.join(','));
   if (query.categories.length) params.set('categoria', query.categories.join(','));
+  if (query.collections.length) params.set('colecao', query.collections.join(','));
   if (query.sizes.length) params.set('tamanho', query.sizes.join(','));
   if (query.price) params.set('preco', query.price);
   if (query.onSale) params.set('promo', '1');
@@ -122,5 +146,5 @@ export function paramsFromQuery(query: CatalogQuery): URLSearchParams {
 }
 
 export function activeFilterCount(query: CatalogQuery): number {
-  return query.teams.length + query.categories.length + query.sizes.length + (query.price ? 1 : 0) + (query.onSale ? 1 : 0);
+  return query.teams.length + query.categories.length + query.collections.length + query.sizes.length + (query.price ? 1 : 0) + (query.onSale ? 1 : 0);
 }
