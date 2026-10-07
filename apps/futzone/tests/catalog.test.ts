@@ -1,3 +1,4 @@
+import { existsSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import { seedProducts } from '@/data/products';
 import { EMPTY_QUERY, filterProducts, paramsFromQuery, queryCatalog, queryFromParams, sortProducts } from '@/lib/catalog';
@@ -9,18 +10,24 @@ describe('catálogo', () => {
   it('cada produto tem id único e URL amigável única', () => {
     expect(new Set(seedProducts.map((p) => p.id)).size).toBe(seedProducts.length);
     expect(new Set(seedProducts.map(productHref)).size).toBe(seedProducts.length);
-    expect(productHref(seedProducts[0])).toBe('/camisas/flamengo/camisa-flamengo-26-27');
+    expect(productHref(seedProducts.find((p) => p.id === 'p-001')!)).toBe('/camisas/flamengo/camisa-flamengo-26-27');
+  });
+
+  it('todas as fotos cadastradas existem em /public', () => {
+    const missing = seedProducts.flatMap((p) => p.images.map((i) => i.src)).filter((src) => !existsSync(`public${src}`));
+    expect(missing).toEqual([]);
   });
 
   it('busca por nome ignora acentos e caixa', () => {
     const r = filterProducts(published, { ...EMPTY_QUERY, q: 'SAO paulo' });
-    expect(r.map((p) => p.teamId)).toEqual(['sao-paulo']);
+    expect(r.length).toBeGreaterThan(0);
+    expect(r.every((p) => p.teamId === 'sao-paulo')).toBe(true);
   });
 
   it('busca com vários termos exige todos', () => {
     const r = filterProducts(published, { ...EMPTY_QUERY, q: 'flamengo retro' });
-    expect(r).toHaveLength(1);
-    expect(r[0].category).toBe('retro');
+    expect(r.length).toBeGreaterThan(0);
+    expect(r.every((p) => p.category === 'retro' && p.teamId === 'flamengo')).toBe(true);
   });
 
   it('filtra por time, categoria, tamanho, preço e promoção', () => {

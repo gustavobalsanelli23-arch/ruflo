@@ -19,7 +19,7 @@ const DEFAULT_DETAILS: Record<CategoryId, string[]> = {
   clubes: ['Tecido 100% poliéster com tecnologia de secagem rápida', 'Escudo e patrocínios aplicados', 'Gola careca com acabamento em ribana', 'Modelagem torcedor'],
   selecoes: ['Tecido leve e respirável', 'Escudo da federação aplicado', 'Modelagem torcedor', 'Acabamento com costuras reforçadas'],
   retro: ['Releitura inspirada no modelo original', 'Tecido com toque de algodão', 'Gola polo ou V conforme o modelo da época', 'Escudo bordado'],
-  kits: ['Kit com camisa e calção', 'Tecido macio e resistente', 'Cós elástico com cordão ajustável', 'Ideal para crianças'],
+  kits: ['Kit com camisa e calção', 'Tecido macio e resistente', 'Cós elástico com cordão ajustável'],
   femininas: ['Modelagem baby look', 'Tecido leve com elastano', 'Escudo aplicado', 'Gola careca'],
 };
 
@@ -40,12 +40,16 @@ interface Seed {
   createdAt: string;
   palette?: { primary: string; secondary: string };
   status?: Product['status'];
+  /** Fotos reais em /public (ex.: '/produtos/<slug>/1.jpg'). */
+  images?: string[];
+  /** Tamanhos infantis. Padrão: kits são infantis, exceto quando informado. */
+  kids?: boolean;
 }
 
 function define(seed: Seed): Product {
   const team = teams.find((t) => t.id === seed.teamId);
   if (!team) throw new Error(`Time desconhecido em produto ${seed.id}: ${seed.teamId}`);
-  const isKids = seed.category === 'kits';
+  const isKids = seed.kids ?? seed.category === 'kits';
   const sizes: Size[] = isKids ? KIDS_SIZES : ADULT_SIZES;
   const stock = Object.fromEntries(sizes.map((s, i) => [s, seed.stock[i] ?? 0])) as Partial<Record<Size, number>>;
   return {
@@ -62,7 +66,7 @@ function define(seed: Seed): Product {
     compareAtPrice: seed.compareAtPrice,
     sizes,
     stock,
-    images: [],
+    images: (seed.images ?? []).map((src, i) => ({ src, alt: i === 0 ? seed.name : `${seed.name} — foto ${i + 1}` })),
     palette: seed.palette ?? team.colors,
     status: seed.status ?? 'published',
     tags: seed.tags ?? [],
@@ -72,6 +76,61 @@ function define(seed: Seed): Product {
 }
 
 export const seedProducts: Product[] = [
+  // ── Catálogo FutZone (fotos reais) ────────────────────────
+  // Preços e estoques destes itens são PROVISÓRIOS — ajustar com os valores reais.
+  ...[
+    { n: '001', name: 'Camisa Feminina Palmeiras Azul III 26/27', slug: 'camisa-feminina-palmeiras-azul-iii-26-27', teamId: 'palmeiras', category: 'femininas', season: '26/27', price: 32990, tags: ['lancamento'] },
+    { n: '002', name: 'Camisa Retrô Arsenal Vinho 2005/06', slug: 'camisa-retro-arsenal-vinho-2005-06', teamId: 'arsenal', category: 'retro', season: '2005/06', price: 25990, tags: ['popular'] },
+    { n: '003', name: 'Kit Infantil Flamengo Listrado I 26/27', slug: 'kit-infantil-flamengo-listrado-i-26-27', teamId: 'flamengo', category: 'kits', season: '26/27', price: 24990, tags: ['mais-vendido', 'lancamento'] },
+    { n: '004', name: 'Camisa Sport Listrada I 2026/27', slug: 'camisa-sport-listrada-i-2026-27', teamId: 'sport', category: 'clubes', season: '2026/27', price: 34990, tags: ['lancamento'] },
+    // Nomes provisórios (sem nome na foto) — confirmar com o catálogo:
+    { n: '005', name: 'Camisa Feminina Internacional Branca', slug: 'camisa-feminina-internacional-branca', teamId: 'internacional', category: 'femininas', season: '', price: 32990, tags: [] },
+    { n: '006', name: 'Camisa Cruzeiro Branca', slug: 'camisa-cruzeiro-branca', teamId: 'cruzeiro', category: 'clubes', season: '', price: 34990, tags: [] },
+    { n: '007', name: 'Camisa Goleiro Botafogo Azul 26/27', slug: 'camisa-goleiro-botafogo-azul-26-27', teamId: 'botafogo', category: 'clubes', season: '26/27', price: 34990, tags: ['lancamento'] },
+    { n: '008', name: 'Camisa Olympique de Marseille I 25/26', slug: 'camisa-olympique-de-marseille-i-25-26', teamId: 'marseille', category: 'clubes', season: '25/26', price: 42990, tags: ['popular'] },
+    { n: '009', name: 'Camisa PSG I 2026/27 Azul e Vermelho', slug: 'camisa-psg-i-2026-27-azul-e-vermelho', teamId: 'psg', category: 'clubes', season: '2026/27', price: 42990, tags: ['mais-vendido', 'lancamento'] },
+    { n: '010', name: 'Camisa Real Madrid Goleiro 25/26', slug: 'camisa-real-madrid-goleiro-25-26', teamId: 'real-madrid', category: 'clubes', season: '25/26', price: 42990, tags: [] },
+    { n: '011', name: 'Camisa Real Madrid II 25/26', slug: 'camisa-real-madrid-ii-25-26', teamId: 'real-madrid', category: 'clubes', season: '25/26', price: 42990, tags: ['popular'] },
+    { n: '012', name: 'Camisa Palmeiras Listrada 25/26', slug: 'camisa-palmeiras-listrada-25-26', teamId: 'palmeiras', category: 'clubes', season: '25/26', price: 34990, tags: ['mais-vendido'] },
+    { n: '013', name: 'Camisa Retrô PSG Opel', slug: 'camisa-retro-psg-opel', teamId: 'psg', category: 'retro', season: '', price: 25990, tags: [] }, // nome provisório
+    { n: '014', name: 'Camisa Retrô Corinthians 2011/12', slug: 'camisa-retro-corinthians-2011-12', teamId: 'corinthians', category: 'retro', season: '2011/12', price: 25990, tags: ['mais-vendido'] },
+    { n: '015', name: 'Kit Infantil Cruzeiro I - Short azul', slug: 'kit-infantil-cruzeiro-i-short-azul', teamId: 'cruzeiro', category: 'kits', season: '', price: 24990, tags: ['popular'] },
+    // ── Lote 16–30 ──
+    { n: '016', name: 'Kit Infantil São Paulo 2025/26', slug: 'kit-infantil-sao-paulo-2025-26', teamId: 'sao-paulo', category: 'kits', season: '2025/26', price: 24990, tags: [] },
+    { n: '017', name: 'Kit Regata e Short Arsenal', slug: 'kit-regata-e-short-arsenal', teamId: 'arsenal', category: 'kits', season: '', price: 27990, tags: [] },
+    { n: '018', name: 'Kit Regata e Short Corinthians Branco e Preto', slug: 'kit-regata-e-short-corinthians-branco-e-preto', teamId: 'corinthians', category: 'kits', season: '', price: 27990, tags: ['popular'] },
+    { n: '019', name: 'Camisa Retrô Flamengo 2008/09 - Adriano', slug: 'camisa-retro-flamengo-2008-09-adriano', teamId: 'flamengo', category: 'retro', season: '2008/09', price: 25990, tags: ['mais-vendido'] },
+    { n: '020', name: 'Camisa Retrô Inter de Milão 2004/05 - Adriano', slug: 'camisa-retro-inter-de-milao-2004-05-adriano', teamId: 'inter-de-milao', category: 'retro', season: '2004/05', price: 25990, tags: ['popular'] },
+    { n: '021', name: 'Kit Regata e Short Portugal Treino Verde', slug: 'kit-regata-e-short-portugal-treino-verde', teamId: 'portugal', category: 'kits', season: '', price: 27990, tags: [] },
+    { n: '022', name: 'Kit Regata e Short Corinthians Treino Bege', slug: 'kit-regata-e-short-corinthians-treino-bege', teamId: 'corinthians', category: 'kits', season: '', price: 27990, tags: ['lancamento'] },
+    { n: '023', name: 'Kit Regata e Short França Treino', slug: 'kit-regata-e-short-franca-treino', teamId: 'franca', category: 'kits', season: '', price: 27990, tags: [] },
+    { n: '024', name: 'Kit Regata e Short Manchester United Branco', slug: 'kit-regata-e-short-manchester-united-branco', teamId: 'manchester-united', category: 'kits', season: '', price: 27990, tags: [] },
+    { n: '025', name: 'Kit Regata e Short França Treino Azul Claro', slug: 'kit-regata-e-short-franca-treino-azul-claro', teamId: 'franca', category: 'kits', season: '', price: 27990, tags: [] },
+    { n: '026', name: 'Kit Regata e Short Flamengo Treino Amarelo', slug: 'kit-regata-e-short-flamengo-treino-amarelo', teamId: 'flamengo', category: 'kits', season: '', price: 27990, tags: ['popular'] },
+    { n: '027', name: 'Kit Regata e Short Palmeiras Verde', slug: 'kit-regata-e-short-palmeiras-verde', teamId: 'palmeiras', category: 'kits', season: '', price: 27990, tags: [] },
+    { n: '028', name: 'Kit Regata e Short Manchester United Preto', slug: 'kit-regata-e-short-manchester-united-preto', teamId: 'manchester-united', category: 'kits', season: '', price: 27990, tags: [] },
+    { n: '029', name: 'Kit Regata e Short PSG Branco Treino', slug: 'kit-regata-e-short-psg-branco-treino', teamId: 'psg', category: 'kits', season: '', price: 27990, tags: [] },
+    { n: '030', name: 'Kit Regata e Short PSG Preto Treino', slug: 'kit-regata-e-short-psg-preto-treino', teamId: 'psg', category: 'kits', season: '', price: 27990, tags: ['lancamento'] },
+  ].map((r, i) =>
+    define({
+      id: `fz-${r.n}`,
+      name: r.name,
+      slug: r.slug,
+      teamId: r.teamId,
+      category: r.category as CategoryId,
+      season: r.season,
+      price: r.price,
+      description: `${r.name}. Produto do catálogo FutZone.`,
+      kids: r.category === 'kits' && /infantil/i.test(r.name),
+      stock: r.category === 'kits' ? [3, 5, 6, 5, 4, 2] : [3, 8, 10, 8, 5, 2],
+      tags: r.tags as ProductTag[],
+      salesCount: 1500 - i * 10,
+      createdAt: '2026-10-07',
+      images: [`/produtos/${r.slug}/1.jpg`],
+    }),
+  ),
+
+  // ── Produtos de demonstração (sem foto) ───────────────────
   // ── Clubes ────────────────────────────────────────────────
   define({ id: 'p-001', name: 'Camisa Flamengo 26/27 I', slug: 'camisa-flamengo-26-27', teamId: 'flamengo', category: 'clubes', season: '26/27', price: 34990, description: 'O manto rubro-negro da nova temporada. Leve, confortável e pronta para o Maracanã lotado.', stock: [4, 12, 18, 15, 8, 3], tags: ['mais-vendido', 'lancamento'], salesCount: 980, createdAt: '2026-09-20' }),
   define({ id: 'p-002', name: 'Camisa Palmeiras 26/27 I', slug: 'camisa-palmeiras-26-27', teamId: 'palmeiras', category: 'clubes', season: '26/27', price: 34990, description: 'O verde alviverde em sua versão mais atual, com tecido respirável para os 90 minutos.', stock: [3, 10, 14, 11, 6, 2], tags: ['mais-vendido'], salesCount: 870, createdAt: '2026-08-28' }),

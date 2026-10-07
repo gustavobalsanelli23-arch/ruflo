@@ -31,7 +31,7 @@ export function ProductGallery({ product }: { product: Product }) {
   const slide = slides[current];
 
   return (
-    <div className="flex flex-col-reverse gap-3 md:flex-row md:gap-4">
+    <div className="flex flex-col-reverse gap-3 self-start md:flex-row md:items-start md:gap-4">
       <div className="flex gap-2 overflow-x-auto scrollbar-none md:w-20 md:flex-col" role="tablist" aria-label="Imagens do produto">
         {slides.map((s, i) => (
           <button

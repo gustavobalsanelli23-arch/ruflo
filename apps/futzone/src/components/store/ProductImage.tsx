@@ -36,7 +36,7 @@ export function ProductImage({ product, index = 0, view = 'front', className, im
     >
       {image ? (
         // eslint-disable-next-line @next/next/no-img-element
-        <img src={image.src} alt={image.alt || product.name} loading="lazy" className={cn('h-full w-full object-contain', imageClassName)} />
+        <img src={image.src} alt={image.alt || product.name} loading="lazy" className={cn('h-full w-full object-cover', imageClassName)} />
       ) : (
         <JerseyArt
           primary={product.palette.primary}

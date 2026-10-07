@@ -100,7 +100,6 @@ export function ProductForm({ product }: { product?: Product }) {
     if (compare !== undefined && (!Number.isFinite(compare) || compare <= price)) e.compareAtPrice = 'O preço promocional exige um preço anterior maior que o preço atual.';
     if (form.sizes.length === 0) e.sizes = 'Selecione ao menos um tamanho.';
     if (form.sizes.some((s) => !/^\d+$/.test(form.stock[s] ?? ''))) e.stock = 'Estoque deve ser um número inteiro (0 ou mais).';
-    if (!form.season.trim()) e.season = 'Informe a temporada.';
     setErrors(e);
     if (Object.keys(e).length) return null;
 
@@ -112,7 +111,7 @@ export function ProductForm({ product }: { product?: Product }) {
       teamId: form.teamId,
       category: form.category,
       season: form.season.trim(),
-      gender: form.category === 'kits' ? 'infantil' : form.category === 'femininas' ? 'feminino' : product?.gender ?? 'masculino',
+      gender: form.sizes.every((s) => (KIDS_SIZES as Size[]).includes(s)) ? 'infantil' : form.category === 'femininas' ? 'feminino' : product?.gender ?? 'masculino',
       description: form.description.trim(),
       details: product?.details ?? ['Tecido leve e respirável', 'Escudo aplicado'],
       price,

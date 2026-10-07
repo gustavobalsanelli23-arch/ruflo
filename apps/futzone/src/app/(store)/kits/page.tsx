@@ -4,5 +4,5 @@ import { CatalogPage } from '../CatalogPage';
 export const metadata: Metadata = { title: 'Kits' };
 
 export default function KitsPage() {
-  return <CatalogPage eyebrow="Camisa + calção" title="Kits" description="Uniformes completos em tamanhos infantis." preset={{ category: 'kits' }} />;
+  return <CatalogPage eyebrow="Camisa + calção" title="Kits" description="Conjuntos de camisa ou regata com short, adulto e infantil." preset={{ category: 'kits' }} />;
 }
