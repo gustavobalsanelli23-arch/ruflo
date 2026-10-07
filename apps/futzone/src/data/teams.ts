@@ -31,5 +31,7 @@ export const teams: Team[] = [
   { id: 'argentina', slug: 'argentina', name: 'Argentina', country: 'Argentina', kind: 'selecao', colors: { primary: '#75AADB', secondary: '#FFFFFF' } },
   { id: 'franca', slug: 'franca', name: 'França', country: 'França', kind: 'selecao', colors: { primary: '#1C2B4A', secondary: '#E1000F' } },
   { id: 'portugal', slug: 'portugal', name: 'Portugal', country: 'Portugal', kind: 'selecao', colors: { primary: '#C8102E', secondary: '#046A38' } },
+  { id: 'inglaterra', slug: 'inglaterra', name: 'Inglaterra', country: 'Inglaterra', kind: 'selecao', colors: { primary: '#F4F4F4', secondary: '#1C2B4A' } },
+  { id: 'nigeria', slug: 'nigeria', name: 'Nigéria', country: 'Nigéria', kind: 'selecao', colors: { primary: '#008751', secondary: '#F4F4F4' } },
   { id: 'holanda', slug: 'holanda', name: 'Holanda', country: 'Holanda', kind: 'selecao', colors: { primary: '#F36C21', secondary: '#FFFFFF' } },
 ];

@@ -115,6 +115,19 @@ export const seedProducts: Product[] = [
     { n: '016b', name: 'Camisa Retrô São Paulo', slug: 'camisa-retro-sao-paulo', teamId: 'sao-paulo', category: 'retro', season: '', price: 25990, tags: [] }, // nome cortado na foto — confirmar
     { n: '019b', name: 'Camisa Retrô Flamengo 1995', slug: 'camisa-retro-flamengo-1995', teamId: 'flamengo', category: 'retro', season: '1995', price: 25990, tags: [] },
     { n: '020b', name: 'Camisa Retrô Flamengo 1992/93', slug: 'camisa-retro-flamengo-1992-93', teamId: 'flamengo', category: 'retro', season: '1992/93', price: 25990, tags: [] },
+    // ── Lote 31–45 (capturas desalinhadas): nomes provisórios a partir do escudo/legenda — confirmar ──
+    { n: '033', name: 'Kit Regata e Short Barcelona Azul e Grená', slug: 'kit-regata-e-short-barcelona-azul-e-grena', teamId: 'barcelona', category: 'kits', season: '', price: 27990, tags: [] },
+    { n: '034', name: 'Kit Regata e Short Barcelona Branca 2024/25', slug: 'kit-regata-e-short-barcelona-branca-2024-25', teamId: 'barcelona', category: 'kits', season: '2024/25', price: 27990, tags: [] },
+    { n: '035', name: 'Kit Regata e Short PSG Treino Branco com Listra', slug: 'kit-regata-e-short-psg-treino-branco-com-listra', teamId: 'psg', category: 'kits', season: '', price: 27990, tags: [] },
+    { n: '036', name: 'Kit Regata e Short PSG Treino Preto com Listra', slug: 'kit-regata-e-short-psg-treino-preto-com-listra', teamId: 'psg', category: 'kits', season: '', price: 27990, tags: [] },
+    { n: '037', name: 'Camisa Jogador Bayern de Munique I 25/26', slug: 'camisa-jogador-bayern-de-munique-i-25-26', teamId: 'bayern', category: 'clubes', season: '25/26', price: 42990, tags: [] },
+    { n: '039', name: 'Camisa Retrô Argentina', slug: 'camisa-retro-argentina', teamId: 'argentina', category: 'retro', season: '', price: 25990, tags: [] },
+    { n: '040', name: 'Camisa Inglaterra Preta', slug: 'camisa-inglaterra-preta', teamId: 'inglaterra', category: 'selecoes', season: '', price: 39990, tags: [] },
+    { n: '041', name: 'Camisa Internacional Branca Manga Longa', slug: 'camisa-internacional-branca-manga-longa', teamId: 'internacional', category: 'clubes', season: '', price: 34990, tags: [] },
+    { n: '042', name: 'Camisa Feminina Flamengo Vermelha', slug: 'camisa-feminina-flamengo-vermelha', teamId: 'flamengo', category: 'femininas', season: '', price: 32990, tags: [] },
+    { n: '043', name: 'Camisa Sport Dourada', slug: 'camisa-sport-dourada', teamId: 'sport', category: 'clubes', season: '', price: 34990, tags: [] },
+    { n: '044', name: 'Camisa Botafogo Branca', slug: 'camisa-botafogo-branca', teamId: 'botafogo', category: 'clubes', season: '', price: 34990, tags: [] },
+    { n: '045', name: 'Camisa Nigéria Verde', slug: 'camisa-nigeria-verde', teamId: 'nigeria', category: 'selecoes', season: '', price: 39990, tags: [] },
   ].map((r, i) =>
     define({
       id: `fz-${r.n}`,
