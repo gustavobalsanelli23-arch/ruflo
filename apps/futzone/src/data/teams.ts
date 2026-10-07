@@ -23,6 +23,8 @@ export const teams: Team[] = [
   { id: 'botafogo', slug: 'botafogo', name: 'Botafogo', country: 'Brasil', kind: 'clube', colors: { primary: '#111111', secondary: '#F4F4F4' } },
   { id: 'cruzeiro', slug: 'cruzeiro', name: 'Cruzeiro', country: 'Brasil', kind: 'clube', colors: { primary: '#003DA5', secondary: '#F4F4F4' } },
   { id: 'internacional', slug: 'internacional', name: 'Internacional', country: 'Brasil', kind: 'clube', colors: { primary: '#E5050F', secondary: '#F4F4F4' } },
+  { id: 'manchester-united', slug: 'manchester-united', name: 'Manchester United', country: 'Inglaterra', kind: 'clube', colors: { primary: '#DA291C', secondary: '#111111' } },
+  { id: 'inter-de-milao', slug: 'inter-de-milao', name: 'Inter de Milão', country: 'Itália', kind: 'clube', colors: { primary: '#0068A8', secondary: '#111111' } },
   { id: 'arsenal', slug: 'arsenal', name: 'Arsenal', country: 'Inglaterra', kind: 'clube', colors: { primary: '#EF0107', secondary: '#F4F4F4' } },
   { id: 'marseille', slug: 'marseille', name: 'Olympique de Marseille', country: 'França', kind: 'clube', colors: { primary: '#F4F4F4', secondary: '#2FAEE0' } },
   { id: 'brasil', slug: 'brasil', name: 'Brasil', country: 'Brasil', kind: 'selecao', colors: { primary: '#FFDF00', secondary: '#009C3B' } },

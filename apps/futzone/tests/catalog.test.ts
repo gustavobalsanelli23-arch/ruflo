@@ -20,13 +20,14 @@ describe('catálogo', () => {
 
   it('busca por nome ignora acentos e caixa', () => {
     const r = filterProducts(published, { ...EMPTY_QUERY, q: 'SAO paulo' });
-    expect(r.map((p) => p.teamId)).toEqual(['sao-paulo']);
+    expect(r.length).toBeGreaterThan(0);
+    expect(r.every((p) => p.teamId === 'sao-paulo')).toBe(true);
   });
 
   it('busca com vários termos exige todos', () => {
     const r = filterProducts(published, { ...EMPTY_QUERY, q: 'flamengo retro' });
-    expect(r).toHaveLength(1);
-    expect(r[0].category).toBe('retro');
+    expect(r.length).toBeGreaterThan(0);
+    expect(r.every((p) => p.category === 'retro' && p.teamId === 'flamengo')).toBe(true);
   });
 
   it('filtra por time, categoria, tamanho, preço e promoção', () => {

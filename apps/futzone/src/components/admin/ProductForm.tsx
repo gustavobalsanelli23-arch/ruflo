@@ -111,7 +111,7 @@ export function ProductForm({ product }: { product?: Product }) {
       teamId: form.teamId,
       category: form.category,
       season: form.season.trim(),
-      gender: form.category === 'kits' ? 'infantil' : form.category === 'femininas' ? 'feminino' : product?.gender ?? 'masculino',
+      gender: form.sizes.every((s) => (KIDS_SIZES as Size[]).includes(s)) ? 'infantil' : form.category === 'femininas' ? 'feminino' : product?.gender ?? 'masculino',
       description: form.description.trim(),
       details: product?.details ?? ['Tecido leve e respirável', 'Escudo aplicado'],
       price,

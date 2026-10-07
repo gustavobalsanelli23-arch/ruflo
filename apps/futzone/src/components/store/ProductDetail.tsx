@@ -153,7 +153,7 @@ export function ProductDetail({ teamSlug, slug }: { teamSlug: string; slug: stri
 
       <section className="mt-16">
         <h2 className="heading-display mb-5 text-3xl">Tabela de tamanhos</h2>
-        <SizeGuide kids={product.category === 'kits'} />
+        <SizeGuide kids={product.gender === 'infantil'} />
       </section>
 
       {related.length > 0 && (
@@ -164,7 +164,7 @@ export function ProductDetail({ teamSlug, slug }: { teamSlug: string; slug: stri
       )}
 
       <Modal open={guideOpen} onClose={() => setGuideOpen(false)} title="Tabela de tamanhos" description={teamById(product.teamId)?.name} size="lg">
-        <SizeGuide kids={product.category === 'kits'} />
+        <SizeGuide kids={product.gender === 'infantil'} />
       </Modal>
     </>
   );
