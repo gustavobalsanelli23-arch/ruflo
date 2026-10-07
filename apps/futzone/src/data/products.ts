@@ -140,6 +140,16 @@ export const seedProducts: Product[] = [
     { n: '058', name: 'Camisa Jogador Flamengo', slug: 'camisa-jogador-flamengo', teamId: 'flamengo', category: 'clubes', season: '', price: 42990, tags: [] },
     { n: '059', name: 'Camisa França Azul', slug: 'camisa-franca-azul', teamId: 'franca', category: 'selecoes', season: '', price: 39990, tags: [] },
     { n: '060', name: 'Camisa Vasco Branca', slug: 'camisa-vasco-branca', teamId: 'vasco', category: 'clubes', season: '', price: 34990, tags: [] },
+    // ── Lote 61–75 (capturas desalinhadas): nomes provisórios — confirmar ──
+    { n: '061', name: 'Camisa Botafogo Listrada I 26/27', slug: 'camisa-botafogo-listrada-i-26-27', teamId: 'botafogo', category: 'clubes', season: '26/27', price: 34990, tags: ['lancamento'] },
+    { n: '062', name: 'Camisa Bahia Listrada II 26/27', slug: 'camisa-bahia-listrada-ii-26-27', teamId: 'bahia', category: 'clubes', season: '26/27', price: 34990, tags: ['lancamento'] },
+    { n: '063', name: 'Camisa Kashima Antlers', slug: 'camisa-kashima-antlers', teamId: 'kashima-antlers', category: 'clubes', season: '', price: 42990, tags: [] },
+    { n: '064', name: 'Camisa Kawasaki Frontale Azul', slug: 'camisa-kawasaki-frontale-azul', teamId: 'kawasaki-frontale', category: 'clubes', season: '', price: 42990, tags: [] },
+    { n: '069', name: 'Camisa Retrô Milan Dourada', slug: 'camisa-retro-milan-dourada', teamId: 'milan', category: 'retro', season: '', price: 25990, tags: [] },
+    { n: '070', name: 'Camisa Retrô Flamengo Umbro', slug: 'camisa-retro-flamengo-umbro', teamId: 'flamengo', category: 'retro', season: '', price: 25990, tags: [] },
+    { n: '073', name: 'Camisa Santa Cruz Branca', slug: 'camisa-santa-cruz-branca', teamId: 'santa-cruz', category: 'clubes', season: '', price: 34990, tags: [] },
+    { n: '074', name: 'Camisa Grêmio Celeste', slug: 'camisa-gremio-celeste', teamId: 'gremio', category: 'clubes', season: '', price: 34990, tags: [] },
+    { n: '075', name: 'Camisa Atlético Mineiro Branca', slug: 'camisa-atletico-mineiro-branca', teamId: 'atletico-mineiro', category: 'clubes', season: '', price: 34990, tags: [] },
   ].map((r, i) =>
     define({
       id: `fz-${r.n}`,
