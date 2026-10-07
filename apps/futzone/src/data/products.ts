@@ -128,6 +128,18 @@ export const seedProducts: Product[] = [
     { n: '043', name: 'Camisa Sport Dourada', slug: 'camisa-sport-dourada', teamId: 'sport', category: 'clubes', season: '', price: 34990, tags: [] },
     { n: '044', name: 'Camisa Botafogo Branca', slug: 'camisa-botafogo-branca', teamId: 'botafogo', category: 'clubes', season: '', price: 34990, tags: [] },
     { n: '045', name: 'Camisa Nigéria Verde', slug: 'camisa-nigeria-verde', teamId: 'nigeria', category: 'selecoes', season: '', price: 39990, tags: [] },
+    // ── Lote 46–60 (capturas desalinhadas): nomes provisórios — confirmar ──
+    { n: '046', name: 'Camisa Feminina Grêmio Celeste', slug: 'camisa-feminina-gremio-celeste', teamId: 'gremio', category: 'femininas', season: '', price: 32990, tags: [] },
+    { n: '049', name: 'Camisa Holanda Laranja', slug: 'camisa-holanda-laranja', teamId: 'holanda', category: 'selecoes', season: '', price: 39990, tags: [] },
+    { n: '050', name: 'Camisa Athletico Paranaense Rubro-Negra', slug: 'camisa-athletico-paranaense-rubro-negra', teamId: 'athletico-paranaense', category: 'clubes', season: '', price: 34990, tags: [] },
+    { n: '051', name: 'Camisa Racing Listrada', slug: 'camisa-racing-listrada', teamId: 'racing', category: 'clubes', season: '', price: 42990, tags: [] },
+    { n: '052', name: 'Camisa Vitória Rubro-Negra', slug: 'camisa-vitoria-rubro-negra', teamId: 'vitoria', category: 'clubes', season: '', price: 34990, tags: [] },
+    { n: '055', name: 'Camisa Palmeiras Goleiro Azul 26/27', slug: 'camisa-palmeiras-goleiro-azul-26-27', teamId: 'palmeiras', category: 'clubes', season: '26/27', price: 34990, tags: [] },
+    { n: '056', name: 'Camisa PSG Branca Treino', slug: 'camisa-psg-branca-treino', teamId: 'psg', category: 'clubes', season: '', price: 42990, tags: [] },
+    { n: '057', name: 'Camisa Baseball Flamengo', slug: 'camisa-baseball-flamengo', teamId: 'flamengo', category: 'clubes', season: '', price: 34990, tags: [] },
+    { n: '058', name: 'Camisa Jogador Flamengo', slug: 'camisa-jogador-flamengo', teamId: 'flamengo', category: 'clubes', season: '', price: 42990, tags: [] },
+    { n: '059', name: 'Camisa França Azul', slug: 'camisa-franca-azul', teamId: 'franca', category: 'selecoes', season: '', price: 39990, tags: [] },
+    { n: '060', name: 'Camisa Vasco Branca', slug: 'camisa-vasco-branca', teamId: 'vasco', category: 'clubes', season: '', price: 34990, tags: [] },
   ].map((r, i) =>
     define({
       id: `fz-${r.n}`,
