@@ -11,7 +11,7 @@ export const metadata: Metadata = {
   description: 'Camisas de clubes, seleções, retrô, kits e femininas. Loja FutZone (ambiente de demonstração).',
 };
 
-export const viewport: Viewport = { themeColor: '#08090b' };
+export const viewport: Viewport = { themeColor: '#050a17' };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (

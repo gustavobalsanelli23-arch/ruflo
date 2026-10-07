@@ -5,30 +5,30 @@
  * Todas as cores da marca vivem aqui. Para ajustar a identidade (por exemplo,
  * ao receber o arquivo original da logo), altere apenas `--color-brand-*`.
  *
- * Azul da marca: aproximação até a logo original estar disponível no projeto.
- * Substitua --color-brand-500 pelo tom exato extraído da logo e ajuste a escala.
+ * Azul da marca extraído da logo oficial (public/brand). O fundo usa o
+ * azul-marinho da logo para que a marca se integre ao site.
  */
 @theme {
-  /* Azul FutZone (principal) */
-  --color-brand-50: #eef4ff;
-  --color-brand-100: #d9e6ff;
-  --color-brand-200: #b3cdff;
-  --color-brand-300: #82adff;
-  --color-brand-400: #4f8bff;
-  --color-brand-500: #1f6bff;
-  --color-brand-600: #1556e0;
-  --color-brand-700: #1043b0;
-  --color-brand-800: #0d3285;
-  --color-brand-900: #0a2459;
-  --color-brand-950: #061433;
+  /* Azul FutZone (principal) — extraído da logo oficial (#054ECC) */
+  --color-brand-50: #ebf1fd;
+  --color-brand-100: #d3e1fb;
+  --color-brand-200: #a9c3f6;
+  --color-brand-300: #7ba4f1;
+  --color-brand-400: #4682ea;
+  --color-brand-500: #0a52d6;
+  --color-brand-600: #054ecc;
+  --color-brand-700: #063da0;
+  --color-brand-800: #062f7a;
+  --color-brand-900: #052156;
+  --color-brand-950: #021231;
 
-  /* Base preta / grafite */
-  --color-bg: #08090b;
-  --color-surface: #101216;
-  --color-surface-2: #16191e;
-  --color-surface-3: #1e2229;
-  --color-line: #262a32;
-  --color-line-strong: #353a44;
+  /* Base azul-marinho (fundo da logo) / grafite */
+  --color-bg: #050a17;
+  --color-surface: #0b1222;
+  --color-surface-2: #10192d;
+  --color-surface-3: #172339;
+  --color-line: #1e2a42;
+  --color-line-strong: #2a3854;
 
   /* Texto */
   --color-fg: #f3f5f8;

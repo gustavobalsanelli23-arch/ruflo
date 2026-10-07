@@ -29,7 +29,7 @@ export function Footer() {
 
       <div className="container-fz grid gap-10 py-12 sm:grid-cols-2 lg:grid-cols-4">
         <div className="space-y-4">
-          <Logo />
+          <Logo variant="full" imgClassName="w-44" />
           <p className="max-w-xs text-sm text-muted">{site.tagline} Camisas de futebol para quem vive o jogo dentro e fora do estádio.</p>
           <a href={`mailto:${site.contactEmail}`} className="inline-flex items-center gap-2 text-sm text-fg-2 hover:text-brand-300">
             <Mail className="size-4 text-brand-400" /> {site.contactEmail}

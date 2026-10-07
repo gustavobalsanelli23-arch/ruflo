@@ -15,7 +15,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
   useEffect(() => setOpen(false), [pathname]);
 
   return (
-    <div className="min-h-dvh bg-[#0b0c0f] lg:grid lg:grid-cols-[256px_1fr]">
+    <div className="min-h-dvh bg-bg lg:grid lg:grid-cols-[256px_1fr]">
       <aside className="sticky top-0 hidden h-dvh border-r border-line bg-surface lg:block">
         <AdminSidebar />
       </aside>
@@ -33,7 +33,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
       )}
 
       <div className="min-w-0">
-        <header className="sticky top-0 z-30 flex h-16 items-center gap-3 border-b border-line bg-[#0b0c0f]/85 px-4 backdrop-blur-xl sm:px-6 lg:px-8">
+        <header className="sticky top-0 z-30 flex h-16 items-center gap-3 border-b border-line bg-bg/85 px-4 backdrop-blur-xl sm:px-6 lg:px-8">
           <button type="button" onClick={() => setOpen(true)} className="grid size-10 place-items-center rounded-full text-fg-2 hover:bg-surface-3 lg:hidden" aria-label="Abrir menu">
             <Menu className="size-5" />
           </button>
