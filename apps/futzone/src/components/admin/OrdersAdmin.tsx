@@ -70,11 +70,14 @@ export function OrdersAdmin() {
         ) : (
           <>
             <div className="hidden lg:block">
-              <AdminTable head={['Pedido', 'Cliente', 'Data', 'Produtos', 'Valor', 'Status', 'Alterar status']} minWidth={960}>
+              <AdminTable head={['Pedido', 'Cliente', 'Data', 'Produtos', 'Entrega', 'Valor', 'Status', 'Alterar status']} minWidth={1080}>
                 {list.map((o) => (
                   <tr key={o.id} className="align-top hover:bg-surface-2/50">
                     <td><Link href={`/admin/pedidos/${o.id}`} className="font-bold text-brand-300 hover:underline">{o.number}</Link></td>
-                    <td className="text-fg-2">{o.customerName}</td>
+                    <td className="text-fg-2">
+                      {o.customerName}
+                      {o.guest && <span className="block text-xs text-muted">visitante</span>}
+                    </td>
                     <td className="whitespace-nowrap text-muted">{formatDateTime(o.createdAt)}</td>
                     <td className="max-w-72">
                       <ul className="space-y-0.5 text-xs text-fg-2">
@@ -82,6 +85,11 @@ export function OrdersAdmin() {
                           <li key={l.productId + l.size} className="truncate">{l.quantity}× {l.name} <span className="text-muted">({l.size})</span></li>
                         ))}
                       </ul>
+                    </td>
+                    <td className="whitespace-nowrap text-xs">
+                      {o.shipping ? <span className="block font-semibold text-fg-2">{o.shipping.serviceName}</span> : <span className="text-muted">—</span>}
+                      {o.address && <span className="block text-muted">{o.address.city}/{o.address.state}</span>}
+                      {o.tracking && <span className="block font-mono text-brand-300">{o.tracking.code}</span>}
                     </td>
                     <td className="font-bold tabular-nums">{formatPrice(o.total)}</td>
                     <td><OrderStatusBadge status={o.status} /></td>

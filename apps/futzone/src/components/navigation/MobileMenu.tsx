@@ -2,7 +2,8 @@
 
 import { useEffect } from 'react';
 import Link from 'next/link';
-import { ArrowRight, ShoppingBag, UserRound, X } from 'lucide-react';
+import { ArrowRight, Heart, ShoppingBag, UserRound, X } from 'lucide-react';
+import { useCustomerAuth } from '@/context/CustomerAuthContext';
 import { mainNav } from '@/data/site';
 import { collections, collectionHref } from '@/data/collections';
 import { cn } from '@/lib/format';
@@ -17,6 +18,7 @@ interface MobileMenuProps {
 
 /** Menu lateral do celular: busca, navegação, coleções e conta. */
 export function MobileMenu({ open, onClose, pathname }: MobileMenuProps) {
+  const { customer } = useCustomerAuth();
   useEffect(() => {
     if (!open) return;
     const onKey = (e: KeyboardEvent) => e.key === 'Escape' && onClose();
@@ -81,12 +83,13 @@ export function MobileMenu({ open, onClose, pathname }: MobileMenuProps) {
           </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-1 border-t border-white/[0.06] p-3 text-xs">
+        <div className="grid grid-cols-3 gap-1 border-t border-white/[0.06] p-3 text-xs">
           {[
-            { href: '/conta', label: 'Conta', icon: UserRound },
+            customer ? { href: '/conta', label: 'Minha conta', icon: UserRound } : { href: '/login', label: 'Entrar', icon: UserRound },
+            { href: customer ? '/conta/favoritos' : '/login?next=%2Fconta%2Ffavoritos', label: 'Favoritos', icon: Heart },
             { href: '/carrinho', label: 'Carrinho', icon: ShoppingBag },
           ].map(({ href, label, icon: Icon }) => (
-            <Link key={href} href={href} onClick={onClose} className="flex flex-col items-center gap-1.5 rounded-xl py-2.5 text-fg-2 transition-colors hover:bg-white/[0.05] hover:text-fg">
+            <Link key={label} href={href} onClick={onClose} className="flex flex-col items-center gap-1.5 rounded-xl py-2.5 text-fg-2 transition-colors hover:bg-white/[0.05] hover:text-fg">
               <Icon className="size-5" />
               {label}
             </Link>

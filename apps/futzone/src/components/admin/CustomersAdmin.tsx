@@ -1,6 +1,7 @@
 'use client';
 
 import { useMemo, useState } from 'react';
+import Link from 'next/link';
 import type { Customer, Order } from '@/types/commerce';
 import { useStoreData } from '@/context/StoreDataContext';
 import { formatDate, formatPrice } from '@/lib/format';
@@ -105,8 +106,8 @@ export function CustomersAdmin() {
                       <div className="flex items-center gap-3">
                         <AdminAvatar initials={initialsOf(c.name)} className="size-8 bg-white/[0.08] text-fg-2 ring-0" />
                         <span>
-                          <span className="block font-semibold">{c.name}</span>
-                          <span className="text-xs text-muted">{c.city}/{c.state}</span>
+                          <Link href={`/admin/clientes/${c.id}`} className="block font-semibold hover:text-brand-300">{c.name}</Link>
+                          <span className="text-xs text-muted">{c.city}/{c.state}{c.origin === 'cadastro' ? ' · cadastro na loja' : ''}</span>
                         </span>
                       </div>
                     </td>
@@ -121,11 +122,11 @@ export function CustomersAdmin() {
             </div>
             <ul className="divide-y divide-white/[0.05] md:hidden">
               {list.map(({ customer: c, orders: n, spent, status }) => (
-                <li key={c.id} className="flex items-start gap-3 p-4">
+                <li key={c.id} className="relative flex items-start gap-3 p-4">
                   <AdminAvatar initials={initialsOf(c.name)} className="size-9 bg-white/[0.08] text-fg-2 ring-0" />
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center justify-between gap-2">
-                      <p className="truncate text-sm font-semibold">{c.name}</p>
+                      <Link href={`/admin/clientes/${c.id}`} className="truncate text-sm font-semibold after:absolute after:inset-0">{c.name}</Link>
                       <AdminBadge tone={STATUS_META[status].tone}>{STATUS_META[status].label}</AdminBadge>
                     </div>
                     <p className="truncate text-xs text-muted">{c.email}</p>

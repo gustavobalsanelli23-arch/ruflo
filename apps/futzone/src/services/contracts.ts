@@ -1,26 +1,25 @@
-import type { Cents, Product } from '@/types/catalog';
-import type { Address, CartItem, Order } from '@/types/commerce';
+import type { Product } from '@/types/catalog';
+import type { Order } from '@/types/commerce';
 
 /**
- * Contratos das integrações FUTURAS. Somente tipos — nada aqui está
- * implementado nesta etapa (sem checkout, pagamento, fornecedor ou banco real).
- * Eles documentam onde cada integração se encaixará sem mudar os componentes.
+ * Contratos das integrações FUTURAS que ainda não têm implementação.
+ * (Frete, CEP, cupons, estoque, autenticação e notificações já têm interface
+ * própria em services/* com uma implementação local de demonstração.)
  */
 
-/** API do fornecedor: sincroniza catálogo e estoque com `ProductRepository`. */
+/** API do fornecedor: sincroniza catálogo e estoque com `ProductRepository` / `InventoryProvider`. */
 export interface SupplierCatalogClient {
   fetchProducts(updatedSince?: string): Promise<Product[]>;
   fetchStock(productIds: string[]): Promise<Record<string, Product['stock']>>;
 }
 
-/** Checkout: transforma o carrinho em pedido. Será criado em etapa própria. */
-export interface CheckoutService {
-  quoteShipping(items: CartItem[], zip: string): Promise<Array<{ id: string; label: string; price: Cents; days: number }>>;
-  createOrder(input: { items: CartItem[]; address: Address; shippingId: string }): Promise<Order>;
-}
-
-/** Gateway de pagamento (ex.: Mercado Pago). Credenciais ficarão apenas no servidor. */
+/**
+ * Gateway de pagamento — nenhum provedor escolhido ainda.
+ * Credenciais ficarão apenas no servidor; o status volta por webhook
+ * assinado e atualiza `order.payment`.
+ */
 export interface PaymentGateway {
-  createPayment(order: Order): Promise<{ paymentId: string; redirectUrl?: string }>;
+  readonly id: string;
+  createPayment(order: Order, method: 'pix' | 'cartao' | 'boleto'): Promise<{ paymentId: string; redirectUrl?: string; pixCode?: string }>;
   getPaymentStatus(paymentId: string): Promise<'pending' | 'approved' | 'rejected' | 'refunded'>;
 }

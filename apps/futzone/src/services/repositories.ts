@@ -2,7 +2,7 @@ import type { Product } from '@/types/catalog';
 import type { Customer, Order } from '@/types/commerce';
 import { seedProducts } from '@/data/products';
 import { seedOrders } from '@/data/orders';
-import { seedCustomers, DEMO_CUSTOMER_ID } from '@/data/customers';
+import { seedCustomers } from '@/data/customers';
 import { DEFAULT_LOW_STOCK_THRESHOLD } from '@/lib/product';
 import { readJSON, removeKey, STORAGE_KEYS, writeJSON } from './storage';
 
@@ -28,12 +28,14 @@ export interface OrderRepository {
   reset(): Promise<Order[]>;
 }
 
+/**
+ * Perfis de clientes (dados pessoais e endereços). Credenciais NÃO ficam
+ * aqui: são responsabilidade do provedor de autenticação (`services/auth`).
+ */
 export interface CustomerRepository {
   list(): Promise<Customer[]>;
-  /** Cliente da sessão atual. Sem autenticação real nesta etapa. */
-  current(): Promise<Customer>;
-  saveCurrent(customer: Customer): Promise<void>;
-  reset(): Promise<Customer>;
+  saveAll(customers: Customer[]): Promise<void>;
+  reset(): Promise<Customer[]>;
 }
 
 export interface StoreSettings {
@@ -41,6 +43,8 @@ export interface StoreSettings {
   contactEmail: string;
   lowStockThreshold: number;
   showDemoNotice: boolean;
+  /** Permite finalizar compra sem criar conta. */
+  allowGuestCheckout: boolean;
 }
 
 export const DEFAULT_SETTINGS: StoreSettings = {
@@ -48,6 +52,7 @@ export const DEFAULT_SETTINGS: StoreSettings = {
   contactEmail: 'contato@futzone.com.br',
   lowStockThreshold: DEFAULT_LOW_STOCK_THRESHOLD,
   showDemoNotice: true,
+  allowGuestCheckout: true,
 };
 
 export interface SettingsRepository {
@@ -84,22 +89,15 @@ class LocalOrderRepository implements OrderRepository {
 }
 
 class LocalCustomerRepository implements CustomerRepository {
-  private seed() {
-    return clone(seedCustomers.find((c) => c.id === DEMO_CUSTOMER_ID) ?? seedCustomers[0]);
-  }
   async list() {
-    const current = await this.current();
-    return seedCustomers.map((c) => (c.id === current.id ? current : c));
+    return readJSON<Customer[]>(STORAGE_KEYS.customers, clone(seedCustomers));
   }
-  async current() {
-    return readJSON<Customer>(STORAGE_KEYS.customer, this.seed());
-  }
-  async saveCurrent(customer: Customer) {
-    writeJSON(STORAGE_KEYS.customer, customer);
+  async saveAll(customers: Customer[]) {
+    writeJSON(STORAGE_KEYS.customers, customers);
   }
   async reset() {
-    removeKey(STORAGE_KEYS.customer);
-    return this.seed();
+    removeKey(STORAGE_KEYS.customers);
+    return clone(seedCustomers);
   }
 }
 

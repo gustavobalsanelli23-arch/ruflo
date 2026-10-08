@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Boxes, ExternalLink, LayoutDashboard, Package, Settings, Shapes, ShoppingCart, Users } from 'lucide-react';
+import { Boxes, ExternalLink, LayoutDashboard, Package, Settings, Shapes, ShoppingCart, TicketPercent, Truck, Users } from 'lucide-react';
 import { cn } from '@/lib/format';
 import { Logo } from '@/components/brand/Logo';
 
@@ -12,6 +12,8 @@ export const ADMIN_NAV = [
   { label: 'Pedidos', href: '/admin/pedidos', icon: ShoppingCart },
   { label: 'Estoque', href: '/admin/estoque', icon: Boxes },
   { label: 'Clientes', href: '/admin/clientes', icon: Users },
+  { label: 'Fretes', href: '/admin/fretes', icon: Truck },
+  { label: 'Cupons', href: '/admin/cupons', icon: TicketPercent },
   { label: 'Categorias', href: '/admin/categorias', icon: Shapes },
   { label: 'Configurações', href: '/admin/configuracoes', icon: Settings },
 ];

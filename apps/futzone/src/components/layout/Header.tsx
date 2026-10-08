@@ -3,13 +3,14 @@
 import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Menu, Search, ShoppingBag, UserRound, X } from 'lucide-react';
+import { Menu, Search, ShoppingBag, X } from 'lucide-react';
 import { mainNav, type NavLink } from '@/data/site';
 import { useCart } from '@/context/CartContext';
 import { cn } from '@/lib/format';
 import { Logo } from '@/components/brand/Logo';
 import { SearchBar } from '@/components/navigation/SearchBar';
 import { MobileMenu } from '@/components/navigation/MobileMenu';
+import { AccountButton } from '@/components/navigation/AccountButton';
 
 export function isNavActive(link: NavLink, pathname: string): boolean {
   if (link.href === '/') return pathname === '/';
@@ -119,9 +120,7 @@ export function Header() {
             <button type="button" className={cn(iconBtn, 'md:hidden')} onClick={() => setSearchOpen((v) => !v)} aria-label="Buscar" aria-expanded={searchOpen}>
               {searchOpen ? <X className="size-5" /> : <Search className="size-5" />}
             </button>
-            <Link href="/conta" className={cn(iconBtn, 'hidden sm:grid', pathname.startsWith('/conta') && 'text-fg')} aria-label="Minha conta">
-              <UserRound className="size-5" />
-            </Link>
+            <AccountButton className={cn(iconBtn, 'hidden sm:grid', pathname.startsWith('/conta') && 'text-fg')} />
             <button type="button" className={iconBtn} onClick={openCart} aria-label={`Abrir carrinho (${count} ${count === 1 ? 'item' : 'itens'})`}>
               <ShoppingBag key={bump} className={cn('size-5', bump > 0 && 'animate-bump')} />
               {count > 0 && (

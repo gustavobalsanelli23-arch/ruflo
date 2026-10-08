@@ -1,8 +1,6 @@
-import type { Metadata } from 'next';
-import { PersonalDataForm } from '@/components/account/PersonalDataForm';
+import { redirect } from 'next/navigation';
 
-export const metadata: Metadata = { title: 'Dados pessoais' };
-
+/** Endereço antigo da página de dados pessoais. */
 export default function Page() {
-  return <PersonalDataForm />;
+  redirect('/conta/perfil');
 }

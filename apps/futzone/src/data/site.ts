@@ -11,7 +11,6 @@ export const site = {
     { name: 'TikTok', href: '' },
     { name: 'WhatsApp', href: '' },
   ] as Array<{ name: string; href: string }>,
-  freeShippingFrom: 29900,
 };
 
 /** Referência a um produto do catálogo pelo time e slug (ex.: URL /camisas/brasil/...). */
@@ -61,7 +60,10 @@ export const mainNav: NavLink[] = [
 
 export const accountNav: NavLink[] = [
   { label: 'Minha conta', href: '/conta' },
-  { label: 'Meus pedidos', href: '/conta/pedidos' },
-  { label: 'Dados pessoais', href: '/conta/dados' },
-  { label: 'Endereços', href: '/conta/enderecos' },
+  { label: 'Meus pedidos', href: '/conta/pedidos', match: ['/conta/pedidos'] },
+  { label: 'Meus endereços', href: '/conta/enderecos' },
+  { label: 'Dados pessoais', href: '/conta/perfil' },
+  { label: 'Segurança', href: '/conta/seguranca' },
+  { label: 'Favoritos', href: '/conta/favoritos' },
+  { label: 'Notificações', href: '/conta/notificacoes' },
 ];
