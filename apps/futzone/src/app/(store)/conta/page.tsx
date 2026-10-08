@@ -1,8 +1,8 @@
 import type { Metadata } from 'next';
-import { AccountOverview } from '@/components/account/AccountViews';
+import { AccountDashboard } from '@/components/account/AccountDashboard';
 
 export const metadata: Metadata = { title: 'Minha conta' };
 
 export default function Page() {
-  return <AccountOverview />;
+  return <AccountDashboard />;
 }

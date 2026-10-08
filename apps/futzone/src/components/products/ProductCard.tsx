@@ -11,6 +11,7 @@ import { useCart } from '@/context/CartContext';
 import { useToast } from '@/context/ToastContext';
 import { Reveal, stagger } from '@/components/ui/Reveal';
 import { ProductImage } from './ProductImage';
+import { FavoriteButton } from './FavoriteButton';
 import { Price, StockText } from './ProductBits';
 
 const BADGE_STYLE: Record<BadgeKind, string> = {
@@ -69,7 +70,7 @@ function ProductCardBase({ product, priority }: ProductCardProps) {
 
   return (
     <article className="group relative flex h-full flex-col">
-      <div className="relative overflow-hidden rounded-[var(--radius-card)] bg-surface-2 transition-[transform,box-shadow] duration-300 ease-[var(--ease-out-fz)] group-hover:-translate-y-1 group-hover:shadow-[0_24px_40px_-24px_rgba(0,0,0,0.9)]">
+      <div className="relative z-10 overflow-hidden rounded-[var(--radius-card)] bg-surface-2 transition-[transform,box-shadow] duration-300 ease-[var(--ease-out-fz)] group-hover:-translate-y-1 group-hover:shadow-[0_24px_40px_-24px_rgba(0,0,0,0.9)]">
         <Link href={href} aria-label={product.name} tabIndex={-1} className="block">
           <ProductImage
             product={product}
@@ -79,6 +80,12 @@ function ProductCardBase({ product, priority }: ProductCardProps) {
             imageClassName={cn('transition-transform duration-500 ease-[var(--ease-out-fz)] group-hover:scale-[1.04]', soldOut && 'opacity-60 grayscale')}
           />
         </Link>
+
+        <FavoriteButton
+          productId={product.id}
+          productName={product.name}
+          className="absolute right-2.5 top-2.5 size-9 rounded-full bg-black/45 text-white backdrop-blur-sm hover:bg-black/65 sm:right-3 sm:top-3"
+        />
 
         {badges.length > 0 && (
           <div className="pointer-events-none absolute left-2.5 top-2.5 flex flex-col items-start gap-1 sm:left-3 sm:top-3">
@@ -166,7 +173,7 @@ function ProductCardBase({ product, priority }: ProductCardProps) {
         </div>
       </div>
       {added && (
-        <span className="animate-pop pointer-events-none absolute right-3 top-3 z-10 inline-flex items-center gap-1 rounded-full bg-success px-2.5 py-1 text-[0.62rem] font-bold uppercase tracking-wider text-white">
+        <span className="animate-pop pointer-events-none absolute left-1/2 top-3 z-20 inline-flex -translate-x-1/2 items-center gap-1 rounded-full bg-success px-2.5 py-1 text-[0.62rem] font-bold uppercase tracking-wider text-white">
           <Check className="size-3" /> {added}
         </span>
       )}

@@ -173,6 +173,7 @@ function PreferencesSection() {
             {(id, d) => <Input id={id} aria-describedby={d} type="number" min={1} max={100} value={form.lowStockThreshold} onChange={(e) => setForm({ ...form, lowStockThreshold: Number(e.target.value) })} />}
           </Field>
           <Switch checked={form.showDemoNotice} onChange={(showDemoNotice) => setForm({ ...form, showDemoNotice })} label="Exibir selo “Dados simulados” no painel" />
+          <Switch checked={form.allowGuestCheckout} onChange={(allowGuestCheckout) => setForm({ ...form, allowGuestCheckout })} label="Permitir compra sem cadastro (visitante)" />
           <div className="flex justify-end">
             <AdminButton type="submit">Salvar preferências</AdminButton>
           </div>
@@ -184,7 +185,11 @@ function PreferencesSection() {
           <ul className="divide-y divide-white/[0.05] text-sm">
             {[
               ['Autenticação com banco de dados', 'lib/auth → trocar a fonte das contas'],
-              ['Pagamentos (Mercado Pago)', 'services/contracts.ts → PaymentGateway'],
+              ['Gateway de pagamento', 'services/contracts.ts → PaymentGateway (provedor a definir)'],
+              ['Contas de clientes no servidor', 'services/auth → CustomerAuthProvider'],
+              ['Frete real (Correios, Melhor Envio ou Frenet)', 'services/shipping/providers → ShippingProvider'],
+              ['Consulta de CEP', 'services/address/cep.service.ts → CepProvider'],
+              ['E-mails transacionais', 'services/notifications → NotificationChannel'],
               ['API do fornecedor (catálogo e estoque)', 'services/contracts.ts → SupplierCatalogClient'],
               ['Banco de dados', 'services/repositories.ts → trocar implementações locais'],
             ].map(([name, where]) => (

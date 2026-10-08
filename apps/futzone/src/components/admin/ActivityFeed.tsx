@@ -1,6 +1,6 @@
 'use client';
 
-import { Boxes, LogIn, Package, Settings, ShoppingCart } from 'lucide-react';
+import { Boxes, LogIn, Package, Settings, ShoppingCart, TicketPercent, Truck, Users } from 'lucide-react';
 import type { AdminActivityKind } from '@/lib/admin/activity';
 import { formatDateTime } from '@/lib/format';
 import { useAdmin } from './AdminGuard';
@@ -10,6 +10,9 @@ const ICON: Record<AdminActivityKind, React.ComponentType<{ className?: string }
   produto: Package,
   estoque: Boxes,
   pedido: ShoppingCart,
+  cliente: Users,
+  frete: Truck,
+  cupom: TicketPercent,
   configuracao: Settings,
 };
 

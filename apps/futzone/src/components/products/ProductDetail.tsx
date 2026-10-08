@@ -12,14 +12,15 @@ import { cn, formatPrice } from '@/lib/format';
 import { availableSizes, stockFor, teamById, teamBySlug } from '@/lib/product';
 import { MAX_PER_ITEM } from '@/lib/cart';
 import { Button, LinkButton } from '@/components/ui/Button';
-import { EmptyState, SectionHeading } from '@/components/ui/Feedback';
+import { EmptyState } from '@/components/ui/Feedback';
 import { Modal } from '@/components/ui/Modal';
 import { QuantityStepper } from '@/components/ui/QuantityStepper';
 import { ProductGallery } from './ProductGallery';
-import { ProductRail } from './ProductCard';
 import { ProductPageSkeleton } from '@/components/ui/Skeleton';
 import { Price, SizeSelector, StockBadge, StockText } from './ProductBits';
 import { SizeGuide } from './SizeGuide';
+import { FavoriteButton } from './FavoriteButton';
+import { RecentlyViewed, RecommendedProducts, useRecordView } from './ProductSections';
 
 export function ProductDetail({ teamSlug, slug }: { teamSlug: string; slug: string }) {
   const { hydrated } = useStoreData();
@@ -55,6 +56,7 @@ export function ProductDetail({ teamSlug, slug }: { teamSlug: string; slug: stri
 
   const team = teamBySlug(teamSlug);
   const product = products.find((p) => p.slug === slug && p.teamId === team?.id);
+  useRecordView(product?.id);
 
   if (!product) {
     if (!hydrated) return <ProductPageSkeleton />;
@@ -72,10 +74,6 @@ export function ProductDetail({ teamSlug, slug }: { teamSlug: string; slug: stri
   const maxQty = size ? Math.min(stockFor(product, size), MAX_PER_ITEM) : MAX_PER_ITEM;
   const soldOut = availableSizes(product).length === 0;
 
-  const related = [
-    ...products.filter((p) => p.id !== product.id && p.teamId === product.teamId),
-    ...products.filter((p) => p.id !== product.id && p.teamId !== product.teamId && p.category === product.category),
-  ].slice(0, 4);
 
   const handleAdd = () => {
     if (addState !== 'idle') return;
@@ -131,7 +129,10 @@ export function ProductDetail({ teamSlug, slug }: { teamSlug: string; slug: stri
               <span className="text-subtle">·</span>
               <span className="text-xs uppercase tracking-wider text-muted">{category?.shortName}{product.season && ` · Temporada ${product.season}`}</span>
             </div>
-            <h1 className="heading-display text-[2.6rem] text-fg sm:text-5xl lg:text-6xl">{product.name}</h1>
+            <div className="flex items-start justify-between gap-4">
+              <h1 className="heading-display text-[2.6rem] text-fg sm:text-5xl lg:text-6xl">{product.name}</h1>
+              <FavoriteButton productId={product.id} productName={product.name} className="mt-1 size-11 shrink-0 rounded-full bg-white/[0.06] text-fg-2 hover:bg-white/[0.12] hover:text-fg" />
+            </div>
           </div>
 
           <div className="flex flex-wrap items-center justify-between gap-3">
@@ -205,12 +206,8 @@ export function ProductDetail({ teamSlug, slug }: { teamSlug: string; slug: stri
         <SizeGuide kids={product.gender === 'infantil'} />
       </section>
 
-      {related.length > 0 && (
-        <section className="mt-20">
-          <SectionHeading eyebrow="Você também pode gostar" title="Produtos relacionados" />
-          <ProductRail products={related} />
-        </section>
-      )}
+      <RecommendedProducts references={[product]} />
+      <RecentlyViewed excludeId={product.id} />
 
       {/* Barra fixa de compra (celular) */}
       {!soldOut && (

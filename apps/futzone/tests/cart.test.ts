@@ -1,6 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import { seedProducts } from '@/data/products';
 import { cartReducer, cartTotals, MAX_PER_ITEM, resolveCart } from '@/lib/cart';
+import { availableSizes } from '@/lib/product';
+
+const inStock = seedProducts.filter((p) => availableSizes(p).length > 0);
 
 describe('carrinho', () => {
   it('adiciona, agrupa o mesmo tamanho e respeita o estoque', () => {
@@ -26,23 +29,39 @@ describe('carrinho', () => {
     expect(cartReducer(s, { type: 'remove', productId: 'p-001', size: 'M' })).toEqual([]);
   });
 
-  it('calcula subtotais e total e ignora produtos indisponíveis', () => {
-    const [a, b, c] = seedProducts;
+  it('soma só itens disponíveis e marca os indisponíveis em vez de sumir com eles', () => {
+    const [a, b, c] = inStock;
+    const sizeA = availableSizes(a)[0];
+    const sizeB = availableSizes(b)[0];
     const draft = { ...c, id: 'rascunho', status: 'draft' as const };
-    const products = [a, b, draft];
     const items = [
-      { productId: a.id, size: a.sizes[0], quantity: 2 },
-      { productId: b.id, size: b.sizes[0], quantity: 1 },
-      { productId: draft.id, size: draft.sizes[0], quantity: 1 }, // rascunho: não entra
-      { productId: 'inexistente', size: 'M' as const, quantity: 1 },
+      { productId: a.id, size: sizeA, quantity: 2 },
+      { productId: b.id, size: sizeB, quantity: 1 },
+      { productId: draft.id, size: draft.sizes[0], quantity: 1 }, // saiu de venda
+      { productId: 'inexistente', size: 'M' as const, quantity: 1 }, // sem cópia salva: descartado
+      { productId: 'removido', size: 'M' as const, quantity: 1, snapshot: { name: 'Camisa removida', price: 1000 } },
     ];
-    const lines = resolveCart(items, products);
-    expect(lines).toHaveLength(2);
+    const lines = resolveCart(items, [a, b, draft]);
+    expect(lines.map((l) => l.status)).toEqual(['ok', 'ok', 'indisponivel', 'indisponivel']);
+    expect(lines[3].name).toBe('Camisa removida');
     const totals = cartTotals(lines);
-    expect(totals.count).toBe(3);
+    expect(totals.validCount).toBe(3);
+    expect(totals.issues).toBe(2);
     expect(totals.subtotal).toBe(a.price * 2 + b.price);
+  });
 
+  it('marca quantidade acima do estoque como insuficiente', () => {
+    const a = inStock[0];
+    const size = availableSizes(a)[0];
+    const lowStock = { ...a, stock: { ...a.stock, [size]: 1 } };
+    const [line] = resolveCart([{ productId: a.id, size, quantity: 3 }], [lowStock]);
+    expect(line.status).toBe('insuficiente');
+    expect(line.available).toBe(1);
+  });
+
+  it('calcula a economia de produtos em promoção', () => {
+    const a = inStock[0];
     const onSale = { ...a, compareAtPrice: a.price + 5000 };
-    expect(cartTotals(resolveCart([{ productId: a.id, size: a.sizes[0], quantity: 1 }], [onSale])).savings).toBe(5000);
+    expect(cartTotals(resolveCart([{ productId: a.id, size: availableSizes(a)[0], quantity: 1 }], [onSale])).savings).toBe(5000);
   });
 });

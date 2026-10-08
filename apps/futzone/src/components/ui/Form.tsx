@@ -9,22 +9,29 @@ interface FieldProps {
   label: string;
   hint?: string;
   error?: string;
+  /** Mostra o asterisco de campo obrigatório. */
+  required?: boolean;
   className?: string;
   children: (id: string, describedBy?: string) => React.ReactNode;
 }
 
 /** Envolve qualquer controle com rótulo, dica e mensagem de erro acessíveis. */
-export function Field({ label, hint, error, className, children }: FieldProps) {
+export function Field({ label, hint, error, required, className, children }: FieldProps) {
   const id = useId();
   const describedBy = error ? `${id}-error` : hint ? `${id}-hint` : undefined;
   return (
     <div className={cn('flex flex-col gap-1.5', className)}>
       <label htmlFor={id} className="text-xs font-semibold uppercase tracking-wider text-fg-2">
         {label}
+        {required && (
+          <span className="ml-0.5 text-brand-400" aria-hidden>
+            *
+          </span>
+        )}
       </label>
       {children(id, describedBy)}
       {error ? (
-        <p id={`${id}-error`} className="text-xs text-danger">
+        <p id={`${id}-error`} role="alert" className="animate-fade text-xs text-danger">
           {error}
         </p>
       ) : hint ? (
@@ -89,7 +96,7 @@ export function Chip({ selected, className, ...props }: ChipProps) {
 interface SwitchProps {
   checked: boolean;
   onChange(checked: boolean): void;
-  label: string;
+  label: React.ReactNode;
 }
 
 export function Switch({ checked, onChange, label }: SwitchProps) {

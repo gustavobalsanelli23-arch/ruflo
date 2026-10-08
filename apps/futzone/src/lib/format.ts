@@ -10,7 +10,20 @@ const brlCompact = new Intl.NumberFormat('pt-BR', { style: 'currency', currency:
 export const formatCompactPrice = (cents: Cents): string => brlCompact.format(cents / 100);
 
 export const formatDate = (iso: string): string =>
-  new Date(iso).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' });
+  new Date(iso.length === 10 ? `${iso}T12:00:00` : iso).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' });
+
+/** 08/10/2026 */
+export const formatShortDate = (iso: string): string =>
+  new Date(iso.length === 10 ? `${iso}T12:00:00` : iso).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+
+/**
+ * Data/hora local sem fuso ("2026-10-08T14:30:00"). Usada em pedidos e eventos
+ * para que servidor e navegador exibam o mesmo horário.
+ */
+export function toLocalISO(date: Date = new Date()): string {
+  const p = (n: number) => String(n).padStart(2, '0');
+  return `${date.getFullYear()}-${p(date.getMonth() + 1)}-${p(date.getDate())}T${p(date.getHours())}:${p(date.getMinutes())}:${p(date.getSeconds())}`;
+}
 
 export const formatDateTime = (iso: string): string =>
   new Date(iso).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });

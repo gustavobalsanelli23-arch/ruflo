@@ -1,5 +1,9 @@
-import type { Order, OrderLine, OrderStatus } from '@/types/commerce';
+import type { Order, OrderEvent, OrderEventType, OrderLine, OrderStatus, PaymentStatus } from '@/types/commerce';
 import type { Size } from '@/types/catalog';
+import { DEFAULT_SHIPPING_SETTINGS } from '@/services/shipping/shipping.settings';
+import { estimateWindow } from '@/services/shipping/delivery';
+import { buildPackage } from '@/services/shipping/package';
+import { toLocalISO } from '@/lib/format';
 import { seedProducts } from './products';
 import { seedCustomers } from './customers';
 
@@ -11,22 +15,73 @@ type LineSeed = [index: number, quantity: number];
 function line([index, quantity]: LineSeed): OrderLine {
   const product = seedProducts[index % seedProducts.length];
   const size: Size = product.sizes.find((s) => (product.stock[s] ?? 0) > 0) ?? product.sizes[0];
-  return { productId: product.id, name: product.name, size, quantity, unitPrice: product.price };
+  return { productId: product.id, name: product.name, size, quantity, unitPrice: product.price, image: product.images[0]?.src };
+}
+
+const HOUR = 3_600_000;
+
+/** Histórico coerente com o status (horários locais, iguais no servidor e no navegador). */
+function history(status: OrderStatus, createdAt: string): OrderEvent[] {
+  const t0 = new Date(createdAt).getTime();
+  const at = (hours: number) => toLocalISO(new Date(t0 + hours * HOUR));
+  const ev = (type: OrderEventType, hours: number, by: OrderEvent['by'] = 'sistema'): OrderEvent => ({ type, at: hours === 0 ? createdAt : at(hours), by });
+  const list: OrderEvent[] = [ev('criado', 0, 'cliente')];
+  if (status === 'cancelado') return [...list, ev('cancelado', 5, 'admin')];
+  if (status === 'pendente') return list;
+  list.push(ev('pagamento_aprovado', 1), ev('preparacao', 3, 'admin'));
+  if (status === 'preparacao') return list;
+  list.push(ev('enviado', 20, 'admin'), ev('rastreio', 20, 'admin'), ev('em_transito', 30));
+  if (status === 'enviado') return list;
+  return [...list, ev('entregue', 72)];
 }
 
 function order(n: number, customerId: string, status: OrderStatus, createdAt: string, lines: LineSeed[]): Order {
   const customer = seedCustomers.find((c) => c.id === customerId);
   if (!customer) throw new Error(`Cliente desconhecido no pedido: ${customerId}`);
   const orderLines = lines.map(line);
+  const subtotal = orderLines.reduce((sum, l) => sum + l.unitPrice * l.quantity, 0);
+  const rate = DEFAULT_SHIPPING_SETTINGS.mockRates[n % 3 === 0 ? 1 : 0];
+  const estimate = estimateWindow(rate.minDays, rate.maxDays, 0, new Date(createdAt));
+  const address = customer.addresses.find((a) => a.isDefault) ?? customer.addresses[0];
+  const pkg = buildPackage(
+    orderLines.map((l) => ({ productId: l.productId, category: seedProducts.find((p) => p.id === l.productId)?.category ?? 'clubes', quantity: l.quantity, unitPrice: l.unitPrice })),
+    DEFAULT_SHIPPING_SETTINGS,
+  );
+  const payment: PaymentStatus = status === 'pendente' ? 'pendente' : status === 'cancelado' ? 'estornado' : 'aprovado';
+  const events = history(status, createdAt);
+  const sent = events.find((e) => e.type === 'enviado');
   return {
     id: `o-${n}`,
     number: `FZ-${String(n).padStart(5, '0')}`,
     customerId,
     customerName: customer.name,
+    customerEmail: customer.email,
     lines: orderLines,
-    total: orderLines.reduce((sum, l) => sum + l.unitPrice * l.quantity, 0),
+    subtotal,
+    discount: 0,
+    shippingCost: rate.basePrice,
+    total: subtotal + rate.basePrice,
     status,
     createdAt,
+    address,
+    shipping: {
+      provider: 'mock',
+      isMock: true,
+      serviceId: rate.id,
+      serviceName: rate.name,
+      carrier: rate.carrier,
+      price: rate.basePrice,
+      originalPrice: rate.basePrice,
+      minDays: rate.minDays,
+      maxDays: rate.maxDays,
+      estimatedFrom: estimate.from,
+      estimatedTo: estimate.to,
+      destinationZip: address.zip.replace(/\D/g, ''),
+      package: pkg,
+    },
+    payment: { status: payment },
+    tracking: sent ? { code: `FZ${n}DEMO`, carrier: rate.carrier, addedAt: sent.at } : undefined,
+    history: events,
   };
 }
 

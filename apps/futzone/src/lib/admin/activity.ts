@@ -8,7 +8,7 @@ import type { PublicAdmin } from '@/lib/auth/types';
  * autor vindo da SESSÃO no backend, nunca de um valor enviado pelo cliente.
  */
 
-export type AdminActivityKind = 'auth' | 'produto' | 'estoque' | 'pedido' | 'configuracao';
+export type AdminActivityKind = 'auth' | 'produto' | 'estoque' | 'pedido' | 'cliente' | 'frete' | 'cupom' | 'configuracao';
 
 export interface AdminActivity {
   id: string;

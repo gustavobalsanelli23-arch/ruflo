@@ -11,6 +11,7 @@ import { ProductSection } from './ProductSection';
 import { CampaignBanner } from './CampaignBanner';
 import { WhyFutzone } from './WhyFutzone';
 import { FinalCta } from './FinalCta';
+import { RecentlyViewed } from '@/components/products/ProductSections';
 
 const inStock = (p: Product) => availableSizes(p).length > 0;
 const byTag = (products: Product[], tag: ProductTag) => products.filter((p) => p.tags.includes(tag));
@@ -40,6 +41,9 @@ export function HomeSections() {
       <ProductSection eyebrow="Coleção retrô" title="Clássicos que não saem de campo" href="/retro" products={s.retro} />
       <ProductSection eyebrow="Seleções" title="Vista as cores do seu país" href="/selecoes" products={s.national} />
       <ProductSection eyebrow="Kits" title="Kits completos" description="Camisa e calção para jogar com o manto." href="/kits" products={s.kits} />
+      <div className="container-fz">
+        <RecentlyViewed className="mt-20 sm:mt-28" />
+      </div>
       <CampaignBanner
         eyebrow="Nova temporada 26/27"
         title={
