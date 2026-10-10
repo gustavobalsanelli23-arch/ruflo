@@ -12,7 +12,7 @@ export function WhyFutzone({ productCount, teamCount }: { productCount: number; 
   ];
   return (
     <section className="container-fz pt-20 sm:pt-28">
-      <SectionHeading eyebrow="Por que a FutZone" title="Feita para quem vive o jogo" />
+      <SectionHeading title="Feita para quem vive o jogo" />
       <div className="grid gap-px overflow-hidden rounded-[var(--radius-card)] bg-white/[0.06] sm:grid-cols-2 lg:grid-cols-4">
         {items.map(({ icon: Icon, title, text }, i) => (
           <Reveal key={title} delay={stagger(i, 70)} className="bg-bg p-6 sm:p-8">

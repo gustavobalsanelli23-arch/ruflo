@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { ArrowRight, Heart, ShoppingBag, UserRound, X } from 'lucide-react';
 import { useCustomerAuth } from '@/context/CustomerAuthContext';
@@ -16,9 +16,30 @@ interface MobileMenuProps {
   pathname: string;
 }
 
+/** Fecha mais rápido do que abre: a resposta ao toque é imediata. */
+const EXIT_MS = 180;
+
 /** Menu lateral do celular: busca, navegação, coleções e conta. */
 export function MobileMenu({ open, onClose, pathname }: MobileMenuProps) {
   const { customer } = useCustomerAuth();
+  const [mounted, setMounted] = useState(open);
+  const [closing, setClosing] = useState(false);
+
+  useEffect(() => {
+    if (open) {
+      setMounted(true);
+      setClosing(false);
+      return;
+    }
+    if (!mounted) return;
+    setClosing(true);
+    const t = window.setTimeout(() => {
+      setMounted(false);
+      setClosing(false);
+    }, EXIT_MS);
+    return () => window.clearTimeout(t);
+  }, [open, mounted]);
+
   useEffect(() => {
     if (!open) return;
     const onKey = (e: KeyboardEvent) => e.key === 'Escape' && onClose();
@@ -30,42 +51,52 @@ export function MobileMenu({ open, onClose, pathname }: MobileMenuProps) {
     };
   }, [open, onClose]);
 
-  if (!open) return null;
+  if (!mounted) return null;
 
   return (
     <div className="fixed inset-0 z-50 lg:hidden">
-      <div className="animate-fade absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} aria-hidden />
-      <div role="dialog" aria-modal="true" aria-label="Menu" className="animate-drawer-left absolute inset-y-0 left-0 flex w-[88%] max-w-sm flex-col bg-surface shadow-2xl">
-        <div className="flex h-16 items-center justify-between px-5">
+      <div
+        className={cn('absolute inset-0 bg-black/70 transition-opacity duration-200', closing ? 'opacity-0' : 'animate-fade')}
+        onClick={onClose}
+        aria-hidden
+      />
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-label="Menu"
+        className={cn(
+          'absolute inset-y-0 left-0 flex w-[88%] max-w-sm flex-col border-r border-line-strong bg-steel',
+          closing ? '-translate-x-full transition-transform duration-[180ms] ease-[var(--ease-out-fz)]' : 'animate-drawer-left',
+        )}
+      >
+        <div className="flex h-16 items-center justify-between border-b border-line px-5">
           <Logo href="/" />
-          <button type="button" onClick={onClose} className="grid size-10 place-items-center rounded-full text-fg-2 transition-colors hover:bg-white/[0.07] hover:text-fg" aria-label="Fechar menu">
-            <X className="size-5" />
+          <button type="button" onClick={onClose} className="grid size-10 place-items-center rounded-xl text-fg-2 transition-[background-color,color] hover:bg-white/[0.06] hover:text-fg" aria-label="Fechar menu">
+            <X className="size-5" strokeWidth={1.75} />
           </button>
         </div>
 
         <div className="flex-1 overflow-y-auto px-5 pb-6">
-          <SearchBar inlinePanel onNavigate={onClose} className="mt-1" />
+          <SearchBar inlinePanel onNavigate={onClose} className="mt-4" />
 
-          <nav aria-label="Menu mobile" className="mt-6">
+          <nav aria-label="Menu mobile" className="mt-5">
             <ul>
               {[{ label: 'Início', href: '/' }, ...mainNav].map((link, i) => {
                 const active = link.href === '/' ? pathname === '/' : pathname.startsWith(link.href);
                 return (
-                  <li key={link.href} className="animate-fade-up" style={{ animationDelay: `${60 + i * 35}ms` }}>
+                  <li key={link.href} className="animate-fade-up" style={{ animationDelay: `${50 + i * 35}ms` }}>
                     <Link
                       href={link.href}
                       onClick={onClose}
                       aria-current={active ? 'page' : undefined}
                       className={cn(
-                        'heading-display flex items-center justify-between border-b border-white/[0.06] py-4 text-[1.75rem] transition-colors',
+                        'heading-stencil relative flex items-center justify-between border-b border-line py-4 text-[1.85rem] transition-colors',
                         active ? 'text-fg' : 'text-fg-2 hover:text-fg',
                       )}
                     >
-                      <span className="flex items-center gap-3">
-                        {active && <span className="h-5 w-1 rounded-full bg-brand-500" aria-hidden />}
-                        {link.label}
-                      </span>
-                      <ArrowRight className="size-5 text-subtle" />
+                      {active && <span className="absolute left-0 top-0 h-[2px] w-10 bg-brand-500" aria-hidden />}
+                      {link.label}
+                      <ArrowRight className="size-5 text-subtle" strokeWidth={1.75} />
                     </Link>
                   </li>
                 );
@@ -73,24 +104,24 @@ export function MobileMenu({ open, onClose, pathname }: MobileMenuProps) {
             </ul>
           </nav>
 
-          <p className="mb-3 mt-8 text-[0.65rem] font-bold uppercase tracking-[0.18em] text-muted">Coleções</p>
+          <h2 className="mb-3 mt-8 text-sm font-bold text-fg">Coleções</h2>
           <div className="flex flex-wrap gap-2">
             {collections.map((c) => (
-              <Link key={c.id} href={collectionHref(c.id)} onClick={onClose} className="rounded-full border border-line px-3.5 py-2 text-sm text-fg-2 transition-colors hover:border-brand-500 hover:text-fg">
+              <Link key={c.id} href={collectionHref(c.id)} onClick={onClose} className="rounded-[var(--radius-chip)] border border-line-strong px-3.5 py-2 text-sm text-fg-2 transition-colors hover:border-fg-2/60 hover:text-fg">
                 {c.name}
               </Link>
             ))}
           </div>
         </div>
 
-        <div className="grid grid-cols-3 gap-1 border-t border-white/[0.06] p-3 text-xs">
+        <div className="grid grid-cols-3 border-t border-line text-xs">
           {[
             customer ? { href: '/conta', label: 'Minha conta', icon: UserRound } : { href: '/login', label: 'Entrar', icon: UserRound },
             { href: customer ? '/conta/favoritos' : '/login?next=%2Fconta%2Ffavoritos', label: 'Favoritos', icon: Heart },
             { href: '/carrinho', label: 'Carrinho', icon: ShoppingBag },
-          ].map(({ href, label, icon: Icon }) => (
-            <Link key={label} href={href} onClick={onClose} className="flex flex-col items-center gap-1.5 rounded-xl py-2.5 text-fg-2 transition-colors hover:bg-white/[0.05] hover:text-fg">
-              <Icon className="size-5" />
+          ].map(({ href, label, icon: Icon }, i) => (
+            <Link key={label} href={href} onClick={onClose} className={cn('flex flex-col items-center gap-1.5 py-3.5 text-fg-2 transition-colors hover:bg-white/[0.04] hover:text-fg', i > 0 && 'border-l border-line')}>
+              <Icon className="size-5" strokeWidth={1.75} />
               {label}
             </Link>
           ))}

@@ -99,7 +99,7 @@ export function SearchBar({ className, autoFocus, inlinePanel, onNavigate }: Sea
   };
 
   const sectionTitle = 'mb-2 flex items-center gap-2 px-1 text-[0.65rem] font-bold uppercase tracking-[0.18em] text-muted';
-  const chip = 'rounded-full border border-line px-3 py-1.5 text-xs text-fg-2 transition-colors duration-150 hover:border-brand-500 hover:text-fg';
+  const chip = 'rounded-[var(--radius-chip)] border border-line-strong px-3 py-1.5 text-xs text-fg-2 transition-colors duration-150 hover:border-fg-2/60 hover:text-fg';
 
   const productRow = (p: (typeof products)[number], i?: number) => (
     <li key={p.id} role="option" aria-selected={i === active}>
@@ -142,10 +142,10 @@ export function SearchBar({ className, autoFocus, inlinePanel, onNavigate }: Sea
         aria-expanded={open}
         aria-controls={listId}
         aria-autocomplete="list"
-        className="h-11 w-full rounded-full border border-white/10 bg-white/[0.05] pl-11 pr-10 text-sm text-fg placeholder:text-subtle transition-[background-color,border-color,box-shadow] duration-200 hover:bg-white/[0.07] focus:border-brand-500 focus:bg-surface focus:outline-none focus:ring-4 focus:ring-brand-500/15 [&::-webkit-search-cancel-button]:hidden"
+        className="h-11 w-full rounded-xl border border-line-strong bg-steel-2 pl-11 pr-10 text-sm text-fg placeholder:text-muted transition-[background-color,border-color,box-shadow] duration-200 hover:border-fg-2/40 focus:border-brand-500 focus:bg-surface focus:outline-none focus:ring-2 focus:ring-brand-500/25 [&::-webkit-search-cancel-button]:hidden"
       />
       {q && (
-        <button type="button" onClick={() => setQ('')} className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full p-1 text-muted transition-colors hover:text-fg" aria-label="Limpar busca">
+        <button type="button" onClick={() => setQ('')} className="absolute right-3 top-1/2 -translate-y-1/2 rounded-md p-1 text-muted transition-colors hover:text-fg" aria-label="Limpar busca">
           <X className="size-4" />
         </button>
       )}
@@ -155,7 +155,7 @@ export function SearchBar({ className, autoFocus, inlinePanel, onNavigate }: Sea
           id={listId}
           role="listbox"
           className={cn(
-            'animate-pop z-50 overflow-hidden rounded-2xl border border-white/10 bg-surface/95 p-3 shadow-[0_24px_60px_-20px_rgba(0,0,0,0.8)] backdrop-blur-xl',
+            'animate-pop z-50 overflow-hidden rounded-2xl border border-line-strong bg-steel p-3 shadow-[0_24px_60px_-20px_rgba(0,0,0,0.85)]',
             inlinePanel ? 'mt-3' : 'absolute inset-x-0 top-[calc(100%+10px)] min-w-[22rem] origin-top',
           )}
         >

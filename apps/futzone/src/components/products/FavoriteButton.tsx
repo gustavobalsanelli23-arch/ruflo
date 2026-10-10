@@ -5,7 +5,7 @@ import { useFavorites } from '@/context/FavoritesContext';
 import { useToast } from '@/context/ToastContext';
 import { cn } from '@/lib/format';
 
-/** ♡ Adicionar aos favoritos (salvo no navegador até existir conta no servidor). */
+/** Adicionar aos favoritos (salvo no navegador até existir conta no servidor). */
 export function FavoriteButton({ productId, productName, className, withLabel }: { productId: string; productName: string; className?: string; withLabel?: boolean }) {
   const { isFavorite, toggle } = useFavorites();
   const { notify } = useToast();
@@ -28,7 +28,7 @@ export function FavoriteButton({ productId, productName, className, withLabel }:
         className,
       )}
     >
-      <Heart key={String(active)} className={cn('size-[1.15rem]', active ? 'animate-pop fill-current text-danger' : '')} />
+      <Heart key={String(active)} className={cn('size-[1.15rem]', active ? 'animate-pop fill-current text-fg' : '')} />
       {withLabel && <span>{active ? 'Nos favoritos' : 'Adicionar aos favoritos'}</span>}
     </button>
   );

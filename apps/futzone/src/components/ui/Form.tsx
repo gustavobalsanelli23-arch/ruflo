@@ -3,7 +3,7 @@ import { ChevronDown } from 'lucide-react';
 import { cn } from '@/lib/format';
 
 const CONTROL =
-  'w-full rounded-xl border border-line bg-surface-2 px-3.5 text-sm text-fg placeholder:text-subtle transition-colors hover:border-line-strong focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/25 disabled:opacity-60 aria-[invalid=true]:border-danger';
+  'w-full rounded-xl border border-line-strong bg-surface-2 px-3.5 text-sm text-fg placeholder:text-muted transition-[border-color,box-shadow] duration-150 hover:border-fg-2/40 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/30 disabled:opacity-60 aria-[invalid=true]:border-danger';
 
 interface FieldProps {
   label: string;
@@ -81,10 +81,10 @@ export function Chip({ selected, className, ...props }: ChipProps) {
       type="button"
       aria-pressed={selected}
       className={cn(
-        'inline-flex h-9 items-center justify-center gap-1.5 rounded-full border px-3.5 text-xs font-semibold transition-[background-color,border-color,color,transform] duration-150 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-400',
+        'inline-flex h-9 items-center justify-center gap-1.5 rounded-[var(--radius-chip,9999px)] border px-3.5 text-xs font-semibold transition-[background-color,border-color,color,transform] duration-150 active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-400',
         selected
-          ? 'border-brand-500 bg-brand-500 text-white'
-          : 'border-line bg-white/[0.02] text-fg-2 hover:border-line-strong hover:text-fg',
+          ? 'border-brand-600 bg-brand-600 text-white'
+          : 'border-line-strong bg-white/[0.02] text-fg-2 hover:border-fg-2/50 hover:text-fg',
         'disabled:cursor-not-allowed disabled:opacity-40',
         className,
       )}

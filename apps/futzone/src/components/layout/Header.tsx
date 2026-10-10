@@ -28,27 +28,30 @@ function useBumpOnIncrease(value: number) {
   return bump;
 }
 
+/**
+ * Saiu do topo da página? Observa o marcador `[data-header-sentinel]` do layout
+ * com IntersectionObserver: nada roda a cada quadro de rolagem.
+ */
+function useScrolledPastTop() {
+  const [scrolled, setScrolled] = useState(false);
+  useEffect(() => {
+    const sentinel = document.querySelector('[data-header-sentinel]');
+    if (!sentinel || !('IntersectionObserver' in window)) return;
+    const observer = new IntersectionObserver(([entry]) => setScrolled(!entry.isIntersecting), { threshold: 0 });
+    observer.observe(sentinel);
+    return () => observer.disconnect();
+  }, []);
+  return scrolled;
+}
+
 export function Header() {
   const pathname = usePathname();
   const { count, open: openCart } = useCart();
   const [menuOpen, setMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
-  const [scrolled, setScrolled] = useState(false);
+  const scrolled = useScrolledPastTop();
   const bump = useBumpOnIncrease(count);
-
-  useEffect(() => {
-    let frame = 0;
-    const onScroll = () => {
-      cancelAnimationFrame(frame);
-      frame = requestAnimationFrame(() => setScrolled(window.scrollY > 24));
-    };
-    onScroll();
-    window.addEventListener('scroll', onScroll, { passive: true });
-    return () => {
-      cancelAnimationFrame(frame);
-      window.removeEventListener('scroll', onScroll);
-    };
-  }, []);
+  const atHomeTop = pathname === '/' && !scrolled;
 
   useEffect(() => {
     setMenuOpen(false);
@@ -56,38 +59,37 @@ export function Header() {
   }, [pathname]);
 
   const iconBtn =
-    'relative grid size-10 place-items-center rounded-full text-fg-2 transition-[background-color,color,transform] duration-200 hover:bg-white/[0.07] hover:text-fg active:scale-95';
+    'relative grid size-10 place-items-center rounded-xl text-fg-2 transition-[background-color,color,transform] duration-150 hover:bg-white/[0.06] hover:text-fg active:scale-95';
 
   return (
     <header className="sticky top-0 z-40">
-      {/* Faixa informativa — recolhe ao rolar */}
+      {/* Aviso honesto de demonstração: recolhe ao rolar */}
       <div
         className={cn(
-          'grid overflow-hidden border-b border-white/5 bg-surface text-center transition-[grid-template-rows,opacity] duration-300 ease-[var(--ease-out-fz)]',
+          'grid overflow-hidden border-b border-line bg-steel text-center transition-[grid-template-rows,opacity] duration-300 ease-[var(--ease-out-fz)]',
           scrolled ? 'grid-rows-[0fr] opacity-0' : 'grid-rows-[1fr] opacity-100',
         )}
       >
-        <p className="min-h-0 py-2 text-[0.68rem] font-medium tracking-[0.14em] text-muted uppercase">
-          <span className="mr-2 inline-block size-1.5 -translate-y-px rounded-full bg-brand-500 align-middle" aria-hidden />
-          Loja em demonstração<span className="hidden sm:inline"> · pagamentos e entregas ainda não disponíveis</span>
+        <p className="min-h-0 py-1.5 text-[0.66rem] font-semibold uppercase tracking-[0.16em] text-muted">
+          Loja em demonstração<span className="hidden sm:inline">: pagamentos e entregas ainda não disponíveis</span>
         </p>
       </div>
 
       <div
         className={cn(
-          'glass border-b transition-[border-color,background-color] duration-300',
-          scrolled ? 'border-white/[0.07] bg-bg/85' : 'border-transparent',
+          'border-b transition-[background-color,border-color,box-shadow] duration-300 ease-[var(--ease-out-fz)]',
+          atHomeTop ? 'border-transparent bg-transparent' : 'border-line bg-bg/95 shadow-[0_12px_30px_-24px_rgb(0_0_0/0.9)] backdrop-blur-md',
         )}
       >
-        <div className={cn('container-fz flex items-center gap-2 transition-[height] duration-300 ease-[var(--ease-out-fz)] lg:gap-8', scrolled ? 'h-14' : 'h-16 lg:h-[72px]')}>
+        <div className={cn('container-fz flex items-center gap-2 transition-[height] duration-300 ease-[var(--ease-out-fz)] lg:gap-7', scrolled ? 'h-14' : 'h-16 lg:h-[68px]')}>
           <button type="button" className={cn(iconBtn, '-ml-2 lg:hidden')} onClick={() => setMenuOpen(true)} aria-label="Abrir menu" aria-expanded={menuOpen}>
-            <Menu className="size-5" />
+            <Menu className="size-5" strokeWidth={1.75} />
           </button>
 
-          <Logo imgClassName={cn('w-auto transition-[height] duration-300', scrolled ? 'h-6 sm:h-6' : 'h-7 sm:h-8')} />
+          <Logo imgClassName={cn('w-auto transition-[height] duration-300', scrolled ? 'h-6 sm:h-6' : 'h-7 sm:h-[30px]')} />
 
           <nav aria-label="Principal" className="hidden lg:block">
-            <ul className="flex items-center gap-1">
+            <ul className="flex items-center">
               {mainNav.map((link) => {
                 const active = isNavActive(link, pathname);
                 return (
@@ -96,15 +98,17 @@ export function Header() {
                       href={link.href}
                       aria-current={active ? 'page' : undefined}
                       className={cn(
-                        'group relative block px-3 py-2 text-[0.8rem] font-semibold uppercase tracking-[0.12em] transition-colors duration-200',
+                        'group relative block px-3.5 py-2 text-[0.78rem] font-bold uppercase tracking-[0.14em] transition-colors duration-150',
                         active ? 'text-fg' : 'text-fg-2 hover:text-fg',
                       )}
                     >
                       {link.label}
+                      {/* Luz do item ativo: o único azul do cabeçalho */}
                       <span
+                        aria-hidden
                         className={cn(
-                          'absolute inset-x-3 -bottom-px h-0.5 origin-left rounded-full bg-brand-500 transition-transform duration-300 ease-[var(--ease-out-fz)]',
-                          active ? 'scale-x-100' : 'scale-x-0 group-hover:scale-x-100 group-hover:bg-white/40',
+                          'absolute inset-x-3.5 -bottom-[3px] h-[2px] origin-left transition-[transform,background-color] duration-200 ease-[var(--ease-out-fz)]',
+                          active ? 'scale-x-100 bg-brand-500' : 'scale-x-0 bg-fg-2/50 group-hover:scale-x-100',
                         )}
                       />
                     </Link>
@@ -118,13 +122,13 @@ export function Header() {
 
           <div className="ml-auto flex items-center gap-0.5 md:ml-0">
             <button type="button" className={cn(iconBtn, 'md:hidden')} onClick={() => setSearchOpen((v) => !v)} aria-label="Buscar" aria-expanded={searchOpen}>
-              {searchOpen ? <X className="size-5" /> : <Search className="size-5" />}
+              {searchOpen ? <X className="size-5" strokeWidth={1.75} /> : <Search className="size-5" strokeWidth={1.75} />}
             </button>
             <AccountButton className={cn(iconBtn, 'hidden sm:grid', pathname.startsWith('/conta') && 'text-fg')} />
             <button type="button" className={iconBtn} onClick={openCart} aria-label={`Abrir carrinho (${count} ${count === 1 ? 'item' : 'itens'})`}>
-              <ShoppingBag key={bump} className={cn('size-5', bump > 0 && 'animate-bump')} />
+              <ShoppingBag key={bump} className={cn('size-5', bump > 0 && 'animate-bump')} strokeWidth={1.75} />
               {count > 0 && (
-                <span key={`n${bump}`} className="animate-pop absolute right-0.5 top-0.5 grid min-w-[1.15rem] place-items-center rounded-full bg-brand-500 px-1 text-[0.62rem] font-bold leading-[1.15rem] text-white ring-2 ring-bg">
+                <span key={`n${bump}`} className="animate-pop absolute right-0 top-0.5 grid min-w-[1.15rem] place-items-center rounded-[4px] bg-brand-600 px-1 text-[0.62rem] font-bold leading-[1.15rem] text-white ring-2 ring-bg">
                   {count}
                 </span>
               )}

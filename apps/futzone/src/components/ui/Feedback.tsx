@@ -12,14 +12,15 @@ interface EmptyStateProps {
 
 export function EmptyState({ icon, title, description, action, className }: EmptyStateProps) {
   return (
-    <div className={cn('animate-fade-up flex flex-col items-center justify-center rounded-3xl bg-surface/60 px-6 py-16 text-center sm:py-20', className)}>
+    <div className={cn('locker animate-fade-up flex flex-col items-center justify-center rounded-3xl px-6 py-16 text-center sm:py-20', className)}>
       {icon && (
-        <div className="relative mb-6 grid size-16 place-items-center rounded-full bg-brand-500/10 text-brand-400 ring-1 ring-brand-500/25">
-          <span className="absolute inset-0 animate-ping rounded-full bg-brand-500/10 [animation-duration:2.4s]" aria-hidden />
+        <div className="relative mb-6 grid size-14 place-items-center rounded-xl border border-line-strong bg-steel-3 text-fg-2">
+          {/* luz do armário vazio */}
+          <span className="absolute inset-x-2 -top-px h-px bg-light/60" aria-hidden />
           {icon}
         </div>
       )}
-      <h3 className="heading-display text-3xl text-fg">{title}</h3>
+      <h3 className="heading-display text-3xl text-fg sm:text-4xl">{title}</h3>
       {description && <p className="mt-3 max-w-sm text-sm leading-relaxed text-muted">{description}</p>}
       {action && <div className="mt-7 flex flex-wrap justify-center gap-3">{action}</div>}
     </div>
@@ -36,27 +37,29 @@ export function DemoNotice({ children, className }: { children: React.ReactNode;
   );
 }
 
+/**
+ * Cabeçalho de seção apoiado na "linha da prateleira": título forte, descrição
+ * opcional logo abaixo e a ação alinhada à direita, sobre uma régua de 1px.
+ * Sem rótulos acima do título: o título fala sozinho.
+ */
 export function SectionHeading({
-  eyebrow,
   title,
   description,
   action,
   className,
 }: {
-  eyebrow?: string;
   title: string;
   description?: string;
   action?: React.ReactNode;
   className?: string;
 }) {
   return (
-    <Reveal className={cn('mb-7 flex items-end justify-between gap-6 sm:mb-9', className)}>
+    <Reveal className={cn('shelf-line mb-6 flex items-end justify-between gap-6 pb-4 sm:mb-8 sm:pb-5', className)}>
       <div className="max-w-2xl">
-        {eyebrow && <p className="eyebrow mb-3">{eyebrow}</p>}
-        <h2 className="heading-display text-[2.1rem] text-fg sm:text-5xl">{title}</h2>
-        {description && <p className="mt-3 text-sm text-muted sm:text-base">{description}</p>}
+        <h2 className="heading-display text-[2.25rem] text-fg sm:text-5xl lg:text-[3.5rem]">{title}</h2>
+        {description && <p className="mt-2.5 max-w-[60ch] text-sm leading-relaxed text-muted sm:text-base">{description}</p>}
       </div>
-      {action && <div className="shrink-0">{action}</div>}
+      {action && <div className="shrink-0 pb-1">{action}</div>}
     </Reveal>
   );
 }

@@ -10,13 +10,13 @@ import { SectionHeading } from '@/components/ui/Feedback';
 import { ProductRail } from './ProductCard';
 
 /** "Você também pode gostar" — mesmo time, mesma categoria, retrô e kits. */
-export function RecommendedProducts({ references, title = 'Você também pode gostar', eyebrow = 'Recomendados para você', className }: { references: Product[]; title?: string; eyebrow?: string; className?: string }) {
+export function RecommendedProducts({ references, title = 'Você também pode gostar', className }: { references: Product[]; title?: string; className?: string }) {
   const products = usePublicProducts();
   const list = useMemo(() => recommend(products, references, { limit: 4 }), [products, references]);
   if (!list.length) return null;
   return (
     <section className={cn('mt-20', className)}>
-      <SectionHeading eyebrow={eyebrow} title={title} />
+      <SectionHeading title={title} />
       <ProductRail products={list} />
     </section>
   );
@@ -41,7 +41,7 @@ export function RecentlyViewed({ excludeId, className }: { excludeId?: string; c
   if (!list.length) return null;
   return (
     <section className={cn('mt-20', className)}>
-      <SectionHeading eyebrow="Seu histórico" title="Você viu recentemente" />
+      <SectionHeading title="Você viu recentemente" />
       <ProductRail products={list} />
     </section>
   );

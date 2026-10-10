@@ -26,7 +26,7 @@ export function CollectionGrid() {
 
   return (
     <section className="container-fz pt-20 sm:pt-28">
-      <SectionHeading eyebrow="Explore" title="Escolha sua coleção" description="Do Brasileirão aos clássicos retrô — encontre a camisa certa em poucos cliques." />
+      <SectionHeading title="Escolha sua coleção" description="Do Brasileirão aos clássicos retrô — encontre a camisa certa em poucos cliques." />
       <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
         {cards.map((c, i) => {
           const featured = i === 0;

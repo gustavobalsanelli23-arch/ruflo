@@ -5,7 +5,8 @@ import { SectionHeading } from '@/components/ui/Feedback';
 import { ProductRail } from '@/components/products/ProductCard';
 
 interface ProductSectionProps {
-  eyebrow: string;
+  /** @deprecated a loja não usa mais rótulos acima de títulos */
+  eyebrow?: string;
   title: string;
   description?: string;
   href: string;
@@ -13,12 +14,11 @@ interface ProductSectionProps {
 }
 
 /** Vitrine de produtos da Home: trilho no celular, grade de 4 no desktop. */
-export function ProductSection({ eyebrow, title, description, href, products }: ProductSectionProps) {
+export function ProductSection({ title, description, href, products }: ProductSectionProps) {
   if (products.length === 0) return null;
   return (
     <section className="container-fz pt-20 sm:pt-28">
       <SectionHeading
-        eyebrow={eyebrow}
         title={title}
         description={description}
         action={

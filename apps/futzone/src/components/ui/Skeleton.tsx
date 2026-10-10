@@ -8,18 +8,24 @@ export function Skeleton({ className }: { className?: string }) {
 /** Card de produto em carregamento (mesmas proporções do ProductCard). */
 export function ProductCardSkeleton() {
   return (
-    <div className="flex flex-col gap-3" aria-hidden>
-      <Skeleton className="aspect-[3/4] w-full rounded-[var(--radius-card)]" />
-      <Skeleton className="h-3 w-1/3" />
-      <Skeleton className="h-4 w-4/5" />
-      <Skeleton className="h-5 w-1/2" />
+    <div className="locker flex flex-col rounded-[var(--radius-card)]" aria-hidden>
+      <div className="flex h-9 items-center justify-between border-b border-line px-3">
+        <Skeleton className="h-3 w-1/3 rounded-sm" />
+        <Skeleton className="h-3 w-10 rounded-sm" />
+      </div>
+      <Skeleton className="aspect-[3/4] w-full rounded-none" />
+      <div className="flex flex-col gap-2 border-t border-line p-3">
+        <Skeleton className="h-4 w-4/5 rounded-sm" />
+        <Skeleton className="h-5 w-1/2 rounded-sm" />
+        <Skeleton className="h-3 w-3/5 rounded-sm" />
+      </div>
     </div>
   );
 }
 
 export function ProductGridSkeleton({ count = 8 }: { count?: number }) {
   return (
-    <div role="status" aria-label="Carregando produtos" className="grid grid-cols-2 gap-x-3 gap-y-8 sm:gap-x-4 md:grid-cols-3 lg:grid-cols-4 lg:gap-x-5">
+    <div role="status" aria-label="Carregando produtos" className="grid grid-cols-2 gap-2 sm:gap-3 md:grid-cols-3 lg:grid-cols-4 lg:gap-4">
       {Array.from({ length: count }, (_, i) => (
         <ProductCardSkeleton key={i} />
       ))}
@@ -49,7 +55,7 @@ export function ProductPageSkeleton() {
             <Skeleton key={i} className="size-12" />
           ))}
         </div>
-        <Skeleton className="h-14 w-full rounded-full" />
+        <Skeleton className="h-14 w-full" />
       </div>
     </div>
   );

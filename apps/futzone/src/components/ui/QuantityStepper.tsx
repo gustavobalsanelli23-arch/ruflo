@@ -14,11 +14,11 @@ interface QuantityStepperProps {
 
 export function QuantityStepper({ value, min = 1, max, onChange, size = 'md', label = 'Quantidade' }: QuantityStepperProps) {
   const btn = cn(
-    'grid place-items-center text-fg-2 transition-colors hover:text-brand-300 disabled:cursor-not-allowed disabled:text-subtle',
+    'grid place-items-center text-fg-2 transition-[color,transform] duration-150 hover:text-fg active:scale-90 disabled:cursor-not-allowed disabled:text-subtle disabled:active:scale-100',
     size === 'sm' ? 'size-8' : 'size-11',
   );
   return (
-    <div role="group" aria-label={label} className="inline-flex items-center rounded-xl border border-line bg-surface-2">
+    <div role="group" aria-label={label} className="inline-flex items-center rounded-xl border border-line-strong bg-surface-2">
       <button type="button" className={btn} onClick={() => onChange(value - 1)} disabled={value <= min} aria-label="Diminuir quantidade">
         <Minus className="size-4" />
       </button>
