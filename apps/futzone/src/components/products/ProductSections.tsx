@@ -9,7 +9,7 @@ import { cn } from '@/lib/format';
 import { SectionHeading } from '@/components/ui/Feedback';
 import { ProductRail } from './ProductCard';
 
-/** "Você também pode gostar" — mesmo time, mesma categoria, retrô e kits. */
+/** "Você também pode gostar": mesmo time, mesma categoria, retrô e kits. */
 export function RecommendedProducts({ references, title = 'Você também pode gostar', className }: { references: Product[]; title?: string; className?: string }) {
   const products = usePublicProducts();
   const list = useMemo(() => recommend(products, references, { limit: 4 }), [products, references]);
@@ -29,7 +29,7 @@ export function useRecordView(productId: string | undefined) {
   }, [productId]);
 }
 
-/** "Você viu recentemente" — some quando não há histórico. */
+/** "Você viu recentemente": some quando não há histórico. */
 export function RecentlyViewed({ excludeId, className }: { excludeId?: string; className?: string }) {
   const products = usePublicProducts();
   const [ids, setIds] = useState<string[]>([]);
