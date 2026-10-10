@@ -229,10 +229,10 @@ export function ProductGrid({ products, className, priorityCount = 0 }: { produc
   );
 }
 
-/** Fileira de armários: rolagem lateral com encaixe no celular; vira grade no desktop. */
+/** Fileira de armários: rolagem lateral com encaixe no celular (o encaixe respeita o recuo lateral); vira grade no desktop. */
 export function ProductRail({ products, omitStatus }: { products: Product[]; omitStatus?: BadgeKind }) {
   return (
-    <div className="-mx-4 flex snap-x snap-mandatory gap-2 overflow-x-auto px-4 pb-2 scrollbar-none sm:-mx-6 sm:gap-3 sm:px-6 lg:mx-0 lg:grid lg:snap-none lg:grid-cols-4 lg:gap-4 lg:overflow-visible lg:px-0">
+    <div className="-mx-4 flex snap-x snap-mandatory scroll-px-4 gap-2 overflow-x-auto px-4 pb-2 scrollbar-none sm:-mx-6 sm:scroll-px-6 sm:gap-3 sm:px-6 lg:mx-0 lg:grid lg:snap-none lg:grid-cols-4 lg:gap-4 lg:overflow-visible lg:px-0">
       {products.map((p, i) => (
         <Reveal key={p.id} delay={stagger(i, 60, 4)} className="w-[64%] shrink-0 snap-start sm:w-[40%] lg:w-auto">
           <ProductCard product={p} omitStatus={omitStatus} />

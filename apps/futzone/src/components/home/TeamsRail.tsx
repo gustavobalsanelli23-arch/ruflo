@@ -99,7 +99,7 @@ export function TeamsRail({ products, className }: { products: Product[]; classN
       <ul
         ref={rail}
         aria-label="Times"
-        className="-mx-4 flex snap-x snap-mandatory gap-2 overflow-x-auto scroll-px-4 px-4 pb-1 scrollbar-none sm:-mx-6 sm:scroll-px-6 sm:px-6 lg:mx-0 lg:scroll-px-0 lg:px-0 lg:gap-2.5"
+        className="-mx-4 flex snap-x snap-mandatory gap-2 overflow-x-auto scroll-px-4 px-4 pb-1 scrollbar-none sm:-mx-6 sm:scroll-px-6 sm:px-6 lg:-mx-2 lg:scroll-px-2 lg:px-2 lg:gap-2.5"
       >
         {list.map(({ team, count }) => {
           const from = origin(team);
