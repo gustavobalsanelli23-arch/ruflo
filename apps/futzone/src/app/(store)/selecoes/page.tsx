@@ -4,5 +4,5 @@ import { CatalogPage } from '../CatalogPage';
 export const metadata: Metadata = { title: 'Seleções' };
 
 export default function SelecoesPage() {
-  return <CatalogPage eyebrow="Coleção" title="Seleções" description="Vista as cores do seu país — camisas de seleções do mundo todo." preset={{ category: 'selecoes' }} />;
+  return <CatalogPage title="Seleções" description="Camisas de seleções nacionais, do Brasil à Nigéria." preset={{ category: 'selecoes' }} />;
 }
