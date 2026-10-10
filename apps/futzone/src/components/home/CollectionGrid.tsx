@@ -2,18 +2,37 @@
 
 import { useMemo } from 'react';
 import Link from 'next/link';
-import { ArrowUpRight } from 'lucide-react';
+import type { Product } from '@/types/catalog';
 import { collections, collectionHref } from '@/data/collections';
-import { usePublicProducts } from '@/context/StoreDataContext';
 import { cn } from '@/lib/format';
 import { findByRef, teamById } from '@/lib/product';
 import { Reveal, stagger } from '@/components/ui/Reveal';
 import { SectionHeading } from '@/components/ui/Feedback';
 
-/** Grade de coleções (Brasileirão, Europeus, Seleções...), com a primeira em destaque. */
-export function CollectionGrid() {
-  const products = usePublicProducts();
+/**
+ * Desenho assimétrico das 7 coleções (desktop, 12 colunas):
+ *   linha 1-2: [Brasileirão 5 col, 2 linhas] [Europeus 4] [Seleções 3]
+ *                                            [Retrô 3]    [Kits 4]
+ *   linha 3:   [Femininas 7]                  [Infantis 5]
+ * No celular: a primeira ocupa a largura toda e as outras seis formam pares.
+ * Se o número de coleções mudar, revise este desenho (sobram buracos).
+ */
+const HALF = 'h-[17rem] sm:h-[22rem] lg:h-auto';
+/** `pos`: enquadramento da foto 3:4 na célula (portas largas descem até o escudo, não ao rosto). */
+const CELL = [
+  { span: 'col-span-2 h-[23rem] sm:h-[28rem] lg:col-span-5 lg:row-span-2 lg:h-auto', title: 'text-[2.75rem] sm:text-6xl', pos: 'object-[50%_24%]' },
+  { span: `${HALF} lg:col-span-4`, title: 'text-[1.7rem] sm:text-4xl', pos: 'object-[50%_30%] lg:object-[50%_36%]' },
+  { span: `${HALF} lg:col-span-3`, title: 'text-[1.7rem] sm:text-4xl', pos: 'object-[50%_30%]' },
+  { span: `${HALF} lg:col-span-3`, title: 'text-[1.7rem] sm:text-4xl', pos: 'object-[50%_30%]' },
+  { span: `${HALF} lg:col-span-4`, title: 'text-[1.7rem] sm:text-4xl', pos: 'object-[50%_30%] lg:object-[50%_36%]' },
+  { span: `${HALF} lg:col-span-7`, title: 'text-[1.7rem] sm:text-4xl', pos: 'object-[50%_30%] lg:object-[50%_44%]' },
+  { span: `${HALF} lg:col-span-5`, title: 'text-[1.7rem] sm:text-4xl', pos: 'object-[50%_30%] lg:object-[50%_42%]' },
+];
 
+const plural = (n: number) => `${n} ${n === 1 ? 'modelo' : 'modelos'}`;
+
+/** Coleções (Brasileirão, Europeus, Seleções...) como portas do vestiário, com foto real e contagem do catálogo. */
+export function CollectionGrid({ products, className }: { products: Product[]; className?: string }) {
   const cards = useMemo(
     () =>
       collections.map((c) => ({
@@ -25,52 +44,45 @@ export function CollectionGrid() {
   );
 
   return (
-    <section className="container-fz pt-20 sm:pt-28">
-      <SectionHeading title="Escolha sua coleção" description="Do Brasileirão aos clássicos retrô — encontre a camisa certa em poucos cliques." />
-      <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
+    <section className={cn('container-fz', className)}>
+      <SectionHeading title="Escolha sua coleção" description="Clubes do Brasil e da Europa, seleções, retrô, kits, femininas e infantis." />
+      <ul className="grid grid-cols-2 gap-2 sm:gap-3 lg:auto-rows-[16rem] lg:grid-cols-12">
         {cards.map((c, i) => {
-          const featured = i === 0;
-          // As duas últimas ocupam a linha inteira no desktop (grade sem buracos).
-          const wide = i >= cards.length - 2;
+          const cell = CELL[i] ?? CELL[CELL.length - 1];
           return (
-            <Reveal key={c.id} delay={stagger(i, 50)} className={cn(featured && 'col-span-2 lg:row-span-2', wide && 'lg:col-span-2')}>
+            <Reveal as="li" key={c.id} delay={stagger(i, 50)} className={cell.span}>
               <Link
                 href={collectionHref(c.id)}
-                className={cn(
-                  'group relative block h-full overflow-hidden rounded-[var(--radius-card)] bg-surface-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-400 focus-visible:ring-offset-2 focus-visible:ring-offset-bg',
-                  featured ? 'aspect-[4/3] lg:aspect-auto' : wide ? 'aspect-[3/4] sm:aspect-[4/5] lg:aspect-[2/1]' : 'aspect-[3/4] sm:aspect-[4/5]',
-                )}
+                className="locker group relative flex h-full flex-col overflow-hidden rounded-[var(--radius-card)] transition-[border-color] duration-200 hover:border-line-strong active:border-fg-2/50"
               >
-                {c.cover && (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={c.cover}
-                    alt=""
-                    width={720}
-                    height={960}
-                    loading="lazy"
-                    decoding="async"
-                    className="absolute inset-0 h-full w-full object-cover object-[50%_25%] transition-transform duration-500 ease-[var(--ease-out-fz)] group-hover:scale-[1.05]"
-                  />
-                )}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/25 to-transparent transition-colors duration-300 group-hover:from-black/90" aria-hidden />
-                <div className="absolute inset-x-0 bottom-0 flex items-end justify-between gap-3 p-4 sm:p-5">
-                  <div className="min-w-0">
-                    <p className="text-[0.62rem] font-bold uppercase tracking-[0.18em] text-white/60">{c.count} modelos</p>
-                    <h3 className={cn('heading-display mt-1 text-white transition-colors duration-200 group-hover:text-brand-200', featured ? 'text-4xl sm:text-6xl' : 'text-2xl sm:text-3xl')}>
-                      {c.name}
-                    </h3>
-                    <p className={cn('mt-1.5 text-xs text-white/70 sm:text-sm', featured ? 'max-w-sm' : 'hidden sm:line-clamp-2')}>{c.description}</p>
-                  </div>
-                  <span className="grid size-10 shrink-0 place-items-center rounded-full bg-white/10 text-white backdrop-blur transition-[background-color,transform] duration-300 group-hover:rotate-45 group-hover:bg-brand-500" aria-hidden>
-                    <ArrowUpRight className="size-4" />
-                  </span>
+                {/* Luz da porta: acende ao apontar, como a dos armários */}
+                <span aria-hidden className="absolute inset-x-[16%] top-0 z-10 h-[2px] bg-light opacity-0 transition-opacity duration-200 group-hover:opacity-100 group-focus-visible:opacity-100" />
+                <div className="relative min-h-0 flex-1 overflow-hidden bg-[#0a0c10]">
+                  {c.cover && (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={c.cover}
+                      alt=""
+                      width={720}
+                      height={960}
+                      loading="lazy"
+                      decoding="async"
+                      className={cn(
+                        'motion-lift absolute inset-0 h-full w-full object-cover transition-transform duration-500 ease-[var(--ease-out-fz)] [@media(hover:hover)]:group-hover:scale-[1.03]',
+                        cell.pos,
+                      )}
+                    />
+                  )}
+                </div>
+                <div className="flex flex-col gap-1 border-t border-line px-3 pb-3 pt-2.5 sm:flex-row sm:items-end sm:justify-between sm:gap-3 sm:px-4 sm:pb-3.5">
+                  <h3 className={cn('heading-display min-w-0 text-fg', cell.title)}>{c.name}</h3>
+                  <span className="shrink-0 pb-0.5 text-xs font-semibold tabular-nums text-muted transition-colors duration-200 group-hover:text-fg-2">{plural(c.count)}</span>
                 </div>
               </Link>
             </Reveal>
           );
         })}
-      </div>
+      </ul>
     </section>
   );
 }

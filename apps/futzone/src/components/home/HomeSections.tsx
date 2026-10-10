@@ -1,62 +1,65 @@
 'use client';
 
 import { useMemo } from 'react';
-import type { Product, ProductTag } from '@/types/catalog';
+import type { Product } from '@/types/catalog';
 import { usePublicProducts } from '@/context/StoreDataContext';
 import { sortProducts } from '@/lib/catalog';
 import { availableSizes } from '@/lib/product';
-import { teams } from '@/data/teams';
+import { RecentlyViewed } from '@/components/products/ProductSections';
+import { TeamsRail } from './TeamsRail';
 import { CollectionGrid } from './CollectionGrid';
 import { ProductSection } from './ProductSection';
-import { CampaignBanner } from './CampaignBanner';
-import { WhyFutzone } from './WhyFutzone';
-import { FinalCta } from './FinalCta';
-import { RecentlyViewed } from '@/components/products/ProductSections';
+import { RetroBand } from './RetroBand';
+import { NewSeason } from './NewSeason';
 
 const inStock = (p: Product) => availableSizes(p).length > 0;
-const byTag = (products: Product[], tag: ProductTag) => products.filter((p) => p.tags.includes(tag));
 
-/** Seções da Home, na ordem: coleções → vitrines → campanha → diferenciais → CTA final. */
-export function HomeSections() {
+/** Temporada em destaque na Home e as grafias dela no catálogo do fornecedor. */
+const SEASON = '26/27';
+const SEASON_ALIASES = new Set([SEASON, '2026/27']);
+
+/**
+ * Um único ritmo vertical: cada seção abre com o mesmo respiro. A fileira de
+ * times é a exceção, porque continua a parede de armários do hero.
+ */
+const SECTION = 'pt-24 sm:pt-32';
+
+/**
+ * Seções da Home, alternando trechos densos e calmos:
+ * times (continua o hero) → coleções → mais vendidas → faixa retrô (calma)
+ * → nova temporada → vistos recentemente.
+ * Cada camisa aparece uma vez só na página (o hero vem do servidor em `heroIds`).
+ */
+export function HomeSections({ heroIds }: { heroIds: string[] }) {
   const products = usePublicProducts();
 
   const s = useMemo(() => {
-    const available = products.filter(inStock);
-    const take = (list: Product[], n = 4) => list.slice(0, n);
-    return {
-      featured: take(sortProducts(byTag(available, 'popular'), 'relevancia')),
-      bestSellers: take(sortProducts(byTag(available, 'mais-vendido'), 'relevancia')),
-      retro: take(sortProducts(available.filter((p) => p.category === 'retro'), 'relevancia')),
-      national: take(sortProducts(available.filter((p) => p.category === 'selecoes'), 'relevancia')),
-      kits: take(sortProducts(available.filter((p) => p.category === 'kits'), 'relevancia')),
-      launches: sortProducts(byTag(available, 'lancamento'), 'novidades'),
+    const shown = new Set(heroIds);
+    const fresh = (list: Product[], n: number) => {
+      const out = list.filter((p) => !shown.has(p.id)).slice(0, n);
+      out.forEach((p) => shown.add(p.id));
+      return out;
     };
-  }, [products]);
+    const available = products.filter(inStock);
+    const bestSellers = fresh(sortProducts(available.filter((p) => p.tags.includes('mais-vendido')), 'relevancia'), 4);
+    // Nova temporada: lançamentos primeiro, depois as mais procuradas da temporada.
+    const season = sortProducts(available.filter((p) => SEASON_ALIASES.has(p.season)), 'relevancia').sort(
+      (a, b) => Number(b.tags.includes('lancamento')) - Number(a.tags.includes('lancamento')),
+    );
+    return { bestSellers, season: fresh(season, 4) };
+  }, [products, heroIds]);
 
   return (
     <>
-      <CollectionGrid />
-      <ProductSection eyebrow="Seleção FutZone" title="Camisas em destaque" description="Os modelos que mais chamam atenção nesta temporada." href="/camisas" products={s.featured} />
-      <ProductSection eyebrow="Os favoritos da torcida" title="Mais vendidas" href="/camisas?ordem=relevancia" products={s.bestSellers} />
-      <ProductSection eyebrow="Coleção retrô" title="Clássicos que não saem de campo" href="/retro" products={s.retro} />
-      <ProductSection eyebrow="Seleções" title="Vista as cores do seu país" href="/selecoes" products={s.national} />
-      <ProductSection eyebrow="Kits" title="Kits completos" description="Camisa e calção para jogar com o manto." href="/kits" products={s.kits} />
-      <div className="container-fz">
-        <RecentlyViewed className="mt-20 sm:mt-28" />
+      <TeamsRail products={products} className="pt-14 sm:pt-16" />
+      <CollectionGrid products={products} className={SECTION} />
+      <ProductSection title="Mais vendidas" href="/camisas?ordem=relevancia" linkContext="as camisas mais vendidas" products={s.bestSellers} className={SECTION} />
+      <RetroBand products={products} className="mt-24 sm:mt-32" />
+      <NewSeason season={SEASON} products={s.season} className={SECTION} />
+      {/* Some sem histórico; com histórico, segue o mesmo respiro das outras seções */}
+      <div className="container-fz [&>section]:mt-24 sm:[&>section]:mt-32">
+        <RecentlyViewed />
       </div>
-      <CampaignBanner
-        eyebrow="Nova temporada 26/27"
-        title={
-          <>
-            Os novos mantos <span className="text-brand-500">já chegaram.</span>
-          </>
-        }
-        text="Lançamentos dos principais clubes e seleções, com fotos reais e grade completa de tamanhos."
-        cta={{ label: 'Ver lançamentos', href: '/camisas?ordem=novidades' }}
-        products={s.launches.length >= 3 ? s.launches : s.featured}
-      />
-      <WhyFutzone productCount={products.length} teamCount={teams.length} />
-      <FinalCta />
     </>
   );
 }
