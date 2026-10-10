@@ -4,5 +4,5 @@ import { CatalogPage } from '../CatalogPage';
 export const metadata: Metadata = { title: 'Camisas' };
 
 export default function CamisasPage() {
-  return <CatalogPage eyebrow="Catálogo completo" title="Camisas" description="Clubes, seleções, retrô, kits e femininas. Use a busca e os filtros para encontrar a sua." />;
+  return <CatalogPage title="Camisas" description="Clubes, seleções, retrô, kits e femininas num só catálogo. Busque pelo time, jogador ou temporada." />;
 }

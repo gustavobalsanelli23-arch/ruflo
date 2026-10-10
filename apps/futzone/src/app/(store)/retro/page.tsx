@@ -4,5 +4,5 @@ import { CatalogPage } from '../CatalogPage';
 export const metadata: Metadata = { title: 'Retrô' };
 
 export default function RetroPage() {
-  return <CatalogPage eyebrow="Coleção" title="Retrô" description="Releituras de camisas históricas que marcaram gerações." preset={{ category: 'retro' }} />;
+  return <CatalogPage title="Retrô" description="Releituras de camisas que marcaram época. A temporada original está na plaquinha de cada peça." preset={{ category: 'retro' }} />;
 }
