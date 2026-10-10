@@ -81,7 +81,7 @@ function toProduct(e: CatalogEntry): Product {
     stock: Object.fromEntries(sizes.map((s) => [s, available.has(s) ? PROVISIONAL_STOCK_PER_SIZE : 0])),
     images: Array.from({ length: e.photos }, (_, i) => ({
       src: `/produtos/${e.teamId}/${e.slug}/${i + 1}.jpg`,
-      alt: i === 0 ? e.name : `${e.name} — foto ${i + 1}`,
+      alt: i === 0 ? e.name : `${e.name}, foto ${i + 1}`,
     })),
     palette: team.colors,
     status: 'published',

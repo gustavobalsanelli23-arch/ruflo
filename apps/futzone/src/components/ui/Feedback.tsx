@@ -12,11 +12,17 @@ interface EmptyStateProps {
 
 export function EmptyState({ icon, title, description, action, className }: EmptyStateProps) {
   return (
-    <div className={cn('locker animate-fade-up flex flex-col items-center justify-center rounded-3xl px-6 py-16 text-center sm:py-20', className)}>
+    <div
+      className={cn(
+        // Na loja vira um armário vazio; no painel administrativo mantém o fundo neutro de antes.
+        'animate-fade-up flex flex-col items-center justify-center rounded-3xl bg-surface/60 px-6 py-16 text-center sm:py-20 [.store-world_&]:locker',
+        className,
+      )}
+    >
       {icon && (
         <div className="relative mb-6 grid size-14 place-items-center rounded-xl border border-line-strong bg-steel-3 text-fg-2">
-          {/* luz do armário vazio */}
-          <span className="absolute inset-x-2 -top-px h-px bg-light/60" aria-hidden />
+          {/* luz do armário vazio (só na loja) */}
+          <span className="absolute inset-x-2 -top-px hidden h-px bg-light/60 [.store-world_&]:block" aria-hidden />
           {icon}
         </div>
       )}
