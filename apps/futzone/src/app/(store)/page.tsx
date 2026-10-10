@@ -1,18 +1,14 @@
-import { Hero } from '@/components/home/Hero';
+import { Hero, heroLockers } from '@/components/home/Hero';
 import { HomeSections } from '@/components/home/HomeSections';
-import { seedProducts } from '@/data/products';
-import { teams } from '@/data/teams';
 
 export default function HomePage() {
-  const stats = [
-    { value: `${seedProducts.filter((p) => p.status === 'published').length}+`, label: 'Modelos' },
-    { value: String(teams.length), label: 'Times' },
-    { value: '7', label: 'Coleções' },
-  ];
+  // A fileira do hero é resolvida no servidor (a foto do primeiro armário é o LCP);
+  // as seções abaixo evitam repetir essas camisas.
+  const lockers = heroLockers();
   return (
     <>
-      <Hero stats={stats} />
-      <HomeSections />
+      <Hero lockers={lockers} />
+      <HomeSections heroIds={lockers.map((p) => p.id)} />
     </>
   );
 }

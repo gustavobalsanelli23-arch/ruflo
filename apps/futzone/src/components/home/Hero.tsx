@@ -1,106 +1,84 @@
-import Link from 'next/link';
-import { ArrowRight } from 'lucide-react';
+import type { Product } from '@/types/catalog';
 import { heroShowcase } from '@/data/site';
 import { seedProducts } from '@/data/products';
-import { cn, formatPrice } from '@/lib/format';
-import { findByRef, productHref, teamById } from '@/lib/product';
+import { sortProducts } from '@/lib/catalog';
+import { availableSizes, findByRef, isPublic } from '@/lib/product';
 import { LinkButton } from '@/components/ui/Button';
-import type { Product } from '@/types/catalog';
+import { ProductCard } from '@/components/products/ProductCard';
+import { SearchBar } from '@/components/navigation/SearchBar';
 
-const delay = (ms: number) => ({ animationDelay: `${ms}ms` });
+const LOCKERS = 4;
+/** Primeira lâmpada acende logo depois da pintura; as outras seguem em fila. */
+const FIRST_LIGHT_MS = 200;
+const LIGHT_STEP_MS = 140;
+/** O vestiário clareia quando o cone de luz cai sobre a camisa (ProductCard: faixa + 220ms). */
+const ROOM_DELAY_MS = 220;
 
-/** Mini-cartão flutuante com produto real (link para a página do produto). */
-function FloatingProduct({ product, className, style }: { product: Product; className?: string; style?: React.CSSProperties }) {
-  return (
-    <Link
-      href={productHref(product)}
-      style={style}
-      className={cn(
-        'animate-fade-up absolute z-20 flex w-52 items-center gap-3 rounded-2xl border border-white/10 bg-bg/75 p-2 pr-4 shadow-[0_20px_40px_-20px_rgba(0,0,0,0.9)] backdrop-blur-xl transition-transform duration-300 ease-[var(--ease-out-fz)] hover:-translate-y-1',
-        className,
-      )}
-    >
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src={product.images[0].src} alt="" width={720} height={960} decoding="async" className="h-14 w-11 shrink-0 rounded-lg object-cover" />
-      <span className="min-w-0">
-        <span className="block text-[0.6rem] font-bold uppercase tracking-[0.16em] text-brand-400">{teamById(product.teamId)?.name}</span>
-        <span className="block truncate text-xs font-semibold text-fg">{product.name.replace(/^Camisa\s+/, '')}</span>
-        <span className="block text-xs font-bold text-fg">{formatPrice(product.price)}</span>
-      </span>
-    </Link>
-  );
+/**
+ * Camisas da fileira: a vitrine definida em data/site.ts, completada pelas mais
+ * procuradas se alguma tiver saído do catálogo ou esgotado.
+ */
+export function heroLockers(products: Product[] = seedProducts): Product[] {
+  const ready = (p: Product | undefined): p is Product => !!p && isPublic(p) && availableSizes(p).length > 0 && p.images.length > 0;
+  const picked = heroShowcase.map((ref) => findByRef(products, ref)).filter(ready);
+  const fill = sortProducts(products.filter(ready), 'relevancia').filter((p) => !picked.includes(p));
+  return [...picked, ...fill].slice(0, LOCKERS);
 }
 
-/** Hero da Home em formato de campanha: título forte + foto grande do catálogo. */
-export function Hero({ stats }: { stats: Array<{ value: string; label: string }> }) {
-  const [left, main, right] = heroShowcase.map((ref) => findByRef(seedProducts, ref));
-
+/**
+ * Hero da Home: o vestiário antes do jogo. À esquerda, a manchete em estêncil
+ * e as duas formas de achar a camisa (catálogo e busca por time). À direita,
+ * quatro armários com camisas reais, apoiados na linha da prateleira, cujas
+ * luzes acendem uma a uma. Componente de servidor: a foto do primeiro armário
+ * (LCP) já vem no HTML.
+ */
+export function Hero({ lockers }: { lockers: Product[] }) {
   return (
-    <section className="relative isolate overflow-hidden">
-      {/* Fundo: luz azul discreta + linhas de campo minimalistas */}
-      <div className="absolute inset-0 -z-10 bg-[radial-gradient(55%_70%_at_75%_35%,color-mix(in_oklab,var(--color-brand-600)_22%,transparent),transparent_70%)]" />
-      <svg className="absolute -right-24 top-1/2 -z-10 hidden h-[130%] -translate-y-1/2 text-white/[0.04] lg:block" viewBox="0 0 600 600" fill="none" aria-hidden>
-        <circle cx="300" cy="300" r="190" stroke="currentColor" strokeWidth="1.5" />
-        <circle cx="300" cy="300" r="4" fill="currentColor" />
-        <path d="M300 0V600" stroke="currentColor" strokeWidth="1.5" />
-      </svg>
-
-      <div className="container-fz grid items-center gap-10 pb-14 pt-8 sm:pt-12 lg:min-h-[min(calc(100dvh-110px),760px)] lg:grid-cols-[1.05fr_1fr] lg:gap-6 lg:pb-16">
-        <div className="relative z-10">
-          <p className="animate-fade-up eyebrow mb-5 flex items-center gap-3" style={delay(0)}>
-            <span className="h-px w-8 bg-brand-500" aria-hidden /> Temporada 26/27
-          </p>
-          <h1 className="animate-fade-up heading-display text-[clamp(3.4rem,11vw,7.6rem)] text-fg" style={delay(60)}>
-            Vista a <span className="text-brand-500">paixão</span>
-            <br /> pelo futebol.
-          </h1>
-          <p className="animate-fade-up mt-6 max-w-md text-base leading-relaxed text-fg-2 sm:text-lg" style={delay(140)}>
-            Camisas de clubes, seleções e clássicos retrô — escolhidas para quem vive o jogo dentro e fora do estádio.
-          </p>
-          <div className="animate-fade-up mt-9 flex flex-wrap gap-3" style={delay(220)}>
-            <LinkButton href="/camisas" size="lg">
-              Ver camisas <ArrowRight className="size-4" />
-            </LinkButton>
-            <LinkButton href="/retro" size="lg" variant="outline">
-              Coleção retrô
-            </LinkButton>
+    // Movimento reduzido: as luzes já aparecem acesas (sem esperar a fila).
+    <section aria-labelledby="hero-title" className="relative motion-reduce:**:[animation-delay:0ms]!">
+      <div className="container-fz">
+        <div className="grid gap-10 border-b border-line-strong pt-8 sm:pt-12 xl:grid-cols-[minmax(0,9fr)_minmax(0,11fr)] xl:items-end xl:gap-12 xl:pt-16">
+          <div className="relative z-20 xl:pb-14">
+            <h1 id="hero-title" className="heading-stencil text-[min(12.4vw,6rem)] text-fg xl:text-[min(5.4vw,4.6rem)]">
+              <span className="block">Vista o manto.</span>
+              <span className="block">Entre em campo.</span>
+            </h1>
+            <p className="mt-5 max-w-[36ch] text-base leading-relaxed text-fg-2 sm:mt-6 sm:text-lg">
+              Camisas de clubes, seleções e clássicos retrô, com fotos reais, preço e tamanhos à vista.
+            </p>
+            <div className="mt-8 flex flex-col gap-2.5 sm:flex-row sm:items-center xl:mt-10">
+              <LinkButton href="/camisas" size="lg" className="shrink-0">
+                Ver camisas
+              </LinkButton>
+              <SearchBar className="w-full sm:max-w-sm xl:max-w-none xl:flex-1 [&_input]:h-13 [&_input]:rounded-[var(--radius-button)]" />
+            </div>
           </div>
-          <dl className="animate-fade-up mt-12 flex gap-10 border-t border-white/[0.07] pt-6" style={delay(300)}>
-            {stats.map((s) => (
-              <div key={s.label}>
-                <dd className="heading-display text-3xl text-fg sm:text-4xl">{s.value}</dd>
-                <dt className="mt-1 text-[0.68rem] font-medium uppercase tracking-[0.16em] text-muted">{s.label}</dt>
-              </div>
-            ))}
-          </dl>
+
+          {/* Fileira de armários: rolagem com encaixe no celular, quatro lado a lado a partir do tablet; ao lado da manchete só no desktop largo */}
+          <ul
+            aria-label="Camisas em destaque"
+            className="-mx-4 flex snap-x snap-mandatory gap-2 overflow-x-auto scroll-px-4 px-4 scrollbar-none sm:-mx-6 sm:scroll-px-6 sm:px-6 md:mx-0 md:grid md:grid-cols-4 md:gap-2.5 md:overflow-visible md:px-0 xl:gap-3"
+          >
+            {lockers.map((product, i) => {
+              const litDelay = FIRST_LIGHT_MS + i * LIGHT_STEP_MS;
+              return (
+                <li key={product.id} className="relative w-[70%] shrink-0 snap-start sm:w-[42%] md:w-auto">
+                  <ProductCard product={product} priority lit litDelay={litDelay} />
+                  {/*
+                    Vestiário no escuro até a lâmpada deste armário firmar. Sem a
+                    animação (ou sem suporte), a camada fica invisível: nunca prende
+                    a camisa no escuro.
+                  */}
+                  <span
+                    aria-hidden
+                    style={{ animationDelay: `${litDelay + ROOM_DELAY_MS}ms` }}
+                    className="pointer-events-none absolute inset-0 z-40 bg-bg/70 opacity-0 animate-[fade-in_0.6s_var(--ease-in-out-fz)_reverse_both]"
+                  />
+                </li>
+              );
+            })}
+          </ul>
         </div>
-
-        {main && main.images[0] && (
-          <div className="relative mx-auto w-full max-w-[460px] lg:max-w-none">
-            <Link
-              href={productHref(main)}
-              className="animate-hero-image group relative mx-auto block aspect-[4/5] w-[82%] overflow-hidden rounded-[2rem] bg-surface-2 shadow-[0_40px_80px_-30px_rgba(0,0,0,0.9)] lg:w-[78%]"
-              aria-label={main.name}
-            >
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={main.images[0].src}
-                alt={main.name}
-                width={720}
-                height={960}
-                fetchPriority="high"
-                className="h-full w-full object-cover transition-transform duration-700 ease-[var(--ease-out-fz)] group-hover:scale-[1.03]"
-              />
-              <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 to-transparent p-5 pt-16">
-                <p className="text-[0.62rem] font-bold uppercase tracking-[0.18em] text-brand-300">Destaque da temporada</p>
-                <p className="mt-1 font-semibold text-white">{main.name}</p>
-                <p className="text-sm font-bold text-white/90">{formatPrice(main.price)}</p>
-              </div>
-            </Link>
-            {left?.images[0] && <FloatingProduct product={left} className="-left-1 top-[12%] hidden sm:flex lg:-left-4" style={delay(380)} />}
-            {right?.images[0] && <FloatingProduct product={right} className="-right-1 bottom-[16%] hidden sm:flex lg:-right-2" style={delay(460)} />}
-          </div>
-        )}
       </div>
     </section>
   );
