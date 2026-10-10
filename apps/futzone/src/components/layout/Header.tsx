@@ -70,15 +70,18 @@ export function Header() {
           scrolled ? 'grid-rows-[0fr] opacity-0' : 'grid-rows-[1fr] opacity-100',
         )}
       >
-        <p className="min-h-0 py-1.5 text-[0.66rem] font-semibold uppercase tracking-[0.16em] text-muted">
-          Loja em demonstração<span className="hidden sm:inline">: pagamentos e entregas ainda não disponíveis</span>
+        {/* O padding fica no filho: a linha 0fr recolhe a faixa inteira, sem sobrar borda de 12px */}
+        <p className="min-h-0">
+          <span className="block py-1.5 text-[0.66rem] font-semibold uppercase tracking-[0.16em] text-muted">
+            Loja em demonstração<span className="hidden sm:inline">: pagamentos e entregas ainda não disponíveis</span>
+          </span>
         </p>
       </div>
 
       <div
         className={cn(
           'border-b transition-[background-color,border-color,box-shadow] duration-300 ease-[var(--ease-out-fz)]',
-          atHomeTop ? 'border-transparent bg-transparent' : 'border-line bg-bg/95 shadow-[0_12px_30px_-24px_rgb(0_0_0/0.9)] backdrop-blur-md',
+          atHomeTop ? 'border-transparent bg-transparent' : 'border-line bg-bg shadow-[0_12px_30px_-24px_rgb(0_0_0/0.9)]',
         )}
       >
         <div className={cn('container-fz flex items-center gap-2 transition-[height] duration-300 ease-[var(--ease-out-fz)] lg:gap-7', scrolled ? 'h-14' : 'h-16 lg:h-[68px]')}>
@@ -118,7 +121,13 @@ export function Header() {
             </ul>
           </nav>
 
-          <SearchBar className="ml-auto hidden w-60 transition-[width] duration-300 ease-[var(--ease-out-fz)] focus-within:w-[22rem] md:block xl:w-72" />
+          {/* No topo da Home a busca já está no hero: o cabeçalho só mostra a dele depois da primeira rolagem */}
+          <SearchBar
+            className={cn(
+              'ml-auto hidden w-60 transition-[width,opacity,visibility] duration-300 ease-[var(--ease-out-fz)] focus-within:w-[22rem] md:block xl:w-72',
+              atHomeTop && 'md:invisible md:opacity-0',
+            )}
+          />
 
           <div className="ml-auto flex items-center gap-0.5 md:ml-0">
             <button type="button" className={cn(iconBtn, 'md:hidden')} onClick={() => setSearchOpen((v) => !v)} aria-label="Buscar" aria-expanded={searchOpen}>

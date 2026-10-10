@@ -8,9 +8,12 @@ interface EmptyStateProps {
   description?: string;
   action?: React.ReactNode;
   className?: string;
+  /** Nível do título: h2 quando o estado vazio é o primeiro bloco depois do h1 da página. */
+  headingLevel?: 'h2' | 'h3';
 }
 
-export function EmptyState({ icon, title, description, action, className }: EmptyStateProps) {
+export function EmptyState({ icon, title, description, action, className, headingLevel = 'h3' }: EmptyStateProps) {
+  const Heading = headingLevel;
   return (
     <div
       className={cn(
@@ -26,7 +29,7 @@ export function EmptyState({ icon, title, description, action, className }: Empt
           {icon}
         </div>
       )}
-      <h3 className="heading-display text-3xl text-fg sm:text-4xl">{title}</h3>
+      <Heading className="heading-display text-3xl text-fg sm:text-4xl">{title}</Heading>
       {description && <p className="mt-3 max-w-sm text-sm leading-relaxed text-muted">{description}</p>}
       {action && <div className="mt-7 flex flex-wrap justify-center gap-3">{action}</div>}
     </div>
@@ -36,8 +39,14 @@ export function EmptyState({ icon, title, description, action, className }: Empt
 /** Aviso padronizado para funções que são apenas demonstração nesta etapa. */
 export function DemoNotice({ children, className }: { children: React.ReactNode; className?: string }) {
   return (
-    <div className={cn('flex items-start gap-3 rounded-xl border border-brand-500/25 bg-brand-500/[0.07] px-4 py-3 text-sm text-fg-2', className)}>
-      <Info className="mt-0.5 size-4 shrink-0 text-brand-400" aria-hidden />
+    <div
+      className={cn(
+        // Na loja o aviso é aço neutro (o azul fica só no elemento ativo); no painel mantém o tom de antes.
+        'flex items-start gap-3 rounded-xl border border-brand-500/25 bg-brand-500/[0.07] px-4 py-3 text-sm text-fg-2 [.store-world_&]:border-line-strong [.store-world_&]:bg-steel-2',
+        className,
+      )}
+    >
+      <Info className="mt-0.5 size-4 shrink-0 text-brand-400 [.store-world_&]:text-fg-2" strokeWidth={1.75} aria-hidden />
       <p>{children}</p>
     </div>
   );

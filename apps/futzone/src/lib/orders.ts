@@ -59,7 +59,7 @@ export function buildOrderTimeline(order: Order): TimelineStep[] {
     payment === 'aprovado'
       ? 'Pagamento confirmado'
       : idx >= 1
-        ? 'Confirmação simulada — gateway de pagamento ainda não integrado'
+        ? 'Confirmação simulada: gateway de pagamento ainda não integrado'
         : payment === 'aguardando_integracao'
           ? 'Etapa preparada para o gateway de pagamento (nenhuma cobrança feita)'
           : 'Aguardando confirmação do pagamento';
@@ -156,7 +156,7 @@ export function buildOrder(input: NewOrderInput, existing: Order[], now: Date = 
 
 export const orderItemsCount = (order: Order) => order.lines.reduce((n, l) => n + l.quantity, 0);
 
-/** "Rua X, 10 — Apto 1 · Bairro · Cidade/UF · CEP" */
+/** "Rua X, 10, Apto 1, Bairro, Cidade/UF, CEP 00000-000" */
 export function formatAddress(a: Address): string {
-  return `${a.street}, ${a.number}${a.complement ? ` — ${a.complement}` : ''} · ${a.district} · ${a.city}/${a.state} · CEP ${a.zip}`;
+  return `${a.street}, ${a.number}${a.complement ? `, ${a.complement}` : ''}, ${a.district}, ${a.city}/${a.state}, CEP ${a.zip}`;
 }

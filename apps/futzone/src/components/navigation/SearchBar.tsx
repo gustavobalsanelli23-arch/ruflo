@@ -19,6 +19,10 @@ interface SearchBarProps {
   /** Painel de sugestões abaixo do campo (padrão) ou fluindo no documento (mobile). */
   inlinePanel?: boolean;
   onNavigate?(): void;
+  /** Nome acessível do campo (padrão "Buscar produtos"). */
+  label?: string;
+  /** "lg" acompanha a altura dos botões grandes (busca do hero). */
+  size?: 'md' | 'lg';
 }
 
 const MAX_RECENT = 5;
@@ -28,7 +32,7 @@ const POPULAR_TEAMS = ['flamengo', 'palmeiras', 'corinthians', 'brasil', 'real-m
  * Busca com sugestões sobre os dados locais: camisas, times, jogadores
  * (pelo nome do produto) e coleções. Sem texto, mostra populares e recentes.
  */
-export function SearchBar({ className, autoFocus, inlinePanel, onNavigate }: SearchBarProps) {
+export function SearchBar({ className, autoFocus, inlinePanel, onNavigate, label = 'Buscar produtos', size = 'md' }: SearchBarProps) {
   const router = useRouter();
   const products = usePublicProducts();
   const [q, setQ] = useState('');
@@ -137,12 +141,15 @@ export function SearchBar({ className, autoFocus, inlinePanel, onNavigate }: Sea
         onFocus={() => setOpen(true)}
         onKeyDown={onKeyDown}
         placeholder="Buscar time, jogador ou camisa"
-        aria-label="Buscar produtos"
+        aria-label={label}
         role="combobox"
         aria-expanded={open}
         aria-controls={listId}
         aria-autocomplete="list"
-        className="h-11 w-full rounded-xl border border-line-strong bg-steel-2 pl-11 pr-10 text-sm text-fg placeholder:text-muted transition-[background-color,border-color,box-shadow] duration-200 hover:border-fg-2/40 focus:border-brand-500 focus:bg-surface focus:outline-none focus:ring-2 focus:ring-brand-500/25 [&::-webkit-search-cancel-button]:hidden"
+        className={cn(
+          'w-full border border-line-strong bg-steel-2 pl-11 pr-10 text-fg placeholder:text-muted transition-[background-color,border-color,box-shadow] duration-200 hover:border-fg-2/40 focus:border-brand-500 focus:bg-surface focus:outline-none focus:ring-2 focus:ring-brand-500/25 [&::-webkit-search-cancel-button]:hidden',
+          size === 'lg' ? 'h-13 rounded-[var(--radius-button,0.75rem)] text-[0.95rem]' : 'h-11 rounded-xl text-sm',
+        )}
       />
       {q && (
         <button type="button" onClick={() => setQ('')} className="absolute right-3 top-1/2 -translate-y-1/2 rounded-md p-1 text-muted transition-colors hover:text-fg" aria-label="Limpar busca">
@@ -228,7 +235,7 @@ export function SearchBar({ className, autoFocus, inlinePanel, onNavigate }: Sea
                   <ul>{results.map((p, i) => productRow(p, i))}</ul>
                 </section>
               )}
-              <button type="submit" className="flex w-full items-center justify-between rounded-xl bg-white/[0.04] px-3 py-2.5 text-left text-xs font-bold uppercase tracking-wider text-brand-300 transition-colors hover:bg-white/[0.08]">
+              <button type="submit" className="flex w-full items-center justify-between rounded-xl bg-white/[0.04] px-3 py-2.5 text-left text-xs font-bold uppercase tracking-wider text-fg transition-colors hover:bg-white/[0.08]">
                 Ver todos os resultados para “{term}” <ArrowUpRight className="size-4" />
               </button>
             </div>

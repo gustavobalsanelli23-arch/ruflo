@@ -53,7 +53,7 @@ export function HomeSections({ heroIds }: { heroIds: string[] }) {
     <>
       <TeamsRail products={products} className="pt-14 sm:pt-16" />
       <CollectionGrid products={products} className={SECTION} />
-      <ProductSection title="Mais vendidas" href="/camisas?ordem=relevancia" linkContext="as camisas mais vendidas" products={s.bestSellers} className={SECTION} />
+      <ProductSection title="Mais vendidas" href="/camisas?ordem=relevancia" linkContext="as camisas mais vendidas" products={s.bestSellers} omitStatus="mais-vendido" className={SECTION} />
       <RetroBand products={products} className="mt-24 sm:mt-32" />
       <NewSeason season={SEASON} products={s.season} className={SECTION} />
       {/* Some sem histórico; com histórico, segue o mesmo respiro das outras seções */}

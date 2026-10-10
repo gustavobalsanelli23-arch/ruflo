@@ -21,11 +21,11 @@ const STATUS_LABEL: Partial<Record<BadgeKind, string>> = {
   'mais-vendido': 'Mais vendido',
 };
 
-function statusOf(product: Product): { label: string; tone: 'muted' | 'danger' | 'fg' } | null {
+function statusOf(product: Product, omit?: BadgeKind): { label: string; tone: 'muted' | 'danger' | 'fg' } | null {
   const badges = badgesFor(product, 4);
   if (badges.includes('esgotado')) return { label: 'Esgotado', tone: 'danger' };
   if (badges.includes('promo')) return { label: `-${discountPercent(product)}%`, tone: 'fg' };
-  const kind = badges.find((b) => STATUS_LABEL[b]);
+  const kind = badges.find((b) => b !== omit && STATUS_LABEL[b]);
   return kind ? { label: STATUS_LABEL[kind] as string, tone: 'muted' } : null;
 }
 
@@ -39,13 +39,15 @@ interface ProductCardProps {
    */
   lit?: boolean;
   litDelay?: number;
+  /** Situação que a prateleira já anuncia no título (ex.: "Mais vendidas"): não repete no armário. */
+  omitStatus?: BadgeKind;
 }
 
 /**
  * Armário do vestiário: plaquinha (time e temporada), o nicho com a camisa
  * sob a luz do teto e a etiqueta (nome, preço, grade de tamanhos).
  */
-function ProductCardBase({ product, priority, lit, litDelay = 0 }: ProductCardProps) {
+function ProductCardBase({ product, priority, lit, litDelay = 0, omitStatus }: ProductCardProps) {
   const { add, open } = useCart();
   const { notify } = useToast();
   const [picking, setPicking] = useState(false);
@@ -54,7 +56,7 @@ function ProductCardBase({ product, priority, lit, litDelay = 0 }: ProductCardPr
   const team = teamById(product.teamId);
   const sizes = availableSizes(product);
   const soldOut = sizes.length === 0;
-  const status = statusOf(product);
+  const status = statusOf(product, omitStatus);
   const plateRight = product.season || categoryById(product.category)?.shortName || '';
 
   const addSize = (size: Size) => {
@@ -228,12 +230,12 @@ export function ProductGrid({ products, className, priorityCount = 0 }: { produc
 }
 
 /** Fileira de armários: rolagem lateral com encaixe no celular; vira grade no desktop. */
-export function ProductRail({ products }: { products: Product[] }) {
+export function ProductRail({ products, omitStatus }: { products: Product[]; omitStatus?: BadgeKind }) {
   return (
     <div className="-mx-4 flex snap-x snap-mandatory gap-2 overflow-x-auto px-4 pb-2 scrollbar-none sm:-mx-6 sm:gap-3 sm:px-6 lg:mx-0 lg:grid lg:snap-none lg:grid-cols-4 lg:gap-4 lg:overflow-visible lg:px-0">
       {products.map((p, i) => (
         <Reveal key={p.id} delay={stagger(i, 60, 4)} className="w-[64%] shrink-0 snap-start sm:w-[40%] lg:w-auto">
-          <ProductCard product={p} />
+          <ProductCard product={p} omitStatus={omitStatus} />
         </Reveal>
       ))}
     </div>

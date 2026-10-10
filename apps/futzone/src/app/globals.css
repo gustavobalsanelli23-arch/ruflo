@@ -337,11 +337,17 @@ html:has(.store-world) {
   *::before,
   *::after {
     animation-duration: 0.01ms !important;
+    /* Atrasos inline (fila das luzes, entradas escalonadas) também somem: o estado final aparece de imediato. */
+    animation-delay: 0ms !important;
     animation-iteration-count: 1 !important;
   }
+  /* O Tailwind v4 usa as propriedades separadas scale/translate/rotate: zera todas. */
   .motion-lift,
   .motion-lift:hover,
   .group:hover .motion-lift {
     transform: none !important;
+    scale: none !important;
+    translate: none !important;
+    rotate: none !important;
   }
 }

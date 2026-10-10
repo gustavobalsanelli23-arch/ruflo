@@ -31,7 +31,10 @@ interface CatalogEntry {
   createdAt: string;
 }
 
-const PROVISIONAL_STOCK_PER_SIZE = 5;
+// Acima do limite de "últimas unidades" (lib/product): um estoque simulado nunca
+// vira aviso de urgência. Avisos de estoque baixo só aparecem quando o admin
+// registra a quantidade real.
+const PROVISIONAL_STOCK_PER_SIZE = 12;
 const FEATURED_COUNT = 8;
 
 function provisionalPrice(e: CatalogEntry, teamCountry: string): number {

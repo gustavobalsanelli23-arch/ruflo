@@ -24,7 +24,7 @@ export function Field({ label, hint, error, required, className, children }: Fie
       <label htmlFor={id} className="text-xs font-semibold uppercase tracking-wider text-fg-2">
         {label}
         {required && (
-          <span className="ml-0.5 text-brand-400" aria-hidden>
+          <span className="ml-0.5 text-muted" aria-hidden>
             *
           </span>
         )}
@@ -108,8 +108,8 @@ export function Switch({ checked, onChange, label }: SwitchProps) {
       onClick={() => onChange(!checked)}
       className="group inline-flex items-center gap-3 text-sm text-fg-2"
     >
-      <span className={cn('relative h-6 w-11 rounded-full transition-colors', checked ? 'bg-brand-500' : 'bg-surface-3 ring-1 ring-line-strong')}>
-        <span className={cn('absolute top-1 size-4 rounded-full bg-white transition-all', checked ? 'left-6' : 'left-1')} />
+      <span className={cn('relative h-6 w-11 rounded-full transition-colors duration-200', checked ? 'bg-brand-500' : 'bg-surface-3 ring-1 ring-line-strong')}>
+        <span className={cn('absolute left-1 top-1 size-4 rounded-full bg-white transition-transform duration-200 ease-[var(--ease-out-fz)]', checked ? 'translate-x-5' : 'translate-x-0')} />
       </span>
       {label}
     </button>

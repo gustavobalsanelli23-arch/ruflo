@@ -263,6 +263,7 @@ export function CatalogView({ preset = {} }: { preset?: CatalogPreset }) {
             <ProductGridSkeleton count={8} />
           ) : results.length === 0 ? (
             <EmptyState
+              headingLevel="h2"
               icon={<SearchX className="size-6" strokeWidth={1.75} />}
               title="Nenhuma camisa encontrada"
               description={query.q ? `Não encontramos resultados para “${query.q}”. Tente o nome de um time, jogador ou temporada.` : 'Nenhum produto combina com esses filtros. Tente remover alguns deles.'}

@@ -50,7 +50,7 @@ export function Hero({ lockers }: { lockers: Product[] }) {
               <LinkButton href="/camisas" size="lg" className="shrink-0">
                 Ver camisas
               </LinkButton>
-              <SearchBar className="w-full sm:max-w-sm xl:max-w-none xl:flex-1 [&_input]:h-13 [&_input]:rounded-[var(--radius-button)]" />
+              <SearchBar size="lg" label="Buscar time ou camisa" className="w-full sm:max-w-sm xl:max-w-none xl:flex-1" />
             </div>
           </div>
 
