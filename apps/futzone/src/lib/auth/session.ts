@@ -3,7 +3,9 @@ import { cookies, headers } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { readAuthConfig } from './config';
 import { randomId, signToken } from './token';
-import { resolveSession, SESSION_COOKIE } from './verify';
+import { readValidPayload, resolveSession, SESSION_COOKIE } from './verify';
+import { isSameOriginRequest } from './origin';
+import { revocationStore } from './revocation';
 import { ADMIN_ROLE, type AdminSessionInfo, type AdminTokenPayload } from './types';
 
 /**
@@ -33,6 +35,15 @@ export async function requireAdminApi(): Promise<{ session: AdminSessionInfo; er
   return { session };
 }
 
+/** Logout: a sessão atual passa a ser recusada no servidor, mesmo que o token seja reenviado. */
+export async function revokeCurrentSession(): Promise<boolean> {
+  const store = await cookies();
+  const payload = await readValidPayload(store.get(SESSION_COOKIE)?.value);
+  if (!payload) return false;
+  await revocationStore.revoke(payload.sid, payload.exp);
+  return true;
+}
+
 export async function issueSessionToken(adminId: string): Promise<{ token: string; payload: AdminTokenPayload }> {
   const config = readAuthConfig();
   if (!config.secret) throw new Error('Sessão administrativa não configurada.');
@@ -41,23 +52,7 @@ export async function issueSessionToken(adminId: string): Promise<{ token: strin
   return { token: await signToken(payload, config.secret), payload };
 }
 
-export const sessionCookieOptions = (maxAge: number) => ({
-  httpOnly: true,
-  secure: process.env.NODE_ENV === 'production',
-  sameSite: 'strict' as const,
-  path: '/',
-  maxAge,
-});
-
 /** Proteção CSRF para POSTs: a origem precisa ser o próprio site. */
 export async function isSameOrigin(): Promise<boolean> {
-  const h = await headers();
-  const origin = h.get('origin');
-  const host = h.get('x-forwarded-host') ?? h.get('host');
-  if (!origin || !host) return false;
-  try {
-    return new URL(origin).host === host;
-  } catch {
-    return false;
-  }
+  return isSameOriginRequest(await headers());
 }

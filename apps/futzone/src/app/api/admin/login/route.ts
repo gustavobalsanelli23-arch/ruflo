@@ -2,7 +2,8 @@ import { headers } from 'next/headers';
 import { isAuthReady, readAuthConfig, toPublicAdmin } from '@/lib/auth/config';
 import { verifyPassword } from '@/lib/auth/password';
 import { createMemoryRateLimiter } from '@/lib/auth/rateLimit';
-import { isSameOrigin, issueSessionToken, SESSION_COOKIE, SESSION_TTL_SEC, sessionCookieOptions } from '@/lib/auth/session';
+import { sessionCookieHeader } from '@/lib/auth/cookie';
+import { isSameOrigin, issueSessionToken, SESSION_TTL_SEC } from '@/lib/auth/session';
 
 export const dynamic = 'force-dynamic';
 
@@ -51,10 +52,6 @@ export async function POST(request: Request) {
   keys.forEach((k) => limiter.reset(k));
   const { token } = await issueSessionToken(account.id);
   const res = json({ ok: true, admin: toPublicAdmin(account) });
-  const opts = sessionCookieOptions(SESSION_TTL_SEC);
-  res.headers.append(
-    'Set-Cookie',
-    `${SESSION_COOKIE}=${token}; Path=${opts.path}; Max-Age=${opts.maxAge}; HttpOnly; SameSite=Strict${opts.secure ? '; Secure' : ''}`,
-  );
+  res.headers.append('Set-Cookie', sessionCookieHeader(token, SESSION_TTL_SEC));
   return res;
 }
