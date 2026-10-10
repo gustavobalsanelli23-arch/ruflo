@@ -129,7 +129,7 @@ function ProductCardBase({ product, priority, lit, litDelay = 0, omitStatus }: P
               )}
             >
               <div className="mb-2 flex items-center justify-between">
-                <p className="text-[0.62rem] font-bold uppercase tracking-[0.16em] text-fg-2">Adicionar rápido</p>
+                <p className="text-[0.6875rem] font-bold uppercase tracking-[0.14em] text-fg-2">Adicionar rápido</p>
                 {picking && (
                   <button type="button" onClick={() => setPicking(false)} className="grid size-6 place-items-center text-muted hover:text-fg lg:hidden" aria-label="Fechar tamanhos">
                     <X className="size-3.5" />
@@ -176,7 +176,7 @@ function ProductCardBase({ product, priority, lit, litDelay = 0, omitStatus }: P
         )}
 
         {added && (
-          <span className="animate-pop pointer-events-none absolute left-2 top-2 z-30 inline-flex items-center gap-1 rounded-xl bg-success px-2.5 py-1.5 text-[0.65rem] font-bold uppercase tracking-wider text-white">
+          <span className="animate-pop pointer-events-none absolute left-2 top-2 z-30 inline-flex items-center gap-1 rounded-xl bg-success px-2.5 py-1.5 text-[0.6875rem] font-bold uppercase tracking-wider text-white">
             <Check className="size-3" /> {added} no carrinho
           </span>
         )}
@@ -194,7 +194,7 @@ function ProductCardBase({ product, priority, lit, litDelay = 0, omitStatus }: P
           {status && (
             <span
               className={cn(
-                'shrink-0 pb-0.5 text-[0.6rem] font-bold uppercase tracking-[0.14em]',
+                'shrink-0 pb-0.5 text-[0.6875rem] font-bold uppercase tracking-[0.12em]',
                 status.tone === 'danger' ? 'text-danger' : status.tone === 'fg' ? 'text-fg' : 'text-muted',
               )}
             >
@@ -202,9 +202,9 @@ function ProductCardBase({ product, priority, lit, litDelay = 0, omitStatus }: P
             </span>
           )}
         </div>
-        <p className="flex flex-wrap gap-x-2 gap-y-0.5 text-[0.68rem] font-semibold tabular-nums tracking-wide" aria-label={soldOut ? 'Sem tamanhos disponíveis' : `Tamanhos disponíveis: ${sizes.join(', ')}`}>
+        <p className="flex flex-wrap gap-x-2 gap-y-0.5 text-[0.6875rem] font-semibold tabular-nums tracking-wide" aria-label={soldOut ? 'Sem tamanhos disponíveis' : `Tamanhos disponíveis: ${sizes.join(', ')}`}>
           {product.sizes.map((s) => (
-            <span key={s} aria-hidden className={stockFor(product, s) > 0 ? 'text-fg-2' : 'text-subtle line-through decoration-subtle'}>
+            <span key={s} aria-hidden className={stockFor(product, s) > 0 ? 'text-fg-2' : 'text-muted line-through decoration-muted/70'}>
               {s}
             </span>
           ))}

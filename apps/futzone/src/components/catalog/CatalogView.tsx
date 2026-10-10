@@ -160,7 +160,10 @@ export function CatalogView({ preset = {} }: { preset?: CatalogPreset }) {
     <div ref={rootRef} className="grid grid-cols-1 gap-8 lg:grid-cols-[17rem_1fr] xl:gap-12">
       {/* Arara de filtros (desktop) */}
       <aside className="hidden lg:block" aria-label="Filtros do catálogo">
-        <div className={`sticky overflow-y-auto overscroll-contain pb-6 pr-3 [scrollbar-width:thin] ${RACK_STICKY}`}>{filters}</div>
+        <div className={`sticky overflow-y-auto overscroll-contain pb-6 pr-3 [scrollbar-width:thin] ${RACK_STICKY}`}>
+          <h2 className="sr-only">Filtros</h2>
+          {filters}
+        </div>
       </aside>
 
       <div className="min-w-0">
@@ -203,7 +206,7 @@ export function CatalogView({ preset = {} }: { preset?: CatalogPreset }) {
           >
             <SlidersHorizontal className="size-4" strokeWidth={1.75} aria-hidden /> Filtros
             {filterCount > 0 && (
-              <span key={filterCount} className="animate-pop grid min-w-5 place-items-center rounded-[2px] bg-fg px-1 text-[0.65rem] leading-5 tabular-nums tracking-normal text-bg">
+              <span key={filterCount} className="animate-pop grid min-w-5 place-items-center rounded-[2px] bg-fg px-1 text-[0.6875rem] leading-5 tabular-nums tracking-normal text-bg">
                 {filterCount}
               </span>
             )}
@@ -258,12 +261,12 @@ export function CatalogView({ preset = {} }: { preset?: CatalogPreset }) {
           </div>
         )}
 
+        <h2 className="sr-only">Resultados</h2>
         <div ref={resultsRef} className="mt-5 sm:mt-6">
           {!hydrated ? (
             <ProductGridSkeleton count={8} />
           ) : results.length === 0 ? (
             <EmptyState
-              headingLevel="h2"
               icon={<SearchX className="size-6" strokeWidth={1.75} />}
               title="Nenhuma camisa encontrada"
               description={query.q ? `Não encontramos resultados para “${query.q}”. Tente o nome de um time, jogador ou temporada.` : 'Nenhum produto combina com esses filtros. Tente remover alguns deles.'}

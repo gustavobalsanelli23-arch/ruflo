@@ -55,8 +55,11 @@ export function Hero({ lockers }: { lockers: Product[] }) {
           </div>
 
           {/* Fileira de armários: rolagem com encaixe no celular, quatro lado a lado a partir do tablet; ao lado da manchete só no desktop largo */}
+          <h2 id="hero-lockers" className="sr-only">
+            Camisas em destaque
+          </h2>
           <ul
-            aria-label="Camisas em destaque"
+            aria-labelledby="hero-lockers"
             className="-mx-4 flex snap-x snap-mandatory gap-2 overflow-x-auto scroll-px-4 px-4 scrollbar-none sm:-mx-6 sm:scroll-px-6 sm:px-6 md:mx-0 md:grid md:grid-cols-4 md:gap-2.5 md:overflow-visible md:px-0 xl:gap-3"
           >
             {lockers.map((product, i) => {

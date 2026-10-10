@@ -72,7 +72,7 @@ export function Header() {
       >
         {/* O padding fica no filho: a linha 0fr recolhe a faixa inteira, sem sobrar borda de 12px */}
         <p className="min-h-0">
-          <span className="block py-1.5 text-[0.66rem] font-semibold uppercase tracking-[0.16em] text-muted">
+          <span className="block py-1.5 text-[0.6875rem] font-semibold uppercase tracking-[0.14em] text-muted">
             Loja em demonstração<span className="hidden sm:inline">: pagamentos e entregas ainda não disponíveis</span>
           </span>
         </p>
@@ -137,7 +137,7 @@ export function Header() {
             <button type="button" className={iconBtn} onClick={openCart} aria-label={`Abrir carrinho (${count} ${count === 1 ? 'item' : 'itens'})`}>
               <ShoppingBag key={bump} className={cn('size-5', bump > 0 && 'animate-bump')} strokeWidth={1.75} />
               {count > 0 && (
-                <span key={`n${bump}`} className="animate-pop absolute right-0 top-0.5 grid min-w-[1.15rem] place-items-center rounded-[4px] bg-brand-600 px-1 text-[0.62rem] font-bold leading-[1.15rem] text-white ring-2 ring-bg">
+                <span key={`n${bump}`} className="animate-pop absolute right-0 top-0.5 grid min-w-[1.15rem] place-items-center rounded-[4px] bg-brand-600 px-1 text-[0.6875rem] font-bold leading-[1.15rem] text-white ring-2 ring-bg">
                   {count}
                 </span>
               )}

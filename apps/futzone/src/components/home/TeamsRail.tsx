@@ -107,11 +107,11 @@ export function TeamsRail({ products, className }: { products: Product[]; classN
             <li key={team.id} className="w-[46%] shrink-0 snap-start sm:w-[28%] md:w-[22%] lg:w-[calc((100%-4*0.625rem)/5)] xl:w-[calc((100%-5*0.625rem)/6)]">
               <Link
                 href={`/camisas/${team.slug}`}
-                className="locker group relative flex h-28 flex-col justify-between rounded-[var(--radius-card)] p-3.5 transition-[border-color,background-color] duration-200 hover:border-line-strong active:bg-steel-3 sm:h-32 sm:p-4"
+                className="locker group relative flex h-28 flex-col justify-between rounded-[var(--radius-card)] p-3.5 transition-[border-color,background-color] duration-200 hover:border-line-strong focus-visible:outline-offset-[-2px] active:bg-steel-3 sm:h-32 sm:p-4"
               >
                 {/* Luz da plaquinha: acende ao apontar, como os armários */}
                 <span aria-hidden className="absolute inset-x-[18%] -top-px h-[2px] bg-light opacity-0 transition-opacity duration-200 group-hover:opacity-100 group-focus-visible:opacity-100" />
-                <span className="plate line-clamp-2 text-[1.15rem] leading-[1.02] text-fg [overflow-wrap:anywhere] xl:text-[1.3rem]">{team.name}</span>
+                <span className="plate line-clamp-2 text-[1.15rem] leading-[1.2] text-fg [overflow-wrap:anywhere] xl:text-[1.3rem]">{team.name}</span>
                 <span className="flex items-end justify-between gap-2 text-xs">
                   <span className="truncate text-muted">{from}</span>
                   <span className="shrink-0 font-semibold tabular-nums text-fg-2">{plural(count)}</span>

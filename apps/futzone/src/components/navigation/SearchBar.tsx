@@ -102,7 +102,7 @@ export function SearchBar({ className, autoFocus, inlinePanel, onNavigate, label
     go(`/camisas?q=${encodeURIComponent(value)}`);
   };
 
-  const sectionTitle = 'mb-2 flex items-center gap-2 px-1 text-[0.65rem] font-bold uppercase tracking-[0.18em] text-muted';
+  const sectionTitle = 'mb-2 flex items-center gap-2 px-1 text-[0.6875rem] font-bold uppercase tracking-[0.16em] text-muted';
   const chip = 'rounded-[var(--radius-chip)] border border-line-strong px-3 py-1.5 text-xs text-fg-2 transition-colors duration-150 hover:border-fg-2/60 hover:text-fg';
 
   const productRow = (p: (typeof products)[number], i?: number) => (

@@ -242,7 +242,8 @@ html:has(.store-world) {
   text-transform: uppercase;
   font-weight: 700;
   letter-spacing: 0.08em;
-  line-height: 1;
+  /* 1.25, não 1: com truncate, acentos de maiúsculas (GRÊMIO, ATLÉTICO, SÃO) seriam cortados. */
+  line-height: 1.25;
 }
 
 /* Linha da prateleira: o eixo horizontal de cada seção */

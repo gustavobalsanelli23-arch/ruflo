@@ -12,7 +12,7 @@ export function AccountButton({ className }: { className?: string }) {
   if (customer) {
     return (
       <Link href="/conta" className={className} aria-label={`Minha conta: ${customer.name}`} title="Minha conta">
-        <span className="grid size-7 place-items-center rounded-md border border-line-strong bg-steel-3 text-[0.62rem] font-bold text-fg">{initialsOf(customer.name)}</span>
+        <span className="grid size-7 place-items-center rounded-md border border-line-strong bg-steel-3 text-[0.6875rem] font-bold text-fg">{initialsOf(customer.name)}</span>
       </Link>
     );
   }
