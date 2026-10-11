@@ -79,10 +79,6 @@ function LitLocker({ product }: { product: Product }) {
       </div>
       <div className="relative isolate overflow-hidden bg-[#0a0c10]">
         <span aria-hidden className="animate-light-on pointer-events-none absolute inset-x-[14%] top-0 z-20 h-[2px] bg-light [animation-delay:200ms]" />
-        <span
-          aria-hidden
-          className="animate-cone-on pointer-events-none absolute inset-0 z-10 bg-[radial-gradient(62%_40%_at_50%_0%,rgb(219_230_255/0.2),transparent_78%)] mix-blend-screen [animation-delay:420ms]"
-        />
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src={image.src} alt="" width={720} height={960} loading="lazy" decoding="async" className="block aspect-[3/4] h-auto w-full object-cover" />
       </div>

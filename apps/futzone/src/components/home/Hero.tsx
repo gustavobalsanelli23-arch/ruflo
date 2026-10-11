@@ -11,7 +11,7 @@ const LOCKERS = 4;
 /** Primeira lâmpada acende logo depois da pintura; as outras seguem em fila. */
 const FIRST_LIGHT_MS = 200;
 const LIGHT_STEP_MS = 140;
-/** O vestiário clareia quando o cone de luz cai sobre a camisa (ProductCard: faixa + 220ms). */
+/** O vestiário clareia logo depois que a faixa de luz do armário firma (ProductCard: faixa + 220ms). */
 const ROOM_DELAY_MS = 220;
 
 /**
