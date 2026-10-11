@@ -6,11 +6,6 @@ export interface PlateDatum {
 }
 
 interface PageHeaderProps {
-  /**
-   * @deprecated A loja não usa rótulos acima do título: o valor é ignorado.
-   * Mantido só para não quebrar páginas que ainda passam a prop.
-   */
-  eyebrow?: string;
   title: string;
   description?: string;
   /** Dado alinhado à direita da linha da prateleira (ex.: total de produtos). */

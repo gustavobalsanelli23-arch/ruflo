@@ -19,7 +19,7 @@ export const categories: Category[] = [
     id: 'kits',
     name: 'Kits',
     shortName: 'Kits',
-    description: 'Camisa e calção juntos — do campo à arquibancada.',
+    description: 'Camisa e calção juntos, do campo à arquibancada.',
     href: '/kits',
   },
   {

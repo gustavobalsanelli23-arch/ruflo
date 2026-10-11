@@ -91,7 +91,7 @@ function TeamPlate({ team, count }: { team: Team; count: number }) {
 
       <span className="flex items-center justify-between gap-3 border-t border-line px-3 py-2 text-xs sm:px-4">
         <span className="min-w-0 truncate text-muted">{country}</span>
-        <span className={cn('shrink-0 font-semibold tabular-nums', empty ? 'text-subtle' : 'text-fg-2')}>
+        <span className={cn('shrink-0 font-semibold tabular-nums', empty ? 'text-muted' : 'text-fg-2')}>
           {count} {count === 1 ? 'camisa' : 'camisas'}
         </span>
       </span>
