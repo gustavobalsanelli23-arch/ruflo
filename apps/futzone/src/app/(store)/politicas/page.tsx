@@ -43,7 +43,7 @@ export default function PoliciesPage() {
                 <h2 id={`${s.id}-titulo`} className="heading-display text-[2rem] text-fg sm:text-[2.5rem]">
                   {s.title}
                 </h2>
-                <p className="mt-4 text-[0.95rem] leading-relaxed text-fg-2 sm:text-base">{s.text}</p>
+                <p className="mt-4 max-w-[60ch] text-[0.95rem] leading-relaxed text-fg-2 sm:text-base">{s.text}</p>
               </section>
             ))}
           </div>
