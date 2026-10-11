@@ -24,7 +24,7 @@ export function FavoriteButton({ productId, productName, className, withLabel }:
       aria-label={label}
       title={active ? 'Remover dos favoritos' : 'Adicionar aos favoritos'}
       className={cn(
-        'inline-flex items-center justify-center gap-2 transition-[transform,color,background-color] duration-200 active:scale-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-400',
+        'inline-flex items-center justify-center gap-2 transition-[transform,scale,color,background-color] duration-200 active:scale-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-400',
         className,
       )}
     >

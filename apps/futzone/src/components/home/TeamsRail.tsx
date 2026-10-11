@@ -76,7 +76,7 @@ export function TeamsRail({ products, className }: { products: Product[]; classN
   if (list.length === 0) return null;
 
   const arrow =
-    'grid size-10 place-items-center rounded-[var(--radius-button)] border border-line-strong text-fg-2 transition-[color,border-color,opacity,transform] duration-150 hover:border-fg-2 hover:text-fg active:scale-[0.97] disabled:pointer-events-none disabled:opacity-35';
+    'grid size-10 place-items-center rounded-[var(--radius-button)] border border-line-strong text-fg-2 transition-[color,border-color,opacity,transform,scale] duration-150 hover:border-fg-2 hover:text-fg active:scale-[0.97] disabled:pointer-events-none disabled:opacity-35';
 
   return (
     <section className={cn('container-fz', className)}>

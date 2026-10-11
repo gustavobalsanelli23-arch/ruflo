@@ -80,7 +80,7 @@ export function CouponField({ code, result, onApply, onRemove }: { code: string 
           type="button"
           onClick={onRemove}
           aria-label={`Remover cupom ${code}`}
-          className="grid size-9 shrink-0 place-items-center rounded-[var(--radius-button)] transition-[background-color,transform] duration-150 ease-[var(--ease-out-fz)] hover:bg-success/15 active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-400"
+          className="grid size-9 shrink-0 place-items-center rounded-[var(--radius-button)] transition-[background-color,transform,scale] duration-150 ease-[var(--ease-out-fz)] hover:bg-success/15 active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-400"
         >
           <X className="size-4" strokeWidth={1.75} aria-hidden />
         </button>

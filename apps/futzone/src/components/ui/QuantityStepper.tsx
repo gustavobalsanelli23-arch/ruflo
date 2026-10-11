@@ -14,7 +14,7 @@ interface QuantityStepperProps {
 
 export function QuantityStepper({ value, min = 1, max, onChange, size = 'md', label = 'Quantidade' }: QuantityStepperProps) {
   const btn = cn(
-    'grid place-items-center text-fg-2 transition-[color,transform] duration-150 hover:text-fg active:scale-90 disabled:cursor-not-allowed disabled:text-subtle disabled:active:scale-100',
+    'grid place-items-center text-fg-2 transition-[color,transform,scale] duration-150 hover:text-fg active:scale-90 disabled:cursor-not-allowed disabled:text-subtle disabled:active:scale-100',
     size === 'sm' ? 'size-8' : 'size-11',
   );
   return (

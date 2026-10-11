@@ -64,7 +64,7 @@ function TeamPlate({ team, count }: { team: Team; count: number }) {
     <Link
       href={`/camisas/${team.slug}`}
       className={cn(
-        'locker group relative isolate flex h-full min-h-[7.5rem] flex-col overflow-hidden rounded-[var(--radius-card)] transition-[border-color,transform] duration-200 ease-[var(--ease-out-fz)] active:scale-[0.98] sm:min-h-[8.5rem]',
+        'locker group relative isolate flex h-full min-h-[7.5rem] flex-col overflow-hidden rounded-[var(--radius-card)] transition-[border-color,transform,scale] duration-200 ease-[var(--ease-out-fz)] active:scale-[0.98] sm:min-h-[8.5rem]',
         'hover:border-brand-600 focus-visible:border-brand-600 focus-visible:outline-none',
       )}
     >

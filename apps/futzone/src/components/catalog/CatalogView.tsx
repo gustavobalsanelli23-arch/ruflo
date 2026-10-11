@@ -54,7 +54,7 @@ function useHeaderHeight(root: React.RefObject<HTMLElement | null>) {
 }
 
 const CHIP =
-  'animate-pop inline-flex h-8 items-center gap-1.5 rounded-[var(--radius-chip)] border border-line-strong bg-steel-2 pl-3 pr-2 text-xs font-semibold text-fg-2 transition-[border-color,color,transform] duration-150 ease-[var(--ease-out-fz)] hover:border-fg-2/60 hover:text-fg active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-400';
+  'animate-pop inline-flex h-8 items-center gap-1.5 rounded-[var(--radius-chip)] border border-line-strong bg-steel-2 pl-3 pr-2 text-xs font-semibold text-fg-2 transition-[border-color,color,transform,scale] duration-150 ease-[var(--ease-out-fz)] hover:border-fg-2/60 hover:text-fg active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-400';
 
 /**
  * Catálogo completo: busca, filtros, ordenação e carregamento progressivo.
@@ -183,7 +183,7 @@ export function CatalogView({ preset = {} }: { preset?: CatalogPreset }) {
             <button
               type="button"
               onClick={() => setTerm('')}
-              className="absolute right-1.5 top-1/2 grid size-9 -translate-y-1/2 place-items-center rounded-lg text-muted transition-[background-color,color,transform] duration-150 hover:bg-white/[0.06] hover:text-fg active:scale-[0.94]"
+              className="absolute right-1.5 top-1/2 grid size-9 -translate-y-1/2 place-items-center rounded-lg text-muted transition-[background-color,color,transform,scale] duration-150 hover:bg-white/[0.06] hover:text-fg active:scale-[0.94]"
               aria-label="Limpar busca"
             >
               <X className="size-4" strokeWidth={1.75} aria-hidden />

@@ -81,7 +81,7 @@ export function Chip({ selected, className, ...props }: ChipProps) {
       type="button"
       aria-pressed={selected}
       className={cn(
-        'inline-flex h-9 items-center justify-center gap-1.5 rounded-[var(--radius-chip,9999px)] border px-3.5 text-xs font-semibold transition-[background-color,border-color,color,transform] duration-150 active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-400',
+        'motion-lift inline-flex h-9 items-center justify-center gap-1.5 rounded-[var(--radius-chip,9999px)] border px-3.5 text-xs font-semibold transition-[background-color,border-color,color,scale] duration-150 active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-400',
         selected
           ? 'border-brand-600 bg-brand-600 text-white'
           : 'border-line-strong bg-white/[0.02] text-fg-2 hover:border-fg-2/50 hover:text-fg',

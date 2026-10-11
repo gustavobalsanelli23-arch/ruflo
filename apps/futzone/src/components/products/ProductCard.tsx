@@ -147,7 +147,7 @@ function ProductCardBase({ product, priority, lit, litDelay = 0, omitStatus }: P
                       onClick={() => addSize(s)}
                       aria-label={`Adicionar tamanho ${s}${out ? ' (esgotado)' : ''}`}
                       className={cn(
-                        'h-8 min-w-9 rounded-lg px-2 text-xs font-bold tabular-nums transition-[background-color,color,transform] duration-150 active:scale-95',
+                        'h-8 min-w-9 rounded-lg px-2 text-xs font-bold tabular-nums transition-[background-color,color,transform,scale] duration-150 active:scale-95',
                         out ? 'cursor-not-allowed text-subtle line-through' : 'bg-white/[0.07] text-fg hover:bg-brand-600 hover:text-white',
                         added === s && 'bg-brand-600 text-white',
                       )}
@@ -165,7 +165,7 @@ function ProductCardBase({ product, priority, lit, litDelay = 0, omitStatus }: P
               aria-label={added ? 'Adicionado ao carrinho' : `Adicionar ${product.name} ao carrinho`}
               aria-expanded={sizes.length > 1 ? picking : undefined}
               className={cn(
-                'absolute bottom-2 right-2 z-30 grid size-10 place-items-center rounded-xl transition-[background-color,transform,opacity] duration-150 active:scale-90 lg:hidden',
+                'absolute bottom-2 right-2 z-30 grid size-10 place-items-center rounded-xl transition-[background-color,transform,scale,opacity] duration-150 active:scale-90 lg:hidden',
                 added ? 'bg-success text-white' : 'bg-fg text-bg',
                 picking && 'pointer-events-none scale-90 opacity-0',
               )}

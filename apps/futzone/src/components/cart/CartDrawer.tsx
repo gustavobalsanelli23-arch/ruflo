@@ -233,7 +233,7 @@ export function CartDrawer() {
                 <button
                   type="button"
                   onClick={dismiss}
-                  className="inline-flex h-9 items-center rounded-[var(--radius-button)] px-1 text-sm font-semibold text-fg-2 underline-offset-4 transition-[color,transform] duration-150 ease-[var(--ease-out-fz)] hover:text-fg hover:underline active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-400"
+                  className="inline-flex h-9 items-center rounded-[var(--radius-button)] px-1 text-sm font-semibold text-fg-2 underline-offset-4 transition-[color,transform,scale] duration-150 ease-[var(--ease-out-fz)] hover:text-fg hover:underline active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-400"
                 >
                   Continuar comprando
                 </button>

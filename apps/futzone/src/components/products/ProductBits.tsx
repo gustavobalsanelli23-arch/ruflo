@@ -142,7 +142,7 @@ export function SizeSelector({ product, value, onChange, compact, invalid, shake
             onClick={() => onChange(s)}
             className={cn(
               'grid place-items-center rounded-[var(--radius-button)] border font-bold tabular-nums transition-[background-color,border-color,color,scale] duration-150 ease-[var(--ease-out-fz)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-400 focus-visible:ring-offset-2 focus-visible:ring-offset-bg',
-              compact ? 'h-7 min-w-7 px-1.5 text-[0.68rem]' : 'h-12 min-w-12 px-3 text-sm',
+              compact ? 'h-7 min-w-7 px-1.5 text-[0.6875rem]' : 'h-12 min-w-12 px-3 text-sm',
               out
                 ? 'cursor-not-allowed border-line bg-transparent text-subtle line-through decoration-subtle'
                 : selected

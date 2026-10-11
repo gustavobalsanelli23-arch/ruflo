@@ -59,7 +59,7 @@ export function Header() {
   }, [pathname]);
 
   const iconBtn =
-    'relative grid size-10 place-items-center rounded-xl text-fg-2 transition-[background-color,color,transform] duration-150 hover:bg-white/[0.06] hover:text-fg active:scale-95';
+    'relative grid size-10 place-items-center rounded-xl text-fg-2 transition-[background-color,color,transform,scale] duration-150 hover:bg-white/[0.06] hover:text-fg active:scale-95';
 
   return (
     <header className="sticky top-0 z-40">

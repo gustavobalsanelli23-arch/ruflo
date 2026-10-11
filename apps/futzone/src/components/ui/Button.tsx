@@ -23,7 +23,7 @@ const SIZES: Record<Size, string> = {
 };
 
 const BASE =
-  'relative inline-flex items-center justify-center rounded-[var(--radius-button,9999px)] font-bold uppercase tracking-[0.12em] select-none whitespace-nowrap transition-[background-color,color,border-color,box-shadow,transform] duration-150 ease-[var(--ease-out-fz)] active:scale-[0.97] disabled:cursor-not-allowed disabled:active:scale-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-400 focus-visible:ring-offset-2 focus-visible:ring-offset-bg';
+  'motion-lift relative inline-flex items-center justify-center rounded-[var(--radius-button,9999px)] font-bold uppercase tracking-[0.12em] select-none whitespace-nowrap transition-[background-color,color,border-color,box-shadow,scale] duration-150 ease-[var(--ease-out-fz)] active:scale-[0.97] disabled:cursor-not-allowed disabled:active:scale-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-400 focus-visible:ring-offset-2 focus-visible:ring-offset-bg';
 
 export interface ButtonStyleProps {
   variant?: Variant;

@@ -102,7 +102,7 @@ export function CartLineItem({ line, variant = 'drawer' }: { line: CartLine; var
             type="button"
             onClick={() => remove(line.productId, line.size)}
             aria-label={`Remover ${line.name} tamanho ${line.size}`}
-            className="-mt-1 grid size-10 shrink-0 place-items-center rounded-[var(--radius-button)] text-muted transition-[color,background-color,transform] duration-150 ease-[var(--ease-out-fz)] hover:bg-danger/10 hover:text-danger active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-400"
+            className="-mt-1 grid size-10 shrink-0 place-items-center rounded-[var(--radius-button)] text-muted transition-[color,background-color,transform,scale] duration-150 ease-[var(--ease-out-fz)] hover:bg-danger/10 hover:text-danger active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-400"
           >
             <Trash2 className="size-4" strokeWidth={1.75} aria-hidden />
           </button>

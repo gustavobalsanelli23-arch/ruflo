@@ -90,7 +90,7 @@ export function Footer() {
 
 function FooterColumn({ title, links }: { title: string; links: Array<{ label: string; href: string }> }) {
   return (
-    <nav aria-label={title}>
+    <nav aria-label={`${title} (rodapé)`}>
       <h3 className="plate mb-4 text-[0.95rem] text-fg">{title}</h3>
       <ul className="space-y-2.5">
         {links.map((l) => (
