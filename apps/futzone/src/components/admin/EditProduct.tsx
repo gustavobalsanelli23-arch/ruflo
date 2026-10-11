@@ -6,9 +6,10 @@ import { AdminLinkButton, AdminPageHeader } from './AdminUI';
 import { ProductForm } from './ProductForm';
 
 export function EditProduct({ id }: { id: string }) {
-  const { products, hydrated } = useStoreData();
+  const { products, hydrated, catalogSource, adminCatalogLoaded } = useStoreData();
   const product = products.find((p) => p.id === id);
-  if (!hydrated) return <div className="h-96 animate-pulse rounded-2xl bg-surface" aria-busy="true" />;
+  // Com banco, o formulário só abre com o catálogo do painel (estoque e situação atuais).
+  if (!hydrated || (catalogSource === 'db' && !adminCatalogLoaded)) return <div className="h-96 animate-pulse rounded-2xl bg-surface" aria-busy="true" />;
   if (!product) return <EmptyState title="Produto não encontrado" action={<AdminLinkButton href="/admin/produtos">Voltar aos produtos</AdminLinkButton>} />;
   return (
     <>

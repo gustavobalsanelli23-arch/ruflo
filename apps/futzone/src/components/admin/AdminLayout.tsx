@@ -5,13 +5,27 @@ import { usePathname } from 'next/navigation';
 import { X } from 'lucide-react';
 import { AdminSidebar } from './AdminSidebar';
 import { AdminHeader } from './AdminHeader';
+import { useStoreData } from '@/context/StoreDataContext';
+import { useToast } from '@/context/ToastContext';
 
 /** Estrutura do painel: sidebar fixa no desktop e menu lateral no celular/tablet. */
 export function AdminLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
 
+  const { refreshCatalog, adminError } = useStoreData();
+  const { notify } = useToast();
+
   useEffect(() => setOpen(false), [pathname]);
+
+  // Com banco, o painel vê o catálogo completo (rascunhos e itens aguardando aprovação).
+  useEffect(() => {
+    void refreshCatalog({ admin: true });
+  }, [refreshCatalog]);
+
+  useEffect(() => {
+    if (adminError) notify(adminError.message, 'warning');
+  }, [adminError, notify]);
 
   useEffect(() => {
     if (!open) return;

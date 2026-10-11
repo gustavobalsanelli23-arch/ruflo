@@ -20,7 +20,7 @@ import { useAdmin } from './AdminGuard';
 const STOCK_CLASS = { disponivel: 'text-fg', baixo: 'text-warn', esgotado: 'text-danger' } as const;
 
 export function ProductsAdmin() {
-  const { products, setProductStatus, deleteProduct, settings } = useStoreData();
+  const { products, setProductStatus, deleteProduct, settings, catalogSource } = useStoreData();
   const { log } = useAdmin();
   const { notify } = useToast();
   const [q, setQ] = useState('');
@@ -181,7 +181,11 @@ export function ProductsAdmin() {
       <AdminConfirm
         open={!!removing}
         title="Excluir produto?"
-        description={`"${removing?.name}" será removido do catálogo local. Esta ação pode ser desfeita apenas restaurando os dados de exemplo em Configurações.`}
+        description={
+          catalogSource === 'db'
+            ? `"${removing?.name}" sai da loja. Produtos do fornecedor ou com pedidos são arquivados (o histórico fica); os demais são excluídos.`
+            : `"${removing?.name}" será removido do catálogo local. Esta ação pode ser desfeita apenas restaurando os dados de exemplo em Configurações.`
+        }
         confirmLabel="Excluir produto"
         onCancel={() => setRemoving(null)}
         onConfirm={() => {
