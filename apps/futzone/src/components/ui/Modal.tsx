@@ -41,7 +41,7 @@ export function Modal({ open, onClose, title, description, size = 'md', footer, 
 
   return (
     <div className="fixed inset-0 z-[70] flex items-end justify-center sm:items-center sm:p-6">
-      <div className="animate-fade absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={onClose} aria-hidden />
+      <div className="animate-fade absolute inset-0 bg-black/75" onClick={onClose} aria-hidden />
       <div
         ref={panelRef}
         role="dialog"
@@ -49,7 +49,7 @@ export function Modal({ open, onClose, title, description, size = 'md', footer, 
         aria-labelledby={titleId}
         tabIndex={-1}
         className={cn(
-          'animate-fade-up relative flex max-h-[92dvh] w-full flex-col overflow-hidden rounded-t-2xl border border-line bg-surface shadow-2xl outline-none sm:rounded-2xl',
+          'animate-sheet sm:animate-pop relative flex max-h-[92dvh] w-full flex-col overflow-hidden rounded-t-2xl border border-line-strong bg-surface shadow-[0_30px_80px_-20px_rgb(0_0_0/0.8)] outline-none sm:rounded-2xl',
           WIDTHS[size],
         )}
       >

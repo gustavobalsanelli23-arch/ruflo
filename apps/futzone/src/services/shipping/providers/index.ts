@@ -20,7 +20,7 @@ export interface ProviderInfo {
 }
 
 export const SHIPPING_PROVIDERS: ProviderInfo[] = [
-  { id: 'mock', name: 'Simulação local', configured: true, description: 'Tabela configurável para desenvolvimento — não é cotação real.' },
+  { id: 'mock', name: 'Simulação local', configured: true, description: 'Tabela configurável para desenvolvimento: não é cotação real.' },
   { id: 'correios', name: 'Correios', configured: false, description: 'PAC, SEDEX e rastreamento (contrato + API).' },
   { id: 'melhor-envio', name: 'Melhor Envio', configured: false, description: 'Cotação multitransportadora e etiquetas.' },
   { id: 'frenet', name: 'Frenet', configured: false, description: 'Gateway de frete com várias transportadoras.' },

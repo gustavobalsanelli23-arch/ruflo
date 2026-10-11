@@ -2,8 +2,8 @@
 
 export const site = {
   name: 'FUTZONE',
-  tagline: 'Vista a paixão pelo futebol.',
-  description: 'Camisas de clubes, seleções, retrô e kits — para quem vive o futebol dentro e fora do estádio.',
+  tagline: 'Vista o manto. Entre em campo.',
+  description: 'Camisas de clubes, seleções, retrô e kits, com fotos reais, preço e tamanhos à vista.',
   contactEmail: 'contato@futzone.com.br',
   /** Perfis oficiais. Deixe `href` vazio até o perfil existir — links vazios não aparecem. */
   social: [
@@ -19,11 +19,16 @@ export interface ProductRef {
   slug: string;
 }
 
-/** Vitrine do hero (3 camisas): esquerda, centro (destaque) e direita. */
+/**
+ * Fileira de armários do hero (4 camisas, da esquerda para a direita, na ordem
+ * em que as luzes acendem). Se alguma sair do catálogo ou esgotar, a Home
+ * completa a fileira com as camisas mais procuradas.
+ */
 export const heroShowcase: ProductRef[] = [
   { teamId: 'flamengo', slug: 'camisa-jogador-flamengo-listrada-i-26-27' },
   { teamId: 'brasil', slug: 'camisa-torcedor-selecao-brasil-amarela-i-26-27' },
-  { teamId: 'barcelona', slug: 'camisa-jogador-barcelona-listrada-i-25-26' },
+  { teamId: 'palmeiras', slug: 'camisa-palmeiras-verde-i-26-27' },
+  { teamId: 'psg', slug: 'camisa-psg-i-2026-27-azul-e-vermelho' },
 ];
 
 /** Foto de capa dos cards de categoria na Home. */
@@ -36,11 +41,14 @@ export const categoryCovers: Record<string, ProductRef> = {
   times: { teamId: 'palmeiras', slug: 'camisa-palmeiras-verde-i-26-27' },
 };
 
-/** Fotos do banner da coleção retrô. */
+/**
+ * Faixa retrô da Home: três camisas do MESMO ano (o ano aparece em destaque
+ * ao lado das fotos, então precisa ser o ano verdadeiro delas).
+ */
 export const retroShowcase: ProductRef[] = [
-  { teamId: 'milan', slug: 'camisa-retro-ac-milan-2006-07-kaka' },
-  { teamId: 'psg', slug: 'camisa-retro-psg-i-ronaldinho-2001-02' },
-  { teamId: 'flamengo', slug: 'camisa-retro-flamengo-1997' },
+  { teamId: 'botafogo', slug: 'camisa-retro-botafogo-listrada-1995' },
+  { teamId: 'flamengo', slug: 'camisa-retro-flamengo-1995' },
+  { teamId: 'botafogo', slug: 'camisa-retro-botafogo-preta-1995' },
 ];
 
 export interface NavLink {

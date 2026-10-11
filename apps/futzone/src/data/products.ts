@@ -31,7 +31,10 @@ interface CatalogEntry {
   createdAt: string;
 }
 
-const PROVISIONAL_STOCK_PER_SIZE = 5;
+// Acima do limite de "últimas unidades" (lib/product): um estoque simulado nunca
+// vira aviso de urgência. Avisos de estoque baixo só aparecem quando o admin
+// registra a quantidade real.
+const PROVISIONAL_STOCK_PER_SIZE = 12;
 const FEATURED_COUNT = 8;
 
 function provisionalPrice(e: CatalogEntry, teamCountry: string): number {
@@ -59,10 +62,12 @@ function toProduct(e: CatalogEntry): Product {
   const available = new Set(e.availableSizes);
   const base: Size[] = e.kids ? KIDS_SIZES : ADULT_SIZES.slice(0, 5);
   const sizes = ALL_SIZES.filter((s) => base.includes(s) || available.has(s));
-  const tags = new Set(e.tags as ProductTag[]);
+  // "mais-vendido" do arquivo do fornecedor é alegação dele, não venda da FutZone: não entra.
+  const tags = new Set((e.tags as ProductTag[]).filter((t) => t !== 'mais-vendido'));
   const rank = featuredRank.get(e.sourceId) ?? Infinity;
-  if (rank < FEATURED_COUNT) tags.add('mais-vendido');
-  else if (rank < FEATURED_COUNT * 2) tags.add('popular');
+  // Destaque segue a ordem do catálogo do fornecedor. "Mais vendido" só existe quando a loja
+  // tiver dado real de vendas (o admin pode marcar à mão): nunca é inventado aqui.
+  if (rank < FEATURED_COUNT * 2) tags.add('popular');
   if (newest.has(e.sourceId)) tags.add('lancamento');
   const categoryName = categories.find((c) => c.id === e.category)?.name ?? e.category;
 
@@ -81,7 +86,7 @@ function toProduct(e: CatalogEntry): Product {
     stock: Object.fromEntries(sizes.map((s) => [s, available.has(s) ? PROVISIONAL_STOCK_PER_SIZE : 0])),
     images: Array.from({ length: e.photos }, (_, i) => ({
       src: `/produtos/${e.teamId}/${e.slug}/${i + 1}.jpg`,
-      alt: i === 0 ? e.name : `${e.name} — foto ${i + 1}`,
+      alt: i === 0 ? e.name : `${e.name}, foto ${i + 1}`,
     })),
     palette: team.colors,
     status: 'published',

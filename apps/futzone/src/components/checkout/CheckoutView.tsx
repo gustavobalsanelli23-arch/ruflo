@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { AlertTriangle, LoaderCircle, Lock, ShoppingBag } from 'lucide-react';
+import { AlertTriangle, LoaderCircle, Shirt } from 'lucide-react';
 import type { Address } from '@/types/commerce';
 import type { ShippingQuote } from '@/services/shipping/shipping.types';
 import { shippingService } from '@/services/shipping/shipping.service';
@@ -29,6 +29,12 @@ import { CouponField, TotalsTable } from './CheckoutTotals';
 import { MobileOrderSummary, OrderSummary } from './OrderSummary';
 
 const LABELS = ['Identificação', 'Endereço', 'Entrega', 'Resumo', 'Pagamento'];
+
+/*
+ * O resumo lateral gruda logo abaixo do Header rolado (58px = h-14 + 2 bordas,
+ * components/layout/Header.tsx) com um respiro de 1.5rem.
+ */
+const SUMMARY_STICKY = 'sticky top-[calc(58px+1.5rem)]';
 
 export function CheckoutView() {
   const router = useRouter();
@@ -159,16 +165,16 @@ export function CheckoutView() {
 
   if (placed.current) {
     return (
-      <div role="status" className="flex flex-col items-center gap-3 py-24 text-center text-fg-2">
-        <LoaderCircle className="size-8 animate-spin text-brand-400" /> Finalizando seu pedido…
+      <div role="status" className="flex flex-col items-center gap-3 py-24 text-center text-sm text-fg-2">
+        <LoaderCircle className="size-6 animate-spin text-muted" strokeWidth={1.75} aria-hidden /> Finalizando seu pedido…
       </div>
     );
   }
 
   if (!hydrated || !loaded || auth.status === 'loading') {
     return (
-      <div role="status" className="flex flex-col items-center gap-3 py-24 text-center text-muted">
-        <LoaderCircle className="size-6 animate-spin" /> Carregando checkout…
+      <div role="status" className="flex flex-col items-center gap-3 py-24 text-center text-sm text-muted">
+        <LoaderCircle className="size-6 animate-spin" strokeWidth={1.75} aria-hidden /> Carregando checkout…
       </div>
     );
   }
@@ -176,7 +182,8 @@ export function CheckoutView() {
   if (validCount === 0 && issues === 0) {
     return (
       <EmptyState
-        icon={<ShoppingBag className="size-6" />}
+        headingLevel="h2"
+        icon={<Shirt className="size-6" strokeWidth={1.75} aria-hidden />}
         title="Seu carrinho está vazio"
         description="Adicione produtos ao carrinho para finalizar a compra."
         action={<LinkButton href="/camisas">Ver camisas</LinkButton>}
@@ -188,27 +195,35 @@ export function CheckoutView() {
   const totalsSlot = <TotalsTable totals={totals} itemCount={validLines.reduce((n, l) => n + l.quantity, 0)} shipping={shipping} couponCode={draft.couponCode} couponResult={couponResult} />;
 
   return (
-    <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1fr_400px] lg:gap-12">
+    <div className="grid grid-cols-1 gap-10 lg:grid-cols-[minmax(0,1fr)_400px] lg:gap-12 xl:gap-16">
       <div className="min-w-0">
         <CheckoutProgress step={step} labels={LABELS} />
         <MobileOrderSummary lines={validLines} total={totals.total} totalsSlot={totalsSlot} couponSlot={couponSlot} />
 
         {issues > 0 && (
-          <div role="alert" className="mb-5 flex flex-wrap items-center gap-3 rounded-2xl border border-warn/30 bg-warn/10 px-4 py-3 text-sm text-warn">
-            <AlertTriangle className="size-4 shrink-0" />
+          <div role="alert" className="mb-6 flex flex-wrap items-center gap-3 rounded-[var(--radius-card)] border border-warn/30 bg-warn/[0.06] px-4 py-3 text-sm text-warn">
+            <AlertTriangle className="size-4 shrink-0" strokeWidth={1.75} aria-hidden />
             <span className="flex-1">Alguns produtos ficaram indisponíveis e não entram neste pedido.</span>
             <LinkButton href="/carrinho" size="sm" variant="secondary">Revisar carrinho</LinkButton>
           </div>
         )}
 
-        <div className="space-y-3">
+        {/* As cinco estações, em lugar fixo, apoiadas na linha da prateleira */}
+        <div className="border-b border-line-strong">
           <StepCard
             n={1}
             title="Identificação"
             active={step === 1}
             done={done1}
             onEdit={() => go(1)}
-            summary={contact && `${contact.name} · ${contact.email}${draft.mode === 'guest' ? ' (visitante)' : ''}`}
+            summary={
+              contact && (
+                <>
+                  <span className="text-fg">{contact.name}</span>, {contact.email}
+                  {draft.mode === 'guest' && <span className="text-muted"> (visitante)</span>}
+                </>
+              )
+            }
           >
             <IdentificationStep
               customer={draft.mode === 'account' ? customer : null}
@@ -226,7 +241,7 @@ export function CheckoutView() {
             active={step === 2}
             done={done2}
             onEdit={() => go(2)}
-            summary={address && `${address.label} — ${address.street}, ${address.number} · ${address.city}/${address.state}`}
+            summary={address && `${address.label}: ${address.street}, ${address.number}, ${address.city}/${address.state}`}
           >
             <AddressStep
               customer={draft.mode === 'account' ? customer : null}
@@ -253,7 +268,7 @@ export function CheckoutView() {
             done={done3}
             onEdit={() => go(3)}
             summary={
-              shipping && `${shipping.name} · ${shipping.isFree ? 'Grátis' : formatPrice(shipping.price)} · ${formatBusinessDays(shipping.minDays, shipping.maxDays)} (${formatDeliveryWindow(shipping.estimate.from, shipping.estimate.to)})`
+              shipping && `${shipping.name}, ${shipping.isFree ? 'Grátis' : formatPrice(shipping.price)}, ${formatBusinessDays(shipping.minDays, shipping.maxDays)} (${formatDeliveryWindow(shipping.estimate.from, shipping.estimate.to)})`
             }
           >
             {address && (
@@ -285,18 +300,16 @@ export function CheckoutView() {
             )}
           </StepCard>
 
-          <StepCard n={5} title="Pagamento" active={step === 5} done={false}>
+          <StepCard n={5} title="Pagamento" active={step === 5} done={false} note="Último passo: o pedido é registrado sem cobrança.">
             <PaymentStep total={totals.total} placing={placing} onFinalize={finalize} />
           </StepCard>
         </div>
 
-        <p className="mt-6 flex items-center justify-center gap-2 text-xs text-muted">
-          <Lock className="size-3.5" /> Seus dados trafegam por conexão segura (HTTPS).
-        </p>
+        <p className="mt-6 text-center text-xs text-muted">Seus dados trafegam por conexão segura (HTTPS).</p>
       </div>
 
       <aside className="hidden lg:block">
-        <div className="sticky top-24">
+        <div className={SUMMARY_STICKY}>
           <OrderSummary lines={validLines} total={totals.total} totalsSlot={totalsSlot} couponSlot={couponSlot} />
         </div>
       </aside>

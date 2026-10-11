@@ -1,23 +1,53 @@
 'use client';
 
-import { ArrowRight, Check, CreditCard, MapPin, Package, Truck } from 'lucide-react';
+import { ArrowRight, Check, Package } from 'lucide-react';
 import { useStoreData } from '@/context/StoreDataContext';
 import { useCustomerAuth } from '@/context/CustomerAuthContext';
-import { formatAddress, PAYMENT_STATUS_META } from '@/lib/orders';
+import { PAYMENT_STATUS_META } from '@/lib/orders';
 import { formatDateTime, formatPrice } from '@/lib/format';
 import { formatBusinessDays, formatDeliveryWindow } from '@/services/shipping/delivery';
 import { LinkButton } from '@/components/ui/Button';
 import { EmptyState } from '@/components/ui/Feedback';
 import { Skeleton } from '@/components/ui/Skeleton';
+import { addressLines } from './addressLines';
 
+const ROW = 'grid gap-1 px-5 py-4 sm:grid-cols-[11rem_minmax(0,1fr)] sm:gap-6 sm:px-8';
+
+function TicketSkeleton() {
+  return (
+    <div role="status" aria-label="Carregando pedido" className="mx-auto max-w-3xl">
+      <Skeleton className="size-12 rounded-[var(--radius-button)]" />
+      <Skeleton className="mt-6 h-12 w-4/5 rounded-sm" />
+      <Skeleton className="mt-4 h-4 w-3/5 rounded-sm" />
+      <div className="locker mt-10 h-96 rounded-[var(--radius-card)]" aria-hidden />
+    </div>
+  );
+}
+
+/**
+ * Confirmação do pedido: calma. Um armário aceso guarda o número do pedido em
+ * estêncil, com data, valor, entrega e pagamento logo abaixo.
+ */
 export function OrderSuccess({ orderId }: { orderId: string }) {
   const { orders, hydrated } = useStoreData();
   const { customer, status } = useCustomerAuth();
   const order = orders.find((o) => o.id === orderId);
 
   if (!order) {
-    if (!hydrated || status === 'loading') return <Skeleton className="mx-auto h-96 max-w-2xl rounded-3xl" />;
-    return <EmptyState icon={<Package className="size-6" />} title="Pedido não encontrado" description="Não encontramos este pedido neste navegador." action={<LinkButton href="/camisas">Continuar comprando</LinkButton>} />;
+    if (!hydrated || status === 'loading') return <TicketSkeleton />;
+    return (
+      <>
+        {/* A página sempre tem um h1; o estado vazio vem logo abaixo, como h2. */}
+        <h1 className="sr-only">Confirmação do pedido</h1>
+        <EmptyState
+          headingLevel="h2"
+          icon={<Package className="size-6" strokeWidth={1.75} aria-hidden />}
+          title="Pedido não encontrado"
+          description="Não encontramos este pedido neste navegador."
+          action={<LinkButton href="/camisas">Continuar comprando</LinkButton>}
+        />
+      </>
+    );
   }
 
   const mine = !!customer && order.customerId === customer.id;
@@ -25,75 +55,75 @@ export function OrderSuccess({ orderId }: { orderId: string }) {
   const s = order.shipping;
 
   return (
-    <div className="mx-auto max-w-2xl">
-      <div className="flex flex-col items-center text-center">
-        <span className="relative grid size-20 place-items-center rounded-full bg-success/15 text-success ring-1 ring-success/30">
-          <span className="absolute inset-0 animate-ping rounded-full bg-success/15 [animation-duration:2.2s] [animation-iteration-count:2]" aria-hidden />
-          <Check className="animate-pop size-10" strokeWidth={2.5} />
+    <div className="mx-auto max-w-3xl">
+      <header>
+        <span className="grid size-12 place-items-center rounded-[var(--radius-button)] border border-success/40 bg-success/10 text-success">
+          <Check className="size-6" strokeWidth={1.75} aria-hidden />
         </span>
-        <h1 className="animate-fade-up heading-display mt-6 text-5xl text-fg [animation-delay:120ms] sm:text-6xl">Pedido realizado com sucesso!</h1>
-        <p className="animate-fade-up mt-3 text-fg-2 [animation-delay:200ms]">
-          Obrigado, {order.customerName.split(' ')[0]}! Guarde o número do pedido para acompanhar a entrega.
-        </p>
-        <p className="animate-fade-up mt-1 text-xs text-muted [animation-delay:240ms]">A confirmação por e-mail será enviada quando o serviço de e-mail estiver ativo.</p>
-      </div>
+        <h1 className="heading-display mt-6 text-[2.5rem] text-fg sm:text-[3.5rem]">Pedido realizado com sucesso!</h1>
+        <p className="mt-4 max-w-[62ch] leading-relaxed text-fg-2">Obrigado, {order.customerName.split(' ')[0]}. Guarde o número do pedido para acompanhar a entrega.</p>
+        <p className="mt-1.5 max-w-[62ch] text-sm leading-relaxed text-muted">A confirmação por e-mail será enviada quando o serviço de e-mail estiver ativo.</p>
+      </header>
 
-      <div className="animate-fade-up mt-10 rounded-3xl bg-surface p-6 ring-1 ring-white/[0.06] [animation-delay:280ms] sm:p-8">
-        <dl className="grid grid-cols-2 gap-4 border-b border-white/[0.06] pb-6 sm:grid-cols-3">
-          <div>
-            <dt className="text-xs text-muted">Número do pedido</dt>
-            <dd className="mt-1 font-bold text-fg">{order.number}</dd>
-          </div>
-          <div>
+      {/* O armário do pedido: a luz acende uma vez sobre o número */}
+      <div className="locker relative mt-10 rounded-[var(--radius-card)]">
+        <span aria-hidden className="animate-light-on pointer-events-none absolute inset-x-[12%] top-0 h-[2px] bg-light" />
+        <dl className="px-5 pb-6 pt-7 sm:px-8 sm:pb-8 sm:pt-9">
+          <dt className="text-sm text-muted">Número do pedido</dt>
+          <dd className="heading-stencil mt-3 text-[clamp(3rem,14vw,6rem)] text-fg">{order.number}</dd>
+        </dl>
+
+        <dl className="grid grid-cols-2 border-t border-line">
+          <div className="px-5 py-4 sm:px-8">
             <dt className="text-xs text-muted">Data</dt>
-            <dd className="mt-1 text-fg">{formatDateTime(order.createdAt)}</dd>
+            <dd className="mt-1 text-sm tabular-nums text-fg">{formatDateTime(order.createdAt)}</dd>
           </div>
-          <div>
+          <div className="border-l border-line px-5 py-4 sm:px-8">
             <dt className="text-xs text-muted">Valor</dt>
-            <dd className="mt-1 font-bold tabular-nums text-fg">{formatPrice(order.total)}</dd>
+            <dd className="mt-1 text-sm font-bold tabular-nums text-fg">{formatPrice(order.total)}</dd>
           </div>
         </dl>
-        <ul className="space-y-5 pt-6 text-sm">
+
+        <dl className="divide-y divide-line border-t border-line text-sm">
           {order.address && (
-            <li className="flex gap-3">
-              <MapPin className="mt-0.5 size-4 shrink-0 text-brand-400" />
-              <span>
-                <span className="block text-xs text-muted">Endereço de entrega</span>
-                <span className="text-fg-2">{order.address.recipient} — {formatAddress(order.address)}</span>
-              </span>
-            </li>
+            <div className={ROW}>
+              <dt className="text-muted">Endereço de entrega</dt>
+              <dd className="leading-relaxed text-fg-2">
+                <span className="block text-fg">{order.address.recipient}</span>
+                {addressLines(order.address).map((l) => (
+                  <span key={l} className="block">
+                    {l}
+                  </span>
+                ))}
+              </dd>
+            </div>
           )}
           {s && (
-            <li className="flex gap-3">
-              <Truck className="mt-0.5 size-4 shrink-0 text-brand-400" />
-              <span>
-                <span className="block text-xs text-muted">Método de entrega</span>
-                <span className="text-fg-2">
-                  {s.serviceName} ({s.carrier}) · {s.price === 0 ? 'Grátis' : formatPrice(s.price)} · {formatBusinessDays(s.minDays, s.maxDays)}
-                </span>
+            <div className={ROW}>
+              <dt className="text-muted">Método de entrega</dt>
+              <dd className="leading-relaxed text-fg-2">
+                {s.serviceName} ({s.carrier}), <span className="tabular-nums">{s.price === 0 ? 'Grátis' : formatPrice(s.price)}</span>, {formatBusinessDays(s.minDays, s.maxDays)}
                 <span className="block font-semibold text-fg">Previsão de entrega {formatDeliveryWindow(s.estimatedFrom, s.estimatedTo)}</span>
-              </span>
-            </li>
+                {s.isMock && <span className="block text-xs text-muted">Valores e prazos simulados.</span>}
+              </dd>
+            </div>
           )}
-          <li className="flex gap-3">
-            <CreditCard className="mt-0.5 size-4 shrink-0 text-brand-400" />
-            <span>
-              <span className="block text-xs text-muted">Pagamento</span>
-              <span className="text-fg-2">{PAYMENT_STATUS_META[order.payment?.status ?? 'aguardando_integracao'].description}</span>
-            </span>
-          </li>
-        </ul>
+          <div className={ROW}>
+            <dt className="text-muted">Pagamento</dt>
+            <dd className="leading-relaxed text-fg-2">{PAYMENT_STATUS_META[order.payment?.status ?? 'aguardando_integracao'].description}</dd>
+          </div>
+        </dl>
       </div>
 
-      <div className="animate-fade-up mt-8 flex flex-col gap-3 [animation-delay:360ms] sm:flex-row sm:justify-center">
+      <div className="mt-8 flex flex-col gap-3 sm:flex-row">
         <LinkButton href={viewHref} size="lg">
-          {mine ? 'Ver meu pedido' : 'Criar conta e acompanhar'} <ArrowRight className="size-4" />
+          {mine ? 'Ver meu pedido' : 'Criar conta e acompanhar'} <ArrowRight className="size-4" strokeWidth={1.75} aria-hidden />
         </LinkButton>
         <LinkButton href="/camisas" size="lg" variant="outline">
           Continuar comprando
         </LinkButton>
       </div>
-      {!mine && <p className="mt-4 text-center text-xs text-muted">Crie a conta com o mesmo e-mail e este pedido aparece automaticamente na sua área.</p>}
+      {!mine && <p className="mt-4 max-w-[62ch] text-sm leading-relaxed text-muted">Crie a conta com o mesmo e-mail e este pedido aparece automaticamente na sua área.</p>}
     </div>
   );
 }

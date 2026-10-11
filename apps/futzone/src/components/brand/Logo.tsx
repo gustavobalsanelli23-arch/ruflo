@@ -28,7 +28,7 @@ export function Logo({ variant = 'wordmark', href = '/', className, imgClassName
       src={v.src}
       width={v.width}
       height={v.height}
-      alt="FutZone — Camisas de time"
+      alt="FutZone, camisas de time"
       fetchPriority={priority ? 'high' : undefined}
       className={cn('select-none', variant === 'wordmark' ? 'h-7 w-auto sm:h-8' : 'h-auto', imgClassName)}
       draggable={false}
@@ -36,7 +36,7 @@ export function Logo({ variant = 'wordmark', href = '/', className, imgClassName
   );
   if (!href) return <span className={cn('inline-flex', className)}>{img}</span>;
   return (
-    <Link href={href} className={cn('inline-flex shrink-0 transition-opacity hover:opacity-90', className)} aria-label="FutZone — página inicial">
+    <Link href={href} className={cn('inline-flex shrink-0 transition-opacity hover:opacity-90', className)} aria-label="FutZone: página inicial">
       {img}
     </Link>
   );

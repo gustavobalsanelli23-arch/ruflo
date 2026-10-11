@@ -1,15 +1,31 @@
 import { Suspense } from 'react';
-import { CatalogView, type CatalogPreset } from '@/components/catalog/CatalogView';
-import { ProductGridSkeleton } from '@/components/ui/Skeleton';
-import { PageHeader } from './PageHeader';
+import { CatalogView } from '@/components/catalog/CatalogView';
+import { CatalogCount } from '@/components/catalog/CatalogCount';
+import type { CatalogPreset } from '@/components/catalog/scope';
+import { CatalogSkeleton } from '@/components/catalog/CatalogSkeleton';
+import { PageHeader, type PlateDatum } from './PageHeader';
 
-/** Página de catálogo reutilizada por /camisas, /retro, /kits, /promocoes e /camisas/[time]. */
-export function CatalogPage({ eyebrow, title, description, preset }: { eyebrow?: string; title: string; description?: string; preset?: CatalogPreset }) {
+interface CatalogPageProps {
+  title: string;
+  description?: string;
+  preset?: CatalogPreset;
+  /** Dados da placa do time (página /camisas/[time]); sem eles, cabeçalho padrão. */
+  plate?: PlateDatum[];
+}
+
+/** Página de catálogo reutilizada por /camisas, /selecoes, /retro, /kits, /promocoes e /camisas/[time]. */
+export function CatalogPage({ title, description, preset, plate }: CatalogPageProps) {
   return (
     <>
-      <PageHeader eyebrow={eyebrow} title={title} description={description} />
-      <div className="container-fz py-8 sm:py-10">
-        <Suspense fallback={<ProductGridSkeleton count={8} />}>
+      <PageHeader
+        title={title}
+        description={description}
+        plate={plate}
+        meta={plate ? undefined : <CatalogCount preset={preset} />}
+      />
+      <div className="container-fz pb-14 pt-6 sm:pb-20 sm:pt-8">
+        {/* CatalogView lê useSearchParams: o Suspense é obrigatório para a página continuar estática */}
+        <Suspense fallback={<CatalogSkeleton />}>
           <CatalogView preset={preset} />
         </Suspense>
       </div>

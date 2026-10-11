@@ -43,7 +43,7 @@ describe('prazo de entrega', () => {
   it('formata a janela sem prometer data exata', () => {
     expect(formatDeliveryWindow('2026-10-14', '2026-10-18')).toBe('entre 14 e 18 de outubro');
     expect(formatDeliveryWindow('2026-10-30', '2026-11-03')).toBe('entre 30 de outubro e 3 de novembro');
-    expect(formatBusinessDays(6, 9)).toBe('6–9 dias úteis');
+    expect(formatBusinessDays(6, 9)).toBe('6 a 9 dias úteis');
     expect(formatBusinessDays(1, 1)).toBe('1 dia útil');
   });
 });

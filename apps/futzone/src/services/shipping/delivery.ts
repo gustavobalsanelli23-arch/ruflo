@@ -49,10 +49,10 @@ export function formatDeliveryWindow(fromKey: string, toKey: string): string {
   return `entre ${day(a)} de ${month(a)} e ${day(b)} de ${month(b)}`;
 }
 
-/** "6–9 dias úteis" · "1 dia útil" */
+/** "6 a 9 dias úteis", "1 dia útil" */
 export function formatBusinessDays(minDays: number, maxDays: number): string {
   if (minDays === maxDays) return `${minDays} ${minDays === 1 ? 'dia útil' : 'dias úteis'}`;
-  return `${minDays}–${maxDays} dias úteis`;
+  return `${minDays} a ${maxDays} dias úteis`;
 }
 
 /** Data curta: "14/10" */

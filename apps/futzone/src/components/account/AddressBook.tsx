@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { MapPin, Pencil, Plus, Star, Trash2 } from 'lucide-react';
+import { MapPin, Pencil, Plus, Trash2 } from 'lucide-react';
 import type { Address } from '@/types/commerce';
 import { useCustomerAuth, useCurrentCustomer } from '@/context/CustomerAuthContext';
 import { useToast } from '@/context/ToastContext';
@@ -10,6 +10,7 @@ import { EmptyState } from '@/components/ui/Feedback';
 import { ConfirmDialog, Modal } from '@/components/ui/Modal';
 import { AddressCard } from './AddressCard';
 import { AddressForm } from './AddressForm';
+import { AccountHeading } from './AccountUI';
 
 /** Aplica a regra de endereço principal único. */
 export function upsertAddress(list: Address[], address: Address): Address[] {
@@ -52,33 +53,44 @@ export function AddressBook() {
 
   return (
     <div>
-      <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
-        <h2 className="heading-display text-4xl">Meus endereços</h2>
-        <Button onClick={() => setEditing({ isDefault: customer.addresses.length === 0 })}>
-          <Plus className="size-4" /> Novo endereço
-        </Button>
-      </div>
+      <AccountHeading
+        title="Meus endereços"
+        description="O endereço principal já vem escolhido no checkout."
+        aside={
+          addresses.length > 0 && (
+            <Button onClick={() => setEditing({ isDefault: customer.addresses.length === 0 })}>
+              <Plus className="size-4" strokeWidth={1.75} aria-hidden /> Novo endereço
+            </Button>
+          )
+        }
+      />
 
       {addresses.length === 0 ? (
-        <EmptyState icon={<MapPin className="size-6" />} title="Nenhum endereço cadastrado" description="Cadastre um endereço para finalizar suas compras mais rápido." action={<Button onClick={() => setEditing({ isDefault: true })}>Adicionar endereço</Button>} />
+        <EmptyState
+          headingLevel="h2"
+          icon={<MapPin className="size-6" strokeWidth={1.75} />}
+          title="Nenhum endereço cadastrado"
+          description="Cadastre um endereço para finalizar suas compras mais rápido."
+          action={<Button onClick={() => setEditing({ isDefault: true })}>Adicionar endereço</Button>}
+        />
       ) : (
-        <ul className="grid gap-4 md:grid-cols-2">
-          {addresses.map((a, i) => (
-            <li key={a.id} className="animate-fade-up" style={{ animationDelay: `${i * 50}ms` }}>
+        <ul className="grid gap-3 md:grid-cols-2 lg:gap-4">
+          {addresses.map((a) => (
+            <li key={a.id}>
               <AddressCard
                 address={a}
                 actions={
                   <>
                     <Button size="sm" variant="secondary" onClick={() => setEditing(a)}>
-                      <Pencil className="size-3.5" /> Editar
+                      <Pencil className="size-3.5" strokeWidth={1.75} aria-hidden /> Editar
                     </Button>
                     {!a.isDefault && (
                       <Button size="sm" variant="ghost" onClick={() => setDefault(a.id)}>
-                        <Star className="size-3.5" /> Tornar principal
+                        Tornar principal
                       </Button>
                     )}
-                    <Button size="sm" variant="ghost" className="ml-auto hover:text-danger" onClick={() => setRemoving(a)} aria-label={`Excluir endereço ${a.label}`}>
-                      <Trash2 className="size-3.5" />
+                    <Button size="sm" variant="ghost" className="ml-auto px-2.5! hover:text-danger!" onClick={() => setRemoving(a)} aria-label={`Excluir endereço ${a.label}`}>
+                      <Trash2 className="size-4" strokeWidth={1.75} aria-hidden />
                     </Button>
                   </>
                 }

@@ -1,26 +1,26 @@
 import { CreditCard, Lock, PackageSearch, Truck } from 'lucide-react';
 import { cn } from '@/lib/format';
+import { STEEL_TAG } from './styles';
 
-/** Selos de confiança — sem prometer o que ainda não existe (pagamento). */
+const ITEMS = [
+  { icon: Lock, title: 'Compra segura', text: 'Conexão protegida por HTTPS' },
+  { icon: PackageSearch, title: 'Rastreamento do pedido', text: 'Acompanhe cada etapa na sua conta' },
+  { icon: Truck, title: 'Frete calculado por CEP', text: 'Valores e prazos simulados até a transportadora ser integrada', tag: 'Simulado' },
+  { icon: CreditCard, title: 'Pagamento seguro', text: 'Disponível quando o gateway for integrado', tag: 'Em breve' },
+];
+
+/** Garantias da loja numa lista discreta. Sem prometer o que ainda não existe: frete "Simulado", pagamento "Em breve" (também no modo compacto). */
 export function TrustBadges({ className, compact }: { className?: string; compact?: boolean }) {
-  const items = [
-    { icon: Lock, title: 'Compra segura', text: 'Conexão protegida por HTTPS' },
-    { icon: PackageSearch, title: 'Rastreamento do pedido', text: 'Acompanhe cada etapa na sua conta' },
-    { icon: Truck, title: 'Envio para todo o Brasil', text: 'Frete calculado pelo CEP' },
-    { icon: CreditCard, title: 'Pagamento seguro', text: 'Disponível quando o gateway for integrado', soon: true },
-  ];
   return (
-    <ul className={cn('grid gap-3', compact ? 'grid-cols-2' : 'sm:grid-cols-2', className)}>
-      {items.map(({ icon: Icon, title, text, soon }) => (
-        <li key={title} className="flex items-start gap-2.5">
-          <Icon className="mt-0.5 size-4 shrink-0 text-brand-400" aria-hidden />
-          <span className="min-w-0">
-            <span className="flex flex-wrap items-center gap-1.5 text-xs font-semibold text-fg">
-              {title}
-              {soon && <span className="rounded bg-white/[0.08] px-1.5 py-px text-[0.6rem] font-bold uppercase tracking-wider text-muted">Em breve</span>}
-            </span>
-            {!compact && <span className="block text-[0.7rem] text-muted">{text}</span>}
+    <ul className={cn('divide-y divide-line', className)}>
+      {ITEMS.map(({ icon: Icon, title, text, tag }) => (
+        <li key={title} className="flex items-start gap-3 py-2.5 first:pt-0 last:pb-0">
+          <Icon className="mt-px size-4 shrink-0 text-muted" strokeWidth={1.75} aria-hidden />
+          <span className="min-w-0 flex-1">
+            <span className="block text-[0.8rem] font-semibold text-fg-2">{title}</span>
+            {!compact && <span className="mt-0.5 block text-xs text-muted">{text}</span>}
           </span>
+          {tag && <span className={STEEL_TAG}>{tag}</span>}
         </li>
       ))}
     </ul>

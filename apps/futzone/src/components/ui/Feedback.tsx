@@ -8,18 +8,28 @@ interface EmptyStateProps {
   description?: string;
   action?: React.ReactNode;
   className?: string;
+  /** Nível do título: h2 quando o estado vazio é o primeiro bloco depois do h1 da página. */
+  headingLevel?: 'h2' | 'h3';
 }
 
-export function EmptyState({ icon, title, description, action, className }: EmptyStateProps) {
+export function EmptyState({ icon, title, description, action, className, headingLevel = 'h3' }: EmptyStateProps) {
+  const Heading = headingLevel;
   return (
-    <div className={cn('animate-fade-up flex flex-col items-center justify-center rounded-3xl bg-surface/60 px-6 py-16 text-center sm:py-20', className)}>
+    <div
+      className={cn(
+        // Na loja vira um armário vazio; no painel administrativo mantém o fundo neutro de antes.
+        'animate-fade-up relative flex flex-col items-center justify-center rounded-3xl bg-surface/60 px-6 py-16 text-center sm:py-20 [.store-world_&]:locker',
+        className,
+      )}
+    >
+      {/* Na loja o quadro é o armário vazio: lâmpada apagada no topo, sem ícone em ladrilho */}
+      <span aria-hidden className="absolute inset-x-[32%] top-0 hidden h-[2px] bg-line-strong [.store-world_&]:block" />
       {icon && (
-        <div className="relative mb-6 grid size-16 place-items-center rounded-full bg-brand-500/10 text-brand-400 ring-1 ring-brand-500/25">
-          <span className="absolute inset-0 animate-ping rounded-full bg-brand-500/10 [animation-duration:2.4s]" aria-hidden />
+        <div className="mb-6 grid size-14 place-items-center rounded-xl border border-line-strong bg-steel-3 text-fg-2 [.store-world_&]:hidden">
           {icon}
         </div>
       )}
-      <h3 className="heading-display text-3xl text-fg">{title}</h3>
+      <Heading className="heading-display text-3xl text-fg sm:text-4xl">{title}</Heading>
       {description && <p className="mt-3 max-w-sm text-sm leading-relaxed text-muted">{description}</p>}
       {action && <div className="mt-7 flex flex-wrap justify-center gap-3">{action}</div>}
     </div>
@@ -29,34 +39,42 @@ export function EmptyState({ icon, title, description, action, className }: Empt
 /** Aviso padronizado para funções que são apenas demonstração nesta etapa. */
 export function DemoNotice({ children, className }: { children: React.ReactNode; className?: string }) {
   return (
-    <div className={cn('flex items-start gap-3 rounded-xl border border-brand-500/25 bg-brand-500/[0.07] px-4 py-3 text-sm text-fg-2', className)}>
-      <Info className="mt-0.5 size-4 shrink-0 text-brand-400" aria-hidden />
+    <div
+      className={cn(
+        // Na loja o aviso é aço neutro (o azul fica só no elemento ativo); no painel mantém o tom de antes.
+        'flex items-start gap-3 rounded-xl border border-brand-500/25 bg-brand-500/[0.07] px-4 py-3 text-sm text-fg-2 [.store-world_&]:border-line-strong [.store-world_&]:bg-steel-2',
+        className,
+      )}
+    >
+      <Info className="mt-0.5 size-4 shrink-0 text-brand-400 [.store-world_&]:text-fg-2" strokeWidth={1.75} aria-hidden />
       <p>{children}</p>
     </div>
   );
 }
 
+/**
+ * Cabeçalho de seção apoiado na "linha da prateleira": título forte, descrição
+ * opcional logo abaixo e a ação alinhada à direita, sobre uma régua de 1px.
+ * Sem rótulos acima do título: o título fala sozinho.
+ */
 export function SectionHeading({
-  eyebrow,
   title,
   description,
   action,
   className,
 }: {
-  eyebrow?: string;
   title: string;
   description?: string;
   action?: React.ReactNode;
   className?: string;
 }) {
   return (
-    <Reveal className={cn('mb-7 flex items-end justify-between gap-6 sm:mb-9', className)}>
+    <Reveal className={cn('shelf-line mb-6 flex items-end justify-between gap-6 pb-4 sm:mb-8 sm:pb-5', className)}>
       <div className="max-w-2xl">
-        {eyebrow && <p className="eyebrow mb-3">{eyebrow}</p>}
-        <h2 className="heading-display text-[2.1rem] text-fg sm:text-5xl">{title}</h2>
-        {description && <p className="mt-3 text-sm text-muted sm:text-base">{description}</p>}
+        <h2 className="heading-display text-[2.25rem] text-fg sm:text-5xl lg:text-[3.5rem]">{title}</h2>
+        {description && <p className="mt-2.5 max-w-[60ch] text-sm leading-relaxed text-muted sm:text-base">{description}</p>}
       </div>
-      {action && <div className="shrink-0">{action}</div>}
+      {action && <div className="shrink-0 pb-1">{action}</div>}
     </Reveal>
   );
 }

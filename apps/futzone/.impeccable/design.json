@@ -1,0 +1,770 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-11T14:27:45+00:00",
+  "title": "Design System: FutZone",
+  "extensions": {
+    "colorMeta": {
+      "brand-blue": {
+        "role": "primary",
+        "displayName": "Azul FutZone",
+        "canonical": "#054ecc",
+        "oklch": "oklch(47.3% 0.205 261.5)",
+        "cssVar": "--color-brand-600",
+        "purpose": "Logo blue (owner-pinned). Primary action, selected size/filter, cart count, selection.",
+        "tonalRamp": [
+          "#021231",
+          "#052156",
+          "#062f7a",
+          "#063da0",
+          "#054ecc",
+          "#0a52d6",
+          "#4682ea",
+          "#a9c3f6"
+        ]
+      },
+      "brand-blue-bright": {
+        "role": "primary",
+        "displayName": "Azul Aceso",
+        "canonical": "#0a52d6",
+        "oklch": "oklch(49.0% 0.213 261.8)",
+        "cssVar": "--color-brand-500",
+        "purpose": "Primary hover; active nav light; active gallery thumbnail light.",
+        "tonalRamp": [
+          "#021231",
+          "#052156",
+          "#062f7a",
+          "#063da0",
+          "#054ecc",
+          "#0a52d6",
+          "#4682ea",
+          "#a9c3f6"
+        ]
+      },
+      "brand-blue-focus": {
+        "role": "primary",
+        "displayName": "Azul de Foco",
+        "canonical": "#4682ea",
+        "oklch": "oklch(61.9% 0.169 260.6)",
+        "cssVar": "--color-brand-400",
+        "purpose": "Focus ring (2px, 2px offset) and caret.",
+        "tonalRamp": [
+          "#021231",
+          "#052156",
+          "#062f7a",
+          "#063da0",
+          "#054ecc",
+          "#0a52d6",
+          "#4682ea",
+          "#a9c3f6"
+        ]
+      },
+      "brand-blue-pressed": {
+        "role": "primary",
+        "displayName": "Azul Pressionado",
+        "canonical": "#063da0",
+        "oklch": "oklch(39.9% 0.169 261.5)",
+        "cssVar": "--color-brand-700",
+        "purpose": "Primary button :active.",
+        "tonalRamp": [
+          "#021231",
+          "#052156",
+          "#062f7a",
+          "#063da0",
+          "#054ecc",
+          "#0a52d6",
+          "#4682ea",
+          "#a9c3f6"
+        ]
+      },
+      "floor": {
+        "role": "neutral",
+        "displayName": "Piso",
+        "canonical": "#07080b",
+        "oklch": "oklch(13.5% 0.007 269.0)",
+        "cssVar": "--color-bg",
+        "purpose": "Body background, scrolled header, theme-color.",
+        "tonalRamp": [
+          "#07080b",
+          "#0d0f13",
+          "#13161c",
+          "#1a1e26",
+          "#2b303b",
+          "#5f6672",
+          "#8b919d",
+          "#c3c8d1"
+        ]
+      },
+      "surface": {
+        "role": "neutral",
+        "displayName": "Superfície",
+        "canonical": "#0d0f13",
+        "oklch": "oklch(16.8% 0.009 264.3)",
+        "cssVar": "--color-surface",
+        "purpose": "Base surface (admin and neutral panels).",
+        "tonalRamp": [
+          "#07080b",
+          "#0d0f13",
+          "#13161c",
+          "#1a1e26",
+          "#2b303b",
+          "#5f6672",
+          "#8b919d",
+          "#c3c8d1"
+        ]
+      },
+      "surface-2": {
+        "role": "neutral",
+        "displayName": "Superfície 2",
+        "canonical": "#13161c",
+        "oklch": "oklch(20.0% 0.013 264.2)",
+        "cssVar": "--color-surface-2",
+        "purpose": "Form fields, skeleton base.",
+        "tonalRamp": [
+          "#07080b",
+          "#0d0f13",
+          "#13161c",
+          "#1a1e26",
+          "#2b303b",
+          "#5f6672",
+          "#8b919d",
+          "#c3c8d1"
+        ]
+      },
+      "surface-3": {
+        "role": "neutral",
+        "displayName": "Superfície 3",
+        "canonical": "#1a1e26",
+        "oklch": "oklch(23.5% 0.017 264.2)",
+        "cssVar": "--color-surface-3",
+        "purpose": "Secondary hover, disabled fills, skeleton shimmer.",
+        "tonalRamp": [
+          "#07080b",
+          "#0d0f13",
+          "#13161c",
+          "#1a1e26",
+          "#2b303b",
+          "#5f6672",
+          "#8b919d",
+          "#c3c8d1"
+        ]
+      },
+      "steel": {
+        "role": "neutral",
+        "displayName": "Aço",
+        "canonical": "#101318",
+        "oklch": "oklch(18.6% 0.011 260.6)",
+        "cssVar": "--color-steel",
+        "purpose": "Locker face base, demo strip, footer.",
+        "tonalRamp": [
+          "#07080b",
+          "#0d0f13",
+          "#13161c",
+          "#1a1e26",
+          "#2b303b",
+          "#5f6672",
+          "#8b919d",
+          "#c3c8d1"
+        ]
+      },
+      "steel-2": {
+        "role": "neutral",
+        "displayName": "Aço 2",
+        "canonical": "#161a21",
+        "oklch": "oklch(21.7% 0.015 261.6)",
+        "cssVar": "--color-steel-2",
+        "purpose": "Locker face top, quick-add drawer, steel rows, size options.",
+        "tonalRamp": [
+          "#07080b",
+          "#0d0f13",
+          "#13161c",
+          "#1a1e26",
+          "#2b303b",
+          "#5f6672",
+          "#8b919d",
+          "#c3c8d1"
+        ]
+      },
+      "steel-3": {
+        "role": "neutral",
+        "displayName": "Aço 3",
+        "canonical": "#1c2129",
+        "oklch": "oklch(24.6% 0.017 259.8)",
+        "cssVar": "--color-steel-3",
+        "purpose": "Active station plate, secondary button.",
+        "tonalRamp": [
+          "#07080b",
+          "#0d0f13",
+          "#13161c",
+          "#1a1e26",
+          "#2b303b",
+          "#5f6672",
+          "#8b919d",
+          "#c3c8d1"
+        ]
+      },
+      "niche": {
+        "role": "neutral",
+        "displayName": "Nicho",
+        "canonical": "#0a0c10",
+        "oklch": "oklch(15.4% 0.009 264.3)",
+        "cssVar": null,
+        "purpose": "Photo backdrop inside the locker (literal #0a0c10 in components, no theme token).",
+        "tonalRamp": [
+          "#07080b",
+          "#0d0f13",
+          "#13161c",
+          "#1a1e26",
+          "#2b303b",
+          "#5f6672",
+          "#8b919d",
+          "#c3c8d1"
+        ]
+      },
+      "seam": {
+        "role": "neutral",
+        "displayName": "Emenda",
+        "canonical": "#1e222a",
+        "oklch": "oklch(25.1% 0.016 264.2)",
+        "cssVar": "--color-line",
+        "purpose": "Locker 1px ring, internal dividers.",
+        "tonalRamp": [
+          "#07080b",
+          "#0d0f13",
+          "#13161c",
+          "#1a1e26",
+          "#2b303b",
+          "#5f6672",
+          "#8b919d",
+          "#c3c8d1"
+        ]
+      },
+      "seam-strong": {
+        "role": "neutral",
+        "displayName": "Emenda Forte",
+        "canonical": "#2b303b",
+        "oklch": "oklch(30.9% 0.021 265.9)",
+        "cssVar": "--color-line-strong",
+        "purpose": "Shelf line, outlines, locker ring on hover/focus.",
+        "tonalRamp": [
+          "#07080b",
+          "#0d0f13",
+          "#13161c",
+          "#1a1e26",
+          "#2b303b",
+          "#5f6672",
+          "#8b919d",
+          "#c3c8d1"
+        ]
+      },
+      "ceiling-light": {
+        "role": "tertiary",
+        "displayName": "Luz do Teto",
+        "canonical": "#dbe6ff",
+        "oklch": "oklch(92.4% 0.036 266.7)",
+        "cssVar": "--color-light",
+        "purpose": "The 2px light strip on the locker steel top edge; station light.",
+        "tonalRamp": [
+          "oklch(15.0% 0.036 266.7)",
+          "oklch(26.0% 0.036 266.7)",
+          "oklch(37.0% 0.036 266.7)",
+          "oklch(48.0% 0.036 266.7)",
+          "oklch(59.0% 0.036 266.7)",
+          "oklch(70.0% 0.036 266.7)",
+          "oklch(82.0% 0.036 266.7)",
+          "oklch(95.0% 0.036 266.7)"
+        ]
+      },
+      "chalk": {
+        "role": "neutral",
+        "displayName": "Giz",
+        "canonical": "#f3f5f8",
+        "oklch": "oklch(96.9% 0.005 258.3)",
+        "cssVar": "--color-fg",
+        "purpose": "Titles, names, prices.",
+        "tonalRamp": [
+          "#07080b",
+          "#0d0f13",
+          "#13161c",
+          "#1a1e26",
+          "#2b303b",
+          "#5f6672",
+          "#8b919d",
+          "#c3c8d1"
+        ]
+      },
+      "chalk-2": {
+        "role": "neutral",
+        "displayName": "Giz Secundário",
+        "canonical": "#c3c8d1",
+        "oklch": "oklch(83.2% 0.014 262.4)",
+        "cssVar": "--color-fg-2",
+        "purpose": "Plates at rest, strong secondary text, available sizes.",
+        "tonalRamp": [
+          "#07080b",
+          "#0d0f13",
+          "#13161c",
+          "#1a1e26",
+          "#2b303b",
+          "#5f6672",
+          "#8b919d",
+          "#c3c8d1"
+        ]
+      },
+      "muted": {
+        "role": "neutral",
+        "displayName": "Cinza",
+        "canonical": "#8b919d",
+        "oklch": "oklch(65.6% 0.019 264.4)",
+        "cssVar": "--color-muted",
+        "purpose": "Descriptions, metadata, season on plate.",
+        "tonalRamp": [
+          "#07080b",
+          "#0d0f13",
+          "#13161c",
+          "#1a1e26",
+          "#2b303b",
+          "#5f6672",
+          "#8b919d",
+          "#c3c8d1"
+        ]
+      },
+      "subtle": {
+        "role": "neutral",
+        "displayName": "Cinza Fundo",
+        "canonical": "#5f6672",
+        "oklch": "oklch(50.8% 0.021 261.3)",
+        "cssVar": "--color-subtle",
+        "purpose": "Disabled text, sold-out sizes.",
+        "tonalRamp": [
+          "#07080b",
+          "#0d0f13",
+          "#13161c",
+          "#1a1e26",
+          "#2b303b",
+          "#5f6672",
+          "#8b919d",
+          "#c3c8d1"
+        ]
+      },
+      "success": {
+        "role": "tertiary",
+        "displayName": "Verde",
+        "canonical": "#2fbf71",
+        "oklch": "oklch(71.2% 0.164 154.1)",
+        "cssVar": "--color-success",
+        "purpose": "Order/stock success, added-to-cart.",
+        "tonalRamp": [
+          "oklch(15.0% 0.160 154.1)",
+          "oklch(26.0% 0.160 154.1)",
+          "oklch(37.0% 0.164 154.1)",
+          "oklch(48.0% 0.164 154.1)",
+          "oklch(59.0% 0.164 154.1)",
+          "oklch(70.0% 0.164 154.1)",
+          "oklch(82.0% 0.164 154.1)",
+          "oklch(95.0% 0.160 154.1)"
+        ]
+      },
+      "warn": {
+        "role": "tertiary",
+        "displayName": "Âmbar",
+        "canonical": "#f2b33d",
+        "oklch": "oklch(80.6% 0.147 79.0)",
+        "cssVar": "--color-warn",
+        "purpose": "Warnings, pending status.",
+        "tonalRamp": [
+          "oklch(15.0% 0.147 79.0)",
+          "oklch(26.0% 0.147 79.0)",
+          "oklch(37.0% 0.147 79.0)",
+          "oklch(48.0% 0.147 79.0)",
+          "oklch(59.0% 0.147 79.0)",
+          "oklch(70.0% 0.147 79.0)",
+          "oklch(82.0% 0.147 79.0)",
+          "oklch(95.0% 0.147 79.0)"
+        ]
+      },
+      "danger": {
+        "role": "tertiary",
+        "displayName": "Vermelho",
+        "canonical": "#f0525c",
+        "oklch": "oklch(65.6% 0.193 20.7)",
+        "cssVar": "--color-danger",
+        "purpose": "Errors, \"Esgotado\".",
+        "tonalRamp": [
+          "oklch(15.0% 0.160 20.7)",
+          "oklch(26.0% 0.160 20.7)",
+          "oklch(37.0% 0.193 20.7)",
+          "oklch(48.0% 0.193 20.7)",
+          "oklch(59.0% 0.193 20.7)",
+          "oklch(70.0% 0.193 20.7)",
+          "oklch(82.0% 0.193 20.7)",
+          "oklch(95.0% 0.160 20.7)"
+        ]
+      },
+      "info": {
+        "role": "tertiary",
+        "displayName": "Azul Informativo",
+        "canonical": "#4f8bff",
+        "oklch": "oklch(65.5% 0.184 262.0)",
+        "cssVar": "--color-info",
+        "purpose": "Informational status in orders.",
+        "tonalRamp": [
+          "oklch(15.0% 0.160 262.0)",
+          "oklch(26.0% 0.160 262.0)",
+          "oklch(37.0% 0.184 262.0)",
+          "oklch(48.0% 0.184 262.0)",
+          "oklch(59.0% 0.184 262.0)",
+          "oklch(70.0% 0.184 262.0)",
+          "oklch(82.0% 0.184 262.0)",
+          "oklch(95.0% 0.160 262.0)"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display (estêncil)",
+        "purpose": "Hero headline only, two fixed lines; below 1280px."
+      },
+      "display-wide": {
+        "displayName": "Display (desktop largo)",
+        "purpose": "Hero headline from 1280px, beside the four lockers."
+      },
+      "plate-title": {
+        "displayName": "Placa do time",
+        "purpose": "Team name on the team page steel plate."
+      },
+      "headline": {
+        "displayName": "Título de seção",
+        "purpose": "Section titles on the shelf line; 2.25rem / 3rem (640px) / 3.5rem (1024px)."
+      },
+      "headline-page": {
+        "displayName": "Título de página",
+        "purpose": "Inner page h1; 2.5rem / 3.25rem / 4rem."
+      },
+      "title": {
+        "displayName": "Título de estação",
+        "purpose": "Checkout station titles (1.6rem / 1.85rem) and empty states."
+      },
+      "plate": {
+        "displayName": "Plaquinha",
+        "purpose": "Locker plates (team 0.82rem, season 0.74rem), station numbers; line-height 1.25 keeps capital accents."
+      },
+      "body": {
+        "displayName": "Corpo",
+        "purpose": "Subcopy and descriptions; hero subcopy 1.125rem from 640px, max 36ch."
+      },
+      "body-sm": {
+        "displayName": "Corpo pequeno",
+        "purpose": "Supporting text, descriptions up to 60-62ch."
+      },
+      "item-name": {
+        "displayName": "Nome da camisa",
+        "purpose": "Product name on the locker label, 2 lines reserved; 0.82rem on mobile."
+      },
+      "price": {
+        "displayName": "Preço",
+        "purpose": "Locker price (1rem / 1.125rem); product page 1.875rem / 2.25rem. Tabular."
+      },
+      "button": {
+        "displayName": "Botão",
+        "purpose": "Button labels: 0.7rem (sm), 0.78rem (md), 0.82rem (lg). Uppercase."
+      },
+      "label": {
+        "displayName": "Rótulo",
+        "purpose": "Nav, locker status line, demo strip, shelf link; uppercase, tracking 0.12-0.14em."
+      }
+    },
+    "shadows": [
+      {
+        "name": "plate-sheen-primary",
+        "value": "inset 0 1px 0 rgb(255 255 255 / 0.16)",
+        "purpose": "Lit fold on top of the primary steel button."
+      },
+      {
+        "name": "plate-sheen-secondary",
+        "value": "inset 0 1px 0 rgb(255 255 255 / 0.06)",
+        "purpose": "Same fold on the secondary button."
+      },
+      {
+        "name": "header-scrolled",
+        "value": "0 12px 30px -24px rgb(0 0 0 / 0.9)",
+        "purpose": "Separates the solid header after the first scroll. Only outer shadow in the store."
+      },
+      {
+        "name": "locker-seam",
+        "value": "0 0 0 1px var(--color-line)",
+        "purpose": "Locker 1px ring (ring-1 ring-line); overlapping rings in a gap-px bank form one seam. Hover/focus: var(--color-line-strong)."
+      },
+      {
+        "name": "focus-ring",
+        "value": "0 0 0 2px var(--color-bg), 0 0 0 4px var(--color-brand-400)",
+        "purpose": "Visible focus on every control (2px brand-400, 2px offset over the floor)."
+      },
+      {
+        "name": "locker-face",
+        "value": "linear-gradient(180deg, var(--color-steel-2) 0%, var(--color-steel) 100%)",
+        "purpose": "Steel face of the locker (background, not shadow). The only allowed gradient."
+      }
+    ],
+    "motion": [
+      {
+        "name": "ease-out-fz",
+        "value": "cubic-bezier(0.23, 1, 0.32, 1)",
+        "purpose": "Default curve for state changes, hovers, reveals."
+      },
+      {
+        "name": "ease-in-out-fz",
+        "value": "cubic-bezier(0.77, 0, 0.175, 1)",
+        "purpose": "Room brightening after each hero light settles."
+      },
+      {
+        "name": "ease-drawer",
+        "value": "cubic-bezier(0.32, 0.72, 0, 1)",
+        "purpose": "Drawers and sheets (cart, mobile menu, filters)."
+      },
+      {
+        "name": "duration-press",
+        "value": "150ms",
+        "purpose": "Press scale (0.97) and color changes on buttons, chips, sizes."
+      },
+      {
+        "name": "duration-light",
+        "value": "200ms",
+        "purpose": "Locker light on hover/focus, ring change, quick-add drawer."
+      },
+      {
+        "name": "duration-header",
+        "value": "300ms",
+        "purpose": "Header height, background and demo strip collapse."
+      },
+      {
+        "name": "duration-drawer",
+        "value": "320ms",
+        "purpose": "Drawer / sheet entrance."
+      },
+      {
+        "name": "duration-reveal",
+        "value": "450ms",
+        "purpose": "Scroll reveal (16px rise + fade), stagger 60ms."
+      },
+      {
+        "name": "duration-photo",
+        "value": "500ms",
+        "purpose": "Photo push-in to 1.03 on locker hover."
+      },
+      {
+        "name": "light-on",
+        "value": "light-on 0.55s linear both",
+        "purpose": "Fluorescent flicker-and-settle of the 2px light strip on featured lockers."
+      },
+      {
+        "name": "light-queue",
+        "value": "first 200ms, step 140ms",
+        "purpose": "Hero lockers light one by one."
+      },
+      {
+        "name": "room-reveal",
+        "value": "fade-in 0.6s ease-in-out-fz reverse, light delay + 220ms",
+        "purpose": "Floor-at-70% veil over each hero locker lifts after its light settles."
+      },
+      {
+        "name": "reduced-motion",
+        "value": "animation-duration 0.01ms, delay 0ms; transforms off",
+        "purpose": "Less, not zero: opacity and color stay, displacement/scale/flicker go; lights appear already on."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "sm",
+        "value": "640px"
+      },
+      {
+        "name": "md",
+        "value": "768px"
+      },
+      {
+        "name": "lg",
+        "value": "1024px"
+      },
+      {
+        "name": "xl",
+        "value": "1280px"
+      },
+      {
+        "name": "container-max",
+        "value": "1360px"
+      }
+    ],
+    "scope": {
+      "storeRoot": ".store-world",
+      "radiusRemap": {
+        "--radius-sm": "2px",
+        "--radius-md": "3px",
+        "--radius-lg": "3px",
+        "--radius-xl": "4px",
+        "--radius-2xl": "4px",
+        "--radius-3xl": "6px",
+        "--radius-4xl": "6px",
+        "--radius-card": "3px",
+        "--radius-button": "3px",
+        "--radius-chip": "3px"
+      },
+      "outsideStore": "Admin keeps pills (--radius-button/--radius-chip fall back to 9999px) and --radius-card 1.125rem.",
+      "tokenSource": "src/app/globals.css",
+      "fontSource": "src/app/layout.tsx (next/font: Big Shoulders 700/800/900, Big Shoulders Stencil 700/800, Manrope 400-800)"
+    },
+    "contractDeviations": [
+      {
+        "name": "Cone of light removed",
+        "contract": "A thin blue-white light strip on the top edge AND a soft cone of light falling onto the shirt.",
+        "build": "Only the 2px ceiling-light strip on the locker steel top edge: lit at rest on featured lockers (hero four, Temporada lead), on hover or focus elsewhere.",
+        "reason": "The cone was invisible on the pale photo backdrops of the catalogue.",
+        "deliberate": true
+      },
+      {
+        "name": "Locker banks",
+        "contract": "Lockers separated by 1px seams.",
+        "build": "Banks use gap-px; each locker carries a 1px ring (ring-1 ring-line) instead of its own border, so neighbouring rings fuse into one seam.",
+        "deliberate": true
+      },
+      {
+        "name": "Team rail flush",
+        "contract": "n/a",
+        "build": "From 1024px the home team rail sits flush with the container grid with a 1px inset so the end rings are not clipped.",
+        "deliberate": true
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Rectangular steel plate in logo blue; one per view, the live action.",
+      "html": "<button class=\"ds-btn-primary\">Ver camisas</button>",
+      "css": ".ds-btn-primary { display:inline-flex; align-items:center; justify-content:center; height:44px; padding:0 20px; border:0; border-radius:var(--radius-button, 3px); background:var(--color-brand-600); color:#fff; font-family:var(--font-sans, Manrope, system-ui, sans-serif); font-size:0.78rem; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; box-shadow:inset 0 1px 0 rgb(255 255 255 / 0.16); cursor:pointer; transition:background-color 150ms cubic-bezier(0.23,1,0.32,1), scale 150ms cubic-bezier(0.23,1,0.32,1); } .ds-btn-primary:hover { background:var(--color-brand-500); } .ds-btn-primary:active { background:var(--color-brand-700); scale:0.97; } .ds-btn-primary:focus-visible { outline:none; box-shadow:0 0 0 2px var(--color-bg), 0 0 0 4px var(--color-brand-400); }"
+    },
+    {
+      "name": "Secondary Button",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "Graphite steel plate for the alternative action.",
+      "html": "<button class=\"ds-btn-secondary\">Continuar comprando</button>",
+      "css": ".ds-btn-secondary { display:inline-flex; align-items:center; height:44px; padding:0 20px; border:0; border-radius:var(--radius-button, 3px); background:var(--color-steel-3); color:var(--color-fg); font-family:var(--font-sans, Manrope, system-ui, sans-serif); font-size:0.78rem; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; box-shadow:inset 0 1px 0 rgb(255 255 255 / 0.06); cursor:pointer; transition:background-color 150ms cubic-bezier(0.23,1,0.32,1), scale 150ms; } .ds-btn-secondary:hover { background:var(--color-surface-3); } .ds-btn-secondary:active { scale:0.97; } .ds-btn-secondary:focus-visible { outline:none; box-shadow:0 0 0 2px var(--color-bg), 0 0 0 4px var(--color-brand-400); }"
+    },
+    {
+      "name": "Outline Button",
+      "kind": "button",
+      "refersTo": "button-outline",
+      "description": "Hairline steel outline for tertiary actions.",
+      "html": "<button class=\"ds-btn-outline\">Ver tabela de medidas</button>",
+      "css": ".ds-btn-outline { display:inline-flex; align-items:center; height:44px; padding:0 20px; border:1px solid var(--color-line-strong); border-radius:var(--radius-button, 3px); background:transparent; color:var(--color-fg); font-family:var(--font-sans, Manrope, system-ui, sans-serif); font-size:0.78rem; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; cursor:pointer; transition:border-color 150ms, background-color 150ms; } .ds-btn-outline:hover { border-color:var(--color-fg-2); background:rgb(255 255 255 / 0.03); } .ds-btn-outline:focus-visible { outline:none; box-shadow:0 0 0 2px var(--color-bg), 0 0 0 4px var(--color-brand-400); }"
+    },
+    {
+      "name": "Filter Chip",
+      "kind": "chip",
+      "refersTo": "chip",
+      "description": "Square steel chip; selected turns solid logo blue.",
+      "html": "<div class=\"ds-chips\"><button class=\"ds-chip\" aria-pressed=\"true\">Brasileirão</button><button class=\"ds-chip\" aria-pressed=\"false\">Europeus</button><button class=\"ds-chip\" aria-pressed=\"false\">Retrô</button></div>",
+      "css": ".ds-chips { display:flex; gap:6px; flex-wrap:wrap; } .ds-chip { height:36px; padding:0 14px; border:1px solid var(--color-line-strong); border-radius:var(--radius-chip, 3px); background:rgb(255 255 255 / 0.02); color:var(--color-fg-2); font-family:var(--font-sans, Manrope, system-ui, sans-serif); font-size:0.75rem; font-weight:600; cursor:pointer; transition:background-color 150ms, border-color 150ms, color 150ms, scale 150ms; } .ds-chip:hover { color:var(--color-fg); border-color:color-mix(in oklab, var(--color-fg-2) 50%, transparent); } .ds-chip:active { scale:0.97; } .ds-chip[aria-pressed='true'] { background:var(--color-brand-600); border-color:var(--color-brand-600); color:#fff; } .ds-chip:focus-visible { outline:none; box-shadow:0 0 0 2px var(--color-brand-400); }"
+    },
+    {
+      "name": "Text Field",
+      "kind": "input",
+      "refersTo": "input",
+      "description": "Graphite field with uppercase label above; blue only on focus.",
+      "html": "<label class=\"ds-field\"><span class=\"ds-field-label\">CEP</span><input class=\"ds-input\" placeholder=\"00000-000\"></label>",
+      "css": ".ds-field { display:flex; flex-direction:column; gap:6px; max-width:280px; } .ds-field-label { font-family:var(--font-sans, Manrope, system-ui, sans-serif); font-size:0.75rem; font-weight:600; letter-spacing:0.05em; text-transform:uppercase; color:var(--color-fg-2); } .ds-input { height:44px; padding:0 14px; border:1px solid var(--color-line-strong); border-radius:4px; background:var(--color-surface-2); color:var(--color-fg); font-family:var(--font-sans, Manrope, system-ui, sans-serif); font-size:0.875rem; transition:border-color 150ms, box-shadow 150ms; } .ds-input::placeholder { color:var(--color-muted); } .ds-input:hover { border-color:color-mix(in oklab, var(--color-fg-2) 40%, transparent); } .ds-input:focus { outline:none; border-color:var(--color-brand-500); box-shadow:0 0 0 2px color-mix(in oklab, var(--color-brand-500) 30%, transparent); }"
+    },
+    {
+      "name": "Header Navigation",
+      "kind": "nav",
+      "refersTo": "nav-link-active",
+      "description": "Uppercase links; the current item carries the only blue in the header as a 2px light.",
+      "html": "<nav class=\"ds-nav\"><a class=\"ds-nav-link\" aria-current=\"page\" href=\"#\">Camisas</a><a class=\"ds-nav-link\" href=\"#\">Times</a><a class=\"ds-nav-link\" href=\"#\">Seleções</a><a class=\"ds-nav-link\" href=\"#\">Retrô</a></nav>",
+      "css": ".ds-nav { display:flex; background:var(--color-bg); border-bottom:1px solid var(--color-line); } .ds-nav-link { position:relative; display:block; padding:8px 14px; font-family:var(--font-sans, Manrope, system-ui, sans-serif); font-size:0.78rem; font-weight:700; letter-spacing:0.14em; text-transform:uppercase; color:var(--color-fg-2); text-decoration:none; transition:color 150ms; } .ds-nav-link::after { content:''; position:absolute; left:14px; right:14px; bottom:-3px; height:2px; background:color-mix(in oklab, var(--color-fg-2) 50%, transparent); transform:scaleX(0); transform-origin:left; transition:transform 200ms cubic-bezier(0.23,1,0.32,1); } .ds-nav-link:hover { color:var(--color-fg); } .ds-nav-link:hover::after { transform:scaleX(1); } .ds-nav-link[aria-current='page'] { color:var(--color-fg); } .ds-nav-link[aria-current='page']::after { transform:scaleX(1); background:var(--color-brand-500); } .ds-nav-link:focus-visible { outline:2px solid var(--color-brand-400); outline-offset:2px; }"
+    },
+    {
+      "name": "Locker (product card)",
+      "kind": "card",
+      "refersTo": "locker",
+      "description": "Signature unit: stencil plate, 3:4 niche, label grid with reserved status slot and bottom-anchored price; light strip on the steel top edge (lit at rest when featured, on hover/focus otherwise). Shown in a gap-px bank.",
+      "html": "<div class=\"ds-bank\"><article class=\"ds-locker ds-locker--lit\" tabindex=\"0\"><span class=\"ds-light\"></span><div class=\"ds-plate\"><span class=\"ds-plate-team\">Flamengo</span><span class=\"ds-plate-season\">26/27</span></div><div class=\"ds-niche\"></div><div class=\"ds-label\"><h3 class=\"ds-name\">Camisa Jogador Flamengo Listrada I 26/27</h3><p class=\"ds-sizes\"><span>P</span><span>M</span><span>G</span><span>GG</span><s>2GG</s></p><div class=\"ds-foot\"><p class=\"ds-status\">Lançamento</p><p class=\"ds-price\">R$ 429,90</p></div></div></article><article class=\"ds-locker\" tabindex=\"0\"><span class=\"ds-light\"></span><div class=\"ds-plate\"><span class=\"ds-plate-team\">Palmeiras</span><span class=\"ds-plate-season\">26/27</span></div><div class=\"ds-niche\"></div><div class=\"ds-label\"><h3 class=\"ds-name\">Camisa Palmeiras Verde I 26/27</h3><p class=\"ds-sizes\"><span>P</span><span>M</span><span>G</span><span>GG</span><span>2GG</span></p><div class=\"ds-foot\"><p class=\"ds-status\"></p><p class=\"ds-price\">R$ 349,90</p></div></div></article></div>",
+      "css": ".ds-bank { display:grid; grid-template-columns:repeat(2, minmax(0, 220px)); gap:1px; padding:1px; } .ds-locker { position:relative; display:flex; flex-direction:column; border-radius:var(--radius-card, 3px); background:linear-gradient(180deg, var(--color-steel-2) 0%, var(--color-steel) 100%); box-shadow:0 0 0 1px var(--color-line); transition:box-shadow 200ms; outline:none; } .ds-locker:hover, .ds-locker:focus-visible { z-index:1; box-shadow:0 0 0 1px var(--color-line-strong); } .ds-light { position:absolute; left:14%; right:14%; top:-1px; height:2px; background:var(--color-light); opacity:0; transition:opacity 200ms; pointer-events:none; } .ds-locker:hover .ds-light, .ds-locker:focus-visible .ds-light, .ds-locker--lit .ds-light { opacity:1; } .ds-plate { display:flex; align-items:center; justify-content:space-between; gap:12px; height:36px; padding:0 12px; border-bottom:1px solid var(--color-line); font-family:var(--font-stencil, 'Big Shoulders Stencil', 'Arial Narrow', sans-serif); font-weight:700; letter-spacing:0.08em; line-height:1.25; text-transform:uppercase; } .ds-plate-team { font-size:0.82rem; color:var(--color-fg-2); transition:color 200ms; } .ds-locker:hover .ds-plate-team { color:var(--color-fg); } .ds-plate-season { font-size:0.74rem; color:var(--color-muted); font-variant-numeric:tabular-nums; } .ds-niche { aspect-ratio:3/4; background:#0a0c10; } .ds-label { display:flex; flex:1; flex-direction:column; gap:8px; padding:10px 12px 12px; border-top:1px solid var(--color-line); font-family:var(--font-sans, Manrope, system-ui, sans-serif); } .ds-name { margin:0; min-height:2.75em; font-size:0.92rem; font-weight:600; line-height:1.375; color:var(--color-fg); } .ds-sizes { display:flex; gap:8px; margin:0; font-size:0.6875rem; font-weight:600; font-variant-numeric:tabular-nums; color:var(--color-fg-2); } .ds-sizes s { color:var(--color-muted); } .ds-foot { margin-top:auto; padding-top:4px; } .ds-status { height:16px; margin:0; font-size:0.6875rem; font-weight:700; line-height:16px; letter-spacing:0.12em; text-transform:uppercase; color:var(--color-muted); } .ds-price { margin:0; font-size:1.125rem; font-weight:800; font-variant-numeric:tabular-nums; color:var(--color-fg); }"
+    },
+    {
+      "name": "Checkout Station",
+      "kind": "custom",
+      "refersTo": "station-plate-active",
+      "description": "Fixed station in order: numbered stencil plate with the light on when active, Big Shoulders title, shelf rule on top.",
+      "html": "<section class=\"ds-station\"><span class=\"ds-station-plate is-active\">02<span class=\"ds-station-light\"></span></span><h2 class=\"ds-station-title\">Endereço</h2></section><section class=\"ds-station\"><span class=\"ds-station-plate\">03</span><h2 class=\"ds-station-title is-pending\">Entrega</h2></section>",
+      "css": ".ds-station { display:flex; align-items:flex-start; gap:16px; padding:20px 0; border-top:1px solid var(--color-line-strong); } .ds-station-plate { position:relative; display:grid; place-items:center; width:40px; height:40px; flex-shrink:0; border:1px solid var(--color-line); border-radius:var(--radius-button, 3px); font-family:var(--font-stencil, 'Big Shoulders Stencil', 'Arial Narrow', sans-serif); font-size:0.95rem; font-weight:700; letter-spacing:0.08em; font-variant-numeric:tabular-nums; color:var(--color-muted); transition:background-color 200ms, border-color 200ms, color 200ms; } .ds-station-plate.is-active { border-color:var(--color-line-strong); background:var(--color-steel-3); color:var(--color-fg); } .ds-station-light { position:absolute; left:6px; right:6px; top:-1px; height:2px; background:var(--color-light); } .ds-station-title { margin:6px 0 0; font-family:var(--font-display, 'Big Shoulders', 'Arial Narrow', sans-serif); font-size:1.85rem; font-weight:800; line-height:0.92; letter-spacing:0.005em; text-transform:uppercase; color:var(--color-fg); } .ds-station-title.is-pending { color:var(--color-muted); }"
+    },
+    {
+      "name": "Section Heading on the Shelf Line",
+      "kind": "custom",
+      "refersTo": "shelf-link",
+      "description": "Big Shoulders section title resting on a 1px shelf rule, one action link at the right.",
+      "html": "<div class=\"ds-shelf\"><h2 class=\"ds-shelf-title\">Encontre seu time</h2><a class=\"ds-shelf-link\" href=\"#\">Ver todos os times</a></div>",
+      "css": ".ds-shelf { display:flex; align-items:flex-end; justify-content:space-between; gap:24px; padding-bottom:20px; border-bottom:1px solid var(--color-line-strong); } .ds-shelf-title { margin:0; font-family:var(--font-display, 'Big Shoulders', 'Arial Narrow', sans-serif); font-size:3rem; font-weight:800; line-height:0.92; letter-spacing:0.005em; text-transform:uppercase; color:var(--color-fg); } .ds-shelf-link { display:inline-flex; align-items:center; height:40px; font-family:var(--font-sans, Manrope, system-ui, sans-serif); font-size:0.74rem; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:var(--color-fg); text-decoration:underline; text-decoration-color:var(--color-line-strong); text-underline-offset:0.4em; transition:text-decoration-color 150ms; } .ds-shelf-link:hover { text-decoration-color:var(--color-fg); } .ds-shelf-link:focus-visible { outline:2px solid var(--color-brand-400); outline-offset:2px; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "O Vestiário Antes do Jogo",
+    "overview": "A loja é o vestiário do time antes da partida: cada camisa espera no seu armário de aço grafite, com a plaquinha em estêncil no topo, e o visitante percorre a fileira e tira uma. O piso é quase preto, o aço é grafite frio, os títulos são brancos e o texto de apoio é cinza. A única coisa que \"acende\" é a luz do teto: uma faixa fina branco-azulada de 2px no aço do topo do armário. Nenhum outro efeito existe.\n\nA densidade é de prateleira: os armários formam bancos contínuos, separados por emendas de 1px, sem respiro entre eles; quem respira são as seções, cada uma apoiada numa régua horizontal de 1px (a linha da prateleira) e separadas por 96px a 128px. A hierarquia vem só do contraste de escala tipográfica: Big Shoulders condensado e em caixa alta para os títulos, Manrope sóbrio para o resto, números sempre tabulares. A foto real do catálogo (3:4, modelo vestindo a camisa) é o herói; o aço em volta dela fica quieto.\n\nO azul da logo é racionado: ele marca o único elemento vivo da tela (ação principal, item de navegação atual, tamanho escolhido, filtro selecionado). Todo o resto é grafite dormente e branco. A loja recusa o padrão da categoria: hero centralizado sobre degradê, chips flutuantes sobre a foto e fileira de cards arredondados.",
+    "keyCharacteristics": [
+      "Armários quase retos (3px), em bancos com emendas de 1px, cada um com plaquinha (time e temporada), nicho com a foto e etiqueta (nome, grade de tamanhos, situação, preço).",
+      "Luz como único efeito: faixa de 2px `ceiling-light` no aço do topo; acesa em repouso só nos armários em destaque, ao apontar ou focar nos demais.",
+      "Azul da logo reservado ao elemento ativo; nunca decorativo.",
+      "Linha da prateleira de 1px como eixo horizontal de cada seção.",
+      "Estêncil (Big Shoulders Stencil) nas plaquinhas e nas manchetes do vestiário; Big Shoulders sólido nos títulos de seção; Manrope no corpo; números tabulares.",
+      "Sem sombras de elevação, sem vidro, sem degradês decorativos; o único degradê é o vertical sutil da face de aço (`steel-2` para `steel`)."
+    ],
+    "rules": [
+      {
+        "name": "The One Live Element Rule",
+        "body": "O azul FutZone marca apenas o que está vivo agora: a ação principal, o item atual, o tamanho escolhido. Se dois azuis cheios disputam a mesma vista sem que ambos sejam estado do usuário, um deles está errado.",
+        "section": "colors"
+      },
+      {
+        "name": "The Light Is Not Blue Rule",
+        "body": "A luz do vestiário é `ceiling-light`, não o azul da marca. Azul é estado; luz é atenção. Exceção registrada: a luz do item de navegação ativo e da miniatura ativa da galeria usa `brand-blue-bright`, porque ali a luz É o estado.",
+        "section": "colors"
+      },
+      {
+        "name": "The Type-Scale-Only Rule",
+        "body": "Hierarquia sai do contraste de tamanho e peso, nunca de ornamento, cor de destaque ou selo. Um título não ganha rótulo acima dele: o título fala sozinho.",
+        "section": "typography"
+      },
+      {
+        "name": "The Tabular Figures Rule",
+        "body": "Todo número que se compara em coluna (preço, tamanho, temporada, contagem, etapa) usa `tabular-nums`.",
+        "section": "typography"
+      },
+      {
+        "name": "The Light-Only Effect Rule",
+        "body": "A luz do teto é o único efeito do mundo: uma faixa de 2px `ceiling-light` no aço do topo do armário, centrada (recuo de 14% a 16% de cada lado). Nos armários em destaque (os quatro do hero e o armário principal da Temporada) ela fica acesa em repouso e acende em fila; nos demais acende ao apontar ou focar, em 200ms. Sem brilhos, sem halos, sem cone.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "**Do** colocar toda camisa num armário completo: plaquinha (time e temporada), nicho 3:4 com a foto real, etiqueta com nome, grade de tamanhos, linha de situação reservada e preço ancorado na base.",
+      "**Do** montar bancos de armários com espaço de 1px e anel de 1px `seam` por armário, para que as emendas se fundam numa só.",
+      "**Do** apoiar cada seção na linha da prateleira (1px `seam-strong`) com um único link de ação à direita.",
+      "**Do** usar a luz do teto (2px `ceiling-light`) como o único efeito: acesa em repouso só em armários em destaque, ao apontar ou focar nos demais.",
+      "**Do** reservar o azul FutZone para o elemento ativo: ação principal, item atual, tamanho ou filtro escolhido.",
+      "**Do** manter os cantos em 3px (2px a 6px no máximo) em toda a loja.",
+      "**Do** usar algarismos tabulares em preços, tamanhos, temporadas, contagens e etapas.",
+      "**Do** sinalizar com honestidade o que é demonstração (frete, cupom, pagamento, e-mail, contas), em aço neutro, nunca em azul."
+    ],
+    "donts": [
+      "**Don't** pôr um cone de luz, brilho, halo ou degradê sobre a foto; sobre o fundo claro do catálogo eles não aparecem e só sujam a imagem.",
+      "**Don't** usar sombras de elevação em armários, chips ou botões; a profundidade é tonal.",
+      "**Don't** usar vidro (desfoque de fundo) sobre as fotos. Os únicos controles sobre o nicho são funcionais (favoritar, adicionar rápido) e ficam em placa quase opaca do piso (`floor` a 75%) ou em giz sólido, de 36px a 40px, nos cantos.",
+      "**Don't** criar selos avulsos sobre a foto: a situação é uma palavra na linha reservada da etiqueta.",
+      "**Don't** usar botões em pílula ou cards arredondados na loja.",
+      "**Don't** colocar rótulos acima dos títulos de seção.",
+      "**Don't** usar o azul da marca como decoração, fundo de seção ou cor de aviso.",
+      "**Don't** inventar avaliações, contagem de vendas, urgência ou descontos."
+    ]
+  }
+}

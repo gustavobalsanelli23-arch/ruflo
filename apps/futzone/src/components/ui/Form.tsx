@@ -3,7 +3,7 @@ import { ChevronDown } from 'lucide-react';
 import { cn } from '@/lib/format';
 
 const CONTROL =
-  'w-full rounded-xl border border-line bg-surface-2 px-3.5 text-sm text-fg placeholder:text-subtle transition-colors hover:border-line-strong focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/25 disabled:opacity-60 aria-[invalid=true]:border-danger';
+  'w-full rounded-xl border border-line-strong bg-surface-2 px-3.5 text-sm text-fg placeholder:text-muted transition-[border-color,box-shadow] duration-150 hover:border-fg-2/40 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/30 disabled:opacity-60 aria-[invalid=true]:border-danger';
 
 interface FieldProps {
   label: string;
@@ -24,7 +24,7 @@ export function Field({ label, hint, error, required, className, children }: Fie
       <label htmlFor={id} className="text-xs font-semibold uppercase tracking-wider text-fg-2">
         {label}
         {required && (
-          <span className="ml-0.5 text-brand-400" aria-hidden>
+          <span className="ml-0.5 text-muted" aria-hidden>
             *
           </span>
         )}
@@ -81,10 +81,10 @@ export function Chip({ selected, className, ...props }: ChipProps) {
       type="button"
       aria-pressed={selected}
       className={cn(
-        'inline-flex h-9 items-center justify-center gap-1.5 rounded-full border px-3.5 text-xs font-semibold transition-[background-color,border-color,color,transform] duration-150 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-400',
+        'motion-lift inline-flex h-9 items-center justify-center gap-1.5 rounded-[var(--radius-chip,9999px)] border px-3.5 text-xs font-semibold transition-[background-color,border-color,color,scale] duration-150 active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-400',
         selected
-          ? 'border-brand-500 bg-brand-500 text-white'
-          : 'border-line bg-white/[0.02] text-fg-2 hover:border-line-strong hover:text-fg',
+          ? 'border-brand-600 bg-brand-600 text-white'
+          : 'border-line-strong bg-white/[0.02] text-fg-2 hover:border-fg-2/50 hover:text-fg',
         'disabled:cursor-not-allowed disabled:opacity-40',
         className,
       )}
@@ -108,8 +108,8 @@ export function Switch({ checked, onChange, label }: SwitchProps) {
       onClick={() => onChange(!checked)}
       className="group inline-flex items-center gap-3 text-sm text-fg-2"
     >
-      <span className={cn('relative h-6 w-11 rounded-full transition-colors', checked ? 'bg-brand-500' : 'bg-surface-3 ring-1 ring-line-strong')}>
-        <span className={cn('absolute top-1 size-4 rounded-full bg-white transition-all', checked ? 'left-6' : 'left-1')} />
+      <span className={cn('relative h-6 w-11 rounded-full transition-colors duration-200', checked ? 'bg-brand-500' : 'bg-surface-3 ring-1 ring-line-strong')}>
+        <span className={cn('absolute left-1 top-1 size-4 rounded-full bg-white transition-transform duration-200 ease-[var(--ease-out-fz)]', checked ? 'translate-x-5' : 'translate-x-0')} />
       </span>
       {label}
     </button>

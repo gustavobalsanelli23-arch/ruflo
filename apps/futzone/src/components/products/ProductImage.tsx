@@ -67,7 +67,7 @@ export function ProductImage({ product, index = 0, view = 'front', className, im
           secondary={product.palette.secondary}
           cut={CUT_BY_CATEGORY[product.category]}
           view={view}
-          title={`${product.name} — imagem ilustrativa`}
+          title={`${product.name} (imagem ilustrativa)`}
           className={cn('h-[82%] w-[82%] drop-shadow-[0_24px_30px_rgba(0,0,0,0.55)]', imageClassName)}
         />
       )}
