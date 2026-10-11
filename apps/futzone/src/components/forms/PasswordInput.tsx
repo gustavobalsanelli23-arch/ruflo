@@ -17,11 +17,11 @@ export const PasswordInput = forwardRef<HTMLInputElement, Omit<React.InputHTMLAt
       <button
         type="button"
         onClick={() => setShow((v) => !v)}
-        className="absolute right-1.5 top-1/2 grid size-9 -translate-y-1/2 place-items-center rounded-lg text-muted transition-colors hover:bg-white/[0.06] hover:text-fg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-400"
+        className="motion-lift absolute right-1 top-1 grid size-9 place-items-center rounded-lg text-muted transition-[background-color,color,scale] duration-150 ease-[var(--ease-out-fz)] hover:bg-steel-3 hover:text-fg active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-400"
         aria-label={show ? 'Ocultar senha' : 'Mostrar senha'}
         aria-pressed={show}
       >
-        {show ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+        {show ? <EyeOff className="size-4" strokeWidth={1.75} aria-hidden /> : <Eye className="size-4" strokeWidth={1.75} aria-hidden />}
       </button>
     </div>
   );

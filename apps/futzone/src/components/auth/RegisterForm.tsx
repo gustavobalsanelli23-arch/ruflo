@@ -1,9 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useId, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { AlertCircle, UserPlus } from 'lucide-react';
+import { AlertCircle } from 'lucide-react';
 import { useCustomerAuth } from '@/context/CustomerAuthContext';
 import { useToast } from '@/context/ToastContext';
 import { customerPasswordProblems, formatCPF, formatPhone, isValidCPF, isValidEmail, isValidFullName, isValidMobile } from '@/lib/validation';
@@ -11,6 +11,8 @@ import { Button } from '@/components/ui/Button';
 import { Field, Input } from '@/components/ui/Form';
 import { PasswordInput } from '@/components/forms/PasswordInput';
 import { PasswordStrength } from '@/components/forms/PasswordStrength';
+import { Checkbox } from '@/components/forms/Checkbox';
+import { TEXT_LINK } from '@/components/account/AccountUI';
 
 type Form = { name: string; email: string; phone: string; cpf: string; password: string; confirm: string; terms: boolean };
 type Errors = Partial<Record<keyof Form, string>>;
@@ -43,6 +45,7 @@ export function RegisterForm({ next, defaultEmail = '' }: { next: string; defaul
   const [touched, setTouched] = useState<Set<keyof Form>>(new Set());
   const [loading, setLoading] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
+  const termsErrorId = useId();
 
   const set = <K extends keyof Form>(key: K, value: Form[K]) => {
     const nextForm = { ...form, [key]: value };
@@ -72,7 +75,7 @@ export function RegisterForm({ next, defaultEmail = '' }: { next: string; defaul
       else setFormError(result.message);
       return;
     }
-    notify('Conta criada! Boas-vindas à FutZone.');
+    notify('Conta criada. Boas-vindas à FutZone.');
     router.replace(next);
   };
 
@@ -92,29 +95,28 @@ export function RegisterForm({ next, defaultEmail = '' }: { next: string; defaul
 
   return (
     <form onSubmit={submit} noValidate className="space-y-5">
-      <p className="text-xs text-muted">
-        Campos com <span className="text-brand-400">*</span> são obrigatórios.
-      </p>
+      <p className="text-sm text-muted">Todos os campos são obrigatórios.</p>
       {formError && (
-        <div role="alert" className="animate-fade-up flex items-start gap-3 rounded-xl border border-danger/30 bg-danger/10 px-4 py-3 text-sm">
-          <AlertCircle className="mt-0.5 size-4 shrink-0 text-danger" aria-hidden /> {formError}
+        <div role="alert" className="animate-fade flex items-start gap-3 rounded-[var(--radius-card)] border border-danger/40 bg-danger/[0.08] px-4 py-3 text-sm text-fg">
+          <AlertCircle className="mt-0.5 size-4 shrink-0 text-danger" strokeWidth={1.75} aria-hidden />
+          <span>{formError}</span>
         </div>
       )}
-      <Field label="Nome completo" required error={errors.name}>
+      <Field label="Nome completo" error={errors.name}>
         {input('name', { autoComplete: 'name', placeholder: 'Seu nome e sobrenome' })}
       </Field>
-      <Field label="E-mail" required error={errors.email}>
+      <Field label="E-mail" error={errors.email}>
         {input('email', { type: 'email', autoComplete: 'email', inputMode: 'email', autoCapitalize: 'none', placeholder: 'voce@email.com' })}
       </Field>
       <div className="grid gap-5 sm:grid-cols-2">
-        <Field label="Celular" required error={errors.phone}>
+        <Field label="Celular" error={errors.phone}>
           {input('phone', { type: 'tel', autoComplete: 'tel-national', inputMode: 'numeric', placeholder: '(11) 91234-5678' }, formatPhone)}
         </Field>
-        <Field label="CPF" required error={errors.cpf}>
+        <Field label="CPF" error={errors.cpf}>
           {input('cpf', { inputMode: 'numeric', placeholder: '000.000.000-00' }, formatCPF)}
         </Field>
       </div>
-      <Field label="Senha" required error={errors.password}>
+      <Field label="Senha" error={errors.password}>
         {(id, d) => (
           <PasswordInput
             id={id}
@@ -130,7 +132,7 @@ export function RegisterForm({ next, defaultEmail = '' }: { next: string; defaul
         )}
       </Field>
       <PasswordStrength id="reg-strength" password={form.password} />
-      <Field label="Confirmar senha" required error={errors.confirm}>
+      <Field label="Confirmar senha" error={errors.confirm}>
         {(id, d) => (
           <PasswordInput
             id={id}
@@ -145,26 +147,36 @@ export function RegisterForm({ next, defaultEmail = '' }: { next: string; defaul
           />
         )}
       </Field>
-      <div>
-        <label className="flex items-start gap-3 text-sm text-fg-2">
-          <input
+      <div className="border-t border-line pt-5">
+        <label className="flex cursor-pointer items-start gap-3 text-sm leading-relaxed text-fg-2">
+          <Checkbox
             name="terms"
-            type="checkbox"
             checked={form.terms}
             onChange={(e) => set('terms', e.target.checked)}
-            className="mt-0.5 size-4 shrink-0 accent-[var(--color-brand-500)]"
             aria-invalid={!!errors.terms}
+            aria-describedby={errors.terms ? termsErrorId : undefined}
+            className="mt-0.5"
           />
           <span>
             Li e aceito os{' '}
-            <Link href="/politicas#termos" className="text-brand-300 underline-offset-4 hover:underline">termos de uso</Link> e a{' '}
-            <Link href="/politicas#privacidade" className="text-brand-300 underline-offset-4 hover:underline">política de privacidade</Link>.
+            <Link href="/politicas#termos" className={TEXT_LINK}>
+              termos de uso
+            </Link>{' '}
+            e a{' '}
+            <Link href="/politicas#privacidade" className={TEXT_LINK}>
+              política de privacidade
+            </Link>
+            .
           </span>
         </label>
-        {errors.terms && <p role="alert" className="mt-1.5 text-xs text-danger">{errors.terms}</p>}
+        {errors.terms && (
+          <p id={termsErrorId} role="alert" className="animate-fade mt-2 pl-8 text-xs text-danger">
+            {errors.terms}
+          </p>
+        )}
       </div>
       <Button type="submit" size="lg" block loading={loading}>
-        {!loading && <UserPlus className="size-4" />} {loading ? 'Criando conta…' : 'Criar conta'}
+        {loading ? 'Criando conta…' : 'Criar conta'}
       </Button>
     </form>
   );

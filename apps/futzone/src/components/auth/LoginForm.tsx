@@ -3,12 +3,13 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { AlertCircle, CheckCircle2, LogIn, Sparkles } from 'lucide-react';
+import { AlertCircle, Check } from 'lucide-react';
 import { useCustomerAuth } from '@/context/CustomerAuthContext';
 import { isValidEmail } from '@/lib/validation';
 import { Button } from '@/components/ui/Button';
 import { Field, Input } from '@/components/ui/Form';
 import { PasswordInput } from '@/components/forms/PasswordInput';
+import { TEXT_LINK } from '@/components/account/AccountUI';
 
 export function LoginForm({ next }: { next: string }) {
   const router = useRouter();
@@ -51,10 +52,12 @@ export function LoginForm({ next }: { next: string }) {
 
   if (state === 'success') {
     return (
-      <div role="status" className="animate-fade-up flex flex-col items-center gap-3 py-8 text-center">
-        <CheckCircle2 className="animate-pop size-12 text-success" />
-        <p className="font-semibold text-fg">Login realizado!</p>
-        <p className="text-sm text-muted">Redirecionando…</p>
+      <div role="status" className="animate-fade flex items-start gap-3">
+        <Check className="mt-0.5 size-5 shrink-0 text-success" strokeWidth={1.75} aria-hidden />
+        <div>
+          <p className="font-semibold text-fg">Login realizado!</p>
+          <p className="mt-0.5 text-sm text-muted">Redirecionando…</p>
+        </div>
       </div>
     );
   }
@@ -62,38 +65,48 @@ export function LoginForm({ next }: { next: string }) {
   return (
     <form onSubmit={submit} noValidate className="space-y-5">
       {error && (
-        <div role="alert" className="animate-fade-up flex items-start gap-3 rounded-xl border border-danger/30 bg-danger/10 px-4 py-3 text-sm">
-          <AlertCircle className="mt-0.5 size-4 shrink-0 text-danger" aria-hidden /> {error}
+        <div role="alert" className="animate-fade flex items-start gap-3 rounded-[var(--radius-card)] border border-danger/40 bg-danger/[0.08] px-4 py-3 text-sm text-fg">
+          <AlertCircle className="mt-0.5 size-4 shrink-0 text-danger" strokeWidth={1.75} aria-hidden />
+          <span>{error}</span>
         </div>
       )}
       <Field label="E-mail" error={fieldErrors.email}>
-        {(id) => (
-          <Input id={id} type="email" value={email} onChange={(e) => setEmail(e.target.value)} autoComplete="username" inputMode="email" autoCapitalize="none" placeholder="voce@email.com" aria-invalid={!!fieldErrors.email} autoFocus />
+        {(id, d) => (
+          <Input
+            id={id}
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            autoComplete="username"
+            inputMode="email"
+            autoCapitalize="none"
+            placeholder="voce@email.com"
+            aria-invalid={!!fieldErrors.email}
+            aria-describedby={d}
+            autoFocus
+          />
         )}
       </Field>
-      <Field label="Senha" error={fieldErrors.password}>
-        {(id) => <PasswordInput id={id} value={password} onChange={(e) => setPassword(e.target.value)} autoComplete="current-password" aria-invalid={!!fieldErrors.password} />}
-      </Field>
-      <div className="flex justify-end">
-        <Link href="/recuperar-senha" className="text-sm text-brand-300 underline-offset-4 hover:underline">
-          Esqueci minha senha
-        </Link>
+      <div>
+        <Field label="Senha" error={fieldErrors.password}>
+          {(id, d) => <PasswordInput id={id} value={password} onChange={(e) => setPassword(e.target.value)} autoComplete="current-password" aria-invalid={!!fieldErrors.password} aria-describedby={d} />}
+        </Field>
+        <p className="mt-3 text-right text-sm">
+          <Link href="/recuperar-senha" className={TEXT_LINK}>
+            Esqueci minha senha
+          </Link>
+        </p>
       </div>
       <Button type="submit" size="lg" block loading={state === 'loading'}>
-        {state !== 'loading' && <LogIn className="size-4" />} {state === 'loading' ? 'Entrando…' : 'Entrar'}
+        {state === 'loading' ? 'Entrando…' : 'Entrar'}
       </Button>
-      <p className="text-center text-sm text-muted">
-        Não tem conta?{' '}
-        <Link href={`/cadastro${next !== '/conta' ? `?next=${encodeURIComponent(next)}` : ''}`} className="font-semibold text-brand-300 underline-offset-4 hover:underline">
-          Criar conta
-        </Link>
-      </p>
       {mode === 'demo' && (
-        <div className="border-t border-white/[0.06] pt-5">
-          <Button variant="outline" block onClick={demo} disabled={state === 'loading'}>
-            <Sparkles className="size-4" /> Explorar com a conta de demonstração
+        <div className="border-t border-line pt-5">
+          {/* Caminho alternativo: placa de aço em caixa normal, para o rótulo caber numa linha no celular */}
+          <Button variant="outline" block onClick={demo} disabled={state === 'loading'} className="px-3! text-sm! normal-case! tracking-normal!">
+            Explorar com a conta de demonstração
           </Button>
-          <p className="mt-2 text-center text-xs text-subtle">Conta de exemplo com pedidos, endereços e rastreio simulados.</p>
+          <p className="mt-2.5 text-center text-xs text-muted">Conta de exemplo com pedidos, endereços e rastreio simulados.</p>
         </div>
       )}
     </form>

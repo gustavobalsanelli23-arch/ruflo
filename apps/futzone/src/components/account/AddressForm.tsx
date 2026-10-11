@@ -1,14 +1,15 @@
 'use client';
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useId, useMemo, useRef, useState } from 'react';
 import { CheckCircle2, Info, LoaderCircle } from 'lucide-react';
 import type { Address } from '@/types/commerce';
 import { useStoreData } from '@/context/StoreDataContext';
 import { BR_STATES, LocalCepProvider, stateFromCep } from '@/services/address/cep.service';
 import { formatCEP, isValidCEP, onlyDigits } from '@/lib/validation';
-import { cn } from '@/lib/format';
 import { Button } from '@/components/ui/Button';
-import { Field, Input, Select } from '@/components/ui/Form';
+import { Chip, Field, Input, Select } from '@/components/ui/Form';
+import { Checkbox } from '@/components/forms/Checkbox';
+import { TEXT_LINK } from './AccountUI';
 
 type Form = Omit<Address, 'id'>;
 type Errors = Partial<Record<keyof Form, string>>;
@@ -47,7 +48,11 @@ interface AddressFormProps {
   hideActions?: boolean;
 }
 
-/** Formulário de endereço com preenchimento pelo CEP (busca local por enquanto). */
+/**
+ * Formulário de endereço com preenchimento pelo CEP (busca local por enquanto).
+ * Com `formId` + `hideActions`, quem usa (modal da conta, checkout) envia o
+ * formulário por um botão próprio, fora dele.
+ */
 export function AddressForm({ initial, defaultRecipient = '', submitLabel = 'Salvar endereço', onSubmit, onCancel, showDefaultToggle = true, formId, hideActions }: AddressFormProps) {
   const { customers } = useStoreData();
   const [form, setForm] = useState<Form>({ ...EMPTY, recipient: defaultRecipient, ...initial, complement: initial?.complement ?? '', reference: initial?.reference ?? '' });
@@ -56,6 +61,7 @@ export function AddressForm({ initial, defaultRecipient = '', submitLabel = 'Sal
   const lastLookup = useRef(onlyDigits(initial?.zip ?? ''));
   const numberRef = useRef<HTMLInputElement>(null);
   const streetRef = useRef<HTMLInputElement>(null);
+  const labelGroupId = useId();
 
   const provider = useMemo(() => new LocalCepProvider(() => customers.flatMap((c) => c.addresses)), [customers]);
 
@@ -153,15 +159,15 @@ export function AddressForm({ initial, defaultRecipient = '', submitLabel = 'Sal
                 className="pr-10"
               />
               <span className="absolute right-3 top-1/2 -translate-y-1/2" aria-hidden>
-                {cep === 'loading' && <LoaderCircle className="size-4 animate-spin text-muted" />}
-                {cep === 'complete' && <CheckCircle2 className="animate-pop size-4 text-success" />}
+                {cep === 'loading' && <LoaderCircle className="size-4 animate-spin text-muted" strokeWidth={1.75} />}
+                {cep === 'complete' && <CheckCircle2 className="animate-fade size-4 text-success" strokeWidth={1.75} />}
               </span>
-              <p id={`${id}-cep`} className="mt-1.5 text-[0.72rem] text-muted" aria-live="polite">
+              <p id={`${id}-cep`} className="mt-1.5 text-xs text-muted" aria-live="polite">
                 {cep === 'complete' && 'Endereço encontrado nos endereços salvos.'}
                 {cep === 'partial' && 'Estado identificado pelo CEP. Complete o restante.'}
                 {cep === 'unknown' && 'CEP não reconhecido. Confira os números.'}
                 {cep === 'idle' && (
-                  <a href="https://buscacepinter.correios.com.br/app/endereco/index.php" target="_blank" rel="noopener noreferrer" className="text-brand-300 hover:underline">
+                  <a href="https://buscacepinter.correios.com.br/app/endereco/index.php" target="_blank" rel="noopener noreferrer" className={TEXT_LINK}>
                     Não sei meu CEP
                   </a>
                 )}
@@ -188,38 +194,35 @@ export function AddressForm({ initial, defaultRecipient = '', submitLabel = 'Sal
         )}
       </Field>
       {text('recipient', 'Nome do destinatário', { className: 'sm:col-span-3', required: true, autoComplete: 'name' })}
-      {text('reference', 'Ponto de referência', { className: 'sm:col-span-3', placeholder: 'Opcional — ajuda o entregador' })}
+      {text('reference', 'Ponto de referência', { className: 'sm:col-span-3', placeholder: 'Opcional, ajuda o entregador' })}
       <div className="sm:col-span-6">
-        <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-fg-2">Identificação</p>
-        <div className="flex flex-wrap items-center gap-2">
+        <p id={labelGroupId} className="mb-1.5 text-xs font-semibold uppercase tracking-wider text-fg-2">
+          Identificação
+        </p>
+        <div role="group" aria-labelledby={labelGroupId} className="flex flex-wrap items-center gap-2">
           {LABELS.map((l) => (
-            <button
-              key={l}
-              type="button"
-              aria-pressed={form.label === l || (l === 'Outro' && !LABELS.slice(0, 2).includes(form.label))}
-              onClick={() => set('label', l === 'Outro' ? '' : l)}
-              className={cn(
-                'h-9 rounded-full border px-4 text-xs font-semibold transition-colors',
-                form.label === l || (l === 'Outro' && !LABELS.slice(0, 2).includes(form.label)) ? 'border-brand-500 bg-brand-500 text-white' : 'border-line text-fg-2 hover:text-fg',
-              )}
-            >
+            <Chip key={l} selected={form.label === l || (l === 'Outro' && !LABELS.slice(0, 2).includes(form.label))} onClick={() => set('label', l === 'Outro' ? '' : l)}>
               {l}
-            </button>
+            </Chip>
           ))}
           {!LABELS.slice(0, 2).includes(form.label) && (
             <Input aria-label="Nome do endereço" data-address-field="label" value={form.label} onChange={(e) => set('label', e.target.value)} placeholder="Ex.: Casa da praia" className="h-9 max-w-52" aria-invalid={!!errors.label} />
           )}
         </div>
-        {errors.label && <p className="mt-1.5 text-xs text-danger">{errors.label}</p>}
+        {errors.label && (
+          <p role="alert" className="animate-fade mt-1.5 text-xs text-danger">
+            {errors.label}
+          </p>
+        )}
       </div>
       {showDefaultToggle && (
-        <label className="flex items-center gap-2 text-sm text-fg-2 sm:col-span-6">
-          <input type="checkbox" className="size-4 accent-[var(--color-brand-500)]" checked={form.isDefault} onChange={(e) => set('isDefault', e.target.checked)} />
+        <label className="flex cursor-pointer items-center gap-3 text-sm text-fg-2 sm:col-span-6">
+          <Checkbox checked={form.isDefault} onChange={(e) => set('isDefault', e.target.checked)} />
           Usar como endereço principal
         </label>
       )}
-      <p className="flex items-start gap-2 text-[0.72rem] text-subtle sm:col-span-6">
-        <Info className="mt-0.5 size-3.5 shrink-0" aria-hidden /> A busca automática completa de endereço pelo CEP será ativada quando o serviço de CEP for integrado.
+      <p className="flex items-start gap-2 text-xs leading-relaxed text-muted sm:col-span-6">
+        <Info className="mt-px size-3.5 shrink-0" strokeWidth={1.75} aria-hidden /> A busca automática completa de endereço pelo CEP será ativada quando o serviço de CEP for integrado.
       </p>
       {!hideActions && (
         <div className="flex flex-wrap justify-end gap-3 sm:col-span-6">
