@@ -6,6 +6,8 @@ import { useFavorites } from '@/context/FavoritesContext';
 import { LinkButton } from '@/components/ui/Button';
 import { EmptyState } from '@/components/ui/Feedback';
 import { ProductGrid } from '@/components/products/ProductCard';
+import { HeaderFigure } from '@/components/catalog/HeaderFigure';
+import { AccountHeading } from './AccountUI';
 
 export function FavoritesView() {
   const { ids } = useFavorites();
@@ -14,14 +16,25 @@ export function FavoritesView() {
 
   return (
     <div>
-      <div className="mb-6 flex flex-wrap items-end justify-between gap-3">
-        <h2 className="heading-display text-4xl">Favoritos</h2>
-        {favorites.length > 0 && <p className="text-sm text-muted">{favorites.length} {favorites.length === 1 ? 'produto salvo' : 'produtos salvos'}</p>}
-      </div>
+      <AccountHeading
+        title="Favoritos"
+        description="As camisas que você guardou, com preço e tamanhos de agora."
+        aside={favorites.length > 0 && <HeaderFigure value={favorites.length} label={favorites.length === 1 ? 'produto salvo' : 'produtos salvos'} />}
+      />
       {favorites.length === 0 ? (
-        <EmptyState icon={<Heart className="size-6" />} title="Nenhum favorito ainda" description="Toque no coração das camisas para salvar aqui." action={<LinkButton href="/camisas">Explorar camisas</LinkButton>} />
+        <EmptyState
+          headingLevel="h2"
+          icon={<Heart className="size-6" strokeWidth={1.75} />}
+          title="Nenhum favorito ainda"
+          description="Toque no coração das camisas para salvar aqui."
+          action={<LinkButton href="/camisas">Explorar camisas</LinkButton>}
+        />
       ) : (
-        <ProductGrid products={favorites} />
+        <>
+          {/* Os armários usam h3 no nome da camisa: este h2 mantém a ordem dos títulos */}
+          <h2 className="sr-only">Camisas salvas</h2>
+          <ProductGrid products={favorites} />
+        </>
       )}
     </div>
   );

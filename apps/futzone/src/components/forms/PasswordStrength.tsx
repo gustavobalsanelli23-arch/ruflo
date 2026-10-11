@@ -7,7 +7,7 @@ import { passwordStrength } from '@/lib/validation';
 const BAR = ['bg-danger', 'bg-danger', 'bg-warn', 'bg-success', 'bg-success'];
 const TEXT = ['text-danger', 'text-danger', 'text-warn', 'text-success', 'text-success'];
 
-/** Medidor de força da senha + requisitos atendidos. */
+/** Medidor de força da senha (quatro placas) e os requisitos atendidos. */
 export function PasswordStrength({ password, id }: { password: string; id?: string }) {
   const { score, label, checks } = passwordStrength(password);
   const items = [
@@ -17,19 +17,19 @@ export function PasswordStrength({ password, id }: { password: string; id?: stri
     { ok: checks.symbol || checks.long, text: 'Símbolo ou 12+ caracteres' },
   ];
   return (
-    <div id={id} className="space-y-2" aria-live="polite">
+    <div id={id} className="space-y-2.5" aria-live="polite">
       <div className="flex items-center gap-3">
         <div className="grid flex-1 grid-cols-4 gap-1" aria-hidden>
           {[0, 1, 2, 3].map((i) => (
-            <span key={i} className={cn('h-1.5 rounded-full transition-colors duration-300', password && i < Math.max(1, score) ? BAR[score] : 'bg-white/[0.08]')} />
+            <span key={i} className={cn('h-1 rounded-[1px] transition-colors duration-200', password && i < Math.max(1, score) ? BAR[score] : 'bg-line-strong')} />
           ))}
         </div>
-        <span className={cn('w-20 text-right text-xs font-semibold', password ? TEXT[score] : 'text-subtle')}>{password ? label : 'Força'}</span>
+        <span className={cn('w-20 text-right text-xs font-semibold', password ? TEXT[score] : 'text-muted')}>{password ? label : 'Força'}</span>
       </div>
-      <ul className="grid grid-cols-2 gap-x-3 gap-y-1 text-[0.72rem]">
+      <ul className="grid grid-cols-2 gap-x-3 gap-y-1.5 text-xs">
         {items.map((it) => (
-          <li key={it.text} className={cn('flex items-center gap-1.5 transition-colors', it.ok ? 'text-success' : 'text-muted')}>
-            {it.ok ? <Check className="size-3" aria-hidden /> : <X className="size-3" aria-hidden />}
+          <li key={it.text} className={cn('flex items-center gap-1.5 transition-colors duration-150', it.ok ? 'text-success' : 'text-muted')}>
+            {it.ok ? <Check className="size-3.5 shrink-0" strokeWidth={1.75} aria-hidden /> : <X className="size-3.5 shrink-0" strokeWidth={1.75} aria-hidden />}
             {it.text}
             <span className="sr-only">{it.ok ? '(atendido)' : '(pendente)'}</span>
           </li>

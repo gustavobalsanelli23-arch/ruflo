@@ -6,7 +6,7 @@ export const metadata: Metadata = { title: 'Recuperar senha' };
 
 export default function PasswordResetPage() {
   return (
-    <AuthShell title="Recuperar senha" subtitle="Informe o e-mail da sua conta e enviaremos um link para criar uma nova senha.">
+    <AuthShell title="Recuperar senha" subtitle="Informe o e-mail da sua conta e enviaremos um link para criar uma nova senha." locker="senha">
       <PasswordResetForm />
     </AuthShell>
   );

@@ -1,137 +1,142 @@
 'use client';
 
 import Link from 'next/link';
-import { ArrowRight, Bell, Heart, MapPin, Package, ShieldCheck, ShoppingBag, UserRound } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 import { useCurrentCustomer } from '@/context/CustomerAuthContext';
 import { useFavorites } from '@/context/FavoritesContext';
 import { useCustomerNotifications, useCustomerOrders } from '@/hooks/useAccountData';
-import { formatDate, formatDateTime, formatPrice } from '@/lib/format';
-import { formatAddress } from '@/lib/orders';
+import { cn, formatDate, formatDateTime } from '@/lib/format';
 import { LinkButton } from '@/components/ui/Button';
-import { OrderStatusBadge } from '@/components/orders/OrderCard';
-import { OrderProgress } from '@/components/orders/OrderTimeline';
+import { OrderLocker } from '@/components/orders/OrderLocker';
+import { AccountHeading, AddressLines, ShelfTitle, TEXT_LINK } from './AccountUI';
 
+/**
+ * Painel da conta: o último pedido como armário e, abaixo, os dados reais em
+ * linhas de texto (notificações, endereço principal e a contagem de cada
+ * área). Sem blocos de métricas.
+ */
 export function AccountDashboard() {
   const customer = useCurrentCustomer();
   const orders = useCustomerOrders();
   const { ids: favorites } = useFavorites();
-  const { list: notifications, unread } = useCustomerNotifications();
+  const { list: notifications, unread, markRead } = useCustomerNotifications();
   const last = orders[0];
   const address = customer.addresses.find((a) => a.isDefault) ?? customer.addresses[0];
 
-  const stats = [
-    { icon: Package, label: 'Pedidos', value: orders.length, href: '/conta/pedidos' },
-    { icon: Heart, label: 'Favoritos', value: favorites.length, href: '/conta/favoritos' },
-    { icon: MapPin, label: 'Endereços', value: customer.addresses.length, href: '/conta/enderecos' },
-    { icon: Bell, label: 'Não lidas', value: unread, href: '/conta/notificacoes' },
-  ];
-
-  const shortcuts = [
-    { icon: Package, label: 'Meus pedidos', href: '/conta/pedidos' },
-    { icon: MapPin, label: 'Meus endereços', href: '/conta/enderecos' },
-    { icon: UserRound, label: 'Dados pessoais', href: '/conta/perfil' },
-    { icon: ShieldCheck, label: 'Segurança', href: '/conta/seguranca' },
-    { icon: Heart, label: 'Favoritos', href: '/conta/favoritos' },
-    { icon: ShoppingBag, label: 'Continuar comprando', href: '/camisas' },
+  const ledger = [
+    { label: 'Pedidos', value: orders.length, href: '/conta/pedidos' },
+    { label: 'Favoritos', value: favorites.length, href: '/conta/favoritos' },
+    { label: 'Endereços salvos', value: customer.addresses.length, href: '/conta/enderecos' },
+    { label: 'Notificações não lidas', value: unread, href: '/conta/notificacoes' },
   ];
 
   return (
-    <div className="space-y-6">
-      <div className="animate-fade-up">
-        <h2 className="heading-display text-4xl sm:text-5xl">Olá, {customer.name.split(' ')[0]}</h2>
-        <p className="mt-1 text-sm text-muted">Cliente desde {formatDate(customer.createdAt)}</p>
-      </div>
+    <div>
+      <AccountHeading title="Minha conta" description={`${customer.name}, cliente desde ${formatDate(customer.createdAt)}.`} />
 
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-        {stats.map(({ icon: Icon, label, value, href }) => (
-          <Link key={label} href={href} className="group rounded-2xl bg-surface p-4 ring-1 ring-white/[0.06] transition-[box-shadow,transform] duration-200 hover:-translate-y-0.5 hover:ring-brand-500/40">
-            <Icon className="size-5 text-brand-400" />
-            <p className="heading-display mt-3 text-4xl tabular-nums">{value}</p>
-            <p className="text-xs uppercase tracking-wider text-muted group-hover:text-fg-2">{label}</p>
-          </Link>
-        ))}
-      </div>
-
-      <section className="rounded-2xl bg-surface p-5 ring-1 ring-white/[0.06]">
-        <div className="mb-4 flex items-center justify-between gap-3">
-          <h3 className="text-sm font-bold uppercase tracking-wider">Último pedido</h3>
-          {last && (
-            <Link href="/conta/pedidos" className="inline-flex items-center gap-1 text-xs font-bold uppercase tracking-wider text-brand-400 hover:text-brand-300">
-              Todos <ArrowRight className="size-3.5" />
-            </Link>
-          )}
-        </div>
+      <section>
+        <ShelfTitle
+          title="Último pedido"
+          action={
+            last && (
+              <Link href="/conta/pedidos" className={TEXT_LINK}>
+                Todos
+              </Link>
+            )
+          }
+        />
         {last ? (
-          <div className="space-y-4">
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <div>
-                <p className="font-bold text-fg">{last.number}</p>
-                <p className="text-xs text-muted">{formatDateTime(last.createdAt)} · {formatPrice(last.total)}</p>
-              </div>
-              <OrderStatusBadge status={last.status} />
-            </div>
-            <OrderProgress order={last} />
-            <LinkButton href={`/conta/pedidos/${last.id}`} size="sm" variant="secondary">
-              Ver pedido <ArrowRight className="size-3.5" />
-            </LinkButton>
-          </div>
+          <OrderLocker order={last} headingLevel="h3" />
         ) : (
-          <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="flex flex-wrap items-center justify-between gap-4 rounded-[var(--radius-card)] border border-dashed border-line-strong px-5 py-5">
             <p className="text-sm text-muted">Você ainda não fez nenhum pedido.</p>
-            <LinkButton href="/camisas" size="sm">Ver camisas</LinkButton>
+            <LinkButton href="/camisas" size="sm">
+              Ver camisas
+            </LinkButton>
           </div>
         )}
       </section>
 
-      <div className="grid gap-6 xl:grid-cols-2">
-        <section className="rounded-2xl bg-surface p-5 ring-1 ring-white/[0.06]">
-          <div className="mb-3 flex items-center justify-between">
-            <h3 className="text-sm font-bold uppercase tracking-wider">Endereço principal</h3>
-            <Link href="/conta/enderecos" className="text-xs font-bold uppercase tracking-wider text-brand-400 hover:text-brand-300">Gerenciar</Link>
-          </div>
-          {address ? (
-            <>
-              <p className="text-sm font-semibold text-fg">{address.recipient}</p>
-              <p className="mt-1 text-sm text-fg-2">{formatAddress(address)}</p>
-            </>
-          ) : (
-            <p className="text-sm text-muted">Nenhum endereço cadastrado ainda. Adicione um para agilizar suas compras.</p>
-          )}
-        </section>
+      <div className="mt-14 grid gap-14 lg:grid-cols-[minmax(0,1.25fr)_minmax(0,1fr)] lg:gap-12">
+        <div className="min-w-0 space-y-14">
+          <section>
+            <ShelfTitle
+              title="Notificações"
+              action={
+                <Link href="/conta/notificacoes" className={TEXT_LINK}>
+                  Ver todas
+                </Link>
+              }
+            />
+            {notifications.length ? (
+              <ul className="-mt-2 divide-y divide-line">
+                {notifications.slice(0, 3).map((n) => (
+                  <li key={n.id}>
+                    <Link href={`/conta/pedidos/${n.orderId}`} onClick={() => markRead([n.id])} className="group grid grid-cols-[7px_minmax(0,1fr)] gap-x-3.5 py-3.5">
+                      {/* Lâmpada acesa = ainda não lida */}
+                      <span aria-hidden className={cn('mt-[0.4rem] size-[7px] rounded-[1px]', !n.read && 'bg-light')} />
+                      <span className="min-w-0">
+                        <span className={cn('block text-sm underline-offset-4 group-hover:underline', n.read ? 'text-fg-2' : 'font-semibold text-fg')}>{n.title}</span>
+                        <span className="mt-0.5 flex flex-wrap gap-x-3 text-xs text-muted">
+                          <span>{n.message}</span>
+                          <span className="tabular-nums">{formatDateTime(n.at)}</span>
+                        </span>
+                        {!n.read && <span className="sr-only">(não lida)</span>}
+                      </span>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="text-sm text-muted">Sem notificações por enquanto.</p>
+            )}
+          </section>
 
-        <section className="rounded-2xl bg-surface p-5 ring-1 ring-white/[0.06]">
-          <div className="mb-3 flex items-center justify-between">
-            <h3 className="text-sm font-bold uppercase tracking-wider">Notificações</h3>
-            <Link href="/conta/notificacoes" className="text-xs font-bold uppercase tracking-wider text-brand-400 hover:text-brand-300">Ver todas</Link>
-          </div>
-          {notifications.length ? (
-            <ul className="space-y-3">
-              {notifications.slice(0, 3).map((n) => (
-                <li key={n.id} className="flex gap-3 text-sm">
-                  <span className={`mt-1.5 size-2 shrink-0 rounded-full ${n.read ? 'bg-white/15' : 'bg-brand-400'}`} aria-hidden />
-                  <span className="min-w-0">
-                    <span className="block font-semibold text-fg">{n.title}</span>
-                    <span className="text-xs text-muted">{n.message} · {formatDateTime(n.at)}</span>
-                  </span>
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <p className="text-sm text-muted">Sem notificações por enquanto.</p>
-          )}
+          <section>
+            <ShelfTitle
+              title="Endereço principal"
+              action={
+                <Link href="/conta/enderecos" className={TEXT_LINK}>
+                  Gerenciar
+                </Link>
+              }
+            />
+            {address ? (
+              <div className="text-sm">
+                <p className="plate text-[0.82rem] text-fg-2">{address.label}</p>
+                <p className="mt-2 font-semibold text-fg">{address.recipient}</p>
+                <AddressLines address={address} className="mt-0.5 text-fg-2" />
+              </div>
+            ) : (
+              <p className="max-w-[52ch] text-sm text-muted">Nenhum endereço cadastrado ainda. Adicione um para agilizar suas compras.</p>
+            )}
+          </section>
+        </div>
+
+        <section className="min-w-0">
+          <ShelfTitle title="Atalhos" />
+          <ul className="-mt-2 divide-y divide-line">
+            {ledger.map((row) => (
+              <li key={row.href}>
+                <Link href={row.href} className="group flex items-baseline justify-between gap-4 py-3.5 text-sm">
+                  <span className="text-fg-2 underline-offset-4 transition-colors duration-150 group-hover:text-fg group-hover:underline">{row.label}</span>
+                  <span className="font-semibold tabular-nums text-fg">{row.value}</span>
+                </Link>
+              </li>
+            ))}
+            <li>
+              <Link href="/camisas" className="group flex items-center justify-between gap-4 py-3.5 text-sm">
+                <span className="font-semibold text-fg underline-offset-4 group-hover:underline">Continuar comprando</span>
+                <ArrowRight
+                  className="motion-lift size-4 text-muted transition-[translate,color] duration-150 ease-[var(--ease-out-fz)] group-hover:translate-x-0.5 group-hover:text-fg"
+                  strokeWidth={1.75}
+                  aria-hidden
+                />
+              </Link>
+            </li>
+          </ul>
         </section>
       </div>
-
-      <section>
-        <h3 className="mb-3 text-sm font-bold uppercase tracking-wider">Atalhos</h3>
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-          {shortcuts.map(({ icon: Icon, label, href }) => (
-            <Link key={href} href={href} className="flex items-center gap-3 rounded-xl bg-surface px-4 py-3.5 text-sm font-semibold text-fg-2 ring-1 ring-white/[0.06] transition-colors hover:text-fg hover:ring-brand-500/40">
-              <Icon className="size-4 shrink-0 text-brand-400" /> {label}
-            </Link>
-          ))}
-        </div>
-      </section>
     </div>
   );
 }

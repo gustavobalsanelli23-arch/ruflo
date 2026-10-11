@@ -1,13 +1,14 @@
 'use client';
 
-import { useState } from 'react';
-import { Check, Copy, MapPinned, Truck } from 'lucide-react';
+import { useId, useState } from 'react';
+import { Check, Copy } from 'lucide-react';
 import type { Order } from '@/types/commerce';
 import type { TrackingInfo } from '@/services/shipping/shipping.types';
 import { shippingService } from '@/services/shipping/shipping.service';
 import { formatDateKey } from '@/services/shipping/delivery';
-import { formatDateTime } from '@/lib/format';
+import { cn, formatDateTime } from '@/lib/format';
 import { Button } from '@/components/ui/Button';
+import { ShelfTitle } from '@/components/account/AccountUI';
 
 const STATUS_LABEL: Record<TrackingInfo['status'], string> = {
   postado: 'Postado',
@@ -17,19 +18,20 @@ const STATUS_LABEL: Record<TrackingInfo['status'], string> = {
   indisponivel: 'Indisponível',
 };
 
-/** Rastreamento: código, transportadora, status, última atualização e previsão. */
+/** Rastreamento: código (com cópia), transportadora, status, última atualização, previsão e o histórico interno. */
 export function TrackingCard({ order }: { order: Order }) {
   const [info, setInfo] = useState<TrackingInfo | null>(null);
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [copied, setCopied] = useState(false);
+  const [copied, setCopied] = useState<'idle' | 'ok' | 'fail'>('idle');
+  const eventsId = useId();
 
   if (!order.tracking) {
     if (order.status === 'cancelado' || order.status === 'entregue') return null;
     return (
-      <section className="rounded-2xl bg-surface p-5 ring-1 ring-white/[0.06]">
-        <h2 className="flex items-center gap-2 text-sm font-bold"><Truck className="size-4 text-brand-400" /> Rastreamento</h2>
-        <p className="mt-2 text-sm text-muted">O código de rastreio aparecerá aqui assim que o pedido for enviado.</p>
+      <section>
+        <ShelfTitle title="Rastreamento" />
+        <p className="max-w-[60ch] text-sm text-muted">O código de rastreio aparecerá aqui assim que o pedido for enviado.</p>
       </section>
     );
   }
@@ -43,9 +45,14 @@ export function TrackingCard({ order }: { order: Order }) {
     setOpen(true);
   };
   const copy = async () => {
-    await navigator.clipboard?.writeText(tracking.code).catch(() => undefined);
-    setCopied(true);
-    window.setTimeout(() => setCopied(false), 1500);
+    try {
+      if (!navigator.clipboard) throw new Error('sem área de transferência');
+      await navigator.clipboard.writeText(tracking.code);
+      setCopied('ok');
+    } catch {
+      setCopied('fail');
+    }
+    window.setTimeout(() => setCopied('idle'), 1800);
   };
 
   const status = order.status === 'entregue' ? 'entregue' : 'em_transito';
@@ -53,49 +60,56 @@ export function TrackingCard({ order }: { order: Order }) {
   const last = [...(order.history ?? [])].reverse().find((e) => ['enviado', 'em_transito', 'rastreio', 'entregue'].includes(e.type))?.at ?? tracking.addedAt;
 
   return (
-    <section className="rounded-2xl bg-surface p-5 ring-1 ring-white/[0.06]">
-      <h2 className="flex items-center gap-2 text-sm font-bold"><Truck className="size-4 text-brand-400" /> Rastreamento</h2>
-      <dl className="mt-4 grid grid-cols-2 gap-x-4 gap-y-3 text-sm">
-        <div className="col-span-2">
+    <section>
+      <ShelfTitle title="Rastreamento" />
+      <dl className="grid grid-cols-2 gap-x-6 gap-y-4 text-sm sm:grid-cols-4">
+        <div className="col-span-2 sm:col-span-4">
           <dt className="text-xs text-muted">Código de rastreio</dt>
-          <dd className="mt-0.5 flex items-center gap-2 font-mono font-semibold text-fg">
-            {tracking.code}
-            <button type="button" onClick={copy} className="grid size-7 place-items-center rounded-md text-muted hover:bg-white/[0.06] hover:text-fg" aria-label="Copiar código de rastreio">
-              {copied ? <Check className="size-3.5 text-success" /> : <Copy className="size-3.5" />}
+          <dd className="mt-1.5 flex flex-wrap items-center gap-2">
+            <span className="font-mono text-base font-semibold tracking-wide text-fg [overflow-wrap:anywhere]">{tracking.code}</span>
+            <button
+              type="button"
+              onClick={copy}
+              className="motion-lift grid size-9 shrink-0 place-items-center rounded-lg border border-line-strong bg-steel-2 text-fg-2 transition-[background-color,color,scale] duration-150 ease-[var(--ease-out-fz)] hover:bg-steel-3 hover:text-fg active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-400"
+              aria-label="Copiar código de rastreio"
+            >
+              {copied === 'ok' ? <Check className="size-4 text-success" strokeWidth={1.75} aria-hidden /> : <Copy className="size-4" strokeWidth={1.75} aria-hidden />}
             </button>
+            <span className={cn('text-xs', copied === 'fail' ? 'text-warn' : 'sr-only')} aria-live="polite">
+              {copied === 'ok' ? 'Código copiado.' : copied === 'fail' ? 'Não foi possível copiar. Selecione o código.' : ''}
+            </span>
           </dd>
         </div>
         <div>
           <dt className="text-xs text-muted">Transportadora</dt>
-          <dd className="mt-0.5 text-fg">{tracking.carrier}</dd>
+          <dd className="mt-1 text-fg">{tracking.carrier}</dd>
         </div>
         <div>
           <dt className="text-xs text-muted">Status</dt>
-          <dd className="mt-0.5 font-semibold text-fg">{STATUS_LABEL[status]}</dd>
+          <dd className="mt-1 font-semibold text-fg">{STATUS_LABEL[status]}</dd>
         </div>
         <div>
           <dt className="text-xs text-muted">Última atualização</dt>
-          <dd className="mt-0.5 text-fg">{formatDateTime(last)}</dd>
+          <dd className="mt-1 tabular-nums text-fg">{formatDateTime(last)}</dd>
         </div>
         <div>
           <dt className="text-xs text-muted">Previsão de entrega</dt>
-          <dd className="mt-0.5 text-fg">{estimate ? `até ${formatDateKey(estimate)}` : order.status === 'entregue' ? 'Entregue' : '—'}</dd>
+          <dd className="mt-1 tabular-nums text-fg">{estimate ? `até ${formatDateKey(estimate)}` : order.status === 'entregue' ? 'Entregue' : 'Sem previsão'}</dd>
         </div>
       </dl>
-      <Button variant="outline" size="sm" className="mt-5" onClick={follow} loading={loading} aria-expanded={open}>
-        {!loading && <MapPinned className="size-4" />} {open ? 'Ocultar atualizações' : 'Acompanhar entrega'}
+
+      <Button variant="outline" size="sm" className="mt-6" onClick={follow} loading={loading} aria-expanded={open} aria-controls={open ? eventsId : undefined}>
+        {open ? 'Ocultar atualizações' : 'Acompanhar entrega'}
       </Button>
+
       {open && info && (
-        <div className="animate-fade-up mt-4 border-t border-white/[0.06] pt-4">
+        <div id={eventsId} className="animate-fade mt-5">
           {info.events.length ? (
-            <ol className="space-y-3">
+            <ol className="divide-y divide-line border-y border-line">
               {info.events.map((e) => (
-                <li key={e.at + e.description} className="flex gap-3 text-sm">
-                  <span className="mt-1.5 size-2 shrink-0 rounded-full bg-brand-400" aria-hidden />
-                  <span>
-                    <span className="block text-fg">{e.description}</span>
-                    <span className="text-xs text-muted">{formatDateTime(e.at)}</span>
-                  </span>
+                <li key={e.at + e.description} className="grid gap-x-5 gap-y-0.5 py-3 sm:grid-cols-[8rem_minmax(0,1fr)]">
+                  <span className="text-xs tabular-nums text-muted sm:pt-px">{formatDateTime(e.at)}</span>
+                  <span className="text-sm text-fg">{e.description}</span>
                 </li>
               ))}
             </ol>
@@ -103,7 +117,7 @@ export function TrackingCard({ order }: { order: Order }) {
             <p className="text-sm text-muted">Sem atualizações ainda.</p>
           )}
           {info.source === 'interno' && (
-            <p className="mt-4 rounded-xl bg-white/[0.04] px-3 py-2 text-xs text-muted">
+            <p className="mt-3 max-w-[62ch] text-xs leading-relaxed text-muted">
               Atualizações registradas pela loja. O rastreamento em tempo real da transportadora será exibido quando a integração estiver ativa.
             </p>
           )}
