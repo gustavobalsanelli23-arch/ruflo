@@ -1,7 +1,7 @@
 import type { CategoryId, Product, Size } from '@/types/catalog';
 import { categories } from '@/data/categories';
 import { collectionById, collections, type CollectionId } from '@/data/collections';
-import { isOnSale, stockFor, teamById } from './product';
+import { availableSizes, isOnSale, stockFor, teamById } from './product';
 
 /**
  * Busca, filtros e ordenação do catálogo — funções puras, sem dependência de
@@ -111,6 +111,18 @@ export function sortProducts(products: Product[], sort: SortKey): Product[] {
     default:
       return list.sort((a, b) => b.salesCount - a.salesCount);
   }
+}
+
+/**
+ * Camisa que representa cada time nos armários de time: a mais relevante com foto real,
+ * de preferência com estoque. Times sem foto nenhuma ficam fora do mapa (armário vazio).
+ */
+export function leadByTeam(products: Product[]): Map<string, Product> {
+  const lead = new Map<string, Product>();
+  const ranked = sortProducts(products, 'relevancia').filter((p) => p.images.length > 0);
+  for (const p of ranked) if (!lead.has(p.teamId) && availableSizes(p).length > 0) lead.set(p.teamId, p);
+  for (const p of ranked) if (!lead.has(p.teamId)) lead.set(p.teamId, p);
+  return lead;
 }
 
 export const queryCatalog = (products: Product[], query: CatalogQuery): Product[] =>

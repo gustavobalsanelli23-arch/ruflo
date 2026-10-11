@@ -3,9 +3,10 @@
 import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Menu, Search, ShoppingBag, X } from 'lucide-react';
+import { Heart, Menu, Search, ShoppingBag, X } from 'lucide-react';
 import { mainNav, type NavLink } from '@/data/site';
 import { useCart } from '@/context/CartContext';
+import { useCustomerAuth } from '@/context/CustomerAuthContext';
 import { cn } from '@/lib/format';
 import { Logo } from '@/components/brand/Logo';
 import { SearchBar } from '@/components/navigation/SearchBar';
@@ -47,6 +48,7 @@ function useScrolledPastTop() {
 export function Header() {
   const pathname = usePathname();
   const { count, open: openCart } = useCart();
+  const { customer } = useCustomerAuth();
   const [menuOpen, setMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const scrolled = useScrolledPastTop();
@@ -110,7 +112,7 @@ export function Header() {
                       <span
                         aria-hidden
                         className={cn(
-                          'absolute inset-x-3.5 -bottom-[3px] h-[2px] origin-left transition-[transform,background-color] duration-200 ease-[var(--ease-out-fz)]',
+                          'absolute inset-x-3.5 -bottom-[3px] h-[2px] origin-left transition-[scale,background-color] duration-200 ease-[var(--ease-out-fz)]',
                           active ? 'scale-x-100 bg-brand-500' : 'scale-x-0 bg-fg-2/50 group-hover:scale-x-100',
                         )}
                       />
@@ -133,7 +135,16 @@ export function Header() {
             <button type="button" className={cn(iconBtn, 'md:hidden')} onClick={() => setSearchOpen((v) => !v)} aria-label="Buscar" aria-expanded={searchOpen}>
               {searchOpen ? <X className="size-5" strokeWidth={1.75} /> : <Search className="size-5" strokeWidth={1.75} />}
             </button>
-            <AccountButton className={cn(iconBtn, 'hidden sm:grid', pathname.startsWith('/conta') && 'text-fg')} />
+            {/* Favoritos: o mesmo destino do menu do celular (sem conta, entra e volta para a lista) */}
+            <Link
+              href={customer ? '/conta/favoritos' : '/login?next=%2Fconta%2Ffavoritos'}
+              aria-label="Favoritos"
+              title="Favoritos"
+              className={cn(iconBtn, 'hidden sm:grid', pathname === '/conta/favoritos' && 'text-fg')}
+            >
+              <Heart className="size-5" strokeWidth={1.75} />
+            </Link>
+            <AccountButton className={cn(iconBtn, 'hidden sm:grid', pathname.startsWith('/conta') && pathname !== '/conta/favoritos' && 'text-fg')} />
             <button type="button" className={iconBtn} onClick={openCart} aria-label={`Abrir carrinho (${count} ${count === 1 ? 'item' : 'itens'})`}>
               <ShoppingBag key={bump} className={cn('size-5', bump > 0 && 'animate-bump')} strokeWidth={1.75} />
               {count > 0 && (

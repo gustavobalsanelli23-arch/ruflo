@@ -28,7 +28,8 @@ const ARROW =
  * atual vem de um IntersectionObserver, sem ouvir o scroll. Sem fotos, mostra
  * três vistas ilustrativas (frente, costas e detalhe), sinalizadas como tal.
  */
-export function ProductGallery({ product }: { product: Product }) {
+/** `cap`: a plaquinha do armário (time e temporada), presa no topo da moldura da galeria. */
+export function ProductGallery({ product, cap }: { product: Product; cap?: React.ReactNode }) {
   const slides: Slide[] = product.images.length
     ? product.images.map((img, i) => ({ key: img.src + i, label: img.alt || `Imagem ${i + 1}`, index: i }))
     : [
@@ -117,15 +118,12 @@ export function ProductGallery({ product }: { product: Product }) {
     <div className={cn('grid gap-3', many && 'lg:grid-cols-[4.5rem_minmax(0,1fr)] lg:gap-4')}>
       {many && <SlideTabs variant="thumbs" product={product} slides={slides} current={current} controls={trackId} onSelect={go} />}
 
-      {/* Altura máxima: a foto 3:4 + a base cabem inteiras na tela quando a galeria fica grudada */}
-      <div className="min-w-0 md:[@media(min-height:36rem)]:max-w-[calc((100dvh-9.5rem)*0.75)]">
+      {/* Altura máxima: plaquinha + foto 3:4 + base cabem inteiras na tela quando a galeria fica grudada */}
+      <div className="min-w-0 md:[@media(min-height:36rem)]:max-w-[calc((100dvh-12rem)*0.75)]">
         <div className="locker relative isolate overflow-hidden rounded-[var(--radius-card)]">
-          {/* A luz do teto: acende uma vez (fora dos slides, não repete ao trocar de foto) */}
+          {/* A luz do teto sobre o aço da plaquinha: acende uma vez (fora dos slides, não repete ao trocar de foto) */}
           <span aria-hidden className="animate-light-on pointer-events-none absolute inset-x-[16%] top-0 z-20 h-[2px] bg-light" />
-          <span
-            aria-hidden
-            className="animate-cone-on pointer-events-none absolute inset-x-0 top-0 z-10 aspect-[3/4] bg-[radial-gradient(64%_42%_at_50%_0%,rgb(219_230_255/0.13),transparent_78%)] mix-blend-screen [animation-delay:220ms]"
-          />
+          {cap}
 
           <div
             ref={trackRef}

@@ -26,7 +26,7 @@ const SECTION = 'pt-24 sm:pt-32';
 
 /**
  * Seções da Home, alternando trechos densos e calmos:
- * times (continua o hero) → coleções → mais vendidas → faixa retrô (calma)
+ * times (continua o hero) → coleções → em destaque → faixa retrô (calma)
  * → nova temporada → vistos recentemente.
  * Cada camisa aparece uma vez só na página (o hero vem do servidor em `heroIds`).
  */
@@ -41,19 +41,20 @@ export function HomeSections({ heroIds }: { heroIds: string[] }) {
       return out;
     };
     const available = products.filter(inStock);
-    const bestSellers = fresh(sortProducts(available.filter((p) => p.tags.includes('mais-vendido')), 'relevancia'), 4);
+    // Destaques da loja (ordem do catálogo do fornecedor), não ranking de vendas: não há dado real de vendas.
+    const featured = fresh(sortProducts(available.filter((p) => p.tags.includes('popular')), 'relevancia'), 4);
     // Nova temporada: lançamentos primeiro, depois as mais procuradas da temporada.
     const season = sortProducts(available.filter((p) => SEASON_ALIASES.has(p.season)), 'relevancia').sort(
       (a, b) => Number(b.tags.includes('lancamento')) - Number(a.tags.includes('lancamento')),
     );
-    return { bestSellers, season: fresh(season, 4) };
+    return { featured, season: fresh(season, 4) };
   }, [products, heroIds]);
 
   return (
     <>
       <TeamsRail products={products} className="pt-14 sm:pt-16" />
       <CollectionGrid products={products} className={SECTION} />
-      <ProductSection title="Mais vendidas" href="/camisas?ordem=relevancia" linkContext="as camisas mais vendidas" products={s.bestSellers} omitStatus="mais-vendido" className={SECTION} />
+      <ProductSection title="Em destaque" href="/camisas?ordem=relevancia" linkContext="as camisas em destaque" products={s.featured} omitStatus="destaque" className={SECTION} />
       <RetroBand products={products} className="mt-24 sm:mt-32" />
       <NewSeason season={SEASON} products={s.season} className={SECTION} />
       {/* Some sem histórico; com histórico, segue o mesmo respiro das outras seções */}

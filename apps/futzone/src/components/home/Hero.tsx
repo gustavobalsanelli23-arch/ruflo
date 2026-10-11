@@ -37,9 +37,9 @@ export function Hero({ lockers }: { lockers: Product[] }) {
     // Movimento reduzido: as luzes já aparecem acesas (sem esperar a fila).
     <section aria-labelledby="hero-title" className="relative motion-reduce:**:[animation-delay:0ms]!">
       <div className="container-fz">
-        <div className="grid gap-10 border-b border-line-strong pt-8 sm:pt-12 xl:grid-cols-[minmax(0,9fr)_minmax(0,11fr)] xl:items-end xl:gap-12 xl:pt-16">
+        <div className="grid gap-10 border-b border-line-strong pt-8 sm:pt-12 xl:grid-cols-[minmax(0,2fr)_minmax(0,3fr)] xl:items-end xl:gap-12 xl:pt-16">
           <div className="relative z-20 xl:pb-14">
-            <h1 id="hero-title" className="heading-stencil text-[min(12.4vw,6rem)] text-fg xl:text-[min(5.4vw,4.6rem)]">
+            <h1 id="hero-title" className="heading-stencil text-[min(12.4vw,6rem)] text-fg xl:text-[min(4.7vw,4.25rem)]">
               <span className="block">Vista o manto.</span>
               <span className="block">Entre em campo.</span>
             </h1>
@@ -60,7 +60,7 @@ export function Hero({ lockers }: { lockers: Product[] }) {
           </h2>
           <ul
             aria-labelledby="hero-lockers"
-            className="-mx-4 flex snap-x snap-mandatory gap-2 overflow-x-auto scroll-px-4 px-4 scrollbar-none sm:-mx-6 sm:scroll-px-6 sm:px-6 md:mx-0 md:grid md:grid-cols-4 md:gap-2.5 md:overflow-visible md:px-0 xl:gap-3"
+            className="-mx-4 flex snap-x snap-mandatory gap-px overflow-x-auto scroll-px-4 px-4 pt-px scrollbar-none sm:-mx-6 sm:scroll-px-6 sm:px-6 md:mx-0 md:grid md:grid-cols-4 md:overflow-visible md:px-0"
           >
             {lockers.map((product, i) => {
               const litDelay = FIRST_LIGHT_MS + i * LIGHT_STEP_MS;

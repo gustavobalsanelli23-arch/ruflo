@@ -50,7 +50,7 @@ export function NewSeason({ season, products, className }: { season: string; pro
         description="As camisas novas de clubes e seleções, recém-chegadas ao vestiário."
         action={<ShelfLink href="/camisas?ordem=novidades" label="Ver lançamentos" />}
       />
-      <ul className="grid grid-cols-2 gap-2 border-b border-line-strong sm:gap-3 md:grid-cols-[minmax(0,1.7fr)_repeat(3,minmax(0,1fr))] md:items-end lg:gap-4">
+      <ul className="grid grid-cols-2 gap-px border-b border-line-strong md:grid-cols-[minmax(0,1.7fr)_repeat(3,minmax(0,1fr))] md:items-end">
         <li ref={leadRef} className="col-span-2 md:col-span-1">
           <ProductCard product={lead} lit={lit} litDelay={80} omitStatus="novo" />
         </li>

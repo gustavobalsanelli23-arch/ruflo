@@ -64,8 +64,9 @@ function toProduct(e: CatalogEntry): Product {
   const sizes = ALL_SIZES.filter((s) => base.includes(s) || available.has(s));
   const tags = new Set(e.tags as ProductTag[]);
   const rank = featuredRank.get(e.sourceId) ?? Infinity;
-  if (rank < FEATURED_COUNT) tags.add('mais-vendido');
-  else if (rank < FEATURED_COUNT * 2) tags.add('popular');
+  // Destaque segue a ordem do catálogo do fornecedor. "Mais vendido" só existe quando a loja
+  // tiver dado real de vendas (o admin pode marcar à mão): nunca é inventado aqui.
+  if (rank < FEATURED_COUNT * 2) tags.add('popular');
   if (newest.has(e.sourceId)) tags.add('lancamento');
   const categoryName = categories.find((c) => c.id === e.category)?.name ?? e.category;
 

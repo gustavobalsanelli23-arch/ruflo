@@ -192,7 +192,7 @@ export function CatalogView({ preset = {} }: { preset?: CatalogPreset }) {
             type="search"
             value={term}
             onChange={(e) => setTerm(e.target.value)}
-            placeholder="Buscar pelo nome da camisa, time ou temporada"
+            placeholder="Buscar camisa, time ou temporada"
             aria-label="Buscar no catálogo"
             autoComplete="off"
             enterKeyHint="search"

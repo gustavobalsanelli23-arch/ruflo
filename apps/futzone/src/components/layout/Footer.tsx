@@ -1,14 +1,14 @@
 import Link from 'next/link';
-import { Mail, RefreshCcw, Ruler, Shirt } from 'lucide-react';
+import { Mail } from 'lucide-react';
 import { collections, collectionHref } from '@/data/collections';
 import { accountNav, mainNav, site } from '@/data/site';
 import { Logo } from '@/components/brand/Logo';
 
 /** Fatos do serviço (nada inventado): fotos reais, grade de tamanhos, direito de arrependimento. */
 const FACTS = [
-  { icon: Shirt, title: 'Fotos reais', text: 'Cada camisa fotografada em quem veste, em vários ângulos.' },
-  { icon: Ruler, title: 'Do P ao 4GG', text: 'Grade adulta completa e tamanhos infantis.' },
-  { icon: RefreshCcw, title: 'Troca em até 7 dias', text: 'Direito de arrependimento garantido por lei.' },
+  { title: 'Fotos reais', text: 'cada camisa fotografada em quem veste, em vários ângulos.' },
+  { title: 'Do P ao 4GG', text: 'grade adulta completa e tamanhos infantis.' },
+  { title: 'Troca em até 7 dias', text: 'direito de arrependimento garantido por lei.' },
 ];
 
 const SUPPORT = [
@@ -28,15 +28,11 @@ export function Footer() {
   const social = site.social.filter((s) => s.href);
   return (
     <footer className="mt-24 border-t border-line-strong bg-steel sm:mt-32">
-      {/* Fileira de fatos: três armários lado a lado, separados por emendas */}
-      <ul className="container-fz grid divide-y divide-line sm:grid-cols-3 sm:divide-x sm:divide-y-0">
-        {FACTS.map(({ icon: Icon, title, text }) => (
-          <li key={title} className="flex items-start gap-4 py-6 sm:px-6 sm:first:pl-0 sm:last:pr-0">
-            <Icon className="mt-0.5 size-5 shrink-0 text-fg-2" strokeWidth={1.6} />
-            <div>
-              <p className="heading-stencil text-xl text-fg">{title}</p>
-              <p className="mt-1 text-sm text-muted">{text}</p>
-            </div>
+      {/* Fatos do serviço numa linha só, separados por emendas: sem faixa de benefícios com ícones */}
+      <ul className="container-fz flex flex-col divide-y divide-line text-sm lg:flex-row lg:divide-x lg:divide-y-0">
+        {FACTS.map(({ title, text }) => (
+          <li key={title} className="py-4 lg:flex-1 lg:px-6 lg:py-5 lg:first:pl-0 lg:last:pr-0">
+            <span className="font-semibold text-fg">{title}:</span> <span className="text-muted">{text}</span>
           </li>
         ))}
       </ul>

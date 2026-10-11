@@ -1,12 +1,13 @@
 'use client';
 
 import { useEffect, useMemo, useRef, useState } from 'react';
-import Link from 'next/link';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import type { Product, Team } from '@/types/catalog';
 import { teams } from '@/data/teams';
 import { cn } from '@/lib/format';
+import { leadByTeam } from '@/lib/catalog';
 import { SectionHeading } from '@/components/ui/Feedback';
+import { TeamLocker } from '@/components/catalog/TeamLocker';
 import { ShelfLink } from './ShelfLink';
 
 /** Quantos times entram na fileira; o resto fica a um clique, em /times. */
@@ -65,6 +66,7 @@ export function TeamsRail({ products, className }: { products: Product[]; classN
   }, [products]);
 
   const ends = useRailEnds(rail, list.length);
+  const leads = useMemo(() => leadByTeam(products), [products]);
 
   const scroll = (dir: 1 | -1) => {
     const el = rail.current;
@@ -99,24 +101,13 @@ export function TeamsRail({ products, className }: { products: Product[]; classN
       <ul
         ref={rail}
         aria-label="Times"
-        className="-mx-4 flex snap-x snap-mandatory gap-2 overflow-x-auto scroll-px-4 px-4 pb-1 scrollbar-none sm:-mx-6 sm:scroll-px-6 sm:px-6 lg:-mx-2 lg:scroll-px-2 lg:px-2 lg:gap-2.5"
+        className="-mx-4 flex snap-x snap-mandatory gap-px overflow-x-auto scroll-px-4 px-4 pb-1 pt-px scrollbar-none sm:-mx-6 sm:scroll-px-6 sm:px-6 lg:-mx-2 lg:scroll-px-2 lg:px-2"
       >
         {list.map(({ team, count }) => {
           const from = origin(team);
           return (
-            <li key={team.id} className="w-[46%] shrink-0 snap-start sm:w-[28%] md:w-[22%] lg:w-[calc((100%-4*0.625rem)/5)] xl:w-[calc((100%-5*0.625rem)/6)]">
-              <Link
-                href={`/camisas/${team.slug}`}
-                className="locker group relative flex h-28 flex-col justify-between rounded-[var(--radius-card)] p-3.5 transition-[border-color,background-color] duration-200 hover:border-line-strong focus-visible:outline-offset-[-2px] active:bg-steel-3 sm:h-32 sm:p-4"
-              >
-                {/* Luz da plaquinha: acende ao apontar, como os armários */}
-                <span aria-hidden className="absolute inset-x-[18%] -top-px h-[2px] bg-light opacity-0 transition-opacity duration-200 group-hover:opacity-100 group-focus-visible:opacity-100" />
-                <span className="plate line-clamp-2 text-[1.15rem] leading-[1.2] text-fg [overflow-wrap:anywhere] xl:text-[1.3rem]">{team.name}</span>
-                <span className="flex items-end justify-between gap-2 text-xs">
-                  <span className="truncate text-muted">{from}</span>
-                  <span className="shrink-0 font-semibold tabular-nums text-fg-2">{plural(count)}</span>
-                </span>
-              </Link>
+            <li key={team.id} className="w-[46%] shrink-0 snap-start sm:w-[28%] md:w-[22%] lg:w-[calc((100%-4px)/5)] xl:w-[calc((100%-5px)/6)]">
+              <TeamLocker team={team} shirt={leads.get(team.id)} origin={from} meta={plural(count)} />
             </li>
           );
         })}

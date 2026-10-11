@@ -68,7 +68,7 @@ export function CollectionGrid({ products, className }: { products: Product[]; c
                       loading="lazy"
                       decoding="async"
                       className={cn(
-                        'motion-lift absolute inset-0 h-full w-full object-cover transition-transform duration-500 ease-[var(--ease-out-fz)] [@media(hover:hover)]:group-hover:scale-[1.03]',
+                        'motion-lift absolute inset-0 h-full w-full object-cover transition-[scale] duration-500 ease-[var(--ease-out-fz)] [@media(hover:hover)]:group-hover:scale-[1.03]',
                         cell.pos,
                       )}
                     />

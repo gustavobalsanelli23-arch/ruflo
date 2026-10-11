@@ -184,19 +184,22 @@ export function ProductDetail({ teamSlug, slug }: { teamSlug: string; slug: stri
       <div className="grid grid-cols-1 gap-8 md:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)] lg:gap-14">
         {/* A galeria acompanha a leitura (só quando cabe inteira na altura da tela) */}
         <div className="min-w-0 md:top-[5.125rem] md:self-start md:[@media(min-height:36rem)]:sticky">
-          <ProductGallery product={product} />
+          <ProductGallery
+            product={product}
+            cap={
+              // Plaquinha do armário (time, que leva à página dele, e temporada): o tampo da galeria, não um rótulo sobre o título
+              <div className="relative z-10 flex h-10 items-center justify-between gap-4 border-b border-line bg-steel-2 px-3">
+                <Link href={`/camisas/${team.slug}`} className="plate min-w-0 truncate text-[0.95rem] leading-[1.25] text-fg underline-offset-4 hover:underline">
+                  {team.name}
+                </Link>
+                {plateRight && <span className="plate shrink-0 text-[0.85rem] leading-[1.25] tabular-nums text-muted">{plateRight}</span>}
+              </div>
+            }
+          />
         </div>
 
         <div className="@container flex min-w-0 flex-col">
-          {/* Plaquinha do armário: time (leva à página dele) e temporada */}
-          <div className="flex h-10 items-center justify-between gap-4 rounded-[var(--radius-card)] border border-line bg-steel-2 px-3">
-            <Link href={`/camisas/${team.slug}`} className="plate min-w-0 truncate text-[0.95rem] leading-[1.25] text-fg underline-offset-4 hover:underline">
-              {team.name}
-            </Link>
-            {plateRight && <span className="plate shrink-0 text-[0.85rem] leading-[1.25] tabular-nums text-muted">{plateRight}</span>}
-          </div>
-
-          <div className="mt-6 flex items-start justify-between gap-4">
+          <div className="flex items-start justify-between gap-4">
             <h1 className="heading-display min-w-0 text-[2.25rem] text-fg sm:text-5xl md:text-[2.5rem] lg:text-[3.25rem] xl:text-[3.5rem]">{product.name}</h1>
             <FavoriteButton
               productId={product.id}

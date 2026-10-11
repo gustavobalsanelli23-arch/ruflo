@@ -19,5 +19,7 @@ export function CatalogCount({ preset, variant = 'figure' }: { preset?: CatalogP
     const block = <span aria-hidden className="skeleton inline-block h-[0.8em] w-[1.6em] translate-y-[0.06em] rounded-sm align-baseline" />;
     return variant === 'figure' ? <HeaderFigure value={block} label="produtos" /> : block;
   }
+  // Vitrine vazia: o estado vazio já explica; um "0" em tamanho de destaque só pesaria sobre ele.
+  if (variant === 'figure' && total === 0) return null;
   return variant === 'figure' ? <HeaderFigure value={total} label={productNoun(total)} /> : <>{total}</>;
 }

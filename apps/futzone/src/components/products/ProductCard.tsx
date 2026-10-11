@@ -39,7 +39,7 @@ interface ProductCardProps {
    */
   lit?: boolean;
   litDelay?: number;
-  /** Situação que a prateleira já anuncia no título (ex.: "Mais vendidas"): não repete no armário. */
+  /** Situação que a prateleira já anuncia no título (ex.: "Em destaque"): não repete no armário. */
   omitStatus?: BadgeKind;
 }
 
@@ -76,38 +76,32 @@ function ProductCardBase({ product, priority, lit, litDelay = 0, omitStatus }: P
   const lightDelay = { animationDelay: `${litDelay}ms` };
 
   return (
-    <article className="locker group relative flex h-full flex-col rounded-[var(--radius-card)] transition-[border-color] duration-200 hover:border-line-strong focus-within:border-line-strong">
+    // No banco de armários (gap-px) os anéis de 1px dos vizinhos se sobrepõem e formam uma emenda só.
+    <article className="locker group relative flex h-full flex-col rounded-[var(--radius-card)] border-0! ring-1 ring-line transition-[box-shadow] duration-200 hover:z-10 hover:ring-line-strong focus-within:z-10 focus-within:ring-line-strong">
+      {/* Luz do teto sobre o aço da plaquinha: acesa (vitrine) ou ao apontar/focar */}
+      <span
+        aria-hidden
+        style={lit ? lightDelay : undefined}
+        className={cn(
+          'pointer-events-none absolute inset-x-[14%] -top-px z-20 h-[2px] bg-light transition-opacity duration-200',
+          lit ? 'animate-light-on' : 'opacity-0 group-hover:opacity-100 group-focus-within:opacity-100',
+        )}
+      />
       {/* Plaquinha do armário */}
       <div className="flex h-9 items-center justify-between gap-3 border-b border-line px-3">
         <span className="plate truncate text-[0.82rem] text-fg-2 transition-colors duration-200 group-hover:text-fg">{team?.name}</span>
         {plateRight && <span className="plate shrink-0 text-[0.74rem] tabular-nums text-muted">{plateRight}</span>}
       </div>
 
-      {/* Nicho: a camisa sob a luz do teto */}
+      {/* Nicho: a camisa */}
       <div className="relative isolate z-10 overflow-hidden bg-[#0a0c10]">
-        <span
-          aria-hidden
-          style={lit ? lightDelay : undefined}
-          className={cn(
-            'pointer-events-none absolute inset-x-[14%] top-0 z-20 h-[2px] bg-light transition-opacity duration-200',
-            lit ? 'animate-light-on' : 'opacity-0 group-hover:opacity-100 group-focus-within:opacity-100',
-          )}
-        />
-        <span
-          aria-hidden
-          style={lit ? { animationDelay: `${litDelay + 220}ms` } : undefined}
-          className={cn(
-            'pointer-events-none absolute inset-0 z-10 bg-[radial-gradient(62%_40%_at_50%_0%,rgb(219_230_255/0.2),transparent_78%)] mix-blend-screen transition-opacity duration-300',
-            lit ? 'animate-cone-on' : 'opacity-0 group-hover:opacity-100 group-focus-within:opacity-100',
-          )}
-        />
         <Link href={href} aria-label={product.name} tabIndex={-1} className="block">
           <ProductImage
             product={product}
             priority={priority}
             hoverSwap
             className="aspect-[3/4] w-full bg-transparent"
-            imageClassName={cn('motion-lift origin-top transition-transform duration-500 ease-[var(--ease-out-fz)] group-hover:scale-[1.03]', soldOut && 'opacity-55 grayscale')}
+            imageClassName={cn('motion-lift origin-top transition-[scale] duration-500 ease-[var(--ease-out-fz)] group-hover:scale-[1.03]', soldOut && 'opacity-55 grayscale')}
           />
         </Link>
 
@@ -182,26 +176,14 @@ function ProductCardBase({ product, priority, lit, litDelay = 0, omitStatus }: P
         )}
       </div>
 
-      {/* Etiqueta: nome, preço e grade */}
+      {/* Etiqueta: nome e grade em cima; situação (linha sempre reservada) e preço ancorados embaixo,
+          para os preços de uma fileira ficarem na mesma altura */}
       <div className="flex flex-1 flex-col gap-2 border-t border-line px-3 pb-3 pt-2.5">
         <h3 className="line-clamp-2 text-[0.82rem] font-semibold leading-snug text-fg sm:text-[0.92rem]">
           <Link href={href} className="after:absolute after:inset-0 after:content-[''] focus-visible:outline-none">
             {product.name}
           </Link>
         </h3>
-        <div className="mt-auto flex flex-wrap items-end justify-between gap-x-2 gap-y-0.5">
-          <Price product={product} />
-          {status && (
-            <span
-              className={cn(
-                'shrink-0 pb-0.5 text-[0.6875rem] font-bold uppercase tracking-[0.12em]',
-                status.tone === 'danger' ? 'text-danger' : status.tone === 'fg' ? 'text-fg' : 'text-muted',
-              )}
-            >
-              {status.label}
-            </span>
-          )}
-        </div>
         <p className="flex flex-wrap gap-x-2 gap-y-0.5 text-[0.6875rem] font-semibold tabular-nums tracking-wide" aria-label={soldOut ? 'Sem tamanhos disponíveis' : `Tamanhos disponíveis: ${sizes.join(', ')}`}>
           {product.sizes.map((s) => (
             <span key={s} aria-hidden className={stockFor(product, s) > 0 ? 'text-fg-2' : 'text-muted line-through decoration-muted/70'}>
@@ -209,6 +191,17 @@ function ProductCardBase({ product, priority, lit, litDelay = 0, omitStatus }: P
             </span>
           ))}
         </p>
+        <div className="mt-auto pt-1">
+          <p
+            className={cn(
+              'h-4 text-[0.6875rem] font-bold uppercase leading-4 tracking-[0.12em]',
+              status?.tone === 'danger' ? 'text-danger' : status?.tone === 'fg' ? 'text-fg' : 'text-muted',
+            )}
+          >
+            {status?.label}
+          </p>
+          <Price product={product} />
+        </div>
       </div>
     </article>
   );
@@ -216,10 +209,10 @@ function ProductCardBase({ product, priority, lit, litDelay = 0, omitStatus }: P
 
 export const ProductCard = memo(ProductCardBase);
 
-/** Parede de armários: 2 colunas (celular), 3 (tablet), 4 (desktop). */
+/** Banco de armários: 2 colunas (celular), 3 (tablet), 4 (desktop), separados por emendas de 1px. */
 export function ProductGrid({ products, className, priorityCount = 0 }: { products: Product[]; className?: string; priorityCount?: number }) {
   return (
-    <div className={cn('grid grid-cols-2 gap-2 sm:gap-3 md:grid-cols-3 lg:grid-cols-4 lg:gap-4', className)}>
+    <div className={cn('grid grid-cols-2 gap-px md:grid-cols-3 lg:grid-cols-4', className)}>
       {products.map((p, i) => (
         <Reveal key={p.id} delay={stagger(i % 4, 60)} className="h-full">
           <ProductCard product={p} priority={i < priorityCount} />
@@ -232,7 +225,7 @@ export function ProductGrid({ products, className, priorityCount = 0 }: { produc
 /** Fileira de armários: rolagem lateral com encaixe no celular (o encaixe respeita o recuo lateral); vira grade no desktop. */
 export function ProductRail({ products, omitStatus }: { products: Product[]; omitStatus?: BadgeKind }) {
   return (
-    <div className="-mx-4 flex snap-x snap-mandatory scroll-px-4 gap-2 overflow-x-auto px-4 pb-2 scrollbar-none sm:-mx-6 sm:scroll-px-6 sm:gap-3 sm:px-6 lg:mx-0 lg:grid lg:snap-none lg:grid-cols-4 lg:gap-4 lg:overflow-visible lg:px-0">
+    <div className="-mx-4 flex snap-x snap-mandatory scroll-px-4 gap-px overflow-x-auto px-4 pb-2 pt-px scrollbar-none sm:-mx-6 sm:scroll-px-6 sm:px-6 lg:mx-0 lg:grid lg:snap-none lg:grid-cols-4 lg:overflow-visible lg:px-0">
       {products.map((p, i) => (
         <Reveal key={p.id} delay={stagger(i, 60, 4)} className="w-[64%] shrink-0 snap-start sm:w-[40%] lg:w-auto">
           <ProductCard product={p} omitStatus={omitStatus} />

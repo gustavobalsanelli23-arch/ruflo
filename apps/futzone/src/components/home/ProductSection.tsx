@@ -9,7 +9,7 @@ interface ProductSectionProps {
   title: string;
   description?: string;
   href: string;
-  /** Completa o nome acessível de "Ver todos" (ex.: "as mais vendidas"). */
+  /** Completa o nome acessível de "Ver todos" (ex.: "as camisas em destaque"). */
   linkContext: string;
   products: Product[];
   className?: string;
