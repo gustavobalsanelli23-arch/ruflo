@@ -156,6 +156,25 @@ export function CatalogView({ preset = {} }: { preset?: CatalogPreset }) {
 
   const filters = <ProductFilters query={query} onChange={update} products={scoped} locked={locked} />;
 
+  // Vitrine sem nenhum produto (ex.: nenhuma promoção ativa): o motivo não são os filtros do
+  // visitante, então não há filtros, busca nem ordenação, só a explicação e o caminho de volta.
+  if (hydrated && scoped.length === 0) {
+    return (
+      <div ref={rootRef}>
+        <h2 className="sr-only">Resultados</h2>
+        <EmptyState
+          title={preset.onSale ? 'Nenhuma promoção no momento' : 'Nenhuma camisa nesta vitrine por enquanto'}
+          description={
+            preset.onSale
+              ? 'Quando houver camisas com desconto, elas aparecem aqui com o preço antigo riscado.'
+              : 'Veja as outras camisas do catálogo.'
+          }
+          action={<Button onClick={() => router.push('/camisas')}>Ver camisas</Button>}
+        />
+      </div>
+    );
+  }
+
   return (
     <div ref={rootRef} className="grid grid-cols-1 gap-8 lg:grid-cols-[17rem_1fr] xl:gap-12">
       {/* Arara de filtros (desktop) */}
