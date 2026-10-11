@@ -2,7 +2,7 @@
 
 import { useMemo } from 'react';
 import { useRouter } from 'next/navigation';
-import { AlertTriangle, ArrowLeft, Lock, ShoppingBag, Trash2 } from 'lucide-react';
+import { AlertTriangle, ArrowLeft, Shirt, Trash2 } from 'lucide-react';
 import type { Product } from '@/types/catalog';
 import { useCart } from '@/context/CartContext';
 import { useStoreData } from '@/context/StoreDataContext';
@@ -14,7 +14,34 @@ import { Skeleton } from '@/components/ui/Skeleton';
 import { ShippingEstimator } from '@/components/checkout/ShippingEstimator';
 import { TrustBadges } from '@/components/checkout/TrustBadges';
 import { RecentlyViewed, RecommendedProducts } from '@/components/products/ProductSections';
-import { CartLineItem } from './CartDrawer';
+import { CartLineItem } from './CartLine';
+
+/*
+ * O resumo gruda logo abaixo do Header rolado (58px = h-14 + 2 bordas,
+ * components/layout/Header.tsx) com um respiro de 1.5rem.
+ */
+const SUMMARY_STICKY = 'lg:sticky lg:top-[calc(58px+1.5rem)] lg:self-start';
+
+function CartSkeleton() {
+  return (
+    <div role="status" aria-label="Carregando carrinho" className="grid grid-cols-1 gap-10 lg:grid-cols-[minmax(0,1fr)_380px] lg:gap-12">
+      <div className="space-y-3">
+        <Skeleton className="mb-4 h-4 w-36 rounded-sm" />
+        {[0, 1].map((i) => (
+          <div key={i} className="locker flex rounded-[var(--radius-card)]" aria-hidden>
+            <Skeleton className="aspect-[3/4] w-24 shrink-0 rounded-none sm:w-28" />
+            <div className="flex-1 space-y-3 p-4">
+              <Skeleton className="h-3 w-1/3 rounded-sm" />
+              <Skeleton className="h-4 w-3/4 rounded-sm" />
+              <Skeleton className="h-3 w-1/4 rounded-sm" />
+            </div>
+          </div>
+        ))}
+      </div>
+      <div className="locker h-80 rounded-[var(--radius-card)]" aria-hidden />
+    </div>
+  );
+}
 
 export function CartPageView() {
   const router = useRouter();
@@ -22,29 +49,14 @@ export function CartPageView() {
   const { hydrated } = useStoreData();
   const references = useMemo(() => lines.map((l) => l.product).filter((p): p is Product => !!p), [lines]);
 
-  if (!hydrated)
-    return (
-      <div role="status" aria-label="Carregando carrinho" className="grid grid-cols-1 gap-8 lg:grid-cols-[1fr_380px] lg:gap-12">
-        <div className="space-y-5">
-          {[0, 1].map((i) => (
-            <div key={i} className="flex gap-4">
-              <Skeleton className="h-36 w-28" />
-              <div className="flex-1 space-y-3">
-                <Skeleton className="h-4 w-3/4" />
-                <Skeleton className="h-3 w-1/3" />
-              </div>
-            </div>
-          ))}
-        </div>
-        <Skeleton className="h-72 rounded-3xl" />
-      </div>
-    );
+  if (!hydrated) return <CartSkeleton />;
 
   if (lines.length === 0) {
     return (
       <>
         <EmptyState
-          icon={<ShoppingBag className="size-6" />}
+          headingLevel="h2"
+          icon={<Shirt className="size-6" strokeWidth={1.75} aria-hidden />}
           title="Seu carrinho está vazio"
           description="Explore o catálogo e adicione as camisas que você quer vestir."
           action={<LinkButton href="/camisas">Ver camisas</LinkButton>}
@@ -58,60 +70,76 @@ export function CartPageView() {
 
   return (
     <>
-      <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1fr_380px] lg:gap-12">
+      <div className="grid grid-cols-1 gap-10 lg:grid-cols-[minmax(0,1fr)_380px] lg:gap-12">
         <section aria-label="Produtos no carrinho" className="min-w-0">
-          <div className="flex items-center justify-between border-b border-white/[0.06] pb-4">
+          <div className="mb-3 flex items-center justify-between gap-4">
             <p className="text-sm text-muted">
-              <span className="font-bold text-fg">{validCount}</span> {validCount === 1 ? 'item disponível' : 'itens disponíveis'}
+              <span className="font-bold tabular-nums text-fg">{validCount}</span> {validCount === 1 ? 'item disponível' : 'itens disponíveis'}
             </p>
-            <Button variant="ghost" size="sm" onClick={clear}>
-              <Trash2 className="size-4" /> Esvaziar
+            <Button variant="ghost" size="sm" onClick={clear} className="-mr-2">
+              <Trash2 className="size-4" strokeWidth={1.75} aria-hidden /> Esvaziar
             </Button>
           </div>
+
           {issues > 0 && (
-            <div role="alert" className="mt-4 flex flex-wrap items-center gap-3 rounded-2xl border border-warn/30 bg-warn/10 px-4 py-3 text-sm text-warn">
-              <AlertTriangle className="size-4 shrink-0" />
-              <span className="flex-1">Alguns produtos ficaram indisponíveis ou com estoque menor. Ajuste o carrinho para continuar.</span>
-              <Button size="sm" variant="secondary" onClick={resolveIssues}>Ajustar automaticamente</Button>
+            <div role="alert" className="mb-3 flex flex-wrap items-center gap-3 rounded-[var(--radius-card)] border border-warn/30 bg-warn/[0.06] px-4 py-3 text-sm text-warn">
+              <AlertTriangle className="size-4 shrink-0" strokeWidth={1.75} aria-hidden />
+              <span className="min-w-0 flex-1">Alguns produtos ficaram indisponíveis ou com estoque menor. Ajuste o carrinho para continuar.</span>
+              <Button size="sm" variant="secondary" onClick={resolveIssues}>
+                Ajustar automaticamente
+              </Button>
             </div>
           )}
-          <ul className="divide-y divide-white/[0.06]">
+
+          <ul className="space-y-3">
             {lines.map((line) => (
               <CartLineItem key={`${line.productId}-${line.size}`} line={line} variant="page" />
             ))}
           </ul>
-          <LinkButton href="/camisas" variant="ghost" className="mt-4">
-            <ArrowLeft className="size-4" /> Continuar comprando
+
+          <LinkButton href="/camisas" variant="ghost" className="-ml-3 mt-5">
+            <ArrowLeft className="size-4" strokeWidth={1.75} aria-hidden /> Continuar comprando
           </LinkButton>
         </section>
 
-        <aside className="lg:sticky lg:top-24 lg:self-start">
-          <div className="animate-fade-up space-y-5 rounded-3xl bg-surface p-6 ring-1 ring-white/[0.06]">
-            <h2 className="heading-display text-3xl">Resumo</h2>
-            <dl className="space-y-3 text-sm">
-              <div className="flex justify-between">
-                <dt className="text-fg-2">Produtos ({validCount})</dt>
-                <dd className="tabular-nums">{formatPrice(subtotal + savings)}</dd>
-              </div>
-              {savings > 0 && (
-                <div className="flex justify-between">
-                  <dt className="text-fg-2">Promoções</dt>
-                  <dd className="tabular-nums text-success">− {formatPrice(savings)}</dd>
-                </div>
-              )}
-              <div className="flex items-baseline justify-between border-t border-white/[0.06] pt-4">
-                <dt className="font-bold">Subtotal</dt>
-                <dd key={subtotal} className="animate-pop text-2xl font-extrabold tabular-nums">{formatPrice(subtotal)}</dd>
-              </div>
-            </dl>
-            <div>
-              <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-fg-2">Calcular frete</p>
-              <ShippingEstimator items={toShippingItems(lines)} subtotal={subtotal} />
+        <aside aria-labelledby="carrinho-resumo" className={SUMMARY_STICKY}>
+          {/* Armário do resumo: aceso, porque guarda a ação principal da página */}
+          <div className="locker relative rounded-[var(--radius-card)]">
+            <span aria-hidden className="pointer-events-none absolute inset-x-[14%] top-0 h-px bg-light/60" />
+            <div className="flex h-11 items-center border-b border-line px-5">
+              <h2 id="carrinho-resumo" className="plate text-[1.05rem] leading-[1.25] text-fg">
+                Resumo
+              </h2>
             </div>
-            <Button block size="lg" disabled={blocked} onClick={() => router.push('/checkout')}>
-              <Lock className="size-4" /> {blocked ? 'Ajuste o carrinho' : 'Continuar para o checkout'}
-            </Button>
-            <TrustBadges compact className="border-t border-white/[0.06] pt-5" />
+            <div className="space-y-5 p-5">
+              <dl className="space-y-2 text-sm">
+                <div className="flex justify-between gap-4">
+                  <dt className="text-fg-2">Produtos ({validCount})</dt>
+                  <dd className="tabular-nums text-fg-2">{formatPrice(subtotal + savings)}</dd>
+                </div>
+                {savings > 0 && (
+                  <div className="flex justify-between gap-4">
+                    <dt className="text-fg-2">Promoções</dt>
+                    <dd className="tabular-nums text-success">− {formatPrice(savings)}</dd>
+                  </div>
+                )}
+                <div className="flex items-baseline justify-between gap-4 border-t border-line pt-3">
+                  <dt className="font-semibold text-fg">Subtotal</dt>
+                  <dd className="text-2xl font-extrabold tabular-nums text-fg">{formatPrice(subtotal)}</dd>
+                </div>
+              </dl>
+
+              <Button block size="lg" disabled={blocked} onClick={() => router.push('/checkout')}>
+                {blocked ? 'Ajuste o carrinho' : 'Continuar para o checkout'}
+              </Button>
+
+              <div className="border-t border-line pt-5">
+                <h3 className="mb-2.5 text-sm font-semibold text-fg">Calcular frete</h3>
+                <ShippingEstimator items={toShippingItems(lines)} subtotal={subtotal} />
+              </div>
+
+              <TrustBadges compact className="border-t border-line pt-4" />
+            </div>
           </div>
         </aside>
       </div>
