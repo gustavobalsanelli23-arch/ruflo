@@ -62,7 +62,8 @@ function toProduct(e: CatalogEntry): Product {
   const available = new Set(e.availableSizes);
   const base: Size[] = e.kids ? KIDS_SIZES : ADULT_SIZES.slice(0, 5);
   const sizes = ALL_SIZES.filter((s) => base.includes(s) || available.has(s));
-  const tags = new Set(e.tags as ProductTag[]);
+  // "mais-vendido" do arquivo do fornecedor é alegação dele, não venda da FutZone: não entra.
+  const tags = new Set((e.tags as ProductTag[]).filter((t) => t !== 'mais-vendido'));
   const rank = featuredRank.get(e.sourceId) ?? Infinity;
   // Destaque segue a ordem do catálogo do fornecedor. "Mais vendido" só existe quando a loja
   // tiver dado real de vendas (o admin pode marcar à mão): nunca é inventado aqui.

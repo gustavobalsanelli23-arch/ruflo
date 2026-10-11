@@ -70,13 +70,13 @@ export function RetroBand({ products, className }: { products: Product[]; classN
             </LinkButton>
           </div>
 
-          <ul className="grid grid-cols-3 gap-2 sm:gap-3">
+          <ul className="grid grid-cols-3 gap-px">
             {photos.map((p) => (
               <li key={p.id}>
                 <Link
                   href={productHref(p)}
                   aria-label={p.name}
-                  className="locker group relative block overflow-hidden rounded-[var(--radius-card)] transition-[border-color] duration-200 hover:border-line-strong active:border-fg-2/50"
+                  className="locker group relative block overflow-hidden rounded-[var(--radius-card)] border-0! ring-1 ring-line transition-[box-shadow] duration-200 hover:z-10 hover:ring-line-strong focus-visible:z-10 focus-visible:ring-line-strong focus-visible:outline-offset-[-2px]"
                 >
                   <span aria-hidden className="absolute inset-x-[16%] top-0 z-10 h-[2px] bg-light opacity-0 transition-opacity duration-200 group-hover:opacity-100 group-focus-visible:opacity-100" />
                   {/* eslint-disable-next-line @next/next/no-img-element */}

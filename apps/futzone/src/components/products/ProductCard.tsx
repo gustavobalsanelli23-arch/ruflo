@@ -179,7 +179,7 @@ function ProductCardBase({ product, priority, lit, litDelay = 0, omitStatus }: P
       {/* Etiqueta: nome e grade em cima; situação (linha sempre reservada) e preço ancorados embaixo,
           para os preços de uma fileira ficarem na mesma altura */}
       <div className="flex flex-1 flex-col gap-2 border-t border-line px-3 pb-3 pt-2.5">
-        <h3 className="line-clamp-2 text-[0.82rem] font-semibold leading-snug text-fg sm:text-[0.92rem]">
+        <h3 className="line-clamp-2 min-h-[2.75em] text-[0.82rem] font-semibold leading-snug text-fg sm:text-[0.92rem]">
           <Link href={href} className="after:absolute after:inset-0 after:content-[''] focus-visible:outline-none">
             {product.name}
           </Link>
