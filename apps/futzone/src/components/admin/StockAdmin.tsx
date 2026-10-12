@@ -24,7 +24,7 @@ const CELL = {
 };
 
 export function StockAdmin() {
-  const { products, setStock, settings } = useStoreData();
+  const { products, setStock, settings, catalogSource } = useStoreData();
   const { log } = useAdmin();
   const threshold = settings.lowStockThreshold;
   const [q, setQ] = useState('');
@@ -49,7 +49,11 @@ export function StockAdmin() {
 
   return (
     <>
-      <AdminPageHeader title="Estoque" description={`Quantidades simuladas por produto e tamanho · estoque baixo: até ${threshold} unidades por produto`} />
+      <AdminPageHeader title="Estoque" description={
+          catalogSource === 'db'
+            ? `Limite de venda por tamanho · tamanho esgotado no fornecedor fica indisponível · estoque baixo: até ${threshold} unidades por produto`
+            : `Quantidades simuladas por produto e tamanho · estoque baixo: até ${threshold} unidades por produto`
+        } />
 
       <div className="mb-6 grid gap-3 sm:grid-cols-3">
         {cards.map(({ key, icon: Icon, className }) => (

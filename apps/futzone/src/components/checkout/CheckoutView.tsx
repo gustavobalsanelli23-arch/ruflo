@@ -12,6 +12,7 @@ import { formatBusinessDays, formatDeliveryWindow } from '@/services/shipping/de
 import { useCart } from '@/context/CartContext';
 import { useStoreData } from '@/context/StoreDataContext';
 import { useCustomerAuth } from '@/context/CustomerAuthContext';
+import { useToast } from '@/context/ToastContext';
 import { computeTotals } from '@/lib/orders';
 import { toShippingItems } from '@/lib/checkout';
 import { formatPrice } from '@/lib/format';
@@ -38,6 +39,7 @@ const SUMMARY_STICKY = 'sticky top-[calc(58px+1.5rem)]';
 
 export function CheckoutView() {
   const router = useRouter();
+  const { notify } = useToast();
   const { lines, items, subtotal, issues, validCount, clear } = useCart();
   const { hydrated, products, settings, placeOrder } = useStoreData();
   const auth = useCustomerAuth();
@@ -132,14 +134,14 @@ export function CheckoutView() {
     return found.length === 0;
   };
 
-  const finalize = () => {
+  const finalize = async () => {
     if (!contact || !address || !shipping || !quote || placing) return;
     if (!validateStock()) {
       go(4);
       return;
     }
     setPlacing(true);
-    const result = placeOrder({
+    const result = await placeOrder({
       items: validItems,
       customer: draft.mode === 'account' ? customer : null,
       contact,
@@ -154,6 +156,8 @@ export function CheckoutView() {
       if (result.reason === 'estoque') {
         setStockIssues(result.issues);
         go(4);
+      } else if (result.reason === 'falha') {
+        notify(result.message, 'warning');
       }
       return;
     }
