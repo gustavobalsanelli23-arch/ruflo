@@ -78,7 +78,7 @@ export function Locations() {
                       </a>
                       <a
                         href={whatsappLink(
-                          `Olá! Vim pelo site e gostaria de falar com a unidade ${unit.shortName} da Conexão Barbearia.`,
+                          `Olá, Conexão! Gostaria de agendar um horário na unidade ${unit.shortName}. Podem me ajudar?`,
                           unit.whatsapp,
                         )}
                         target="_blank"

@@ -32,7 +32,8 @@ export const whatsapp = {
 };
 
 export function whatsappLink(message?: string, number: string = whatsapp.number) {
-  const text = message ?? 'Olá! Vim pelo site da Conexão Barbearia e gostaria de mais informações.';
+  // Mesmo formato de mensagem usado pela barbearia no link oficial do WhatsApp.
+  const text = message ?? 'Olá, Conexão! Gostaria de agendar um horário. Podem me ajudar?';
   return `https://wa.me/${number}?text=${encodeURIComponent(text)}`;
 }
 
