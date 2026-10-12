@@ -18,10 +18,13 @@ export const business = {
 export const links = {
   booking: 'https://appbarber.com.br/download/prime?cod=4588460',
   subscription: 'https://l.appbarber.com.br/i4y908a5',
-  instagram: null as string | null, // não consta no site anterior: adicionar o perfil oficial
+  instagram: 'https://www.instagram.com/barbeariaconexaoo/' as string | null,
   terms: '/termos-de-uso/',
   privacy: '/politica-de-privacidade/',
 } as const;
+
+/** Perfil exibido nos links (derivado da URL do Instagram). */
+export const instagramHandle = links.instagram ? `@${links.instagram.split('/').filter(Boolean).pop()}` : null;
 
 export const whatsapp = {
   number: '551143829358',

@@ -1,5 +1,5 @@
 import { ArrowUp, ArrowUpRight, Mail } from 'lucide-react';
-import { business, links, nav, navExtra, units, whatsapp, whatsappLink } from '../data/site';
+import { business, instagramHandle, links, nav, navExtra, units, whatsapp, whatsappLink } from '../data/site';
 import { track } from '../lib/analytics';
 import { InstagramIcon, WhatsAppIcon } from './ui/Icons';
 import { Reveal } from './ui/Reveal';
@@ -71,11 +71,12 @@ export function Footer({ basePath = '' }: FooterProps) {
                     href={links.instagram}
                     target="_blank"
                     rel="noopener"
+                    aria-label={`Instagram da Conexão Barbearia: ${instagramHandle}`}
                     className="group flex items-center justify-between gap-6 border-b border-line pb-4"
                   >
                     <span className="flex items-center gap-4">
                       <InstagramIcon className="size-5 text-gold" />
-                      <span className="text-base text-bone/85 md:text-lg">Instagram</span>
+                      <span className="text-base text-bone/85 md:text-lg">{instagramHandle}</span>
                     </span>
                     <ArrowUpRight
                       className="size-5 text-bone/50 group-hover:text-gold"
