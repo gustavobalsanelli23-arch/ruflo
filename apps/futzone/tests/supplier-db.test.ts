@@ -59,6 +59,7 @@ describe.skipIf(!URL_)('integração com banco (Postgres)', () => {
     getPool: typeof import('@/server/db/client').getPool;
     closeDatabase: typeof import('@/server/db/migrate').closeDatabase;
     ensureDatabase: typeof import('@/server/db/migrate').ensureDatabase;
+    migrateDatabase: typeof import('@/server/db/migrate').migrateDatabase;
   };
   let models: SupplierModel[];
   const flaProduct = seedProducts.find((p) => p.teamId === 'flamengo' && p.sizes.some((s) => (p.stock[s] ?? 0) > 0))!;
@@ -90,6 +91,7 @@ describe.skipIf(!URL_)('integração com banco (Postgres)', () => {
       getPool: client.getPool,
       closeDatabase: migrate.closeDatabase,
       ensureDatabase: migrate.ensureDatabase,
+      migrateDatabase: migrate.migrateDatabase,
     };
     models = baseModels();
   });
@@ -108,6 +110,28 @@ describe.skipIf(!URL_)('integração com banco (Postgres)', () => {
     const p = pub.find((x) => x.id === flaProduct.id)!;
     expect(p.images[0].src).toMatch(/^\/produtos\//);
     expect(p.stock).toEqual(flaProduct.stock);
+  });
+
+  it('tabela de preços nova: aplicada uma vez nos preços pela tabela, preço manual preservado', async () => {
+    const [a, b] = seedProducts.filter((p) => p.price === 16990).slice(0, 2);
+    // Simula um banco criado com a tabela antiga: preços antigos, um deles manual, e uma pendência velha.
+    await db.query(`DELETE FROM app_kv WHERE key = 'price_table_v2'`);
+    await db.query(`UPDATE products SET data = jsonb_set(data, '{price}', '34990') WHERE id = $1`, [a.id]);
+    await db.query(`UPDATE products SET data = jsonb_set(data, '{price}', '29990'), price_source = 'manual' WHERE id = $1`, [b.id]);
+    await db.query(`INSERT INTO sync_changes (product_id, kind, summary, before, after, state) VALUES ($1, 'preco', 'velha', '34990', '39990', 'pending')`, [a.id]);
+    await mod.migrateDatabase();
+    const price = async (id: string) => Number((await db.query(`SELECT data->>'price' AS p FROM products WHERE id = $1`, [id])).rows[0].p);
+    expect(await price(a.id)).toBe(16990);
+    expect(await price(b.id)).toBe(29990);
+    expect((await db.query(`SELECT count(*)::int AS n FROM sync_changes WHERE state = 'pending' AND kind = 'preco'`)).rows[0].n).toBe(0);
+    expect((await db.query(`SELECT count(*)::int AS n FROM sync_changes WHERE product_id = $1 AND kind = 'preco' AND state = 'applied'`, [a.id])).rows[0].n).toBe(1);
+    // Segunda vez não muda nada (roda uma vez só).
+    await db.query(`UPDATE products SET data = jsonb_set(data, '{price}', '34990') WHERE id = $1`, [a.id]);
+    await mod.migrateDatabase();
+    expect(await price(a.id)).toBe(34990);
+    // Volta ao normal para os próximos testes.
+    await db.query(`UPDATE products SET data = jsonb_set(data, '{price}', '16990'), price_source = 'rule' WHERE id = ANY($1)`, [[a.id, b.id]]);
+    await db.query(`DELETE FROM sync_changes`);
   });
 
   it('7. sincronizações repetidas com o mesmo catálogo não duplicam nem mudam nada', async () => {
@@ -135,7 +159,7 @@ describe.skipIf(!URL_)('integração com banco (Postgres)', () => {
   });
 
   it('2. mudança de preço pela tabela aguarda aprovação; preço editado à mão não muda', async () => {
-    const r = await mod.savePriceRules({ ...(await import('@/lib/pricing')).DEFAULT_PRICE_RULES, nacional: 36990 });
+    const r = await mod.savePriceRules({ ...(await import('@/lib/pricing')).DEFAULT_PRICE_RULES, torcedor: 17990 });
     expect(r.pending).toBe(true);
     expect(r.changes).toBeGreaterThan(0);
     const pending = await db.query(`SELECT count(*)::int AS n FROM sync_changes WHERE kind = 'preco' AND state = 'pending'`);

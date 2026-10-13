@@ -57,7 +57,7 @@ describe('sincronização com o fornecedor', () => {
     expect(rec.id).toBe('fz-n1');
     expect(rec.reviewState).toBe('pending');
     expect(rec.product.status).toBe('draft');
-    expect(rec.product.price).toBe(DEFAULT_PRICE_RULES.nacional);
+    expect(rec.product.price).toBe(DEFAULT_PRICE_RULES.torcedor);
     expect(rec.stock.P?.supplierAvailable).toBe(true);
     expect(rec.stock.M?.supplierAvailable).toBe(false);
     expect(rec.product.images).toEqual([]); // fotos só são copiadas na aprovação
@@ -75,11 +75,11 @@ describe('sincronização com o fornecedor', () => {
     const cheap = { ...record('a1', ['M']), product: { ...record('a1', ['M']).product, price: 29990 } };
     const pendingRun = run([cheap], [model('a1', ['M'])]);
     const price = pendingRun.changes.find((c) => c.kind === 'preco');
-    expect(price).toMatchObject({ state: 'pending', before: 29990, after: DEFAULT_PRICE_RULES.nacional });
-    expect(pendingRun.updates.find((u) => u.product?.price === DEFAULT_PRICE_RULES.nacional)).toBeUndefined();
+    expect(price).toMatchObject({ state: 'pending', before: 29990, after: DEFAULT_PRICE_RULES.torcedor });
+    expect(pendingRun.updates.find((u) => u.product?.price === DEFAULT_PRICE_RULES.torcedor)).toBeUndefined();
 
     const applied = run([cheap], [model('a1', ['M'])], { approvePriceChanges: false });
-    expect(applied.updates.find((u) => u.id === cheap.id)?.product?.price).toBe(DEFAULT_PRICE_RULES.nacional);
+    expect(applied.updates.find((u) => u.id === cheap.id)?.product?.price).toBe(DEFAULT_PRICE_RULES.torcedor);
 
     const manual = run([{ ...cheap, priceSource: 'manual' }], [model('a1', ['M'])], { approvePriceChanges: false });
     expect(manual.changes.some((c) => c.kind === 'preco')).toBe(false);
