@@ -302,6 +302,8 @@
     }
   },
   "enabledPlugins": {
-    "claude-code-setup@claude-plugins-official": true
+    "claude-code-setup@claude-plugins-official": true,
+    "claude-mem@thedotmack": true,
+    "cartographer@cartographer-marketplace": true
   }
 }
