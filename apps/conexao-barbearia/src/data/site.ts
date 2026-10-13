@@ -89,10 +89,10 @@ export const units: Unit[] = [
     lat: -23.511307,
     lng: -46.876487,
     placeId: 'ChIJm5KOY3gDz5QRLNFMytGTJHs',
-    // O site anterior apontava para um número de exemplo (5511999999999).
-    // Até a unidade informar um número próprio, o botão usa o WhatsApp oficial.
+    // Mesmo WhatsApp da Mercado Lopes, confirmado pela barbearia em out/2026
+    // (o site anterior apontava para um número de exemplo).
     whatsapp: '551143829358',
-    whatsappIsCentral: true,
+    whatsappIsCentral: false,
   },
 ];
 
