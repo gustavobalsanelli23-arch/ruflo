@@ -65,8 +65,8 @@ export function Hero() {
         className="container-x relative flex flex-1 flex-col justify-end pb-12 pt-32 sm:pb-16 lg:justify-center lg:pb-32 lg:pt-36"
       >
         <p className="hero-fade eyebrow text-bone/80" style={{ animationDelay: '0.15s' }}>
-          <span aria-hidden="true" className="h-px w-10 bg-gold" />
-          Desde {business.foundedYear} <span className="text-gold">•</span> {business.city}, {business.state}
+          <span aria-hidden="true" className="h-px w-10 bg-accent" />
+          Desde {business.foundedYear} <span className="text-accent">•</span> {business.city}, {business.state}
         </p>
 
         <h1
@@ -76,7 +76,7 @@ export function Hero() {
           {lines.map((line, i) => (
             <span key={line.text} className="block overflow-hidden pb-[0.08em]">
               <span
-                className={`hero-line block ${line.accent ? 'font-normal italic text-gold' : ''}`}
+                className={`hero-line block ${line.accent ? 'font-normal italic text-accent' : ''}`}
                 style={{ animationDelay: `${0.25 + i * 0.12}s` }}
               >
                 {line.text}
@@ -98,7 +98,7 @@ export function Hero() {
             target="_blank"
             rel="noopener"
             onClick={() => track('Schedule', { origem: 'hero' })}
-            className="btn btn-gold"
+            className="btn btn-accent"
           >
             Agendar horário
             <ArrowUpRight className="btn-arrow size-4" strokeWidth={1.75} aria-hidden="true" />

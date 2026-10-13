@@ -15,7 +15,7 @@ export function Locations() {
           label="Unidades"
           title={
             <>
-              Duas unidades <span className="font-normal italic text-gold">em Barueri.</span>
+              Duas unidades <span className="font-normal italic text-accent">em Barueri.</span>
             </>
           }
           intro="Escolha a unidade mais próxima de você. Trabalhamos com agendamento e também com encaixe."
@@ -35,7 +35,7 @@ export function Locations() {
                       aria-hidden="true"
                       className="absolute inset-0 flex flex-col items-center justify-center gap-3 text-bone/40"
                     >
-                      <MapPin className="size-6 text-gold" strokeWidth={1.25} />
+                      <MapPin className="size-6 text-accent" strokeWidth={1.25} />
                       <span className="text-[0.625rem] font-semibold uppercase tracking-[0.24em]">Carregando mapa</span>
                     </div>
                     <iframe
@@ -48,7 +48,7 @@ export function Locations() {
                   </div>
 
                   <div className="flex flex-1 flex-col p-7 sm:p-10">
-                    <p className="eyebrow text-gold">
+                    <p className="eyebrow text-accent">
                       <span className="tabular-nums">Unidade {unit.index}</span>
                     </p>
                     <h3
@@ -71,7 +71,7 @@ export function Locations() {
                         target="_blank"
                         rel="noopener"
                         onClick={() => track('FindLocation', { unidade: unit.id })}
-                        className="btn btn-gold"
+                        className="btn btn-accent"
                       >
                         <Navigation className="size-4" strokeWidth={1.75} aria-hidden="true" />
                         Traçar rota
@@ -97,7 +97,7 @@ export function Locations() {
                       className="link-line mt-6 self-start text-[0.6875rem] font-semibold uppercase tracking-[0.2em] text-bone/70 hover:text-bone"
                     >
                       Abrir no Google Maps
-                      <ArrowUpRight className="size-3.5 text-gold" strokeWidth={1.75} aria-hidden="true" />
+                      <ArrowUpRight className="size-3.5 text-accent" strokeWidth={1.75} aria-hidden="true" />
                     </a>
                   </div>
                 </article>

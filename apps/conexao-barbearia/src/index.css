@@ -15,15 +15,18 @@
 }
 
 @theme {
-  --color-ink: #101010;
-  --color-graphite: #1c1c1c;
-  --color-line: #2a2a2a;
-  --color-bone: #f5f3ef;
-  --color-bone-2: #ebe8e2;
-  --color-stone: #858585;
-  --color-stone-deep: #5c5a56;
-  --color-gold: #b59a6a;
-  --color-gold-deep: #7a6340;
+  /* Base preto-azulada + branco frio; azul da marca só como acento. */
+  --color-ink: #0a0e15;
+  --color-graphite: #121822;
+  --color-line: #222a36;
+  --color-bone: #f3f5f8;
+  --color-bone-2: #e6eaf0;
+  --color-stone: #8a93a3;
+  --color-stone-deep: #535b68;
+  /* Acento em fundo escuro (6,4:1), preenchimento de botão (branco 4,75:1) e acento em fundo claro (7:1). */
+  --color-accent: #5b93f5;
+  --color-accent-strong: #2f6fdb;
+  --color-accent-deep: #1f4fa8;
 
   --font-display: 'Cormorant Garamond', 'Times New Roman', serif;
   --font-sans: 'Manrope Variable', 'Manrope', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
@@ -57,12 +60,12 @@
   }
 
   ::selection {
-    background-color: var(--color-gold);
-    color: var(--color-ink);
+    background-color: var(--color-accent-strong);
+    color: #fff;
   }
 
   :focus-visible {
-    outline: 1px solid var(--color-gold);
+    outline: 1px solid var(--color-accent);
     outline-offset: 4px;
   }
 
@@ -144,17 +147,21 @@
     transform: translateX(4px);
   }
 
-  .btn-gold {
-    background-color: var(--color-gold);
-    color: var(--color-ink);
+  .btn-accent {
+    background-color: var(--color-accent-strong);
+    color: #fff;
   }
 
-  .btn-gold::before {
+  .btn-accent::before {
     background-color: var(--color-bone);
   }
 
+  .btn-accent:hover {
+    color: var(--color-ink);
+  }
+
   .btn-ghost {
-    border: 1px solid rgb(245 243 239 / 0.35);
+    border: 1px solid rgb(243 245 248 / 0.35);
     color: var(--color-bone);
   }
 
@@ -173,15 +180,15 @@
   }
 
   .btn-dark::before {
-    background-color: var(--color-gold);
+    background-color: var(--color-accent-strong);
   }
 
   .btn-dark:hover {
-    color: var(--color-ink);
+    color: #fff;
   }
 
   .btn-outline-dark {
-    border: 1px solid rgb(16 16 16 / 0.3);
+    border: 1px solid rgb(10 14 21 / 0.3);
     color: var(--color-ink);
   }
 

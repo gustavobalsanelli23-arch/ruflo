@@ -18,7 +18,7 @@ export function App() {
       <MotionConfig reducedMotion="user">
         <a
           href="#conteudo"
-          className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:bg-gold focus:px-4 focus:py-3 focus:text-sm focus:font-semibold focus:text-ink"
+          className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:bg-accent focus:px-4 focus:py-3 focus:text-sm focus:font-semibold focus:text-ink"
         >
           Pular para o conteúdo
         </a>

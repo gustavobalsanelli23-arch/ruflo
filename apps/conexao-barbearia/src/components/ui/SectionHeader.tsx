@@ -18,9 +18,9 @@ export function SectionHeader({ index, label, title, intro, tone = 'dark', align
     <header className={align === 'split' ? 'grid gap-8 lg:grid-cols-12 lg:items-end lg:gap-12' : 'grid gap-8'}>
       <div className={align === 'split' ? 'lg:col-span-7' : ''}>
         <Reveal>
-          <p className={`eyebrow ${light ? 'text-gold-deep' : 'text-gold'}`}>
+          <p className={`eyebrow ${light ? 'text-accent-deep' : 'text-accent'}`}>
             <span className="tabular-nums">{index}</span>
-            <span aria-hidden="true" className={`h-px w-10 ${light ? 'bg-gold-deep/60' : 'bg-gold/60'}`} />
+            <span aria-hidden="true" className={`h-px w-10 ${light ? 'bg-accent-deep/60' : 'bg-accent/60'}`} />
             <span>{label}</span>
           </p>
         </Reveal>

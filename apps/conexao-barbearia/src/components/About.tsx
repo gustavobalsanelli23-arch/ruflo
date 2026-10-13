@@ -41,7 +41,7 @@ export function About() {
           </RevealImage>
           <RevealImage
             delay={0.2}
-            className="absolute bottom-0 right-0 aspect-[4/3] w-[54%] overflow-hidden border-[6px] border-bone bg-bone-2 shadow-[0_30px_60px_-30px_rgb(16_16_16/0.45)] sm:w-[48%]"
+            className="absolute bottom-0 right-0 aspect-[4/3] w-[54%] overflow-hidden border-[6px] border-bone bg-bone-2 shadow-[0_30px_60px_-30px_rgb(10_14_21/0.45)] sm:w-[48%]"
           >
             <Picture
               image={crew}
@@ -60,9 +60,9 @@ export function About() {
         {/* Texto */}
         <div className="lg:col-span-6 lg:col-start-7 lg:pt-6">
           <Reveal>
-            <p className="eyebrow text-gold-deep">
+            <p className="eyebrow text-accent-deep">
               <span className="tabular-nums">01</span>
-              <span aria-hidden="true" className="h-px w-10 bg-gold-deep/60" />
+              <span aria-hidden="true" className="h-px w-10 bg-accent-deep/60" />
               <span>Sobre a Conexão</span>
             </p>
           </Reveal>
@@ -71,7 +71,7 @@ export function About() {
               id="sobre-title"
               className="display text-balance mt-6 text-[2.6rem] xs:text-5xl md:text-6xl xl:text-7xl"
             >
-              Mais que um corte. <span className="font-normal italic text-gold-deep">Um padrão.</span>
+              Mais que um corte. <span className="font-normal italic text-accent-deep">Um padrão.</span>
             </h2>
           </Reveal>
 

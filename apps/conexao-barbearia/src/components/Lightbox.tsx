@@ -82,7 +82,7 @@ export function Lightbox({ items, index, onClose, onIndexChange }: Props) {
               className="text-[0.6875rem] font-semibold tabular-nums tracking-[0.24em] text-bone/70"
               aria-live="polite"
             >
-              <span className="text-gold">{String(index + 1).padStart(2, '0')}</span> /{' '}
+              <span className="text-accent">{String(index + 1).padStart(2, '0')}</span> /{' '}
               {String(items.length).padStart(2, '0')}
             </p>
             <button
@@ -90,7 +90,7 @@ export function Lightbox({ items, index, onClose, onIndexChange }: Props) {
               type="button"
               onClick={onClose}
               aria-label="Fechar galeria"
-              className="-mr-2 flex size-11 items-center justify-center text-bone/80 transition-colors hover:text-gold"
+              className="-mr-2 flex size-11 items-center justify-center text-bone/80 transition-colors hover:text-accent"
             >
               <X className="size-6" strokeWidth={1.25} aria-hidden="true" />
             </button>
@@ -136,7 +136,7 @@ export function Lightbox({ items, index, onClose, onIndexChange }: Props) {
                 go(-1);
               }}
               aria-label="Foto anterior"
-              className="absolute left-6 top-1/2 hidden size-14 -translate-y-1/2 items-center justify-center border border-bone/20 text-bone/80 transition-colors hover:border-gold hover:text-gold md:flex"
+              className="absolute left-6 top-1/2 hidden size-14 -translate-y-1/2 items-center justify-center border border-bone/20 text-bone/80 transition-colors hover:border-accent hover:text-accent md:flex"
             >
               <ArrowLeft className="size-5" strokeWidth={1.25} aria-hidden="true" />
             </button>
@@ -147,7 +147,7 @@ export function Lightbox({ items, index, onClose, onIndexChange }: Props) {
                 go(1);
               }}
               aria-label="Próxima foto"
-              className="absolute right-6 top-1/2 hidden size-14 -translate-y-1/2 items-center justify-center border border-bone/20 text-bone/80 transition-colors hover:border-gold hover:text-gold md:flex"
+              className="absolute right-6 top-1/2 hidden size-14 -translate-y-1/2 items-center justify-center border border-bone/20 text-bone/80 transition-colors hover:border-accent hover:text-accent md:flex"
             >
               <ArrowRight className="size-5" strokeWidth={1.25} aria-hidden="true" />
             </button>
@@ -158,7 +158,7 @@ export function Lightbox({ items, index, onClose, onIndexChange }: Props) {
               type="button"
               onClick={() => go(-1)}
               aria-label="Foto anterior"
-              className="flex size-12 items-center justify-center border border-bone/20 text-bone/80 active:border-gold active:text-gold"
+              className="flex size-12 items-center justify-center border border-bone/20 text-bone/80 active:border-accent active:text-accent"
             >
               <ArrowLeft className="size-5" strokeWidth={1.25} aria-hidden="true" />
             </button>
@@ -166,7 +166,7 @@ export function Lightbox({ items, index, onClose, onIndexChange }: Props) {
               type="button"
               onClick={() => go(1)}
               aria-label="Próxima foto"
-              className="flex size-12 items-center justify-center border border-bone/20 text-bone/80 active:border-gold active:text-gold"
+              className="flex size-12 items-center justify-center border border-bone/20 text-bone/80 active:border-accent active:text-accent"
             >
               <ArrowRight className="size-5" strokeWidth={1.25} aria-hidden="true" />
             </button>

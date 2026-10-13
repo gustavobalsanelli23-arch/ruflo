@@ -38,15 +38,15 @@ export function FinalCTA() {
           />
         </m.div>
         <div className="absolute inset-0 bg-gradient-to-b from-ink via-ink/70 to-ink" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_0%,rgb(16_16_16/0.7)_75%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_0%,rgb(10_14_21/0.7)_75%)]" />
       </div>
 
       <div className="container-x flex flex-col items-center text-center">
         <Reveal>
-          <p className="eyebrow text-gold">
-            <span aria-hidden="true" className="h-px w-10 bg-gold/60" />
+          <p className="eyebrow text-accent">
+            <span aria-hidden="true" className="h-px w-10 bg-accent/60" />
             Agende agora
-            <span aria-hidden="true" className="h-px w-10 bg-gold/60" />
+            <span aria-hidden="true" className="h-px w-10 bg-accent/60" />
           </p>
         </Reveal>
         <Reveal delay={0.08}>
@@ -54,7 +54,7 @@ export function FinalCTA() {
             id="cta-title"
             className="display text-balance mx-auto mt-8 max-w-5xl text-[2.75rem] xs:text-[3.25rem] sm:text-6xl md:text-7xl lg:text-8xl"
           >
-            Seu próximo visual <span className="font-normal italic text-gold">começa aqui.</span>
+            Seu próximo visual <span className="font-normal italic text-accent">começa aqui.</span>
           </h2>
         </Reveal>
         <Reveal delay={0.16}>
@@ -69,7 +69,7 @@ export function FinalCTA() {
               target="_blank"
               rel="noopener"
               onClick={() => track('Schedule', { origem: 'cta-final' })}
-              className="btn btn-gold min-h-14 px-9"
+              className="btn btn-accent min-h-14 px-9"
             >
               Agendar meu horário
               <ArrowUpRight className="btn-arrow size-4" strokeWidth={1.75} aria-hidden="true" />

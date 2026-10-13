@@ -16,7 +16,7 @@ export function Team() {
           label="Nossa equipe"
           title={
             <>
-              Barbeiros que <span className="font-normal italic text-gold-deep">conectam.</span>
+              Barbeiros que <span className="font-normal italic text-accent-deep">conectam.</span>
             </>
           }
           intro="Profissionais experientes, treinados dentro do padrão Conexão, que tratam cada cliente como único."
@@ -37,7 +37,7 @@ export function Team() {
                     className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-ink/60 to-transparent"
                   />
                 </div>
-                <p className="mt-5 text-[0.625rem] font-semibold uppercase tracking-[0.22em] text-gold-deep sm:text-[0.6875rem]">
+                <p className="mt-5 text-[0.625rem] font-semibold uppercase tracking-[0.22em] text-accent-deep sm:text-[0.6875rem]">
                   {barber.experience}
                 </p>
                 <h3

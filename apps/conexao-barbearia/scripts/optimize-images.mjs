@@ -15,9 +15,9 @@ const SRC = join(root, 'assets-src');
 const OUT = join(root, 'public', 'images');
 const ORIGIN = 'https://barbeariaconexao.com.br/wp-content/uploads/';
 
-const BG = { r: 16, g: 16, b: 16, alpha: 1 }; // #101010
-const WARM_WHITE = [245, 243, 239]; // #F5F3EF
-const GOLD = [181, 154, 106]; // #B59A6A
+const BG = { r: 10, g: 14, b: 21, alpha: 1 }; // #0A0E15
+const BONE = [243, 245, 248]; // #F3F5F8
+const ACCENT = [91, 147, 245]; // #5B93F5
 
 /** Fotografias reais: [arquivo de saída, caminho original no WordPress]. */
 const PHOTOS = [
@@ -83,14 +83,14 @@ async function writeVariants(name, pipeline, widths, { avif = false } = {}) {
   }
 }
 
-/** Recolore o logotipo: azul → branco quente, faixas do escudo → dourado. */
+/** Recolore o logotipo: azul → branco frio, faixas do escudo → azul de acento. */
 async function recolorLogo(buf) {
   const { data, info } = await sharp(buf).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
   for (let i = 0; i < data.length; i += 4) {
     const [r, b] = [data[i], data[i + 2]];
-    // Azul vira branco quente; o restante (faixas brancas do logo horizontal,
-    // faixas pretas do símbolo quadrado e o texto "BARBEARIA") vira dourado.
-    const [nr, ng, nb] = b - r > 60 ? WARM_WHITE : GOLD;
+    // Azul vira branco frio; o restante (faixas brancas do logo horizontal,
+    // faixas pretas do símbolo quadrado e o texto "BARBEARIA") vira azul de acento.
+    const [nr, ng, nb] = b - r > 60 ? BONE : ACCENT;
     data[i] = nr;
     data[i + 1] = ng;
     data[i + 2] = nb;
@@ -110,7 +110,7 @@ async function main() {
   const hero = sharp(await source('2025/07/site-10-1.png'))
     .grayscale()
     .linear(1.12, -14)
-    .tint({ r: 222, g: 214, b: 200 });
+    .tint({ r: 200, g: 210, b: 226 });
   await writeVariants('hero-monocromatico', hero, [480, 800], { avif: true });
 
   // CTA final: barboterapia monocromática.
@@ -164,9 +164,9 @@ async function main() {
     .toBuffer();
   const ogLogo = await logo.clone().resize({ width: 420 }).png().toBuffer();
   const fade = Buffer.from(
-    `<svg width="1200" height="630"><defs><linearGradient id="g" x1="0" x2="1"><stop offset="0.42" stop-color="#101010"/><stop offset="0.62" stop-color="#101010" stop-opacity="0"/></linearGradient></defs><rect width="1200" height="630" fill="url(#g)"/>` +
-      `<rect x="80" y="372" width="56" height="1" fill="rgb(${GOLD.join(',')})"/>` +
-      `<text x="80" y="420" font-family="DejaVu Sans, Arial, sans-serif" font-size="22" letter-spacing="5" fill="rgb(${WARM_WHITE.join(',')})">BARUERI, SP  ·  DESDE 2015</text></svg>`,
+    `<svg width="1200" height="630"><defs><linearGradient id="g" x1="0" x2="1"><stop offset="0.42" stop-color="#0A0E15"/><stop offset="0.62" stop-color="#0A0E15" stop-opacity="0"/></linearGradient></defs><rect width="1200" height="630" fill="url(#g)"/>` +
+      `<rect x="80" y="372" width="56" height="1" fill="rgb(${ACCENT.join(',')})"/>` +
+      `<text x="80" y="420" font-family="DejaVu Sans, Arial, sans-serif" font-size="22" letter-spacing="5" fill="rgb(${BONE.join(',')})">BARUERI, SP  ·  DESDE 2015</text></svg>`,
   );
   await sharp({ create: { width: 1200, height: 630, channels: 4, background: BG } })
     .composite([

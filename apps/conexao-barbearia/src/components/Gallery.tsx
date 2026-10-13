@@ -31,7 +31,7 @@ export function Gallery() {
           label="Galeria"
           title={
             <>
-              Estilo que <span className="font-normal italic text-gold">fala por si.</span>
+              Estilo que <span className="font-normal italic text-accent">fala por si.</span>
             </>
           }
           intro="Trabalhos reais, feitos pelos nossos barbeiros em clientes da Conexão. Toque em uma foto para ampliar."
