@@ -343,6 +343,7 @@
     "marketing-skills@marketingskills": true,
     "playwright@claude-plugins-official": true,
     "perplexity@perplexity-mcp-server": true,
-    "glif@glif": true
+    "glif@glif": true,
+    "firecrawl@claude-plugins-official": true
   }
 }
