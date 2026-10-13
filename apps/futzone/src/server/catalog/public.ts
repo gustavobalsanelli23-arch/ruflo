@@ -17,7 +17,7 @@ export const getPublicCatalog = unstable_cache(
     await ensureDatabase();
     return queryPublicProducts(getPool());
   },
-  ['catalogo-publico-v1'],
+  ['catalogo-publico-v2'],
   { tags: [CATALOG_TAG], revalidate: 300 },
 );
 
