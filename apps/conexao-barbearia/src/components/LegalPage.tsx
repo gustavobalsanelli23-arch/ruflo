@@ -33,7 +33,7 @@ export function LegalPage({ slug }: { slug: LegalSlug }) {
                 href={links.booking}
                 target="_blank"
                 rel="noopener"
-                className="btn btn-gold min-h-11 px-5 text-[0.6875rem]"
+                className="btn btn-accent min-h-11 px-5 text-[0.6875rem]"
               >
                 Agendar
                 <ArrowUpRight className="btn-arrow size-4" strokeWidth={1.75} aria-hidden="true" />
@@ -47,13 +47,13 @@ export function LegalPage({ slug }: { slug: LegalSlug }) {
             <div className="mx-auto max-w-3xl">
               <a
                 href="/"
-                className="link-line text-[0.6875rem] font-semibold uppercase tracking-[0.22em] text-gold-deep sm:hidden"
+                className="link-line text-[0.6875rem] font-semibold uppercase tracking-[0.22em] text-accent-deep sm:hidden"
               >
                 <ArrowLeft className="size-3.5" strokeWidth={1.75} aria-hidden="true" />
                 Voltar ao site
               </a>
-              <p className="eyebrow mt-8 text-gold-deep sm:mt-0">
-                <span aria-hidden="true" className="h-px w-10 bg-gold-deep/60" />
+              <p className="eyebrow mt-8 text-accent-deep sm:mt-0">
+                <span aria-hidden="true" className="h-px w-10 bg-accent-deep/60" />
                 {doc.title}
               </p>
               <h1 className="display text-balance mt-6 text-4xl md:text-6xl">{title.text}</h1>
@@ -74,7 +74,7 @@ function renderBlocks(blocks: (typeof legalDocs)[LegalSlug]['blocks']) {
   const flush = () => {
     if (!list.length) return;
     out.push(
-      <ul key={`ul-${out.length}`} className="my-5 grid list-disc gap-2 pl-5 marker:text-gold-deep">
+      <ul key={`ul-${out.length}`} className="my-5 grid list-disc gap-2 pl-5 marker:text-accent-deep">
         {list.map((li) => (
           <li key={li}>{li}</li>
         ))}

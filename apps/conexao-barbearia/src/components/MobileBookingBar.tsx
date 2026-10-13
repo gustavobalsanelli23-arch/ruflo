@@ -51,7 +51,7 @@ export function MobileBookingBar() {
               target="_blank"
               rel="noopener"
               onClick={() => track('Schedule', { origem: 'barra-mobile' })}
-              className="btn btn-gold min-h-12 flex-1"
+              className="btn btn-accent min-h-12 flex-1"
             >
               Agendar horário
               <ArrowUpRight className="btn-arrow size-4" strokeWidth={1.75} aria-hidden="true" />

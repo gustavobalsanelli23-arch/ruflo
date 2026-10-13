@@ -88,7 +88,7 @@ export function Header() {
                       {item.label}
                       <span
                         aria-hidden="true"
-                        className={`absolute -bottom-0.5 left-0 h-px bg-gold transition-all duration-500 ease-editorial ${
+                        className={`absolute -bottom-0.5 left-0 h-px bg-accent transition-all duration-500 ease-editorial ${
                           isActive ? 'w-full' : 'w-0 group-hover:w-full'
                         }`}
                       />
@@ -105,7 +105,7 @@ export function Header() {
               target="_blank"
               rel="noopener"
               onClick={() => track('Schedule', { origem: 'header' })}
-              className="btn btn-gold hidden min-h-11 px-5 text-[0.6875rem] sm:inline-flex"
+              className="btn btn-accent hidden min-h-11 px-5 text-[0.6875rem] sm:inline-flex"
             >
               Agendar horário
               <ArrowUpRight className="btn-arrow size-4" strokeWidth={1.75} aria-hidden="true" />
@@ -165,7 +165,7 @@ export function Header() {
                       onClick={() => setOpen(false)}
                       className="flex items-baseline gap-5 py-4"
                     >
-                      <span className="w-6 text-[0.6875rem] font-semibold tabular-nums tracking-[0.2em] text-gold">
+                      <span className="w-6 text-[0.6875rem] font-semibold tabular-nums tracking-[0.2em] text-accent">
                         {String(i + 1).padStart(2, '0')}
                       </span>
                       <span className="font-display text-[2rem] uppercase leading-none text-bone">{item.label}</span>
@@ -185,7 +185,7 @@ export function Header() {
                   target="_blank"
                   rel="noopener"
                   onClick={() => track('Schedule', { origem: 'menu-mobile' })}
-                  className="btn btn-gold w-full"
+                  className="btn btn-accent w-full"
                 >
                   Agendar horário
                   <ArrowUpRight className="btn-arrow size-4" strokeWidth={1.75} aria-hidden="true" />
@@ -219,7 +219,7 @@ export function Header() {
                 <ul className="mt-6 grid gap-3 text-sm text-bone/55">
                   {units.map((u) => (
                     <li key={u.id} className="flex gap-3">
-                      <MapPin className="mt-0.5 size-4 shrink-0 text-gold" strokeWidth={1.5} aria-hidden="true" />
+                      <MapPin className="mt-0.5 size-4 shrink-0 text-accent" strokeWidth={1.5} aria-hidden="true" />
                       <span>
                         <span className="text-bone/80">{u.shortName}</span> · {u.street} — {u.complement}
                       </span>

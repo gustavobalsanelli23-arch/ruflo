@@ -15,15 +15,15 @@ export function FAQ() {
         <div className="lg:col-span-4">
           <div className="lg:sticky lg:top-32">
             <Reveal>
-              <p className="eyebrow text-gold-deep">
+              <p className="eyebrow text-accent-deep">
                 <span className="tabular-nums">07</span>
-                <span aria-hidden="true" className="h-px w-10 bg-gold-deep/60" />
+                <span aria-hidden="true" className="h-px w-10 bg-accent-deep/60" />
                 <span>FAQ</span>
               </p>
             </Reveal>
             <Reveal delay={0.08}>
               <h2 id="faq-title" className="display text-balance mt-6 text-[2.6rem] xs:text-5xl md:text-6xl">
-                Perguntas <span className="font-normal italic text-gold-deep">frequentes.</span>
+                Perguntas <span className="font-normal italic text-accent-deep">frequentes.</span>
               </h2>
             </Reveal>
             <Reveal delay={0.16}>
@@ -62,10 +62,10 @@ export function FAQ() {
                       className="group flex w-full items-center justify-between gap-6 py-7 text-left md:py-8"
                     >
                       <span className="flex items-baseline gap-5">
-                        <span className="w-6 shrink-0 text-[0.6875rem] font-semibold tabular-nums tracking-[0.2em] text-gold-deep">
+                        <span className="w-6 shrink-0 text-[0.6875rem] font-semibold tabular-nums tracking-[0.2em] text-accent-deep">
                           {String(i + 1).padStart(2, '0')}
                         </span>
-                        <span className="font-display text-[1.5rem] leading-tight text-ink transition-colors group-hover:text-gold-deep md:text-[1.875rem]">
+                        <span className="font-display text-[1.5rem] leading-tight text-ink transition-colors group-hover:text-accent-deep md:text-[1.875rem]">
                           {faq.question}
                         </span>
                       </span>
@@ -105,7 +105,7 @@ export function FAQ() {
                             className="link-line mt-5 text-[0.6875rem] font-semibold uppercase tracking-[0.2em] text-ink"
                           >
                             {faq.link.label}
-                            <ArrowUpRight className="size-3.5 text-gold-deep" strokeWidth={1.75} aria-hidden="true" />
+                            <ArrowUpRight className="size-3.5 text-accent-deep" strokeWidth={1.75} aria-hidden="true" />
                           </a>
                         )}
                       </div>

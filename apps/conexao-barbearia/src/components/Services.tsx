@@ -15,7 +15,7 @@ export function Services() {
           label="Serviços"
           title={
             <>
-              Precisão em <span className="font-normal italic text-gold">cada detalhe.</span>
+              Precisão em <span className="font-normal italic text-accent">cada detalhe.</span>
             </>
           }
           intro="Três serviços, um mesmo padrão: atenção ao seu estilo do primeiro movimento da máquina ao acabamento na lâmina."
@@ -55,7 +55,7 @@ export function Services() {
                       className="shrink-0 font-display leading-none text-bone"
                       aria-label={`Preço: ${service.price} reais`}
                     >
-                      <span className="mr-1 align-top text-sm font-semibold tracking-wider text-gold">R$</span>
+                      <span className="mr-1 align-top text-sm font-semibold tracking-wider text-accent">R$</span>
                       <span className="text-[2.75rem] tabular-nums">{service.price}</span>
                     </p>
                   </div>
@@ -82,8 +82,8 @@ export function Services() {
         <Reveal delay={0.1}>
           <div className="mt-20 grid gap-8 border border-line p-7 sm:p-10 md:grid-cols-[1fr_auto] md:items-center">
             <div>
-              <p className="eyebrow text-gold">
-                <span aria-hidden="true" className="h-px w-8 bg-gold/60" />
+              <p className="eyebrow text-accent">
+                <span aria-hidden="true" className="h-px w-8 bg-accent/60" />
                 Assinatura Conexão
               </p>
               <p className="mt-4 max-w-2xl text-pretty font-display text-2xl leading-snug text-bone md:text-3xl">

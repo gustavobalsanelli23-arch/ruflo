@@ -23,7 +23,7 @@ export function Testimonials() {
           label="Depoimentos"
           title={
             <>
-              Quem conhece, <span className="font-normal italic text-gold">recomenda.</span>
+              Quem conhece, <span className="font-normal italic text-accent">recomenda.</span>
             </>
           }
           intro="Palavras de clientes que já viveram a experiência Conexão."
@@ -35,7 +35,7 @@ export function Testimonials() {
             <figure className="lg:sticky lg:top-32">
               <span
                 aria-hidden="true"
-                className="block font-display text-[7rem] leading-[0.6] text-gold md:text-[9rem]"
+                className="block font-display text-[7rem] leading-[0.6] text-accent md:text-[9rem]"
               >
                 “
               </span>
@@ -43,7 +43,7 @@ export function Testimonials() {
                 {featured.quote}
               </blockquote>
               <figcaption className="mt-8 flex items-center gap-4">
-                <span aria-hidden="true" className="h-px w-10 bg-gold/60" />
+                <span aria-hidden="true" className="h-px w-10 bg-accent/60" />
                 <span>
                   <span className="block text-sm font-semibold text-bone">{featured.name}</span>
                   <span className="text-[0.6875rem] uppercase tracking-[0.2em] text-stone">Cliente Conexão</span>
@@ -62,7 +62,7 @@ export function Testimonials() {
                 <Reveal delay={(i % 2) * 0.08} className="h-full">
                   <figure className="flex h-full flex-col p-7 sm:p-8">
                     <blockquote className="flex-1 text-pretty text-[0.9375rem] leading-relaxed text-bone/75">
-                      <span aria-hidden="true" className="mr-1 font-display text-2xl leading-none text-gold">
+                      <span aria-hidden="true" className="mr-1 font-display text-2xl leading-none text-accent">
                         “
                       </span>
                       {t.quote}
@@ -70,7 +70,7 @@ export function Testimonials() {
                     <figcaption className="mt-7 flex items-center gap-3">
                       <span
                         aria-hidden="true"
-                        className="flex size-10 shrink-0 items-center justify-center rounded-full border border-gold/40 font-display text-base text-gold"
+                        className="flex size-10 shrink-0 items-center justify-center rounded-full border border-accent/40 font-display text-base text-accent"
                       >
                         {initials(t.name)}
                       </span>
@@ -99,7 +99,7 @@ export function Testimonials() {
                     className="link-line text-[0.75rem] font-semibold uppercase tracking-[0.2em] text-bone"
                   >
                     {u.shortName}
-                    <ArrowUpRight className="size-3.5 text-gold" strokeWidth={1.75} aria-hidden="true" />
+                    <ArrowUpRight className="size-3.5 text-accent" strokeWidth={1.75} aria-hidden="true" />
                   </a>
                 </li>
               ))}
