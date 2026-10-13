@@ -1,11 +1,13 @@
 import { m, useScroll, useTransform } from 'framer-motion';
-import { useRef } from 'react';
+import { useRef, type CSSProperties } from 'react';
 import { googleRating, hours, images, logo } from '../data/site';
 import { waLink } from '../lib/whatsapp';
 import { ArrowRight, Star, WhatsApp } from './ui/Icons';
 import { Picture } from './ui/Picture';
-import { MaskedLines, ease } from './ui/Reveal';
 import { WhatsAppLink } from './ui/WhatsAppLink';
+
+/** Atraso da animação de entrada (CSS) de cada elemento da primeira dobra. */
+const delay = (s: number) => ({ '--d': `${s}s` }) as CSSProperties;
 
 export function Hero() {
   const ref = useRef<HTMLElement>(null);
@@ -23,19 +25,14 @@ export function Hero() {
       {/* Fotografia: tela cheia no celular, moldura vertical à direita no desktop. */}
       <div className="absolute inset-x-0 -top-16 bottom-0 -z-10 lg:inset-y-0 lg:left-auto lg:right-0 lg:w-[46%] xl:w-[44%]">
         <m.div className="relative h-full w-full overflow-hidden" style={{ y: imageY }}>
-          <m.div
-            className="h-full w-full"
-            initial={{ scale: 1.12 }}
-            animate={{ scale: 1 }}
-            transition={{ duration: 2.4, ease }}
-          >
+          <div className="hero-settle h-full w-full">
             <Picture
               image={images.honeyBlonde}
               sizes="(min-width: 1024px) 46vw, 100vw"
               priority
               className="h-full w-full object-cover object-[50%_18%]"
             />
-          </m.div>
+          </div>
         </m.div>
         {/* Véus para leitura do texto */}
         <div className="absolute inset-0 bg-gradient-to-t from-ink from-25% via-ink/60 via-55% to-ink/0 lg:hidden" aria-hidden />
@@ -51,68 +48,60 @@ export function Hero() {
         className="relative mx-auto flex w-full max-w-[1440px] flex-col justify-end px-5 pb-9 pt-28 md:px-10 md:pb-14 lg:justify-center lg:pb-14 lg:pt-28 short:pt-24 short:pb-10"
       >
         <div className="lg:w-[53%] lg:pr-6 xl:pr-12">
-          <m.img
+          <img
             src={logo.white.src}
             width={logo.white.width}
             height={logo.white.height}
             alt="VIP body & hair"
-            className="w-[112px] xs:w-[124px] md:w-[180px] lg:w-[196px] xl:w-[212px] short:w-[150px]"
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 1.4, ease, delay: 0.1 }}
+            className="hero-rise w-[112px] xs:w-[124px] md:w-[180px] lg:w-[196px] xl:w-[212px] short:w-[150px]"
+            style={delay(0.05)}
           />
 
-          <m.p
-            className="eyebrow mt-7 flex items-center gap-4 text-[0.625rem] text-bone/75 md:mt-10 short:mt-7"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 1, delay: 0.5 }}
+          <p
+            className="hero-rise eyebrow mt-7 flex items-center gap-4 text-[0.625rem] text-bone/75 md:mt-10 short:mt-7"
+            style={delay(0.3)}
           >
             <span className="h-px w-8 bg-honey" aria-hidden />
             <span>
               Salão <span className="hidden xs:inline">de beleza </span>premium · Barueri/SP
             </span>
-          </m.p>
+          </p>
 
           <h1 id="hero-titulo" className="display mt-5 text-[2.6rem] xs:text-[2.9rem] md:text-[4rem] lg:text-[3.9rem] xl:text-[4.6rem] 2xl:text-[5rem] short:text-[3.5rem]">
             <span className="sr-only">VIP body &amp; hair — </span>
-            <MaskedLines
-              animateOnMount
-              delay={0.35}
-              lines={[
-                'A arte de revelar',
-                <>
-                  a sua <em className="text-honey">melhor</em>
-                </>,
-                <em key="v">versão.</em>,
-              ]}
-            />
+            {[
+              'A arte de revelar',
+              <>
+                a sua <em className="text-honey">melhor</em>
+              </>,
+              <em key="v">versão.</em>,
+            ].map((line, i) => (
+              <span key={i} className="block overflow-hidden pb-[0.1em] -mb-[0.1em]">
+                <span className="hero-line block" style={delay(0.2 + i * 0.12)}>
+                  {line}
+                </span>
+              </span>
+            ))}
           </h1>
 
-          <m.p
-            className="mt-7 hidden max-w-lg text-pretty leading-relaxed text-bone/75 sm:block md:text-lg short:mt-5 short:text-base"
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 1.1, delay: 0.9, ease }}
+          <p
+            className="hero-rise mt-7 hidden max-w-lg text-pretty leading-relaxed text-bone/75 sm:block md:text-lg short:mt-5 short:text-base"
+            style={delay(0.9)}
           >
             Coloração, corte e cuidado com a direção criativa de Ricky Moica, embaixador Wella Professionals. Mais de duas
             décadas de história em Barueri.
-          </m.p>
+          </p>
 
-          <m.p
-            className="mt-5 max-w-xs text-sm leading-relaxed text-bone/75 sm:hidden"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 1, delay: 0.9 }}
+          <p
+            className="hero-rise mt-5 max-w-xs text-sm leading-relaxed text-bone/75 sm:hidden"
+            style={delay(0.9)}
           >
             Direção criativa de Ricky Moica, embaixador Wella Professionals.
-          </m.p>
+          </p>
 
-          <m.div
-            className="mt-8 flex flex-col gap-2 xs:flex-row xs:items-center xs:gap-6 md:mt-10 short:mt-7"
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 1.1, delay: 1.05, ease }}
+          <div
+            className="hero-rise mt-8 flex flex-col gap-2 xs:flex-row xs:items-center xs:gap-6 md:mt-10 short:mt-7"
+            style={delay(1.05)}
           >
             <WhatsAppLink source="hero" className="btn btn-light">
               <WhatsApp width={18} height={18} />
@@ -126,13 +115,11 @@ export function Hero() {
               <span className="link-line pb-0.5">Consultoria gratuita</span>
               <ArrowRight width={16} height={16} className="transition-transform duration-500 group-hover:translate-x-1" />
             </WhatsAppLink>
-          </m.div>
+          </div>
 
-          <m.dl
-            className="mt-12 hidden max-w-lg grid-cols-3 gap-6 border-t border-bone/15 pt-6 lg:grid xl:mt-14 short:hidden"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 1.2, delay: 1.3 }}
+          <dl
+            className="hero-rise mt-12 hidden max-w-lg grid-cols-3 gap-6 border-t border-bone/15 pt-6 lg:grid xl:mt-14 short:hidden"
+            style={delay(1.3)}
           >
             <div>
               <dt className="eyebrow text-[0.6rem] text-bone/55">Google</dt>
@@ -149,7 +136,7 @@ export function Hero() {
               <dt className="eyebrow text-[0.6rem] text-bone/55">Ter a sáb</dt>
               <dd className="mt-2 font-display text-2xl">10h–20h</dd>
             </div>
-          </m.dl>
+          </dl>
           <p className="sr-only">{hours.summary}.</p>
         </div>
       </m.div>
@@ -161,11 +148,7 @@ export function Hero() {
       >
         <span className="eyebrow text-[0.55rem]">Role</span>
         <span className="relative h-10 w-px overflow-hidden bg-bone/20">
-          <m.span
-            className="absolute inset-x-0 top-0 h-1/2 bg-bone"
-            animate={{ y: ['-100%', '200%'] }}
-            transition={{ duration: 2.2, repeat: Infinity, ease: 'easeInOut' }}
-          />
+          <span className="scroll-cue absolute inset-x-0 top-0 h-1/2 bg-bone" />
         </span>
       </a>
     </section>

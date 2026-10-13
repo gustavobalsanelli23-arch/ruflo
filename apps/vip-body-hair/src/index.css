@@ -259,6 +259,68 @@
   }
 }
 
+/*
+ * Entrada da primeira dobra em CSS puro: começa na primeira pintura, sem esperar o
+ * JavaScript hidratar (o texto do herói é o LCP no celular). A opacidade inicial
+ * 0.01 mantém o elemento "pintado" para as métricas, imperceptível ao olho.
+ */
+@keyframes hero-rise {
+  from {
+    opacity: 0.01;
+    transform: translate3d(0, 14px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes hero-line {
+  from {
+    opacity: 0.01;
+    transform: translate3d(0, 72%, 0);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes hero-settle {
+  from {
+    transform: scale(1.12);
+  }
+  to {
+    transform: none;
+  }
+}
+.hero-rise {
+  animation: hero-rise 1.1s var(--ease-lux) var(--d, 0s) both;
+}
+.hero-line {
+  animation: hero-line 1.25s var(--ease-lux) var(--d, 0s) both;
+}
+.hero-settle {
+  animation: hero-settle 2.4s var(--ease-lux) both;
+}
+@keyframes scroll-cue {
+  from {
+    transform: translateY(-100%);
+  }
+  to {
+    transform: translateY(200%);
+  }
+}
+.scroll-cue {
+  animation: scroll-cue 2.2s ease-in-out infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .hero-rise,
+  .hero-line,
+  .hero-settle,
+  .scroll-cue {
+    animation: none;
+  }
+}
+
 /* Faixa de serviços em movimento contínuo (pausada para quem prefere menos movimento). */
 @keyframes marquee {
   from {

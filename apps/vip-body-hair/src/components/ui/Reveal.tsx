@@ -58,18 +58,17 @@ export function MaskedLines({
   lines,
   className = '',
   delay = 0,
-  animateOnMount = false,
 }: {
   lines: ReactNode[];
   className?: string;
   delay?: number;
-  animateOnMount?: boolean;
 }) {
   return (
     <m.span
       className={`block ${className}`}
       initial="hidden"
-      {...(animateOnMount ? { animate: 'show' } : { whileInView: 'show', viewport: { once: true, margin: '0px 0px -8% 0px' } })}
+      whileInView="show"
+      viewport={{ once: true, margin: '0px 0px -8% 0px' }}
       variants={{ show: { transition: { staggerChildren: 0.12, delayChildren: delay } } }}
     >
       {lines.map((line, i) => (
