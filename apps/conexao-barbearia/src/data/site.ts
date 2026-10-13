@@ -18,10 +18,13 @@ export const business = {
 export const links = {
   booking: 'https://appbarber.com.br/download/prime?cod=4588460',
   subscription: 'https://l.appbarber.com.br/i4y908a5',
-  instagram: null as string | null, // não consta no site anterior: adicionar o perfil oficial
+  instagram: 'https://www.instagram.com/barbeariaconexaoo/' as string | null,
   terms: '/termos-de-uso/',
   privacy: '/politica-de-privacidade/',
 } as const;
+
+/** Perfil exibido nos links (derivado da URL do Instagram). */
+export const instagramHandle = links.instagram ? `@${links.instagram.split('/').filter(Boolean).pop()}` : null;
 
 export const whatsapp = {
   number: '551143829358',
@@ -29,7 +32,8 @@ export const whatsapp = {
 };
 
 export function whatsappLink(message?: string, number: string = whatsapp.number) {
-  const text = message ?? 'Olá! Vim pelo site da Conexão Barbearia e gostaria de mais informações.';
+  // Mesmo formato de mensagem usado pela barbearia no link oficial do WhatsApp.
+  const text = message ?? 'Olá, Conexão! Gostaria de agendar um horário. Podem me ajudar?';
   return `https://wa.me/${number}?text=${encodeURIComponent(text)}`;
 }
 
@@ -85,10 +89,10 @@ export const units: Unit[] = [
     lat: -23.511307,
     lng: -46.876487,
     placeId: 'ChIJm5KOY3gDz5QRLNFMytGTJHs',
-    // O site anterior apontava para um número de exemplo (5511999999999).
-    // Até a unidade informar um número próprio, o botão usa o WhatsApp oficial.
+    // Mesmo WhatsApp da Mercado Lopes, confirmado pela barbearia em out/2026
+    // (o site anterior apontava para um número de exemplo).
     whatsapp: '551143829358',
-    whatsappIsCentral: true,
+    whatsappIsCentral: false,
   },
 ];
 

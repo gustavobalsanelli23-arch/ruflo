@@ -1,12 +1,12 @@
 import { AnimatePresence, m } from 'framer-motion';
 import { ArrowUpRight, MapPin } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
-import { links, nav, navExtra, units, whatsapp, whatsappLink } from '../data/site';
+import { instagramHandle, links, nav, navExtra, units, whatsapp, whatsappLink } from '../data/site';
 import { useActiveSection } from '../hooks/useActiveSection';
 import { useLockBody } from '../hooks/useLockBody';
 import { useScrolled } from '../hooks/useScrolled';
 import { track } from '../lib/analytics';
-import { WhatsAppIcon } from './ui/Icons';
+import { InstagramIcon, WhatsAppIcon } from './ui/Icons';
 
 const sectionIds = nav.map((n) => n.id);
 const ease = [0.22, 1, 0.36, 1] as const;
@@ -200,6 +200,18 @@ export function Header() {
                   <WhatsAppIcon className="size-4" />
                   WhatsApp {whatsapp.display}
                 </a>
+                {links.instagram && (
+                  <a
+                    href={links.instagram}
+                    target="_blank"
+                    rel="noopener"
+                    aria-label={`Instagram da Conexão Barbearia: ${instagramHandle}`}
+                    className="btn btn-ghost w-full"
+                  >
+                    <InstagramIcon className="size-4" />
+                    Instagram
+                  </a>
+                )}
                 <a href={links.subscription} target="_blank" rel="noopener" className="btn btn-ghost w-full">
                   Assinatura
                   <ArrowUpRight className="btn-arrow size-4" strokeWidth={1.75} aria-hidden="true" />
