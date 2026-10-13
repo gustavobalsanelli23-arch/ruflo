@@ -280,7 +280,8 @@
   },
   "enabledMcpjsonServers": [
     "claude-flow",
-    "shadcn"
+    "shadcn",
+    "firecrawl"
   ],
   "extraKnownMarketplaces": {
     "claude-plugins-official": {
@@ -318,6 +319,18 @@
         "source": "github",
         "repo": "coreyhaines31/marketingskills"
       }
+    },
+    "perplexity-mcp-server": {
+      "source": {
+        "source": "github",
+        "repo": "perplexityai/modelcontextprotocol"
+      }
+    },
+    "glif": {
+      "source": {
+        "source": "github",
+        "repo": "glifxyz/glif-mcp-server"
+      }
     }
   },
   "enabledPlugins": {
@@ -327,6 +340,9 @@
     "frontend-design@claude-plugins-official": true,
     "21st@21st-dev": true,
     "ui-ux-pro-max@ui-ux-pro-max-skill": true,
-    "marketing-skills@marketingskills": true
+    "marketing-skills@marketingskills": true,
+    "playwright@claude-plugins-official": true,
+    "perplexity@perplexity-mcp-server": true,
+    "glif@glif": true
   }
 }
