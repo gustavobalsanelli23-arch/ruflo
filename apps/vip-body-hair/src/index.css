@@ -1,0 +1,281 @@
+@import '@fontsource-variable/bodoni-moda/opsz.css';
+@import '@fontsource-variable/bodoni-moda/opsz-italic.css';
+@import '@fontsource-variable/jost/wght.css';
+@import 'tailwindcss';
+
+/* Telas de notebook (ex.: 1366×768, 1440×900 com a barra do navegador): compacta a primeira dobra. */
+@custom-variant short (@media (min-width: 1024px) and (max-height: 940px));
+
+/*
+ * VIP body & hair — direção visual
+ * Preto do monograma, marfim de papel e um único acento mel (do honey blonde,
+ * especialidade da casa). Bodoni Moda ecoa o serifado de alto contraste do
+ * logotipo; Jost dá a voz geométrica e discreta da interface.
+ */
+@theme {
+  --color-ink: #0f0e0c;
+  --color-ink-2: #171513;
+  --color-ink-3: #24211e;
+  --color-paper: #faf7f2;
+  --color-bone: #f3eee7;
+  --color-sand: #e7dfd4;
+  --color-stone: #6e665d;
+  --color-mist: #b9b0a5;
+  --color-honey: #c49a6c;
+  --color-honey-deep: #8a6240;
+  --color-wa: #1fa855;
+
+  --font-display: 'Bodoni Moda Variable', 'Bodoni 72', Didot, 'Times New Roman', serif;
+  --font-sans: 'Jost Variable', 'Futura', 'Century Gothic', system-ui, sans-serif;
+
+  --ease-lux: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1);
+
+  --breakpoint-xs: 26rem;
+}
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+    scroll-behavior: smooth;
+    scroll-padding-top: 5rem;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+  }
+  body {
+    background: var(--color-paper);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    font-weight: 380;
+    line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+  ::selection {
+    background: var(--color-honey);
+    color: var(--color-ink);
+  }
+  :focus-visible {
+    outline: 1.5px solid var(--color-honey);
+    outline-offset: 3px;
+  }
+  img {
+    max-width: 100%;
+  }
+}
+
+@layer components {
+  /* Títulos editoriais: Bodoni com tamanho óptico alto e entrelinha justa. */
+  .display {
+    font-family: var(--font-display);
+    font-variation-settings: 'opsz' 96;
+    font-weight: 400;
+    letter-spacing: -0.015em;
+    line-height: 1.02;
+  }
+  .display em,
+  .display .italic {
+    font-style: italic;
+    font-weight: 400;
+  }
+
+  /* Rótulos em caixa alta espaçada, como "BODY" e "HAIR" do logotipo. */
+  .eyebrow {
+    font-family: var(--font-sans);
+    font-size: 0.6875rem;
+    font-weight: 500;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+  }
+
+  .hairline {
+    height: 1px;
+    background: currentColor;
+    opacity: 0.18;
+  }
+
+  /* Botões */
+  .btn {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    min-height: 3.25rem;
+    padding: 0 1.75rem;
+    font-size: 0.75rem;
+    font-weight: 500;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    isolation: isolate;
+    overflow: hidden;
+    transition:
+      color 0.5s var(--ease-lux),
+      border-color 0.5s var(--ease-lux),
+      background-color 0.5s var(--ease-lux);
+  }
+  .btn::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    transform: scaleX(0);
+    transform-origin: right;
+    transition: transform 0.6s var(--ease-lux);
+  }
+  .btn:hover::before,
+  .btn:focus-visible::before {
+    transform: scaleX(1);
+    transform-origin: left;
+  }
+  .btn .btn-arrow {
+    transition: transform 0.6s var(--ease-lux);
+  }
+  .btn:hover .btn-arrow,
+  .btn:focus-visible .btn-arrow {
+    transform: translateX(4px);
+  }
+
+  .btn-light {
+    background: var(--color-bone);
+    color: var(--color-ink);
+  }
+  .btn-light::before {
+    background: var(--color-honey);
+  }
+
+  .btn-dark {
+    background: var(--color-ink);
+    color: var(--color-bone);
+  }
+  .btn-dark::before {
+    background: var(--color-ink-3);
+  }
+
+  .btn-outline-light {
+    border: 1px solid rgb(243 238 231 / 0.35);
+    color: var(--color-bone);
+  }
+  .btn-outline-light::before {
+    background: var(--color-bone);
+  }
+  .btn-outline-light:hover,
+  .btn-outline-light:focus-visible {
+    color: var(--color-ink);
+    border-color: var(--color-bone);
+  }
+
+  .btn-outline-dark {
+    border: 1px solid rgb(15 14 12 / 0.25);
+    color: var(--color-ink);
+  }
+  .btn-outline-dark::before {
+    background: var(--color-ink);
+  }
+  .btn-outline-dark:hover,
+  .btn-outline-dark:focus-visible {
+    color: var(--color-bone);
+    border-color: var(--color-ink);
+  }
+
+  /* Link com sublinhado que se desenha no hover. */
+  .link-line {
+    background-image: linear-gradient(currentColor, currentColor);
+    background-size: 0% 1px;
+    background-position: 0 100%;
+    background-repeat: no-repeat;
+    transition: background-size 0.6s var(--ease-lux);
+  }
+  .link-line:hover,
+  .link-line:focus-visible {
+    background-size: 100% 1px;
+  }
+
+  /* Imagens com leve zoom no hover (dentro de um contêiner com overflow-hidden). */
+  .zoom-img img {
+    transition: transform 1.4s var(--ease-lux);
+  }
+  .group:hover .zoom-img img,
+  .zoom-img:hover img {
+    transform: scale(1.04);
+  }
+
+  /* Campos do formulário */
+  .field {
+    width: 100%;
+    background: transparent;
+    border: 0;
+    border-bottom: 1px solid rgb(15 14 12 / 0.22);
+    border-radius: 0;
+    padding: 0.85rem 0;
+    font-size: 1rem;
+    color: var(--color-ink);
+    transition: border-color 0.4s var(--ease-lux);
+    appearance: none;
+  }
+  .field:focus {
+    outline: none;
+    border-color: var(--color-ink);
+  }
+  .field::placeholder {
+    color: rgb(15 14 12 / 0.38);
+  }
+  .field[aria-invalid='true'] {
+    border-color: #a5432f;
+  }
+  select.field {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' fill='none' stroke='%230F0E0C' stroke-width='1.2'%3E%3Cpath d='M1 1.5l5 5 5-5'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.25rem center;
+    padding-right: 1.75rem;
+  }
+}
+
+@layer utilities {
+  .grain {
+    position: relative;
+  }
+  .grain::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0.06;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    mix-blend-mode: overlay;
+  }
+  .text-balance {
+    text-wrap: balance;
+  }
+  .text-pretty {
+    text-wrap: pretty;
+  }
+  .safe-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+}
+
+/* Faixa de serviços em movimento contínuo (pausada para quem prefere menos movimento). */
+@keyframes marquee {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+.marquee-track {
+  animation: marquee 48s linear infinite;
+}
+.marquee:hover .marquee-track {
+  animation-play-state: paused;
+}
+@media (prefers-reduced-motion: reduce) {
+  .marquee-track {
+    animation: none;
+  }
+}

@@ -8,11 +8,13 @@
 // - logo-vip-original.png ........ logo.png de vipbodyhair.com.br
 // - honey-blonde-{1,2,3}.jpg ..... post DeSla1ojkNT do @vipbodyhair (honey blonde)
 // - ricky-moica-retrato.jpg ...... post DeKEQmqkX-j do @rickymoica (Wella, 2026)
+// - ricky-moica-wella.jpg ........ mesmo post (lançamento Pure Perfection)
 // - maquiagem-editorial.jpg ...... capa do reel DeQFsrfOE0K do @vipbodyhair
 // - bar-shakes.jpg ............... post DeKK2utuOwM do @vipbodyhair (shakes)
 // - penteado-salao.jpg ........... post DeMzM5hkdgo do @vipbodyhair (penteado)
 // - frame-*.png .................. quadros do reel DeUqVBoPl1o do @vipbodyhair
 //                                  ("Nosso mood de sábado"), gravado no salão
+// - reel-sabado-capa.jpg ......... capa do mesmo reel (publicada girada em 90°)
 import { mkdir, access } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -34,7 +36,7 @@ const PHOTOS = [
   // Herói — honey blonde (resultado real publicado pelo salão).
   ['honey-blonde', 'honey-blonde-1.jpg', null, [480, 800, 1200], true],
   ['honey-blonde-luz', 'honey-blonde-2.jpg', null, [480, 800]],
-  ['honey-blonde-perfil', 'honey-blonde-3.jpg', null, [480, 800]],
+  ['honey-blonde-perfil', 'honey-blonde-3.jpg', null, [480, 800, 1200]],
   // Diretor criativo (retrato 4:5).
   ['ricky-moica', 'ricky-moica-retrato.jpg', { left: 120, top: 680, width: 2160, height: 2700 }, [480, 800, 1100]],
   // Quadros do salão (720×1280 → 4:5 ou 9:16).
@@ -48,6 +50,9 @@ const PHOTOS = [
   ['corte-consultoria', 'frame-corte-consultoria.png', { left: 0, top: 140, width: 720, height: 900 }, [480, 720]],
   ['diretor-criativo-atendimento', 'frame-diretor-criativo-acao.png', null, [480, 720]],
   ['ferramentas', 'frame-ferramentas.png', { left: 0, top: 220, width: 720, height: 900 }, [480, 720]],
+  ['corte-curto-ajuste', 'frame-corte-curto-ajuste.png', { left: 0, top: 120, width: 720, height: 900 }, [480, 720]],
+  ['referencia-tablet', 'frame-referencia-tablet.png', null, [480, 720]],
+  ['ricky-moica-wella', 'ricky-moica-wella.jpg', { left: 0, top: 160, width: 2001, height: 2501 }, [480, 800]],
   ['cafe-menu', 'frame-cafe.png', { left: 0, top: 380, width: 720, height: 720 }, [480, 720]],
   ['maquiagem-editorial', 'maquiagem-editorial.jpg', null, [480]],
   ['bar-shakes', 'bar-shakes.jpg', { left: 0, top: 90, width: 1080, height: 1350 }, [480, 800]],
@@ -95,6 +100,15 @@ async function main() {
     if (crop) img = img.extract(crop);
     dims[name] = await writeVariants(name, img, widths, { avif });
   }
+
+  // Capa do reel "Nosso mood de sábado", publicada girada em 90°: corte em camadas
+  // com franja e o profissional ao fundo. Na horizontal, vira o fundo do CTA final.
+  dims['corte-camadas-horizontal'] = await writeVariants(
+    'corte-camadas-horizontal',
+    sharp(join(SRC, 'reel-sabado-capa.jpg')).rotate(270),
+    [800, 1400, 2000],
+    { avif: true },
+  );
 
   // Logotipo oficial (branco sobre transparente) — recortado e em duas cores.
   const logoWhite = await sharp(join(SRC, 'logo-vip-original.png')).trim({ threshold: 1 }).png().toBuffer();
