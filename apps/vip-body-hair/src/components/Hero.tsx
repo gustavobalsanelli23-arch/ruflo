@@ -67,7 +67,7 @@ export function Hero() {
             </span>
           </p>
 
-          <h1 id="hero-titulo" className="display mt-5 text-[2.6rem] xs:text-[2.9rem] md:text-[4rem] lg:text-[3.9rem] xl:text-[4.6rem] 2xl:text-[5rem] short:text-[3.5rem]">
+          <h1 id="hero-titulo" className="display mt-5 text-[2.3rem] min-[360px]:text-[2.6rem] xs:text-[2.9rem] md:text-[4rem] lg:text-[3.9rem] xl:text-[4.6rem] 2xl:text-[5rem] short:text-[3.5rem]">
             <span className="sr-only">VIP body &amp; hair — </span>
             {[
               'A arte de revelar',
@@ -103,7 +103,7 @@ export function Hero() {
             className="hero-rise mt-8 flex flex-col gap-2 xs:flex-row xs:items-center xs:gap-6 md:mt-10 short:mt-7"
             style={delay(1.05)}
           >
-            <WhatsAppLink source="hero" className="btn btn-light">
+            <WhatsAppLink source="hero" className="btn btn-light max-[359px]:px-4 max-[359px]:tracking-[0.14em]">
               <WhatsApp width={18} height={18} />
               Agendar pelo WhatsApp
             </WhatsAppLink>
@@ -143,7 +143,7 @@ export function Hero() {
 
       <a
         href="#sobre"
-        className="absolute bottom-8 left-1/2 hidden -translate-x-1/2 flex-col items-center gap-3 text-bone/60 transition-colors hover:text-bone md:flex lg:left-[calc(54%-3rem)]"
+        className="absolute bottom-8 hidden -translate-x-1/2 flex-col items-center gap-3 text-bone/60 transition-colors hover:text-bone lg:left-[calc(54%-3rem)] lg:flex short:hidden"
         aria-label="Rolar para conhecer o salão"
       >
         <span className="eyebrow text-[0.55rem]">Role</span>

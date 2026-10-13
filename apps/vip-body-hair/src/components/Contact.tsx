@@ -84,7 +84,7 @@ export function Contact() {
           intro={<p>No Bethaville, em Barueri (SP). Entrada, banheiro e estacionamento acessíveis.</p>}
         />
 
-        <div className="mt-16 grid gap-16 md:mt-24 lg:grid-cols-12 lg:gap-10">
+        <div className="mt-16 grid grid-cols-1 gap-16 md:mt-24 lg:grid-cols-12 lg:gap-10">
           <div className="lg:col-span-5">
             <Reveal>
               <dl className="divide-y divide-ink/10 border-y border-ink/10">

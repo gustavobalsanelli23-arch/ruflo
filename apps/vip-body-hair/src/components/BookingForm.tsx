@@ -161,7 +161,7 @@ export function BookingForm() {
       </div>
 
       <div className="flex flex-col gap-4 pt-2">
-        <button type="submit" className="btn btn-dark w-full whitespace-nowrap sm:w-auto sm:self-start">
+        <button type="submit" className="btn btn-dark w-full px-5 text-center sm:w-auto sm:self-start sm:whitespace-nowrap sm:px-7">
           <WhatsApp width={18} height={18} />
           Enviar pelo WhatsApp
           <ArrowRight width={16} height={16} className="btn-arrow" />
