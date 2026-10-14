@@ -7,11 +7,9 @@ import type { Product } from '@/types/catalog';
 import { useCart } from '@/context/CartContext';
 import { useStoreData } from '@/context/StoreDataContext';
 import { formatPrice } from '@/lib/format';
-import { toShippingItems } from '@/lib/checkout';
 import { Button, LinkButton } from '@/components/ui/Button';
 import { EmptyState } from '@/components/ui/Feedback';
 import { Skeleton } from '@/components/ui/Skeleton';
-import { ShippingEstimator } from '@/components/checkout/ShippingEstimator';
 import { TrustBadges } from '@/components/checkout/TrustBadges';
 import { RecentlyViewed, RecommendedProducts } from '@/components/products/ProductSections';
 import { CartLineItem } from './CartLine';
@@ -123,6 +121,10 @@ export function CartPageView() {
                     <dd className="tabular-nums text-success">− {formatPrice(savings)}</dd>
                   </div>
                 )}
+                <div className="flex justify-between gap-4">
+                  <dt className="text-fg-2">Frete</dt>
+                  <dd className="text-muted">Calculado no pagamento</dd>
+                </div>
                 <div className="flex items-baseline justify-between gap-4 border-t border-line pt-3">
                   <dt className="font-semibold text-fg">Subtotal</dt>
                   <dd className="text-2xl font-extrabold tabular-nums text-fg">{formatPrice(subtotal)}</dd>
@@ -132,11 +134,6 @@ export function CartPageView() {
               <Button block size="lg" disabled={blocked} onClick={() => router.push('/checkout')}>
                 {blocked ? 'Ajuste o carrinho' : 'Continuar para o checkout'}
               </Button>
-
-              <div className="border-t border-line pt-5">
-                <h3 className="mb-2.5 text-sm font-semibold text-fg">Calcular frete</h3>
-                <ShippingEstimator items={toShippingItems(lines)} subtotal={subtotal} />
-              </div>
 
               <TrustBadges compact className="border-t border-line pt-4" />
             </div>

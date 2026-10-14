@@ -1,5 +1,7 @@
 import type { Cents, Size } from './catalog';
 import type { PackageSummary } from '@/services/shipping/shipping.types';
+import type { PriceKey } from '@/lib/pricing';
+import type { PaymentLinkGroup } from '@/lib/paymentLinks';
 
 export interface CartItem {
   productId: string;
@@ -23,6 +25,8 @@ export interface OrderLine {
   quantity: number;
   unitPrice: Cents;
   image?: string;
+  /** Tipo de preço (define em qual link da Stripe a camisa é paga). */
+  priceKey?: PriceKey;
 }
 
 /**
@@ -33,10 +37,12 @@ export type PaymentStatus = 'aguardando_integracao' | 'pendente' | 'aprovado' | 
 
 export interface OrderPayment {
   status: PaymentStatus;
-  /** Preenchidos pelo gateway quando houver integração (ex.: Pix, cartão). */
+  /** Ex.: gateway `stripe`, método `link` (links de pagamento por tipo de camisa). */
   method?: string;
   gateway?: string;
   updatedAt?: string;
+  /** Pagamentos a fazer na Stripe, um por tipo de camisa (cada um com o seu frete). */
+  links?: PaymentLinkGroup[];
 }
 
 /** Eventos do histórico do pedido — base da timeline e das notificações do cliente. */
@@ -89,6 +95,7 @@ export interface Order {
   customerId: string;
   customerName: string;
   customerEmail?: string;
+  customerPhone?: string;
   /** Compra feita sem conta (checkout de visitante). */
   guest?: boolean;
   lines: OrderLine[];

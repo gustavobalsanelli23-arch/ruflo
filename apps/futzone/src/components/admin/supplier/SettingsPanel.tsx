@@ -104,6 +104,9 @@ function PriceRulesCard({ rules, approve, onChanged }: { rules: PriceRules; appr
             {(id) => <AdminInput id={id} value={form[key]} onChange={(e) => setForm({ ...form, [key]: e.target.value })} inputMode="decimal" />}
           </Field>
         ))}
+        <p className="text-xs leading-relaxed text-warn sm:col-span-2">
+          Os links de pagamento da Stripe têm preço fixo. Se mudar um valor aqui, mude também o preço do link na Stripe e no código da loja; enquanto forem diferentes, essas camisas não podem ser pagas.
+        </p>
         <div className="sm:col-span-2">
           <AdminButton onClick={save} loading={saving}>
             Salvar tabela de preços

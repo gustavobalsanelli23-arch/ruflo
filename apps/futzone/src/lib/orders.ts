@@ -1,5 +1,5 @@
 import type { Cents } from '@/types/catalog';
-import type { Address, Order, OrderEvent, OrderEventType, OrderLine, OrderShipping, OrderStatus, PaymentStatus } from '@/types/commerce';
+import type { Address, Order, OrderEvent, OrderEventType, OrderLine, OrderPayment, OrderShipping, OrderStatus, PaymentStatus } from '@/types/commerce';
 import type { BadgeTone } from '@/components/ui/Badge';
 import { toLocalISO } from './format';
 
@@ -17,7 +17,7 @@ export const PAYMENT_STATUS_META: Record<PaymentStatus, { label: string; tone: B
     tone: 'neutral',
     description: 'O pagamento será solicitado quando o gateway de pagamento for integrado. Nenhuma cobrança foi feita.',
   },
-  pendente: { label: 'Aguardando pagamento', tone: 'warn', description: 'Pagamento ainda não confirmado.' },
+  pendente: { label: 'Aguardando pagamento', tone: 'warn', description: 'Aguardando o pagamento na Stripe (Pix ou cartão).' },
   aprovado: { label: 'Aprovado', tone: 'success', description: 'Pagamento confirmado.' },
   recusado: { label: 'Recusado', tone: 'danger', description: 'O pagamento foi recusado.' },
   estornado: { label: 'Estornado', tone: 'neutral', description: 'O valor foi devolvido.' },
@@ -55,14 +55,19 @@ export function buildOrderTimeline(order: Order): TimelineStep[] {
   const idx = FLOW.indexOf(order.status);
   const payment = order.payment?.status;
   const paymentApproved = payment === 'aprovado' || idx >= 1;
+  const stripe = order.payment?.gateway === 'stripe';
   const paymentDetail =
     payment === 'aprovado'
       ? 'Pagamento confirmado'
       : idx >= 1
-        ? 'Confirmação simulada: gateway de pagamento ainda não integrado'
+        ? stripe
+          ? 'Pagamento confirmado pela loja'
+          : 'Confirmação simulada: gateway de pagamento ainda não integrado'
         : payment === 'aguardando_integracao'
           ? 'Etapa preparada para o gateway de pagamento (nenhuma cobrança feita)'
-          : 'Aguardando confirmação do pagamento';
+          : stripe
+            ? 'Aguardando o pagamento na Stripe'
+            : 'Aguardando confirmação do pagamento';
 
   const steps: TimelineStep[] = [
     { id: 'realizado', label: 'Pedido realizado', state: 'done', at: order.createdAt },
@@ -120,38 +125,51 @@ export interface NewOrderInput {
   customerId: string;
   customerName: string;
   customerEmail: string;
+  customerPhone?: string;
   guest: boolean;
   lines: OrderLine[];
-  address: Address;
-  shipping: OrderShipping;
+  /** Pedidos pagos pelos links da Stripe não têm endereço nem frete no site (ficam na Stripe). */
+  address?: Address;
+  shipping?: OrderShipping;
   coupon?: { code: string; description: string; amount: Cents };
   totals: OrderTotals;
+  /** Sem `payment`: aguardando integração (pedidos antigos e de exemplo). */
+  payment?: Omit<OrderPayment, 'updatedAt'>;
+  /** Número já definido (pelo servidor); sem ele, o próximo da lista local. */
+  number?: string;
+  id?: string;
 }
 
-/** Monta o pedido a partir do checkout (pagamento: aguardando integração). */
-export function buildOrder(input: NewOrderInput, existing: Order[], now: Date = new Date()): Order {
-  const at = toLocalISO(now);
+/** Monta o pedido a partir do checkout. */
+export function buildOrder(input: NewOrderInput, existing: Order[], now: Date = new Date(), at: string = toLocalISO(now)): Order {
   const created: OrderEvent = { type: 'criado', at, by: 'cliente' };
   return {
-    id: `o-${now.getTime().toString(36)}${Math.random().toString(36).slice(2, 6)}`,
-    number: nextOrderNumber(existing),
+    id: input.id ?? newOrderId(now),
+    number: input.number ?? nextOrderNumber(existing),
     customerId: input.customerId,
     customerName: input.customerName,
     customerEmail: input.customerEmail,
+    customerPhone: input.customerPhone,
     guest: input.guest || undefined,
     lines: input.lines,
     subtotal: input.totals.subtotal,
     discount: input.totals.discount,
-    shippingCost: input.totals.shipping ?? 0,
+    shippingCost: input.totals.shipping ?? undefined,
     coupon: input.coupon,
     total: input.totals.total,
     status: 'pendente',
     createdAt: at,
     address: input.address,
     shipping: input.shipping,
-    payment: { status: 'aguardando_integracao', updatedAt: at },
+    payment: { ...(input.payment ?? { status: 'aguardando_integracao' }), updatedAt: at },
     history: [created],
   };
+}
+
+/** Id do pedido: tempo + parte aleatória longa (o número visível, FZ-…, é outro). */
+export function newOrderId(now: Date = new Date()): string {
+  const random = globalThis.crypto?.randomUUID?.().replace(/-/g, '') ?? `${Math.random().toString(36).slice(2)}${Math.random().toString(36).slice(2)}`;
+  return `o-${now.getTime().toString(36)}-${random.slice(0, 16)}`;
 }
 
 export const orderItemsCount = (order: Order) => order.lines.reduce((n, l) => n + l.quantity, 0);

@@ -10,7 +10,7 @@ import { DemoNotice, EmptyState } from '@/components/ui/Feedback';
 import { AdminAvatar, AdminBadge, AdminCard, AdminLinkButton, AdminPageHeader, AdminStats, initialsOf } from './AdminUI';
 
 export function CustomerDetailAdmin({ id }: { id: string }) {
-  const { customers, orders, hydrated } = useStoreData();
+  const { customers, adminOrders: orders, hydrated } = useStoreData();
   const customer = customers.find((c) => c.id === id);
 
   if (!customer) {

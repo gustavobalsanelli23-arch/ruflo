@@ -19,6 +19,7 @@ import { OrderLocker, OrderStatusTag } from '@/components/orders/OrderLocker';
 import { OrderTimeline } from '@/components/orders/OrderTimeline';
 import { TrackingCard } from '@/components/orders/TrackingCard';
 import { OrderDelivery, OrderItems, OrderTotals } from '@/components/orders/OrderSummaryBlocks';
+import { PaymentLinks } from '@/components/orders/PaymentLinks';
 import { AccountHeading, ShelfTitle } from './AccountUI';
 
 type Filter = 'todos' | 'andamento' | 'concluidos' | 'cancelados';
@@ -170,6 +171,7 @@ export function CustomerOrderDetail({ id }: { id: string }) {
               <h2 className="heading-display mb-3 text-xl text-fg">Pagamento</h2>
               <p className={cn('text-sm font-semibold', PAYMENT_TONE[payment.tone] ?? 'text-fg')}>{payment.label}</p>
               <p className="mt-1 text-sm leading-relaxed text-fg-2">{payment.description}</p>
+              <PaymentLinks order={order} className="mt-4" />
             </section>
           </div>
           <p className="mt-4 text-xs leading-relaxed text-muted">

@@ -121,7 +121,7 @@ export function SecurityPanel() {
           <ShelfTitle title="Privacidade dos seus dados" />
           <ul className="max-w-[68ch] list-disc space-y-2 pl-5 text-sm leading-relaxed text-fg-2 marker:text-muted">
             <li>Sua senha nunca é guardada em texto: armazenamos apenas um hash criptográfico.</li>
-            <li>Nesta demonstração, seus dados ficam somente neste navegador: nada é enviado a servidores.</li>
+            <li>Sua conta fica salva neste navegador. Ao finalizar um pedido, nome, e-mail, telefone e itens são enviados à loja para separar e enviar a compra.</li>
             <li>Com o banco de dados, o acesso passará a exigir sessão segura no servidor e seguirá a LGPD.</li>
           </ul>
         </section>

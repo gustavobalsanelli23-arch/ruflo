@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { ArrowLeft, Check, Mail, PackageOpen, Phone, Truck, UserRound } from 'lucide-react';
+import { ArrowLeft, Check, CreditCard, ExternalLink, Mail, PackageOpen, Phone, Truck, UserRound } from 'lucide-react';
 import type { OrderEventType, OrderStatus } from '@/types/commerce';
 import { ORDER_STATUSES } from '@/types/commerce';
 import { useStoreData } from '@/context/StoreDataContext';
@@ -10,7 +10,8 @@ import { useToast } from '@/context/ToastContext';
 import { cn, formatDateTime, formatPrice } from '@/lib/format';
 import { formatAddress, ORDER_STATUS_META, PAYMENT_STATUS_META } from '@/lib/orders';
 import { formatBusinessDays, formatDeliveryWindow } from '@/services/shipping/delivery';
-import { formatCEP } from '@/lib/validation';
+import { formatCEP, formatPhone } from '@/lib/validation';
+import { paymentUrl } from '@/lib/paymentLinks';
 import { DemoNotice, EmptyState } from '@/components/ui/Feedback';
 import { Input, Select } from '@/components/ui/Form';
 import { ProductImage } from '@/components/products/ProductImage';
@@ -33,7 +34,8 @@ const EVENT_LABEL: Record<OrderEventType, string> = {
 const BY_LABEL = { cliente: 'cliente', admin: 'administrador', sistema: 'sistema' } as const;
 
 export function OrderDetailAdmin({ id }: { id: string }) {
-  const { orders, products, customers, setOrderStatus, setOrderTracking, hydrated } = useStoreData();
+  const { adminOrders: orders, products, customers, catalogSource, adminCatalogLoaded, setOrderStatus, setOrderTracking, setOrderPayment, hydrated } = useStoreData();
+  const live = catalogSource === 'db';
   const { log } = useAdmin();
   const { notify } = useToast();
   const order = orders.find((o) => o.id === id);
@@ -41,7 +43,8 @@ export function OrderDetailAdmin({ id }: { id: string }) {
   const [carrier, setCarrier] = useState('');
 
   if (!order) {
-    if (!hydrated) return <div className="h-96 animate-pulse rounded-2xl bg-surface" aria-busy="true" />;
+    // Com banco, os pedidos chegam do servidor junto com o catálogo do painel.
+    if (!hydrated || (live && !adminCatalogLoaded)) return <div className="h-96 animate-pulse rounded-2xl bg-surface" aria-busy="true" />;
     return <EmptyState title="Pedido não encontrado" description="Ele pode ter sido removido dos dados de exemplo." action={<AdminLinkButton href="/admin/pedidos">Voltar aos pedidos</AdminLinkButton>} />;
   }
 
@@ -52,11 +55,22 @@ export function OrderDetailAdmin({ id }: { id: string }) {
   const step = FLOW.indexOf(order.status);
   const s = order.shipping;
   const payment = PAYMENT_STATUS_META[order.payment?.status ?? 'aguardando_integracao'];
+  const stripe = order.payment?.gateway === 'stripe';
+  const links = order.payment?.links ?? [];
+  const phone = order.customerPhone ?? customer?.phone;
+  const paid = order.payment?.status === 'aprovado';
 
   const change = (status: OrderStatus) => {
+    if (live && status === 'cancelado' && !window.confirm(`Cancelar o pedido ${order.number}? As camisas voltam ao estoque e o pedido não pode ser reaberto.`)) return;
     setOrderStatus(order.id, status);
     log('pedido', `alterou o pedido ${order.number} para "${ORDER_STATUS_META[status].label}"`);
     notify(`${order.number}: status alterado para "${ORDER_STATUS_META[status].label}".`);
+  };
+
+  const markPaid = (status: 'aprovado' | 'pendente') => {
+    setOrderPayment(order.id, status);
+    log('pedido', `${status === 'aprovado' ? 'marcou como pago' : 'desmarcou o pagamento de'} o pedido ${order.number}`);
+    notify(status === 'aprovado' ? `${order.number}: pagamento marcado como recebido.` : `${order.number}: pagamento voltou para "aguardando".`);
   };
 
   const saveTracking = (e: React.FormEvent) => {
@@ -84,7 +98,13 @@ export function OrderDetailAdmin({ id }: { id: string }) {
         actions={
           <label className="flex items-center gap-3 text-xs text-muted">
             Status
-            <Select value={order.status} onChange={(e) => change(e.target.value as OrderStatus)} className="h-10 w-44 rounded-lg text-sm" aria-label="Alterar status do pedido">
+            <Select
+              value={order.status}
+              onChange={(e) => change(e.target.value as OrderStatus)}
+              disabled={live && order.status === 'cancelado'}
+              className="h-10 w-44 rounded-lg text-sm"
+              aria-label="Alterar status do pedido"
+            >
               {ORDER_STATUSES.map((st) => (
                 <option key={st} value={st}>
                   {ORDER_STATUS_META[st].label}
@@ -141,12 +161,12 @@ export function OrderDetailAdmin({ id }: { id: string }) {
               <div className="flex justify-between text-fg-2"><dt>Subtotal</dt><dd className="tabular-nums">{formatPrice(subtotal)}</dd></div>
               <div className="flex justify-between text-fg-2">
                 <dt>Frete{s ? ` (${s.serviceName})` : ''}</dt>
-                <dd className="tabular-nums">{s ? (s.price === 0 ? 'Grátis' : formatPrice(s.price)) : '—'}</dd>
+                <dd className="tabular-nums">{s ? (s.price === 0 ? 'Grátis' : formatPrice(s.price)) : stripe ? 'Cobrado na Stripe' : '—'}</dd>
               </div>
               {!!order.discount && (
                 <div className="flex justify-between text-success"><dt>Desconto{order.coupon ? ` (${order.coupon.code})` : ''}</dt><dd className="tabular-nums">− {formatPrice(order.discount)}</dd></div>
               )}
-              <div className="flex justify-between pt-1 text-base font-bold"><dt>Total</dt><dd className="tabular-nums">{formatPrice(order.total)}</dd></div>
+              <div className="flex justify-between pt-1 text-base font-bold"><dt>{stripe && !s ? 'Total dos produtos' : 'Total'}</dt><dd className="tabular-nums">{formatPrice(order.total)}</dd></div>
             </dl>
           </AdminCard>
 
@@ -175,7 +195,7 @@ export function OrderDetailAdmin({ id }: { id: string }) {
                 {order.guest && <AdminBadge tone="neutral" dot={false}>Visitante</AdminBadge>}
               </p>
               {(order.customerEmail ?? customer?.email) && <p className="flex items-center gap-2 text-fg-2"><Mail className="size-4 text-muted" /> {order.customerEmail ?? customer?.email}</p>}
-              {customer && <p className="flex items-center gap-2 text-fg-2"><Phone className="size-4 text-muted" /> {customer.phone}</p>}
+              {phone && <p className="flex items-center gap-2 text-fg-2"><Phone className="size-4 text-muted" /> {formatPhone(phone)}</p>}
             </div>
           </AdminCard>
 
@@ -188,6 +208,8 @@ export function OrderDetailAdmin({ id }: { id: string }) {
                   <p className="text-fg-2">{formatAddress(address)}</p>
                   {address.reference && <p className="text-xs text-muted">Referência: {address.reference}</p>}
                 </div>
+              ) : stripe ? (
+                <p className="text-fg-2">Endereço de entrega e frete foram informados no pagamento da Stripe. Procure o pagamento pela referência do pedido (abaixo, em Pagamento).</p>
               ) : (
                 <p className="text-muted">Endereço não informado.</p>
               )}
@@ -207,7 +229,7 @@ export function OrderDetailAdmin({ id }: { id: string }) {
                     </p>
                   )}
                 </div>
-              ) : (
+              ) : stripe ? null : (
                 <p className="text-muted">Pedido sem cotação de frete registrada.</p>
               )}
             </div>
@@ -247,13 +269,52 @@ export function OrderDetailAdmin({ id }: { id: string }) {
           </AdminCard>
 
           <AdminCard title="Pagamento">
-            <div className="space-y-2 p-5 text-sm">
+            <div className="space-y-3 p-5 text-sm">
               <AdminBadge tone={payment.tone}>{payment.label}</AdminBadge>
-              <p className="text-fg-2">{payment.description}</p>
-              <p className="text-xs text-muted">Gateway de pagamento: não integrado.</p>
+              {stripe ? (
+                <>
+                  <p className="text-fg-2">
+                    {links.length > 1 ? `${links.length} pagamentos na Stripe, um por tipo de camisa (cada um com o frete).` : 'Pagamento pelo link da Stripe (com o frete).'} Procure na Stripe pela referência ou pelo e-mail do cliente.
+                  </p>
+                  <ul className="divide-y divide-white/[0.05] rounded-lg border border-white/[0.06]">
+                    {links.map((g) => (
+                      <li key={g.reference} className="flex items-start gap-3 px-3 py-2.5">
+                        <CreditCard className="mt-0.5 size-4 shrink-0 text-muted" />
+                        <span className="min-w-0 flex-1">
+                          <span className="block font-mono text-xs font-semibold text-fg">{g.reference}</span>
+                          <span className="block text-xs text-fg-2">
+                            {g.label} × {g.quantity} · {formatPrice(g.amount)} + frete
+                          </span>
+                        </span>
+                        <a href={paymentUrl(g, order.customerEmail)} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-xs font-semibold text-brand-400 hover:text-brand-300" aria-label={`Abrir o link de pagamento ${g.reference}`}>
+                          Link <ExternalLink className="size-3.5" />
+                        </a>
+                      </li>
+                    ))}
+                  </ul>
+                  {paid ? (
+                    <AdminButton size="sm" variant="ghost" onClick={() => markPaid('pendente')} disabled={order.status === 'cancelado'}>
+                      Marcar como não pago
+                    </AdminButton>
+                  ) : (
+                    <AdminButton size="sm" onClick={() => markPaid('aprovado')} disabled={order.status === 'cancelado'}>
+                      <Check className="size-4" /> Marcar como pago
+                    </AdminButton>
+                  )}
+                </>
+              ) : (
+                <>
+                  <p className="text-fg-2">{payment.description}</p>
+                  <p className="text-xs text-muted">Pedido anterior aos links de pagamento.</p>
+                </>
+              )}
             </div>
           </AdminCard>
-          <DemoNotice>Alterar status ou rastreio atualiza a conta do cliente neste navegador. Nenhum e-mail é enviado nesta etapa.</DemoNotice>
+          {live ? (
+            <p className="text-xs text-muted">As alterações ficam gravadas no servidor. Nenhum e-mail é enviado ao cliente. Cancelar devolve as camisas ao estoque.</p>
+          ) : (
+            <DemoNotice>Alterar status ou rastreio atualiza a conta do cliente neste navegador. Nenhum e-mail é enviado nesta etapa.</DemoNotice>
+          )}
         </div>
       </div>
     </>

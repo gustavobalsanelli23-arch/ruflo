@@ -103,4 +103,19 @@ CREATE TABLE IF NOT EXISTS stock_commit_lines (
   quantity integer NOT NULL CHECK (quantity > 0),
   PRIMARY KEY (order_id, product_id, size)
 );
+-- Pedido cancelado devolve o estoque uma única vez.
+ALTER TABLE stock_commits ADD COLUMN IF NOT EXISTS released_at timestamptz;
+
+-- Pedidos da loja (pagos pelos links da Stripe). data = o Order do site.
+CREATE SEQUENCE IF NOT EXISTS order_number_seq START 10001;
+CREATE TABLE IF NOT EXISTS orders (
+  id text PRIMARY KEY,
+  number text NOT NULL UNIQUE,
+  data jsonb NOT NULL,
+  status text NOT NULL,
+  payment_status text NOT NULL,
+  created_at timestamptz NOT NULL DEFAULT now(),
+  updated_at timestamptz NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS orders_created_idx ON orders (created_at DESC);
 `;

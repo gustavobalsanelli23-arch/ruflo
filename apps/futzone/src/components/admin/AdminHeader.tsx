@@ -10,7 +10,7 @@ import { AdminUserMenu } from './AdminUserMenu';
 
 export function AdminHeader({ onMenu }: { onMenu(): void }) {
   const pathname = usePathname();
-  const { settings } = useStoreData();
+  const { settings, catalogSource } = useStoreData();
   const { logout, loggingOut } = useAdmin();
   const current = ADMIN_NAV.find((n) => isAdminActive(n.href, pathname));
 
@@ -24,7 +24,7 @@ export function AdminHeader({ onMenu }: { onMenu(): void }) {
         {current?.label}
       </p>
       <div className="ml-auto flex items-center gap-2 sm:gap-3">
-        {settings.showDemoNotice && (
+        {settings.showDemoNotice && catalogSource !== 'db' && (
           <span className="hidden rounded-md bg-warn/10 px-2 py-1 text-[0.65rem] font-semibold text-warn md:inline">Dados simulados</span>
         )}
         <AdminUserMenu />

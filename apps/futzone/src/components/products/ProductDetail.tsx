@@ -2,9 +2,8 @@
 
 import { useEffect, useId, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
-import { Check, ChevronDown, ChevronRight, PackageCheck, RefreshCcw, Ruler, Shirt, ShoppingBag } from 'lucide-react';
+import { Check, ChevronDown, ChevronRight, PackageCheck, RefreshCcw, Ruler, Shirt, ShoppingBag, Truck } from 'lucide-react';
 import type { Size } from '@/types/catalog';
-import type { ShippingItem } from '@/services/shipping/shipping.types';
 import { categoryById } from '@/data/categories';
 import { useStoreData, usePublicProducts } from '@/context/StoreDataContext';
 import { useCart } from '@/context/CartContext';
@@ -17,7 +16,6 @@ import { EmptyState } from '@/components/ui/Feedback';
 import { Modal } from '@/components/ui/Modal';
 import { QuantityStepper } from '@/components/ui/QuantityStepper';
 import { ProductPageSkeleton } from '@/components/ui/Skeleton';
-import { ShippingEstimator } from '@/components/checkout/ShippingEstimator';
 import { ProductGallery } from './ProductGallery';
 import { Price, SizeSelector, StockText } from './ProductBits';
 import { SizeGuide } from './SizeGuide';
@@ -85,7 +83,7 @@ function AddLabel({ done, children }: { done: boolean; children: string }) {
 /**
  * Página do produto: a camisa tirada do armário. Galeria acesa à esquerda
  * (fica à vista enquanto se escolhe), e à direita a plaquinha do time, o nome,
- * o preço, a grade de tamanhos, a compra, o frete simulado e os detalhes.
+ * o preço, a grade de tamanhos, a compra, a nota do frete e os detalhes.
  */
 export function ProductDetail({ teamSlug, slug }: { teamSlug: string; slug: string }) {
   const { hydrated } = useStoreData();
@@ -129,7 +127,6 @@ export function ProductDetail({ teamSlug, slug }: { teamSlug: string; slug: stri
   const plateRight = product.season || categoryById(product.category)?.shortName || '';
   const maxQty = size ? Math.min(stockFor(product, size), MAX_PER_ITEM) : MAX_PER_ITEM;
   const soldOut = availableSizes(product).length === 0;
-  const shippingItems: ShippingItem[] = [{ productId: product.id, category: product.category, quantity: qty, unitPrice: product.price }];
   const detailRows = [...product.details, `Tamanhos: ${product.sizes.join(', ')}`].map(splitDetail);
 
   const pickSize = (s: Size) => {
@@ -164,7 +161,6 @@ export function ProductDetail({ teamSlug, slug }: { teamSlug: string; slug: stri
     timers.current.push(window.setTimeout(open, 350), window.setTimeout(() => setAdded(false), 1600));
   };
 
-  const shipId = `${uid}-frete`;
   const detailsId = `${uid}-detalhes`;
 
   return (
@@ -266,13 +262,10 @@ export function ProductDetail({ teamSlug, slug }: { teamSlug: string; slug: stri
           </div>
 
           {!soldOut && (
-            <section aria-labelledby={shipId} className="mt-8 border-t border-line pt-6">
-              <div className="mb-3 flex items-baseline justify-between gap-4">
-                <h2 id={shipId} className="text-sm font-bold text-fg">Frete e prazo</h2>
-                <span className="text-xs text-muted">Simulado</span>
-              </div>
-              <ShippingEstimator items={shippingItems} subtotal={product.price * qty} />
-            </section>
+            <p className="mt-8 flex items-start gap-2.5 border-t border-line pt-6 text-sm text-fg-2">
+              <Truck className="mt-0.5 size-4 shrink-0 text-muted" strokeWidth={1.75} aria-hidden />
+              Frete calculado no pagamento, conforme a sua região.
+            </p>
           )}
 
           <section className="mt-8 border-t border-line">

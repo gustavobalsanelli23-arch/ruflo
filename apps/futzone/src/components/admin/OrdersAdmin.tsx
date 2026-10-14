@@ -7,17 +7,20 @@ import { ORDER_STATUSES } from '@/types/commerce';
 import { useStoreData } from '@/context/StoreDataContext';
 import { useToast } from '@/context/ToastContext';
 import { formatDateTime, formatPrice } from '@/lib/format';
-import { ORDER_STATUS_META } from '@/lib/orders';
+import { ORDER_STATUS_META, PAYMENT_STATUS_META } from '@/lib/orders';
 import { DemoNotice, EmptyState } from '@/components/ui/Feedback';
 import { Select } from '@/components/ui/Form';
 import { OrderCard, OrderStatusBadge } from '@/components/orders/OrderCard';
-import { AdminCard, AdminSearch, AdminTabs, AdminPageHeader, AdminTable } from './AdminUI';
+import { AdminBadge, AdminCard, AdminSearch, AdminTabs, AdminPageHeader, AdminTable } from './AdminUI';
 import { useAdmin } from './AdminGuard';
 
 type Filter = OrderStatus | 'todos';
 
 export function OrdersAdmin() {
-  const { orders, setOrderStatus } = useStoreData();
+  const { adminOrders: allOrders, catalogSource, adminCatalogLoaded, setOrderStatus } = useStoreData();
+  const live = catalogSource === 'db';
+  // Com banco, só mostra a lista quando os pedidos do servidor chegaram (sem piscar os de exemplo).
+  const orders = useMemo(() => (live && !adminCatalogLoaded ? [] : allOrders), [live, adminCatalogLoaded, allOrders]);
   const { log } = useAdmin();
   const { notify } = useToast();
   const [filter, setFilter] = useState<Filter>('todos');
@@ -34,13 +37,20 @@ export function OrdersAdmin() {
     .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
 
   const change = (o: Order, status: OrderStatus) => {
+    if (live && status === 'cancelado' && !window.confirm(`Cancelar o pedido ${o.number}? As camisas voltam ao estoque e o pedido não pode ser reaberto.`)) return;
     setOrderStatus(o.id, status);
     log('pedido', `alterou o pedido ${o.number} para "${ORDER_STATUS_META[status].label}"`);
     notify(`${o.number}: status alterado para "${ORDER_STATUS_META[status].label}".`);
   };
 
   const statusSelect = (o: Order) => (
-    <Select value={o.status} onChange={(e) => change(o, e.target.value as OrderStatus)} className="h-9 w-40 rounded-lg text-xs" aria-label={`Alterar status do pedido ${o.number}`}>
+    <Select
+      value={o.status}
+      onChange={(e) => change(o, e.target.value as OrderStatus)}
+      disabled={live && o.status === 'cancelado'}
+      className="h-9 w-40 rounded-lg text-xs"
+      aria-label={`Alterar status do pedido ${o.number}`}
+    >
       {ORDER_STATUSES.map((s) => <option key={s} value={s}>{ORDER_STATUS_META[s].label}</option>)}
     </Select>
   );
@@ -49,8 +59,14 @@ export function OrdersAdmin() {
 
   return (
     <>
-      <AdminPageHeader title="Pedidos" description="Pedidos simulados — sem processamento real de pagamento ou envio." />
-      <DemoNotice className="mb-6">A alteração de status é apenas local, para demonstrar o fluxo de gestão. Nenhum cliente é notificado.</DemoNotice>
+      {live ? (
+        <AdminPageHeader title="Pedidos" description="Pedidos da loja. Confira cada pagamento na Stripe pela referência do pedido e marque como pago no detalhe." />
+      ) : (
+        <>
+          <AdminPageHeader title="Pedidos" description="Pedidos deste navegador (banco de dados não configurado)." />
+          <DemoNotice className="mb-6">Sem o banco de dados, os pedidos ficam só no navegador de quem comprou. Nenhum cliente é notificado.</DemoNotice>
+        </>
+      )}
 
       <div className="mb-4">
         <AdminTabs<Filter>
@@ -70,7 +86,7 @@ export function OrdersAdmin() {
         ) : (
           <>
             <div className="hidden lg:block">
-              <AdminTable head={['Pedido', 'Cliente', 'Data', 'Produtos', 'Entrega', 'Valor', 'Status', 'Alterar status']} minWidth={1080}>
+              <AdminTable head={['Pedido', 'Cliente', 'Data', 'Produtos', 'Pagamento', 'Valor', 'Status', 'Alterar status']} minWidth={1080}>
                 {list.map((o) => (
                   <tr key={o.id} className="align-top hover:bg-surface-2/50">
                     <td><Link href={`/admin/pedidos/${o.id}`} className="font-bold text-brand-300 hover:underline">{o.number}</Link></td>
@@ -87,9 +103,8 @@ export function OrdersAdmin() {
                       </ul>
                     </td>
                     <td className="whitespace-nowrap text-xs">
-                      {o.shipping ? <span className="block font-semibold text-fg-2">{o.shipping.serviceName}</span> : <span className="text-muted">—</span>}
-                      {o.address && <span className="block text-muted">{o.address.city}/{o.address.state}</span>}
-                      {o.tracking && <span className="block font-mono text-brand-300">{o.tracking.code}</span>}
+                      <AdminBadge tone={PAYMENT_STATUS_META[o.payment?.status ?? 'aguardando_integracao'].tone}>{PAYMENT_STATUS_META[o.payment?.status ?? 'aguardando_integracao'].label}</AdminBadge>
+                      {o.tracking && <span className="mt-1 block font-mono text-brand-300">{o.tracking.code}</span>}
                     </td>
                     <td className="font-bold tabular-nums">{formatPrice(o.total)}</td>
                     <td><OrderStatusBadge status={o.status} /></td>
