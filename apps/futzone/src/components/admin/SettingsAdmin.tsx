@@ -185,9 +185,9 @@ function PreferencesSection() {
           <ul className="divide-y divide-white/[0.05] text-sm">
             {[
               ['Autenticação com banco de dados', 'lib/auth → trocar a fonte das contas'],
-              ['Gateway de pagamento', 'services/contracts.ts → PaymentGateway (provedor a definir)'],
+              ['Pagamento: links da Stripe (ativo)', 'lib/paymentLinks.ts → um link por tipo de camisa; confirmação marcada no pedido'],
               ['Contas de clientes no servidor', 'services/auth → CustomerAuthProvider'],
-              ['Frete real (Correios, Melhor Envio ou Frenet)', 'services/shipping/providers → ShippingProvider'],
+              ['Frete: cobrado na Stripe (ativo)', 'opções de frete configuradas em cada link de pagamento'],
               ['Consulta de CEP', 'services/address/cep.service.ts → CepProvider'],
               ['E-mails transacionais', 'services/notifications → NotificationChannel'],
               ['API do fornecedor (catálogo e estoque)', 'services/contracts.ts → SupplierCatalogClient'],

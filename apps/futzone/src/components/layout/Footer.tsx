@@ -68,7 +68,7 @@ export function Footer() {
 
       <div className="border-t border-line py-6">
         <div className="container-fz flex flex-col gap-3 text-xs text-muted sm:flex-row sm:items-center sm:justify-between">
-          <p>© {new Date().getFullYear()} FutZone. Ambiente de demonstração: produtos, estoques e pedidos são simulados.</p>
+          <p>© {new Date().getFullYear()} FutZone. Pagamentos processados pela Stripe.</p>
           <ul className="flex gap-5">
             {POLICIES.map((p) => (
               <li key={p.label}>

@@ -34,7 +34,7 @@ const PAGE_SIZE = 12;
 /*
  * Barra e arara grudam logo abaixo do Header (components/layout/Header.tsx).
  * A altura real dele é medida (ResizeObserver, nunca evento de scroll) e vira
- * --header-h: rolado, a barra fica h-14 e o aviso de demonstração recolhe; se
+ * --header-h: rolado, a barra fica h-14; se
  * o Header mudar, os elementos grudados acompanham. 58px = h-14 + 2 bordas.
  */
 const TOOLBAR_STICKY = 'top-[var(--header-h,58px)]';

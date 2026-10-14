@@ -205,7 +205,7 @@ export function CartDrawer() {
               <dl className="space-y-1.5 text-sm">
                 <div className="flex items-center justify-between gap-4">
                   <dt className="text-fg-2">Frete</dt>
-                  <dd className="text-muted">Calculado no checkout</dd>
+                  <dd className="text-muted">Calculado no pagamento</dd>
                 </div>
                 <div className="flex items-baseline justify-between gap-4">
                   <dt className="text-fg">

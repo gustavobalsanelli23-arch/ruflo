@@ -1,10 +1,9 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
-import type { Address } from '@/types/commerce';
 import { readSessionJSON, removeSessionKey, STORAGE_KEYS, writeSessionJSON } from '@/services/storage';
 
-export type CheckoutStep = 1 | 2 | 3 | 4 | 5;
+export type CheckoutStep = 1 | 2 | 3;
 
 export interface GuestContact {
   name: string;
@@ -18,21 +17,22 @@ export interface CheckoutDraft {
   step: CheckoutStep;
   mode: 'account' | 'guest' | null;
   guest: GuestContact | null;
-  /** Endereço salvo escolhido, ou 'avulso' para `oneOffAddress`. */
-  addressId: string | null;
-  oneOffAddress: Address | null;
-  shippingId: string | null;
-  couponCode: string | null;
 }
 
-export const EMPTY_DRAFT: CheckoutDraft = { step: 1, mode: null, guest: null, addressId: null, oneOffAddress: null, shippingId: null, couponCode: null };
+export const EMPTY_DRAFT: CheckoutDraft = { step: 1, mode: null, guest: null };
 
 export function useCheckoutDraft() {
   const [draft, setDraft] = useState<CheckoutDraft>(EMPTY_DRAFT);
   const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
-    setDraft({ ...EMPTY_DRAFT, ...readSessionJSON<Partial<CheckoutDraft>>(STORAGE_KEYS.checkoutDraft, {}) });
+    // Rascunhos do checkout antigo (5 passos, com endereço e frete) viram o atual.
+    const saved = readSessionJSON<Partial<CheckoutDraft>>(STORAGE_KEYS.checkoutDraft, {});
+    setDraft({
+      step: Math.min(Math.max(Number(saved.step) || 1, 1), 3) as CheckoutStep,
+      mode: saved.mode === 'account' || saved.mode === 'guest' ? saved.mode : null,
+      guest: saved.guest ?? null,
+    });
     setLoaded(true);
   }, []);
 

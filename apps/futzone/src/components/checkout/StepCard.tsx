@@ -30,7 +30,7 @@ const prefersReducedMotion = () => typeof window !== 'undefined' && window.match
 /**
  * Leva a estação que acabou de abrir para logo abaixo do Header, a menos que
  * ela já esteja à vista no alto da tela. No topo da página o Header ainda está
- * alto (aviso de demonstração + h-16) e encolhe para 58px ao rolar, puxando o
+ * alto (h-16) e encolhe para 58px ao rolar, puxando o
  * conteúdo para cima: o destino já desconta essa diferença.
  */
 function bringIntoView(el: HTMLElement) {

@@ -2,8 +2,7 @@
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import type { Cents, Product, ProductInput, ProductStatus, Size } from '@/types/catalog';
-import type { Address, CartItem, Customer, Order, OrderEvent, OrderLine, OrderStatus, OrderTracking } from '@/types/commerce';
-import type { ShippingOption, ShippingPackage } from '@/services/shipping/shipping.types';
+import type { CartItem, Customer, Order, OrderEvent, OrderLine, OrderStatus, OrderTracking } from '@/types/commerce';
 import { seedProducts } from '@/data/products';
 import { seedOrders } from '@/data/orders';
 import { seedCustomers } from '@/data/customers';
@@ -16,9 +15,9 @@ import {
   type StoreSettings,
 } from '@/services/repositories';
 import { findStockIssues, type StockIssue } from '@/services/inventory.service';
-import { couponRepository, evaluateCoupon } from '@/services/coupons/coupon.service';
 import { customerAuthProvider } from '@/services/auth/localDemo.provider';
-import { buildOrder, computeTotals, EVENT_FOR_STATUS } from '@/lib/orders';
+import { buildOrder, computeTotals, EVENT_FOR_STATUS, newOrderId } from '@/lib/orders';
+import { linkPriceMismatch, paymentGroups, productPriceKey } from '@/lib/paymentLinks';
 import { toLocalISO } from '@/lib/format';
 import { normalizeEmail } from '@/lib/validation';
 
@@ -27,16 +26,13 @@ export interface PlaceOrderInput {
   /** Conta logada; `null` = compra como visitante (usa `contact`). */
   customer: Customer | null;
   contact: { name: string; email: string; phone: string; cpf: string };
-  address: Address;
-  shipping: ShippingOption;
-  package: ShippingPackage;
-  originZip: string;
-  couponCode?: string;
 }
 
 export type PlaceOrderResult =
   | { ok: true; order: Order }
   | { ok: false; reason: 'estoque'; issues: StockIssue[] }
+  /** Preço do produto diferente do preço fixo do link da Stripe do tipo dele. */
+  | { ok: false; reason: 'preco'; products: string[] }
   | { ok: false; reason: 'vazio' }
   | { ok: false; reason: 'falha'; message: string };
 
@@ -58,7 +54,10 @@ interface StoreData {
   /** Última falha ao gravar uma alteração do painel no servidor (o painel mostra um aviso). */
   adminError: { message: string; at: number } | null;
   products: Product[];
+  /** Pedidos deste navegador (área do cliente). */
   orders: Order[];
+  /** Pedidos que o painel mostra: os do banco (com banco), senão os deste navegador. */
+  adminOrders: Order[];
   customers: Customer[];
   settings: StoreSettings;
   saveProduct(input: ProductInput): Product;
@@ -67,10 +66,12 @@ interface StoreData {
   setStock(id: string, size: Size, quantity: number): void;
   setOrderStatus(id: string, status: OrderStatus): void;
   setOrderTracking(id: string, tracking: Omit<OrderTracking, 'addedAt'> | null): void;
+  /** Pagamento conferido na Stripe (ou desfeito) pelo painel. */
+  setOrderPayment(id: string, status: 'aprovado' | 'pendente'): void;
   upsertCustomer(customer: Customer): void;
   /** Vincula pedidos feitos como visitante à conta criada com o mesmo e-mail. */
   claimGuestOrders(customer: Customer): void;
-  /** Revalida o estoque, dá baixa (no servidor, quando há banco) e registra o pedido. */
+  /** Revalida estoque e preço, registra o pedido (no banco, quando há) e dá baixa no estoque. */
   placeOrder(input: PlaceOrderInput): Promise<PlaceOrderResult>;
   saveSettings(settings: StoreSettings): void;
   resetDemoData(): Promise<void>;
@@ -82,6 +83,8 @@ export function StoreDataProvider({ children }: { children: React.ReactNode }) {
   const [hydrated, setHydrated] = useState(false);
   const [products, setProducts] = useState<Product[]>(seedProducts);
   const [orders, setOrders] = useState<Order[]>(seedOrders);
+  /** Pedidos do banco, carregados quando o painel abre (null = sem banco ou fora do painel). */
+  const [serverOrders, setServerOrders] = useState<Order[] | null>(null);
   const [customers, setCustomers] = useState<Customer[]>(seedCustomers);
   const [settings, setSettings] = useState<StoreSettings>(DEFAULT_SETTINGS);
   const [catalogSource, setCatalogSource] = useState<CatalogSource>('local');
@@ -101,18 +104,30 @@ export function StoreDataProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
+  const fetchServerOrders = useCallback(async (): Promise<Order[] | null> => {
+    try {
+      const res = await fetch('/api/admin/pedidos', { cache: 'no-store', credentials: 'same-origin' });
+      if (!res.ok) return null;
+      const body = (await res.json()) as { source?: string; orders?: Order[] };
+      return body.source === 'db' && Array.isArray(body.orders) ? body.orders : null;
+    } catch {
+      return null;
+    }
+  }, []);
+
   const refreshCatalog = useCallback(
     async (opts: { admin?: boolean } = {}) => {
       if (opts.admin) adminViewRef.current = true;
       const admin = adminViewRef.current;
-      const list = await fetchCatalog(admin);
+      const [list, remoteOrders] = await Promise.all([fetchCatalog(admin), admin ? fetchServerOrders() : Promise.resolve(null)]);
+      if (remoteOrders) setServerOrders(remoteOrders);
       if (!list) return;
       sourceRef.current = 'db';
       setCatalogSource('db');
       setProducts(list);
       if (admin) setAdminCatalogLoaded(true);
     },
-    [fetchCatalog],
+    [fetchCatalog, fetchServerOrders],
   );
 
   useEffect(() => {
@@ -213,74 +228,65 @@ export function StoreDataProvider({ children }: { children: React.ReactNode }) {
       // Primeira checagem com o catálogo carregado; a definitiva é no servidor, abaixo.
       const issues = findStockIssues(input.items, products);
       if (issues.length) return { ok: false, reason: 'estoque', issues };
+      const bought = input.items.map((item) => products.find((x) => x.id === item.productId)!);
+      const wrongPrice = [...new Set(bought.filter(linkPriceMismatch).map((p) => p.name))];
+      if (wrongPrice.length) return { ok: false, reason: 'preco', products: wrongPrice };
 
-      const lines: OrderLine[] = input.items.map((item) => {
-        const p = products.find((x) => x.id === item.productId)!;
-        return { productId: p.id, name: p.name, size: item.size, quantity: item.quantity, unitPrice: p.price, image: p.images[0]?.src };
-      });
-      const priced = lines.map((l) => ({ unitPrice: l.unitPrice, quantity: l.quantity, compareAtPrice: products.find((p) => p.id === l.productId)?.compareAtPrice }));
-      const subtotal = priced.reduce((n, l) => n + l.unitPrice * l.quantity, 0);
-
-      // Cupom é revalidado aqui (no backend real, no servidor).
-      let coupon: { code: string; description: string; amount: Cents } | undefined;
-      if (input.couponCode) {
-        const result = evaluateCoupon(
-          couponRepository.list().find((c) => c.code === input.couponCode),
-          { subtotal, shippingCost: input.shipping.price },
-        );
-        if (result.ok) coupon = { code: result.coupon.code, description: result.message, amount: result.discount };
-      }
-      const totals = computeTotals(priced, input.shipping.price, coupon?.amount ?? 0);
       const email = normalizeEmail(input.customer?.email ?? input.contact.email);
-      const order = buildOrder(
-        {
-          customerId: input.customer?.id ?? `visitante:${email}`,
-          customerName: input.customer?.name ?? input.contact.name,
-          customerEmail: email,
-          guest: !input.customer,
-          lines,
-          address: input.address,
-          coupon,
-          totals,
-          shipping: {
-            provider: input.shipping.provider,
-            isMock: input.shipping.isMock,
-            serviceId: input.shipping.id,
-            serviceName: input.shipping.name,
-            carrier: input.shipping.carrier,
-            price: input.shipping.price,
-            originalPrice: input.shipping.originalPrice,
-            minDays: input.shipping.minDays,
-            maxDays: input.shipping.maxDays,
-            estimatedFrom: input.shipping.estimate.from,
-            estimatedTo: input.shipping.estimate.to,
-            originZip: input.originZip || undefined,
-            destinationZip: input.address.zip.replace(/\D/g, ''),
-            package: input.package,
-          },
-        },
-        orders,
-      );
+      const name = input.customer?.name ?? input.contact.name;
+      const phone = input.customer?.phone ?? input.contact.phone;
+      let order: Order;
 
       if (sourceRef.current === 'db') {
-        // Baixa atômica no banco: se outro cliente levou o último item, nada é registrado.
+        // O servidor grava o pedido, dá a baixa atômica e numera: se outro cliente
+        // levou o último item, nada é registrado.
         try {
-          const res = await fetch('/api/pedidos/confirmar-estoque', {
+          const res = await fetch('/api/pedidos', {
             method: 'POST',
             credentials: 'same-origin',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ orderId: order.id, items: input.items.map((i) => ({ productId: i.productId, size: i.size, quantity: i.quantity })) }),
+            body: JSON.stringify({
+              orderId: newOrderId(),
+              customer: { name, email, phone, accountId: input.customer?.id },
+              items: input.items.map((i) => ({ productId: i.productId, size: i.size, quantity: i.quantity })),
+            }),
           });
-          const body = (await res.json().catch(() => ({}))) as { issues?: StockIssue[]; error?: string };
-          if (res.status === 409 && body.issues?.length) {
+          const body = (await res.json().catch(() => ({}))) as { order?: Order; reason?: string; issues?: StockIssue[]; products?: string[]; error?: string };
+          if (res.status === 409 && body.reason === 'estoque' && body.issues?.length) {
             void refreshCatalog();
             return { ok: false, reason: 'estoque', issues: body.issues };
           }
-          if (!res.ok) return { ok: false, reason: 'falha', message: body.error ?? 'Não foi possível confirmar o pedido agora. Tente novamente.' };
+          if (res.status === 409 && body.reason === 'preco') {
+            void refreshCatalog();
+            return { ok: false, reason: 'preco', products: body.products ?? [] };
+          }
+          if (!res.ok || !body.order) return { ok: false, reason: 'falha', message: body.error ?? 'Não foi possível registrar o pedido agora. Tente novamente.' };
+          order = body.order;
         } catch {
           return { ok: false, reason: 'falha', message: 'Sem conexão. Seu pedido não foi registrado; tente novamente.' };
         }
         void refreshCatalog();
+      } else {
+        const lines: OrderLine[] = input.items.map((item) => {
+          const p = products.find((x) => x.id === item.productId)!;
+          return { productId: p.id, name: p.name, size: item.size, quantity: item.quantity, unitPrice: p.price, image: p.images[0]?.src, priceKey: productPriceKey(p) };
+        });
+        const draft = buildOrder(
+          {
+            customerId: input.customer?.id ?? `visitante:${email}`,
+            customerName: name,
+            customerEmail: email,
+            customerPhone: phone || undefined,
+            guest: !input.customer,
+            lines,
+            totals: computeTotals(lines.map((l) => ({ unitPrice: l.unitPrice, quantity: l.quantity, compareAtPrice: products.find((p) => p.id === l.productId)?.compareAtPrice })), null, 0),
+          },
+          orders,
+        );
+        order = {
+          ...draft,
+          payment: { ...draft.payment!, status: 'pendente', gateway: 'stripe', method: 'link', links: paymentGroups(lines.map((l) => ({ priceKey: l.priceKey!, quantity: l.quantity, unitPrice: l.unitPrice })), draft.number) },
+        };
       }
 
       commitProducts((prev) =>
@@ -292,11 +298,41 @@ export function StoreDataProvider({ children }: { children: React.ReactNode }) {
           return { ...p, stock, salesCount: p.salesCount + mine.reduce((n, i) => n + i.quantity, 0) };
         }),
       );
-      commitOrders((prev) => [order, ...prev]);
+      commitOrders((prev) => [order, ...prev.filter((o) => o.id !== order.id)]);
       return { ok: true, order };
     },
     [products, orders, commitProducts, commitOrders, refreshCatalog],
   );
+
+  /** Alteração de pedido no painel: no banco quando há (pedidos do servidor), senão local. */
+  const patchServerOrder = useCallback(
+    (id: string, patch: Record<string, unknown>, optimistic: (o: Order) => Order) => {
+      setServerOrders((prev) => prev && prev.map((o) => (o.id === id ? optimistic(o) : o)));
+      void (async () => {
+        try {
+          const res = await fetch(`/api/admin/pedidos/${encodeURIComponent(id)}`, {
+            method: 'PATCH',
+            credentials: 'same-origin',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(patch),
+          });
+          const body = (await res.json().catch(() => ({}))) as { order?: Order; error?: string };
+          if (res.ok && body.order) {
+            setServerOrders((prev) => prev && prev.map((o) => (o.id === id ? body.order! : o)));
+            if (patch.status === 'cancelado') void refreshCatalog({ admin: true });
+            return;
+          }
+          setAdminError({ message: body.error ?? 'Não foi possível salvar no servidor.', at: Date.now() });
+        } catch {
+          setAdminError({ message: 'Sem conexão com o servidor. A alteração não foi salva.', at: Date.now() });
+        }
+        void refreshCatalog({ admin: true });
+      })();
+    },
+    [refreshCatalog],
+  );
+
+  const serverMode = serverOrders !== null;
 
   const value = useMemo<StoreData>(
     () => ({
@@ -307,6 +343,7 @@ export function StoreDataProvider({ children }: { children: React.ReactNode }) {
       adminError,
       products,
       orders,
+      adminOrders: serverOrders ?? orders,
       customers,
       settings,
       saveProduct,
@@ -335,28 +372,40 @@ export function StoreDataProvider({ children }: { children: React.ReactNode }) {
           }, 500),
         );
       },
-      setOrderStatus: (id, status) =>
-        commitOrders((prev) =>
-          prev.map((o) => {
-            if (o.id !== id || o.status === status) return o;
-            const events: OrderEvent[] = [...(o.history ?? [])];
-            if (status !== 'pendente') events.push({ type: EVENT_FOR_STATUS[status], at: toLocalISO(), by: 'admin' });
-            return { ...o, status, history: events };
-          }),
-        ),
-      setOrderTracking: (id, tracking) =>
-        commitOrders((prev) =>
-          prev.map((o) => {
-            if (o.id !== id) return o;
-            if (!tracking) return { ...o, tracking: undefined };
-            const at = toLocalISO();
-            return {
-              ...o,
-              tracking: { ...tracking, addedAt: at },
-              history: [...(o.history ?? []), { type: 'rastreio', at, by: 'admin', note: `Código de rastreio ${tracking.code} (${tracking.carrier})` }],
-            };
-          }),
-        ),
+      setOrderStatus: (id, status) => {
+        const apply = (o: Order): Order => {
+          if (o.status === status) return o;
+          const events: OrderEvent[] = [...(o.history ?? [])];
+          if (status !== 'pendente') events.push({ type: EVENT_FOR_STATUS[status], at: toLocalISO(), by: 'admin' });
+          return { ...o, status, history: events };
+        };
+        if (serverMode) patchServerOrder(id, { status }, apply);
+        else commitOrders((prev) => prev.map((o) => (o.id === id ? apply(o) : o)));
+      },
+      setOrderTracking: (id, tracking) => {
+        const apply = (o: Order): Order => {
+          if (!tracking) return { ...o, tracking: undefined };
+          const at = toLocalISO();
+          return {
+            ...o,
+            tracking: { ...tracking, addedAt: at },
+            history: [...(o.history ?? []), { type: 'rastreio', at, by: 'admin', note: `Código de rastreio ${tracking.code} (${tracking.carrier})` }],
+          };
+        };
+        if (serverMode) patchServerOrder(id, { tracking: tracking ? { code: tracking.code, carrier: tracking.carrier } : null }, apply);
+        else commitOrders((prev) => prev.map((o) => (o.id === id ? apply(o) : o)));
+      },
+      setOrderPayment: (id, status) => {
+        const apply = (o: Order): Order => {
+          if (o.payment?.status === status) return o;
+          const at = toLocalISO();
+          const history: OrderEvent[] = [...(o.history ?? [])];
+          if (status === 'aprovado') history.push({ type: 'pagamento_aprovado', at, by: 'admin', note: 'Pagamento conferido na Stripe' });
+          return { ...o, payment: { ...(o.payment ?? {}), status, updatedAt: at }, history };
+        };
+        if (serverMode) patchServerOrder(id, { paymentStatus: status }, apply);
+        else commitOrders((prev) => prev.map((o) => (o.id === id ? apply(o) : o)));
+      },
       upsertCustomer: (customer) =>
         commitCustomers((prev) => (prev.some((c) => c.id === customer.id) ? prev.map((c) => (c.id === customer.id ? customer : c)) : [customer, ...prev])),
       claimGuestOrders: (customer) =>
@@ -379,7 +428,7 @@ export function StoreDataProvider({ children }: { children: React.ReactNode }) {
         setCustomers(c);
       },
     }),
-    [hydrated, catalogSource, adminCatalogLoaded, refreshCatalog, adminError, products, orders, customers, settings, saveProduct, placeOrder, commitProducts, commitOrders, commitCustomers, adminRequest],
+    [hydrated, catalogSource, adminCatalogLoaded, refreshCatalog, adminError, products, orders, serverOrders, serverMode, customers, settings, saveProduct, placeOrder, commitProducts, commitOrders, commitCustomers, adminRequest, patchServerOrder],
   );
 
   return <StoreDataContext.Provider value={value}>{children}</StoreDataContext.Provider>;

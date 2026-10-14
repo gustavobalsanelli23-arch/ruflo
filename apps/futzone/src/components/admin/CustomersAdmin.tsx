@@ -37,7 +37,7 @@ interface Row {
 }
 
 export function CustomersAdmin() {
-  const { customers, orders } = useStoreData();
+  const { customers, adminOrders: orders } = useStoreData();
   const [q, setQ] = useState('');
   const [filter, setFilter] = useState<Filter>('todos');
   const [sort, setSort] = useState<Sort>('recentes');

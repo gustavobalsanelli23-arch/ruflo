@@ -22,7 +22,7 @@ const greeting = () => {
 };
 
 export function Dashboard() {
-  const { products, orders, customers, settings } = useStoreData();
+  const { products, adminOrders: orders, customers, settings } = useStoreData();
   const { session, previousAccess } = useAdmin();
   const threshold = settings.lowStockThreshold;
 

@@ -1,7 +1,7 @@
 import type { Cents, CategoryId } from '@/types/catalog';
 
 /**
- * Tabela de preços por tipo de camisa (frete à parte, calculado no checkout).
+ * Tabela de preços por tipo de camisa (frete à parte, cobrado no pagamento pela Stripe).
  * O fornecedor não informa preço: a FutZone define o valor de cada tipo
  * (editável no painel, em Integração com fornecedor). Preço editado à mão num
  * produto nunca é sobrescrito por esta tabela.

@@ -65,21 +65,6 @@ export function Header() {
 
   return (
     <header className="sticky top-0 z-40">
-      {/* Aviso honesto de demonstração: recolhe ao rolar */}
-      <div
-        className={cn(
-          'grid overflow-hidden border-b border-line bg-steel text-center transition-[grid-template-rows,opacity] duration-300 ease-[var(--ease-out-fz)]',
-          scrolled ? 'grid-rows-[0fr] opacity-0' : 'grid-rows-[1fr] opacity-100',
-        )}
-      >
-        {/* O padding fica no filho: a linha 0fr recolhe a faixa inteira, sem sobrar borda de 12px */}
-        <p className="min-h-0">
-          <span className="block py-1.5 text-[0.6875rem] font-semibold uppercase tracking-[0.14em] text-muted">
-            Loja em demonstração<span className="hidden sm:inline">: pagamentos e entregas ainda não disponíveis</span>
-          </span>
-        </p>
-      </div>
-
       <div
         className={cn(
           'border-b transition-[background-color,border-color,box-shadow] duration-300 ease-[var(--ease-out-fz)]',

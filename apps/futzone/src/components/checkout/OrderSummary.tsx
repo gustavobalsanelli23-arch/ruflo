@@ -11,7 +11,6 @@ interface Props {
   lines: CartLine[];
   total: number;
   totalsSlot: React.ReactNode;
-  couponSlot: React.ReactNode;
 }
 
 /** Itens do pedido: foto no nicho, nome, tamanho, quantidade e subtotal. */
@@ -39,8 +38,8 @@ export function OrderLines({ lines, className }: { lines: CartLine[]; className?
   );
 }
 
-/** Resumo lateral (desktop): armário aceso com os itens, o cupom e os totais. */
-export function OrderSummary({ lines, totalsSlot, couponSlot }: Props) {
+/** Resumo lateral (desktop): armário aceso com os itens e os totais. */
+export function OrderSummary({ lines, totalsSlot }: Props) {
   return (
     <div className="locker relative rounded-[var(--radius-card)]">
       <span aria-hidden className="pointer-events-none absolute inset-x-[14%] top-0 h-px bg-light/60" />
@@ -49,8 +48,7 @@ export function OrderSummary({ lines, totalsSlot, couponSlot }: Props) {
       </div>
       <div className="space-y-5 p-5">
         <OrderLines lines={lines} className="max-h-72 overflow-y-auto overscroll-contain pr-1" />
-        <div className="border-t border-line pt-4">{couponSlot}</div>
-        {totalsSlot}
+        <div className="border-t border-line pt-4">{totalsSlot}</div>
         <TrustBadges compact className="border-t border-line pt-4" />
       </div>
     </div>
@@ -59,10 +57,10 @@ export function OrderSummary({ lines, totalsSlot, couponSlot }: Props) {
 
 /**
  * Resumo recolhível (celular). Recolhido, o painel fica `inert` numa linha de
- * grade 0fr (não some do DOM: o cupom guarda o próprio estado). A altura muda
+ * grade 0fr (não some do DOM). A altura muda
  * sem animar; o conteúdo só aparece em fade.
  */
-export function MobileOrderSummary({ lines, total, totalsSlot, couponSlot }: Props) {
+export function MobileOrderSummary({ lines, total, totalsSlot }: Props) {
   const [open, setOpen] = useState(false);
   const panelId = useId();
   return (
@@ -87,7 +85,6 @@ export function MobileOrderSummary({ lines, total, totalsSlot, couponSlot }: Pro
         <div className="min-h-0 overflow-hidden">
           <div className={cn('space-y-5 border-t border-line p-4 transition-opacity duration-200 ease-[var(--ease-out-fz)]', open ? 'opacity-100' : 'opacity-0')}>
             <OrderLines lines={lines} />
-            {couponSlot}
             {totalsSlot}
           </div>
         </div>

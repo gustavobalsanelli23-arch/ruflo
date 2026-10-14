@@ -12,8 +12,13 @@ const SECTIONS = [
     title: 'Trocas e devoluções',
     text: 'Compras feitas pela internet podem ser devolvidas em até 7 dias após o recebimento (direito de arrependimento, art. 49 do Código de Defesa do Consumidor). As regras detalhadas de troca de tamanho serão publicadas aqui antes do início das vendas.',
   },
-  { id: 'entregas', title: 'Entregas', text: 'Prazos, valores de frete e regiões atendidas serão definidos quando a finalização de compra for ativada.' },
-  { id: 'privacidade', title: 'Privacidade', text: 'Nesta versão de demonstração nenhum dado é enviado a servidores: carrinho, conta e pedidos ficam apenas no seu navegador. A política completa, em conformidade com a LGPD, será publicada antes do lançamento.' },
+  { id: 'entregas', title: 'Entregas', text: 'O frete é calculado na página de pagamento (Stripe), conforme a região de entrega: lá você informa o endereço e vê o valor e o prazo antes de pagar.' },
+  {
+    id: 'pagamento',
+    title: 'Pagamento',
+    text: 'O pagamento é feito na página segura da Stripe, com Pix ou cartão. Cada tipo de camisa do pedido tem o seu pagamento, com o frete da sua região. A loja não recebe os dados do seu cartão. Depois de confirmar o pagamento, separamos e enviamos o pedido.',
+  },
+  { id: 'privacidade', title: 'Privacidade', text: 'Ao finalizar um pedido, guardamos seu nome, e-mail, telefone e os itens comprados para separar e enviar a compra; o endereço de entrega e o pagamento são informados na Stripe. Carrinho e conta ficam no seu navegador. A política completa, em conformidade com a LGPD, está em elaboração.' },
   { id: 'termos', title: 'Termos de uso', text: 'Os termos de uso da loja estão em elaboração e serão publicados antes do início das vendas.' },
 ];
 

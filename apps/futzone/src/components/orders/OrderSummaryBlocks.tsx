@@ -62,7 +62,9 @@ export function OrderTotals({ order }: { order: Order }) {
       </div>
       <div className="flex justify-between gap-4 text-fg-2">
         <dt>Frete{order.shipping ? ` (${order.shipping.serviceName})` : ''}</dt>
-        <dd className="shrink-0 tabular-nums">{shipping === undefined ? 'Não informado' : shipping === 0 ? 'Grátis' : formatPrice(shipping)}</dd>
+        <dd className="shrink-0 tabular-nums">
+          {shipping === undefined ? (order.payment?.gateway === 'stripe' ? 'Pago na Stripe' : 'Não informado') : shipping === 0 ? 'Grátis' : formatPrice(shipping)}
+        </dd>
       </div>
       {!!order.discount && (
         <div className="flex justify-between gap-4 text-success">
@@ -71,7 +73,7 @@ export function OrderTotals({ order }: { order: Order }) {
         </div>
       )}
       <div className="flex justify-between gap-4 border-t border-line pt-3 text-base font-bold text-fg">
-        <dt>Total</dt>
+        <dt>{shipping === undefined && order.payment?.gateway === 'stripe' ? 'Total dos produtos' : 'Total'}</dt>
         <dd className="tabular-nums">{formatPrice(order.total)}</dd>
       </div>
     </dl>
@@ -91,7 +93,7 @@ export function OrderDelivery({ order }: { order: Order }) {
           {order.address.reference && <p className="mt-1 text-xs text-muted">Referência: {order.address.reference}</p>}
         </div>
       ) : (
-        <p className="text-muted">Endereço não informado.</p>
+        <p className="text-muted">{order.payment?.gateway === 'stripe' ? 'Endereço e frete informados na página de pagamento (Stripe).' : 'Endereço não informado.'}</p>
       )}
       {s && (
         <div>
