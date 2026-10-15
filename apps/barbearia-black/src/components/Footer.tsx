@@ -58,7 +58,7 @@ export function Footer() {
                   </span>
                 ) : (
                   <span>
-                    {location.locality} · {location.city}/{location.region}
+                    {location.locality}
                   </span>
                 )}
               </li>

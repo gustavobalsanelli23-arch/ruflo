@@ -18,11 +18,11 @@ export const links = {
 } as const;
 
 /**
- * WhatsApp oficial, só dígitos com DDI (ex.: 55 + DDD + número).
- * Ainda não divulgado no Instagram: configure aqui ou pela variável de ambiente
- * VITE_WHATSAPP_NUMBER no deploy. Enquanto vazio, o agendamento usa o Direct.
+ * WhatsApp oficial do Matheus, só dígitos com DDI (55 + DDD + número).
+ * Pode ser sobrescrito pela variável de ambiente VITE_WHATSAPP_NUMBER no deploy;
+ * se ficar vazio ou inválido, o agendamento volta a usar o Direct do Instagram.
  */
-const WHATSAPP_NUMBER: string | null = null;
+const WHATSAPP_NUMBER: string | null = '5547996410356';
 
 function normalizeWhatsapp(raw: string | null | undefined) {
   const digits = (raw ?? '').replace(/\D/g, '');
@@ -55,10 +55,10 @@ export function formatPhone(digits: string) {
 }
 
 /**
- * Localização divulgada na bio do Instagram ("barra São João"): o distrito de
- * Barra de São João, em Casimiro de Abreu (RJ). Rua e número ainda não divulgados.
+ * Localização como aparece na bio do Instagram ("barra São João").
+ * Cidade, estado, rua e número ainda não confirmados: não exibimos nada além disso.
  */
-export const location = { locality: 'Barra de São João', city: 'Casimiro de Abreu', region: 'RJ' } as const;
+export const location = { locality: 'Barra São João' } as const;
 
 export type Address = { street: string; district?: string; city: string; state: string; postalCode?: string; mapsUrl?: string };
 /** Endereço completo (rua e número): ainda não divulgado no perfil. */

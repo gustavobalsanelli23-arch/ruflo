@@ -71,7 +71,6 @@ export function Booking() {
                   ) : (
                     <>
                       {location.locality}
-                      <span className="font-medium text-ash"> · {location.city}/{location.region}</span>
                       <span className="mt-1 block text-sm font-medium text-ash">Endereço completo no agendamento.</span>
                     </>
                   )}

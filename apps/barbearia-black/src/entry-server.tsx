@@ -38,11 +38,10 @@ export function schema() {
         }
       : {
           '@type': 'PostalAddress',
-          addressLocality: `${location.locality}, ${location.city}`,
-          addressRegion: location.region,
+          addressLocality: location.locality,
           addressCountry: 'BR',
         },
-    areaServed: `${location.locality}, ${location.city} - ${location.region}`,
+    areaServed: location.locality,
     ...(address?.mapsUrl ? { hasMap: address.mapsUrl } : {}),
     ...(hours ? { openingHours: hours.flatMap((h) => h.schema) } : {}),
     ...(services.length
