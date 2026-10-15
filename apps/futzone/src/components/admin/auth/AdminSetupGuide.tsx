@@ -1,10 +1,10 @@
 'use client';
 
 import { useState } from 'react';
-import { Check, Copy, KeyRound, ShieldAlert } from 'lucide-react';
-import { hashPassword, passwordProblems } from '@/lib/auth/password';
+import { ShieldAlert } from 'lucide-react';
 import { toBase64Url } from '@/lib/auth/encoding';
 import { AdminButton } from '../AdminUI';
+import { AdminHashGenerator, CopyOutput } from './AdminHashGenerator';
 
 /**
  * Exibido apenas enquanto NENHUM administrador estiver configurado no servidor.
@@ -12,27 +12,7 @@ import { AdminButton } from '../AdminUI';
  * só o hash resultante é copiado para as variáveis de ambiente.
  */
 export function AdminSetupGuide({ problems }: { problems: string[] }) {
-  const [password, setPassword] = useState('');
-  const [hash, setHash] = useState('');
   const [secret, setSecret] = useState('');
-  const [busy, setBusy] = useState(false);
-  const [copied, setCopied] = useState<string | null>(null);
-  const issues = password ? passwordProblems(password) : [];
-
-  const generate = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (issues.length || !password) return;
-    setBusy(true);
-    setHash(await hashPassword(password));
-    setPassword('');
-    setBusy(false);
-  };
-
-  const copy = async (key: string, value: string) => {
-    await navigator.clipboard.writeText(value).catch(() => undefined);
-    setCopied(key);
-    window.setTimeout(() => setCopied(null), 1500);
-  };
 
   return (
     <div className="space-y-5 text-sm">
@@ -61,46 +41,15 @@ export function AdminSetupGuide({ problems }: { problems: string[] }) {
         </li>
       </ol>
 
-      <form onSubmit={generate} className="space-y-2 rounded-xl border border-white/[0.06] bg-bg/50 p-4">
-        <label htmlFor="setup-pw" className="flex items-center gap-2 text-xs font-semibold text-fg-2">
-          <KeyRound className="size-3.5 text-brand-400" /> Gerar hash de senha
-        </label>
-        <input
-          id="setup-pw"
-          type="password"
-          autoComplete="new-password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          placeholder="Senha do administrador"
-          className="h-11 w-full rounded-lg border border-line bg-surface-2 px-3 text-sm focus:border-brand-500 focus:outline-none"
-        />
-        {issues.length > 0 && <p className="text-xs text-warn">A senha precisa de: {issues.join(', ')}.</p>}
-        <AdminButton type="submit" size="sm" loading={busy} disabled={!password || issues.length > 0}>
-          Gerar hash
-        </AdminButton>
-        {hash && <Output label="PASSWORD_HASH" value={hash} copied={copied === 'hash'} onCopy={() => copy('hash', hash)} />}
-      </form>
+      <AdminHashGenerator />
 
       <div className="space-y-2 rounded-xl border border-white/[0.06] bg-bg/50 p-4">
         <p className="text-xs font-semibold text-fg-2">Segredo de sessão (gerar uma única vez)</p>
         <AdminButton size="sm" variant="secondary" onClick={() => setSecret(toBase64Url(crypto.getRandomValues(new Uint8Array(48))))}>
           Gerar segredo
         </AdminButton>
-        {secret && <Output label="SESSION_SECRET" value={secret} copied={copied === 'secret'} onCopy={() => copy('secret', secret)} />}
+        {secret && <CopyOutput label="SESSION_SECRET" value={secret} />}
       </div>
-    </div>
-  );
-}
-
-function Output({ label, value, copied, onCopy }: { label: string; value: string; copied: boolean; onCopy(): void }) {
-  return (
-    <div className="flex items-center gap-2">
-      <code className="min-w-0 flex-1 truncate rounded-md bg-surface-2 px-2 py-1.5 text-[0.7rem] text-fg-2" title={value}>
-        {value}
-      </code>
-      <AdminButton size="icon" variant="ghost" onClick={onCopy} aria-label={`Copiar ${label}`}>
-        {copied ? <Check className="size-4 text-success" /> : <Copy className="size-4" />}
-      </AdminButton>
     </div>
   );
 }

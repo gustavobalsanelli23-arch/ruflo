@@ -20,7 +20,7 @@ async function derive(password: string, salt: Uint8Array<ArrayBuffer>, iteration
 
 export async function hashPassword(password: string, iterations = PBKDF2_ITERATIONS): Promise<string> {
   const salt = crypto.getRandomValues(new Uint8Array(16));
-  const hash = await derive(password, salt, iterations);
+  const hash = await derive(password.normalize('NFC'), salt, iterations);
   return [PREFIX, iterations, toBase64Url(salt), toBase64Url(hash)].join(':');
 }
 
@@ -32,8 +32,12 @@ export function isValidPasswordHash(stored: string): boolean {
 export async function verifyPassword(password: string, stored: string): Promise<boolean> {
   if (!isValidPasswordHash(stored)) return false;
   const [, iter, salt, hash] = stored.split(':');
-  const actual = await derive(password, fromBase64Url(salt), Number(iter));
-  return timingSafeEqual(actual, fromBase64Url(hash));
+  const check = async (pw: string) => timingSafeEqual(await derive(pw, fromBase64Url(salt), Number(iter)), fromBase64Url(hash));
+  if (await check(password)) return true;
+  // Acentos podem chegar compostos ("é") ou decompostos ("e" + acento) conforme o
+  // teclado: a mesma senha confere nas duas formas.
+  const nfc = password.normalize('NFC');
+  return nfc !== password && (await check(nfc));
 }
 
 /** Política mínima de senha para os administradores. */
