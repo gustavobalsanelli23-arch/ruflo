@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { isAuthReady, readAuthConfig } from '@/lib/auth/config';
 import { getAdminSession } from '@/lib/auth/session';
@@ -40,7 +41,15 @@ export default async function AdminLoginPage({ searchParams }: { searchParams: P
           {ready ? <AdminLoginForm next={next} /> : <AdminSetupGuide problems={config.problems} />}
         </div>
 
-        <p className="mt-6 text-center text-xs text-subtle">Área exclusiva da equipe FutZone. Acessos são registrados.</p>
+        {ready && (
+          <p className="mt-5 text-center text-xs text-muted">
+            Primeiro acesso ou a senha não funciona?{' '}
+            <Link href="/admin/nova-senha" className="font-semibold text-fg-2 underline-offset-4 hover:text-fg hover:underline">
+              Criar nova senha
+            </Link>
+          </p>
+        )}
+        <p className="mt-3 text-center text-xs text-subtle">Área exclusiva da equipe FutZone. Acessos são registrados.</p>
       </div>
     </main>
   );

@@ -90,7 +90,15 @@ describe('cobertura das rotas administrativas', () => {
 
   it('toda página do painel fica sob o layout protegido', () => {
     const pages = files(join(SRC, 'app/admin')).filter((f) => f.endsWith('page.tsx')).map((f) => relative(join(SRC, 'app/admin'), f));
-    expect(pages.filter((p) => !p.startsWith('(painel)/'))).toEqual(['login/page.tsx']);
+    expect(pages.filter((p) => !p.startsWith('(painel)/')).sort()).toEqual(['login/page.tsx', 'nova-senha/page.tsx']);
+  });
+
+  it('a página pública de nova senha só gera o hash no navegador (não lê nem envia dados)', () => {
+    const page = read(join(SRC, 'app/admin/nova-senha/page.tsx'));
+    const generator = read(join(SRC, 'components/admin/auth/AdminHashGenerator.tsx'));
+    for (const code of [page, generator]) {
+      expect(code).not.toMatch(/@\/server|lib\/auth\/(session|config)|process\.env|fetch\(/);
+    }
   });
 
   it('toda API administrativa (exceto login/logout) exige sessão de ADMIN', () => {

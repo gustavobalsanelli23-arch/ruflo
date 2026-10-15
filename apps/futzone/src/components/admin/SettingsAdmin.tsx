@@ -1,7 +1,9 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { KeyRound, LogOut, Monitor, RotateCcw, ShieldCheck } from 'lucide-react';
+import { AlertTriangle, CircleCheck, KeyRound, LogOut, Monitor, RotateCcw, ShieldCheck } from 'lucide-react';
+import Link from 'next/link';
+import type { AdminSlotInfo } from '@/lib/auth/config';
 import { useStoreData } from '@/context/StoreDataContext';
 import { useToast } from '@/context/ToastContext';
 import { formatDateTime } from '@/lib/format';
@@ -59,6 +61,7 @@ function ProfileSection() {
           </Field>
         </div>
       </AdminCard>
+      <AccountsCard />
       <AdminCard title="Como alterar estes dados">
         <div className="space-y-3 p-5 text-sm text-fg-2">
           <p>Nome e e-mail ficam guardados com segurança no servidor (variáveis de ambiente), e não neste navegador.</p>
@@ -68,6 +71,68 @@ function ProfileSection() {
         </div>
       </AdminCard>
     </div>
+  );
+}
+
+const SLOT_STATUS: Record<AdminSlotInfo['status'], string> = {
+  ok: 'Conta ativa',
+  ausente: 'Não configurada',
+  email_invalido: 'E-mail ausente ou inválido',
+  hash_invalido: 'Senha (hash) ausente ou inválida',
+  email_repetido: 'E-mail igual ao do outro administrador',
+};
+
+/** As duas contas do painel, como o servidor as lê: ajuda a achar e-mail digitado errado ou senha mal colada. */
+function AccountsCard() {
+  const [slots, setSlots] = useState<AdminSlotInfo[] | null>(null);
+  const [failed, setFailed] = useState(false);
+  useEffect(() => {
+    let alive = true;
+    fetch('/api/admin/contas', { cache: 'no-store', credentials: 'same-origin' })
+      .then((r) => (r.ok ? r.json() : Promise.reject()))
+      .then((b: { slots: AdminSlotInfo[] }) => alive && setSlots(b.slots))
+      .catch(() => alive && setFailed(true));
+    return () => {
+      alive = false;
+    };
+  }, []);
+
+  return (
+    <AdminCard title="Contas de administrador" description="Como o servidor lê as contas configuradas na Vercel" className="xl:col-span-2">
+      <div className="space-y-4 p-5 text-sm">
+        {failed && <p className="text-danger">Não foi possível carregar as contas agora.</p>}
+        {!slots && !failed && <p className="text-muted">Carregando…</p>}
+        {slots && (
+          <ul className="divide-y divide-white/[0.05] rounded-lg border border-white/[0.06]">
+            {slots.map((s) => {
+              const ok = s.status === 'ok' && !s.hashIncomplete;
+              return (
+                <li key={s.slot} className="flex items-start gap-3 px-4 py-3">
+                  {ok ? <CircleCheck className="mt-0.5 size-4 shrink-0 text-success" /> : <AlertTriangle className="mt-0.5 size-4 shrink-0 text-warn" />}
+                  <div className="min-w-0 flex-1">
+                    <p className="font-semibold text-fg">
+                      Administrador {s.slot}: {s.name}
+                    </p>
+                    <p className="text-fg-2 [overflow-wrap:anywhere]">{s.email ?? 'sem e-mail'}</p>
+                    <p className={ok ? 'text-xs text-success' : 'text-xs text-warn'}>
+                      {s.hashIncomplete ? 'O hash da senha parece incompleto (colado pela metade): a senha nunca vai conferir.' : SLOT_STATUS[s.status]}
+                    </p>
+                  </div>
+                  <code className="hidden shrink-0 text-[0.7rem] text-muted sm:block">FUTZONE_ADMIN_{s.slot}_*</code>
+                </li>
+              );
+            })}
+          </ul>
+        )}
+        <p className="text-xs leading-relaxed text-muted">
+          Um administrador não consegue entrar? Confira se o e-mail acima é exatamente o que ele digita. Se estiver certo, peça para ele criar uma senha nova em{' '}
+          <Link href="/admin/nova-senha" className="font-semibold text-brand-400 hover:text-brand-300">
+            /admin/nova-senha
+          </Link>{' '}
+          e mandar o código gerado; cole o código em <code className="break-all text-brand-300">FUTZONE_ADMIN_n_PASSWORD_HASH</code> na Vercel e faça um novo deploy.
+        </p>
+      </div>
+    </AdminCard>
   );
 }
 

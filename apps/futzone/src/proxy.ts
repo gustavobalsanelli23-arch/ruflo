@@ -14,7 +14,8 @@ import { resolveSession, SESSION_COOKIE } from '@/lib/auth/verify';
  * profundidade) — o proxy sozinho nunca é a única proteção.
  */
 
-const PUBLIC_PATHS = new Set(['/admin/login', '/api/admin/login']);
+// /admin/nova-senha só gera o hash no navegador: não lê nem grava nada no servidor.
+const PUBLIC_PATHS = new Set(['/admin/login', '/admin/nova-senha', '/api/admin/login']);
 
 function secure(res: NextResponse) {
   res.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
