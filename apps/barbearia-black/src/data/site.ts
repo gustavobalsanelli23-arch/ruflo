@@ -3,7 +3,7 @@
 // esconde o bloco correspondente: nada de número, preço, horário ou endereço inventado.
 
 /** Domínio público do site (canonical, Open Graph, sitemap). Troque pelo domínio definitivo. */
-export const SITE_URL = (import.meta.env.VITE_SITE_URL as string | undefined)?.replace(/\/$/, '') || 'https://barbearia-black.vercel.app';
+export const SITE_URL = (import.meta.env.VITE_SITE_URL as string | undefined)?.replace(/\/$/, '') || 'https://barbearia-black-gtsec.vercel.app';
 
 export const business = {
   name: 'Barbearia Black',
