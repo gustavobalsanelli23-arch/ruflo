@@ -1,0 +1,253 @@
+{
+  "hero-botox-dourado": {
+    "width": 1680,
+    "height": 2240,
+    "widths": [
+      640,
+      960,
+      1280,
+      1680
+    ],
+    "avif": true
+  },
+  "detalhe-fios-brilho": {
+    "width": 800,
+    "height": 1067,
+    "widths": [
+      480,
+      800
+    ]
+  },
+  "botox-castanho-claro": {
+    "width": 1200,
+    "height": 1600,
+    "widths": [
+      480,
+      800,
+      1200
+    ]
+  },
+  "botox-castanho-salao": {
+    "width": 1200,
+    "height": 1600,
+    "widths": [
+      480,
+      800,
+      1200
+    ]
+  },
+  "botox-escuro-longo": {
+    "width": 1200,
+    "height": 1600,
+    "widths": [
+      480,
+      800,
+      1200
+    ]
+  },
+  "botox-antes": {
+    "width": 1200,
+    "height": 1600,
+    "widths": [
+      480,
+      800,
+      1200
+    ]
+  },
+  "botox-depois": {
+    "width": 1200,
+    "height": 1600,
+    "widths": [
+      480,
+      800,
+      1200
+    ]
+  },
+  "progressiva-corte-antes": {
+    "width": 1200,
+    "height": 1600,
+    "widths": [
+      480,
+      800,
+      1200
+    ]
+  },
+  "progressiva-corte-resultado": {
+    "width": 1200,
+    "height": 1600,
+    "widths": [
+      480,
+      800,
+      1200
+    ]
+  },
+  "progressiva-corte-perfil": {
+    "width": 1200,
+    "height": 1600,
+    "widths": [
+      480,
+      800,
+      1200
+    ]
+  },
+  "hidratacao-corte-infantil": {
+    "width": 1200,
+    "height": 1600,
+    "widths": [
+      480,
+      800,
+      1200
+    ]
+  },
+  "progressiva-sem-formol-antes": {
+    "width": 720,
+    "height": 960,
+    "widths": [
+      480,
+      720
+    ]
+  },
+  "progressiva-sem-formol-depois": {
+    "width": 720,
+    "height": 960,
+    "widths": [
+      480,
+      720
+    ]
+  },
+  "botox-escuro-alinhado": {
+    "width": 720,
+    "height": 960,
+    "widths": [
+      480,
+      720
+    ]
+  },
+  "lavatorio-massagem": {
+    "width": 720,
+    "height": 960,
+    "widths": [
+      480,
+      720
+    ]
+  },
+  "lavatorio-cuidado": {
+    "width": 720,
+    "height": 960,
+    "widths": [
+      480,
+      720
+    ]
+  },
+  "progressiva-crespo-depois": {
+    "width": 1200,
+    "height": 1600,
+    "widths": [
+      480,
+      800,
+      1200
+    ]
+  },
+  "progressiva-crespo-antes": {
+    "width": 1200,
+    "height": 1600,
+    "widths": [
+      480,
+      800,
+      1200
+    ]
+  },
+  "botox-chanel": {
+    "width": 1200,
+    "height": 1600,
+    "widths": [
+      480,
+      800,
+      1200
+    ]
+  },
+  "botox-chanel-perfil": {
+    "width": 1200,
+    "height": 1600,
+    "widths": [
+      480,
+      800,
+      1200
+    ]
+  },
+  "escova-babyliss": {
+    "width": 800,
+    "height": 1067,
+    "widths": [
+      480,
+      800
+    ]
+  },
+  "escova-babyliss-retrato": {
+    "width": 800,
+    "height": 1067,
+    "widths": [
+      480,
+      800
+    ]
+  },
+  "botox-resultado-2025": {
+    "width": 1200,
+    "height": 1500,
+    "widths": [
+      480,
+      800,
+      1200
+    ]
+  },
+  "progressiva-sem-formol-escuro": {
+    "width": 1200,
+    "height": 1600,
+    "widths": [
+      480,
+      800,
+      1200
+    ]
+  },
+  "tranca-nago-boxeadora": {
+    "width": 1200,
+    "height": 1500,
+    "widths": [
+      480,
+      800,
+      1200
+    ]
+  },
+  "tranca-nago-boxeadora-lateral": {
+    "width": 1200,
+    "height": 1500,
+    "widths": [
+      480,
+      800,
+      1200
+    ]
+  },
+  "tranca-nago-freestyle": {
+    "width": 720,
+    "height": 960,
+    "widths": [
+      480,
+      720
+    ]
+  },
+  "cauter-gloss": {
+    "width": 720,
+    "height": 960,
+    "widths": [
+      480,
+      720
+    ]
+  },
+  "video:brilho-em-movimento": {
+    "width": 600,
+    "height": 800,
+    "widths": [
+      600
+    ]
+  }
+}
