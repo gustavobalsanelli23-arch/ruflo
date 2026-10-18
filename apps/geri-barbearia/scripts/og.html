@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Geri Barbearia — imagem de compartilhamento</title>
+    <style>
+      @font-face {
+        font-family: 'Bodoni Moda';
+        font-weight: 400 900;
+        src: url('../src/fonts/bodoni-moda-latin-opsz-normal.woff2') format('woff2');
+      }
+      @font-face {
+        font-family: 'DM Sans';
+        font-weight: 100 1000;
+        src: url('../src/fonts/dm-sans-latin-wght-normal.woff2') format('woff2');
+      }
+      * {
+        margin: 0;
+        box-sizing: border-box;
+      }
+      body {
+        width: 1200px;
+        height: 630px;
+        background: #10100f;
+        color: #e9e2d6;
+        font-family: 'DM Sans', sans-serif;
+        display: grid;
+        grid-template-columns: 500px 1fr;
+        overflow: hidden;
+      }
+      .photo {
+        position: relative;
+        overflow: hidden;
+      }
+      .photo img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        object-position: 60% 30%;
+      }
+      .photo::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(90deg, rgb(16 16 15 / 0) 55%, #10100f 100%);
+      }
+      .copy {
+        padding: 70px 72px 60px 40px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+      }
+      .word {
+        font-family: 'Bodoni Moda', serif;
+        font-size: 200px;
+        line-height: 0.86;
+        letter-spacing: -0.02em;
+      }
+      .sign {
+        display: flex;
+        align-items: center;
+        gap: 18px;
+        margin-top: 18px;
+      }
+      .rule {
+        height: 5px;
+        border-top: 1px solid #a88b58;
+        border-bottom: 1px solid #a88b58;
+      }
+      .sign span {
+        font-size: 14px;
+        letter-spacing: 0.42em;
+        text-transform: uppercase;
+        color: #d5c3a3;
+      }
+      .tagline {
+        margin-top: 38px;
+        font-family: 'Bodoni Moda', serif;
+        font-size: 46px;
+        line-height: 1.08;
+      }
+      .foot {
+        margin-top: 34px;
+        display: flex;
+        justify-content: space-between;
+        font-size: 18px;
+        color: #d5c3a3;
+      }
+      .foot b {
+        font-weight: 500;
+        color: #a88b58;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="photo"><img src="../public/images/freestyle-ring-light-800.webp" alt="" /></div>
+    <div class="copy">
+      <div class="word">GERI</div>
+      <div class="sign">
+        <div class="rule" style="width: 54px"></div>
+        <span>Barbearia</span>
+        <div class="rule" style="flex: 1"></div>
+      </div>
+      <p class="tagline">Mais que um corte.<br />Uma tradição.</p>
+      <p class="foot"><span>Benedito Novo, SC</span><b>Chegou, cortou!</b></p>
+    </div>
+  </body>
+</html>
