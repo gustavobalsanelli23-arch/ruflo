@@ -1,0 +1,321 @@
+@import 'tailwindcss';
+
+/* ── Fontes (self-hosted, subconjunto latino) ───────────────────────────── */
+@font-face {
+  font-family: 'Bodoni Moda';
+  font-style: normal;
+  font-weight: 400 900;
+  font-display: swap;
+  src: url('./fonts/bodoni-moda-latin-opsz-normal.woff2') format('woff2-variations');
+}
+@font-face {
+  font-family: 'Bodoni Moda';
+  font-style: italic;
+  font-weight: 400 900;
+  font-display: swap;
+  src: url('./fonts/bodoni-moda-latin-opsz-italic.woff2') format('woff2-variations');
+}
+@font-face {
+  font-family: 'DM Sans';
+  font-style: normal;
+  font-weight: 100 1000;
+  font-display: swap;
+  src: url('./fonts/dm-sans-latin-wght-normal.woff2') format('woff2-variations');
+}
+
+/* ── Tokens ─────────────────────────────────────────────────────────────── */
+@theme {
+  --color-ink: #10100f; /* preto profundo — base */
+  --color-coffee: #211913; /* marrom café — superfícies */
+  --color-wood: #38271d; /* marrom madeira — madeira das bancadas */
+  --color-parchment: #d5c3a3; /* bege envelhecido — texto secundário */
+  --color-gold: #a88b58; /* dourado envelhecido — filetes e detalhes */
+  --color-bone: #e9e2d6; /* off-white — texto principal */
+
+  --font-serif: 'Bodoni Moda', 'Bodoni 72', Didot, Georgia, serif;
+  --font-sans: 'DM Sans', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out-quart: cubic-bezier(0.76, 0, 0.24, 1);
+}
+
+:root {
+  --gutter: clamp(1.25rem, 4vw, 3.5rem);
+  --section: clamp(5.5rem, 3rem + 9vw, 11rem);
+  --line: rgb(213 195 163 / 0.16);
+  --line-strong: rgb(213 195 163 / 0.32);
+  --muted: rgb(233 226 214 / 0.66);
+  --header-h: 5rem;
+  color-scheme: dark;
+}
+
+/* ── Base ───────────────────────────────────────────────────────────────── */
+@layer base {
+  html {
+    background: var(--color-ink);
+    -webkit-text-size-adjust: 100%;
+  }
+  html.lenis,
+  html.lenis body {
+    height: auto;
+  }
+  .lenis.lenis-stopped {
+    overflow: hidden;
+  }
+  body {
+    background: var(--color-ink);
+    color: var(--color-bone);
+    font-family: var(--font-sans);
+    font-size: 1.0625rem;
+    line-height: 1.65;
+    font-optical-sizing: auto;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    overflow-x: clip;
+  }
+  ::selection {
+    background: var(--color-gold);
+    color: var(--color-ink);
+  }
+  img {
+    max-width: 100%;
+    height: auto;
+  }
+  a,
+  button {
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+  }
+  /* No celular, o foco por teclado não fica escondido sob a barra fixa do WhatsApp. */
+  @media (max-width: 767px) {
+    html {
+      scroll-padding-bottom: 5.5rem;
+    }
+  }
+  [tabindex='-1']:focus {
+    outline: none;
+  }
+  :focus-visible {
+    outline: 2px solid var(--color-gold);
+    outline-offset: 4px;
+    border-radius: 2px;
+  }
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-serif);
+    font-weight: 400;
+    text-wrap: balance;
+  }
+  p {
+    text-wrap: pretty;
+  }
+}
+
+/* ── Utilitários da casa ────────────────────────────────────────────────── */
+@utility container-x {
+  width: 100%;
+  max-width: 90rem;
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+}
+
+@utility section-y {
+  padding-block: var(--section);
+}
+
+/* Letreiro: versalete espaçado, usado só nos letreiros (logo, placa de horário). */
+@utility signage {
+  font-family: var(--font-sans);
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+}
+
+@utility text-display {
+  font-family: var(--font-serif);
+  font-size: clamp(2.5rem, 1.4rem + 3.6vw, 5rem);
+  line-height: 1.02;
+  letter-spacing: -0.015em;
+}
+
+@utility text-lead {
+  font-size: clamp(1.125rem, 1rem + 0.4vw, 1.3125rem);
+  line-height: 1.6;
+}
+
+/* Filete duplo dourado, como na placa da fachada. */
+@utility rule-double {
+  height: 5px;
+  border-block: 1px solid var(--color-gold);
+}
+
+@utility hairline {
+  height: 1px;
+  background: var(--line-strong);
+}
+
+/* ── Componentes ────────────────────────────────────────────────────────── */
+@layer components {
+  .btn {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    min-height: 3.5rem;
+    padding: 0 1.75rem;
+    font-size: 0.9375rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    overflow: hidden;
+    isolation: isolate;
+    transition: color 0.5s var(--ease-out-expo);
+    white-space: nowrap;
+  }
+  /* Preenchimento que sobe como uma lâmina ao passar o mouse. */
+  .btn::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: var(--btn-fill);
+    clip-path: inset(100% 0 0 0);
+    transition: clip-path 0.6s var(--ease-out-expo);
+  }
+  .btn:hover::before,
+  .btn:focus-visible::before {
+    clip-path: inset(0 0 0 0);
+  }
+  .btn svg {
+    flex: none;
+    transition: transform 0.6s var(--ease-out-expo);
+  }
+  .btn:hover svg {
+    transform: rotate(-8deg) scale(1.08);
+  }
+
+  .btn-primary {
+    --btn-fill: var(--color-gold);
+    background: var(--color-bone);
+    color: var(--color-ink);
+  }
+  .btn-ghost {
+    --btn-fill: var(--color-bone);
+    border: 1px solid var(--line-strong);
+    color: var(--color-bone);
+  }
+  .btn-ghost:hover,
+  .btn-ghost:focus-visible {
+    color: var(--color-ink);
+  }
+
+  /* Link com sublinhado que se desenha da esquerda para a direita. */
+  .link-line {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding-block: 0.25rem;
+    background: linear-gradient(currentColor, currentColor) no-repeat left bottom / 100% 1px;
+    transition:
+      background-size 0.6s var(--ease-out-expo),
+      color 0.3s;
+  }
+  .link-line:hover {
+    background-size: 0% 1px;
+    background-position: right bottom;
+  }
+  .link-line--quiet {
+    background-size: 0% 1px;
+    background-position: right bottom;
+  }
+  .link-line--quiet:hover,
+  .link-line--quiet:focus-visible {
+    background-size: 100% 1px;
+    background-position: left bottom;
+  }
+
+  .status-dot {
+    position: relative;
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 999px;
+    background: var(--dot, var(--color-parchment));
+    flex: none;
+  }
+  .status-dot[data-state='open'] {
+    --dot: #8fae7a;
+  }
+  .status-dot[data-state='break'] {
+    --dot: var(--color-gold);
+  }
+  .status-dot[data-state='closed'] {
+    --dot: #9a6b5a;
+  }
+  .status-dot[data-state='open']::after {
+    content: '';
+    position: absolute;
+    inset: -4px;
+    border-radius: inherit;
+    border: 1px solid var(--dot);
+    animation: dot-pulse 2.4s var(--ease-out-expo) infinite;
+  }
+}
+
+@keyframes dot-pulse {
+  0% {
+    transform: scale(0.6);
+    opacity: 0.9;
+  }
+  100% {
+    transform: scale(1.8);
+    opacity: 0;
+  }
+}
+
+/* Grão de papel/madeira, só em telas grandes (custo zero no celular). */
+@media (min-width: 1024px) and (prefers-reduced-motion: no-preference) {
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: 90;
+    pointer-events: none;
+    opacity: 0.045;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+}
+
+/* ── Estados iniciais das animações (só com JS e sem reduced-motion) ─────── */
+.intro {
+  display: none;
+}
+.js-intro .intro {
+  display: block;
+}
+.js-motion [data-hero-item] {
+  visibility: hidden;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+@keyframes cue {
+  0% {
+    transform: translateY(-100%);
+  }
+  100% {
+    transform: translateY(200%);
+  }
+}

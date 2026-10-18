@@ -1,0 +1,94 @@
+{
+  "freestyle-ring-light": {
+    "width": 1440,
+    "height": 1920,
+    "widths": [
+      480,
+      800,
+      1200,
+      1440
+    ],
+    "color": "#181818"
+  },
+  "freestyle-navalha": {
+    "width": 1440,
+    "height": 1920,
+    "widths": [
+      480,
+      800,
+      1200,
+      1440
+    ],
+    "color": "#282828"
+  },
+  "desenho-raio": {
+    "width": 1080,
+    "height": 1350,
+    "widths": [
+      480,
+      800,
+      1080
+    ],
+    "color": "#383838"
+  },
+  "degrade-em-v": {
+    "width": 1080,
+    "height": 1350,
+    "widths": [
+      480,
+      800,
+      1080
+    ],
+    "color": "#e8e8e8"
+  },
+  "degrade-em-v-desenho-1": {
+    "width": 1080,
+    "height": 1350,
+    "widths": [
+      480,
+      800,
+      1080
+    ],
+    "color": "#d8d8d8"
+  },
+  "degrade-em-v-desenho-2": {
+    "width": 1080,
+    "height": 1350,
+    "widths": [
+      480,
+      800,
+      1080
+    ],
+    "color": "#080808"
+  },
+  "corte-infantil": {
+    "width": 1440,
+    "height": 1920,
+    "widths": [
+      480,
+      800,
+      1200,
+      1440
+    ],
+    "color": "#c8c8b8"
+  },
+  "certificado": {
+    "width": 1080,
+    "height": 1349,
+    "widths": [
+      480,
+      800,
+      1080
+    ],
+    "color": "#080808"
+  },
+  "fachada": {
+    "width": 640,
+    "height": 1136,
+    "widths": [
+      480,
+      640
+    ],
+    "color": "#080808"
+  }
+}

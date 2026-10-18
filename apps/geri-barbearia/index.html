@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Geri Barbearia | Barbearia em Benedito Novo, SC</title>
+    <meta
+      name="description"
+      content="Barbearia no centro de Benedito Novo (SC) desde 2024. Corte masculino, degradê, desenho freestyle, barba e corte infantil, por ordem de chegada. Rua Celso Ramos, 5330."
+    />
+    <link rel="canonical" href="__SITE_URL__/" />
+    <meta name="robots" content="index, follow, max-image-preview:large" />
+    <meta name="theme-color" content="#10100F" />
+    <meta name="color-scheme" content="dark" />
+    <meta name="format-detection" content="telephone=no" />
+    <meta name="geo.region" content="BR-SC" />
+    <meta name="geo.placename" content="Benedito Novo" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="pt_BR" />
+    <meta property="og:site_name" content="Geri Barbearia" />
+    <meta property="og:url" content="__SITE_URL__/" />
+    <meta property="og:title" content="Geri Barbearia | Mais que um corte. Uma tradição." />
+    <meta
+      property="og:description"
+      content="Barbearia no centro de Benedito Novo (SC). Atendimento por ordem de chegada, de terça a sábado. Chegou, cortou."
+    />
+    <meta property="og:image" content="__SITE_URL__/og.jpg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Emblema da Geri Barbearia ao lado de um corte degradê com desenho freestyle" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Geri Barbearia | Barbearia em Benedito Novo, SC" />
+    <meta name="twitter:image" content="__SITE_URL__/og.jpg" />
+
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="icon" href="/favicon-32.png" type="image/png" sizes="32x32" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" sizes="180x180" />
+    <link rel="manifest" href="/site.webmanifest" />
+
+    <link
+      rel="preload"
+      as="image"
+      type="image/avif"
+      href="/images/freestyle-ring-light-800.avif"
+      imagesrcset="/images/freestyle-ring-light-480.avif 480w, /images/freestyle-ring-light-800.avif 800w, /images/freestyle-ring-light-1200.avif 1200w, /images/freestyle-ring-light-1440.avif 1440w"
+      imagesizes="(min-width: 1280px) 56vw, (min-width: 1024px) 58vw, 100vw"
+      fetchpriority="high"
+    />
+
+    <!-- Decide, antes da primeira pintura, se há animação e abertura. Se o JS
+         principal não chegar em 4s, o conteúdo aparece sem animação. -->
+    <script>
+      (function () {
+        var d = document.documentElement;
+        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+        d.classList.add('js-motion');
+        try {
+          if (!sessionStorage.getItem('geri:intro')) d.classList.add('js-intro');
+        } catch (e) {
+          d.classList.add('js-intro');
+        }
+        setTimeout(function () {
+          if (!window.__geriReady) d.classList.remove('js-motion', 'js-intro');
+        }, 4000);
+      })();
+    </script>
+    <!--schema-->
+  </head>
+  <body>
+    <div id="root"><!--app-html--></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
