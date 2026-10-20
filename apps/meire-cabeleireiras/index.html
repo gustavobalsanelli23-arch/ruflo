@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Meire Cabeleireiras | Loiros, mechas e coloração com Meire Costa</title>
+    <meta
+      name="description"
+      content="Salão da cabeleireira Meire Costa: mechas, loiros personalizados, coloração, cortes em camadas e finalização. Veja trabalhos reais e agende seu horário."
+    />
+    <link rel="canonical" href="__SITE_URL__/" />
+    <meta name="robots" content="index, follow, max-image-preview:large" />
+    <meta name="theme-color" content="#FAF7F3" />
+    <meta name="color-scheme" content="light" />
+    <meta name="format-detection" content="telephone=no" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="pt_BR" />
+    <meta property="og:site_name" content="Meire Cabeleireiras" />
+    <meta property="og:url" content="__SITE_URL__/" />
+    <meta property="og:title" content="Meire Cabeleireiras | A arte na forma de beleza" />
+    <meta
+      property="og:description"
+      content="Loiros, mechas, coloração e finalização feitos por Meire Costa. Veja trabalhos reais e agende seu horário."
+    />
+    <meta property="og:image" content="__SITE_URL__/og.jpg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Meire Cabeleireiras: cabelo loiro com escova modelada ao lado do nome do salão" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Meire Cabeleireiras | A arte na forma de beleza" />
+    <meta name="twitter:image" content="__SITE_URL__/og.jpg" />
+
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="icon" href="/favicon-32.png" type="image/png" sizes="32x32" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" sizes="180x180" />
+    <link rel="manifest" href="/site.webmanifest" />
+
+    <link
+      rel="preload"
+      as="image"
+      type="image/avif"
+      href="/images/escova-modelada-480.avif"
+      imagesrcset="/images/escova-modelada-320.avif 320w, /images/escova-modelada-480.avif 480w, /images/escova-modelada-640.avif 640w"
+      imagesizes="(min-width: 1024px) 30vw, 100vw"
+      fetchpriority="high"
+    />
+
+    <!-- Decide, antes da primeira pintura, se há animação de abertura (só no
+         desktop: no celular o texto aparece já no primeiro quadro). Se o JS
+         principal não chegar em 4s, o conteúdo aparece sem animação. -->
+    <script>
+      (function () {
+        var d = document.documentElement;
+        if (!window.matchMedia('(prefers-reduced-motion: no-preference) and (min-width: 1024px)').matches) return;
+        d.classList.add('js-motion');
+        setTimeout(function () {
+          if (!window.__meireReady) d.classList.remove('js-motion');
+        }, 4000);
+      })();
+    </script>
+    <!--schema-->
+  </head>
+  <body>
+    <div id="root"><!--app-html--></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
