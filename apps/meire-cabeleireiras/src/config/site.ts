@@ -2,9 +2,9 @@
 // horários ou o domínio do site, altere somente este arquivo.
 //
 // Conferido no Instagram oficial (@meire.cabeleireiras) em 20/10/2026: nome da
-// profissional, lema do logo e legendas dos posts. Telefone, endereço e horários
-// NÃO estavam públicos e ficam como PLACEHOLDER: o site esconde tudo o que não
-// estiver preenchido, sem inventar nada no lugar.
+// profissional, lema do logo e legendas dos posts. O telefone foi informado em
+// 20/10/2026. Endereço e horários NÃO estavam públicos e ficam como PLACEHOLDER:
+// o site esconde tudo o que não estiver preenchido, sem inventar nada no lugar.
 
 /** PLACEHOLDER: endereço público definitivo (canonical, Open Graph, sitemap). */
 export const SITE_URL = 'https://meire-cabeleireiras.vercel.app';
@@ -50,11 +50,11 @@ export const business: Business = {
   },
   whatsapp: {
     /**
-     * PLACEHOLDER: DDI + DDD + número, só dígitos (formato do wa.me), ex.: '5511912345678'.
-     * Enquanto estiver vazio, todos os botões de agendamento abrem o Direct do
+     * DDI + DDD + número, só dígitos (formato do wa.me): (11) 99790-1598.
+     * Se ficar vazio, todos os botões de agendamento abrem o Direct do
      * Instagram e passam a dizer "Agendar pelo Instagram".
      */
-    number: '',
+    number: '5511997901598',
     message: 'Olá, Meire! Vim pelo site e gostaria de agendar um horário.',
   },
   /** PLACEHOLDER: preencha para exibir no rodapé, no mapa e nos dados estruturados. */

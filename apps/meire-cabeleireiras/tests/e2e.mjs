@@ -9,7 +9,7 @@ import { chromium } from 'playwright';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const BASE = process.env.BASE_URL ?? 'http://localhost:4174/';
-const DIRECT = 'https://ig.me/m/meire.cabeleireiras';
+const WHATSAPP = 'https://wa.me/5511997901598?text=';
 const PROFILE = 'https://www.instagram.com/meire.cabeleireiras/';
 
 let server;
@@ -104,7 +104,8 @@ await test('Schema.org HairSalon só com dados verificados', async () => {
   assert(salon?.name === 'Meire Cabeleireiras', 'HairSalon ausente');
   assert(salon.sameAs.includes(PROFILE), 'sameAs Instagram');
   assert(salon.employee?.name === 'Meire Costa', 'profissional');
-  assert(!('telephone' in salon) && !('address' in salon), 'telefone/endereço inventados no schema');
+  assert(salon.telephone === '+5511997901598', `telefone no schema: ${salon.telephone}`);
+  assert(!('address' in salon), 'endereço inventado no schema');
 });
 
 await test('Estrutura: um único h1, seções rotuladas e âncoras válidas', async () => {
@@ -124,17 +125,17 @@ await test('Estrutura: um único h1, seções rotuladas e âncoras válidas', as
   assert(info.imgsNoAlt === 0, 'imagens sem alt');
 });
 
-await test('Agendamento: sem WhatsApp configurado, todos os botões abrem o Direct', async () => {
+await test('Agendamento: todos os botões abrem o WhatsApp do salão', async () => {
   const links = await desk.evaluate(() =>
     [...document.querySelectorAll('a[data-booking]')].map((a) => ({ href: a.href, target: a.target, rel: a.rel, ch: a.dataset.booking })),
   );
   assert(links.length >= 10, `poucos botões de agendamento: ${links.length}`);
   for (const l of links) {
-    assert(l.ch === 'instagram' && l.href === DIRECT, `link fora do padrão: ${l.href}`);
+    assert(l.ch === 'whatsapp' && l.href.startsWith(WHATSAPP), `link fora do padrão: ${l.href}`);
     assert(l.target === '_blank' && l.rel.includes('noopener'), 'target/rel');
   }
-  const wa = await desk.evaluate(() => document.querySelectorAll('a[href*="wa.me"]').length);
-  assert(wa === 0, 'link de WhatsApp sem número configurado');
+  const footer = await desk.evaluate(() => document.querySelector('footer').textContent);
+  assert(footer.includes('(11) 99790-1598'), 'telefone ausente no rodapé');
 });
 
 await test('Links do Instagram apontam para o perfil e para os posts reais', async () => {

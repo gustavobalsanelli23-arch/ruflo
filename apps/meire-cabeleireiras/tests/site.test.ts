@@ -32,9 +32,10 @@ describe('agendamento', () => {
     expect(resolveBooking('11912345678').channel).toBe('instagram');
   });
 
-  it('a configuração publicada não inventa telefone', () => {
-    expect(business.whatsapp.number).toBe('');
-    expect(booking().channel).toBe('instagram');
+  it('a configuração publicada usa o WhatsApp do salão', () => {
+    expect(business.whatsapp.number).toBe('5511997901598');
+    expect(formatPhone(business.whatsapp.number)).toBe('(11) 99790-1598');
+    expect(booking().channel).toBe('whatsapp');
   });
 
   it('mensagem padrão é codificada no link', () => {
