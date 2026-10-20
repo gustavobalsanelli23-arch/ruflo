@@ -1,0 +1,66 @@
+{
+  "escova-modelada": {
+    "width": 640,
+    "height": 1136,
+    "widths": [
+      320,
+      480,
+      640
+    ],
+    "color": "#181828"
+  },
+  "correcao-de-cor": {
+    "width": 640,
+    "height": 930,
+    "widths": [
+      320,
+      480,
+      640
+    ],
+    "color": "#b8a898"
+  },
+  "mechas-loiras": {
+    "width": 524,
+    "height": 936,
+    "widths": [
+      320,
+      524
+    ],
+    "color": "#181818"
+  },
+  "loiro-manteiga": {
+    "width": 640,
+    "height": 900,
+    "widths": [
+      320,
+      480,
+      640
+    ],
+    "color": "#c8a888"
+  },
+  "liso": {
+    "width": 298,
+    "height": 566,
+    "widths": [
+      298
+    ],
+    "color": "#080808"
+  },
+  "bege-dourado": {
+    "width": 410,
+    "height": 472,
+    "widths": [
+      320,
+      410
+    ],
+    "color": "#383848"
+  },
+  "bege-dourado-costas": {
+    "width": 330,
+    "height": 440,
+    "widths": [
+      330
+    ],
+    "color": "#181828"
+  }
+}

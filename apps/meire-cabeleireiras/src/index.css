@@ -1,0 +1,323 @@
+@import 'tailwindcss';
+
+/* ── Fontes (self-hosted, subconjunto latino) ─────────────────────────────
+   Newsreader: serifada editorial com tamanho óptico (24–72) e itálico
+   caligráfico, eco refinado do letreiro cursivo do logo.
+   Albert Sans: sem serifa limpa para textos, menus e informações. */
+@font-face {
+  font-family: 'Newsreader';
+  font-style: normal;
+  font-weight: 300 420;
+  font-display: swap;
+  src: url('./fonts/newsreader-latin-opsz-normal.woff2') format('woff2-variations');
+}
+/* O itálico tem um único peso (330), para pesar metade no carregamento. */
+@font-face {
+  font-family: 'Newsreader';
+  font-style: italic;
+  font-weight: 330;
+  font-display: swap;
+  src: url('./fonts/newsreader-latin-opsz-italic.woff2') format('woff2-variations');
+}
+@font-face {
+  font-family: 'Albert Sans';
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url('./fonts/albert-sans-latin-wght-normal.woff2') format('woff2-variations');
+}
+
+/* ── Tokens ─────────────────────────────────────────────────────────────── */
+@theme {
+  --color-verde: #294c3b; /* verde botânico — cor de identidade */
+  --color-floresta: #19372c; /* verde profundo — texto e fundos escuros */
+  --color-rosa: #e9b8c3; /* rosa floral — detalhes */
+  --color-papel: #faf7f3; /* off-white — base */
+  --color-champanhe: #d9c5a7; /* bege champagne — filetes, o "fio" */
+  --color-cinza: #77716d; /* cinza quente — texto secundário */
+
+  --font-serif: 'Newsreader', 'Iowan Old Style', Georgia, serif;
+  --font-sans: 'Albert Sans', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out-quart: cubic-bezier(0.76, 0, 0.24, 1);
+}
+
+:root {
+  --gutter: clamp(1.25rem, 4.5vw, 4rem);
+  --section: clamp(6rem, 3.5rem + 9vw, 12rem);
+  --header-h: 4.5rem;
+  --hero-size: clamp(3.1rem, 0.6rem + 7.4vw, 8rem);
+  --ink: var(--color-floresta);
+  --ink-soft: rgb(25 55 44 / 0.78);
+  --line: rgb(25 55 44 / 0.14);
+  --line-light: rgb(217 197 167 / 0.24);
+  color-scheme: light;
+}
+
+/* ── Base ───────────────────────────────────────────────────────────────── */
+@layer base {
+  html {
+    background: var(--color-papel);
+    -webkit-text-size-adjust: 100%;
+    /* O cabeçalho fixo nunca cobre o elemento em foco. */
+    scroll-padding-top: var(--header-h);
+  }
+  html.lenis,
+  html.lenis body {
+    height: auto;
+  }
+  .lenis.lenis-stopped {
+    overflow: hidden;
+  }
+  body {
+    background: var(--color-papel);
+    color: var(--ink);
+    font-family: var(--font-sans);
+    font-size: 1.0625rem;
+    line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    overflow-x: clip;
+  }
+  ::selection {
+    background: var(--color-rosa);
+    color: var(--color-floresta);
+  }
+  img {
+    max-width: 100%;
+    height: auto;
+  }
+  a,
+  button {
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+  }
+  button {
+    cursor: pointer;
+  }
+  @media (max-width: 1023px) {
+    /* O foco por teclado não fica escondido sob a barra fixa de agendamento. */
+    html {
+      scroll-padding-bottom: 6rem;
+    }
+  }
+  [tabindex='-1']:focus {
+    outline: none;
+  }
+  :focus-visible {
+    outline: 2px solid currentColor;
+    outline-offset: 4px;
+    border-radius: 2px;
+  }
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-serif);
+    font-weight: 300;
+    font-optical-sizing: auto;
+    text-wrap: balance;
+  }
+  p {
+    text-wrap: pretty;
+  }
+}
+
+/* ── Utilitários da casa ────────────────────────────────────────────────── */
+@utility container-x {
+  width: 100%;
+  max-width: 92rem;
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+}
+
+@utility section-y {
+  padding-block: var(--section);
+}
+
+/* Escala tipográfica: 17 · 21 · 28 · 42 · 64 · 96 · 136 (aprox.). */
+@utility text-hero {
+  font-family: var(--font-serif);
+  font-weight: 300;
+  font-size: var(--hero-size);
+  line-height: 0.92;
+  letter-spacing: -0.025em;
+}
+
+@utility text-display {
+  font-family: var(--font-serif);
+  font-weight: 300;
+  font-size: clamp(2.6rem, 1.5rem + 4.4vw, 5.75rem);
+  line-height: 0.98;
+  letter-spacing: -0.02em;
+}
+
+@utility text-title {
+  font-family: var(--font-serif);
+  font-weight: 300;
+  font-size: clamp(1.875rem, 1.3rem + 2.1vw, 3.25rem);
+  line-height: 1.04;
+  letter-spacing: -0.012em;
+}
+
+@utility text-lead {
+  font-size: clamp(1.125rem, 1rem + 0.45vw, 1.3125rem);
+  line-height: 1.6;
+}
+
+/* Legenda de fotografia: discreta, como num editorial impresso. */
+@utility caption {
+  font-size: 0.8125rem;
+  line-height: 1.45;
+  letter-spacing: 0.01em;
+  color: var(--color-cinza);
+}
+
+/* Pétala: o recorte do lótus do logo, usado uma única vez (a foto do hero). */
+@utility petal {
+  --petal: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'%3E%3Cpath d='M0 100V22C0 10 28 3 50 0C72 3 100 10 100 22V100Z'/%3E%3C/svg%3E");
+  -webkit-mask: var(--petal) center / 100% 100% no-repeat;
+  mask: var(--petal) center / 100% 100% no-repeat;
+}
+
+@utility hairline {
+  height: 1px;
+  background: var(--line);
+}
+
+/* ── Componentes ────────────────────────────────────────────────────────── */
+@layer components {
+  .btn {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.7rem;
+    min-height: 3.5rem;
+    padding: 0 1.9rem;
+    border-radius: 999px;
+    font-size: 0.9688rem;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    overflow: hidden;
+    isolation: isolate;
+    white-space: nowrap;
+    transition:
+      color 0.5s var(--ease-out-expo),
+      transform 0.5s var(--ease-out-expo);
+  }
+  /* O preenchimento sobe de baixo, como uma pétala se abrindo. */
+  .btn::before {
+    content: '';
+    position: absolute;
+    inset: -1px;
+    z-index: -1;
+    background: var(--btn-fill);
+    transform: translateY(102%);
+    border-radius: 50% 50% 0 0 / 60% 60% 0 0;
+    transition:
+      transform 0.7s var(--ease-out-expo),
+      border-radius 0.7s var(--ease-out-expo);
+  }
+  .btn:hover::before,
+  .btn:focus-visible::before {
+    transform: translateY(0);
+    border-radius: 0;
+  }
+  .btn:active {
+    transform: scale(0.98);
+  }
+  .btn svg {
+    flex: none;
+    transition: transform 0.6s var(--ease-out-expo);
+  }
+  .btn:hover svg {
+    transform: rotate(-10deg) scale(1.08);
+  }
+
+  .btn-primary {
+    --btn-fill: var(--color-verde);
+    background: var(--color-floresta);
+    color: var(--color-papel);
+  }
+  .btn-rose {
+    --btn-fill: var(--color-papel);
+    background: var(--color-rosa);
+    color: var(--color-floresta);
+  }
+  .btn-outline {
+    --btn-fill: var(--color-floresta);
+    box-shadow: inset 0 0 0 1px var(--line);
+    color: var(--color-floresta);
+  }
+  .btn-outline:hover,
+  .btn-outline:focus-visible {
+    color: var(--color-papel);
+  }
+  .btn-outline-light {
+    --btn-fill: var(--color-papel);
+    box-shadow: inset 0 0 0 1px var(--line-light);
+    color: var(--color-papel);
+  }
+  .btn-outline-light:hover,
+  .btn-outline-light:focus-visible {
+    color: var(--color-floresta);
+  }
+
+  /* Link com sublinhado que se desenha da esquerda para a direita. */
+  .link-line {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55rem;
+    padding-block: 0.3rem;
+    background: linear-gradient(currentColor, currentColor) no-repeat left bottom / 100% 1px;
+    transition:
+      background-size 0.6s var(--ease-out-expo),
+      color 0.3s;
+  }
+  .link-line:hover {
+    background-size: 0% 1px;
+    background-position: right bottom;
+  }
+  .link-quiet {
+    background-size: 0% 1px;
+    background-position: right bottom;
+  }
+  .link-quiet:hover,
+  .link-quiet:focus-visible {
+    background-size: 100% 1px;
+    background-position: left bottom;
+  }
+}
+
+/* Grão de papel bem leve, só em telas grandes (custo zero no celular). */
+@media (min-width: 1024px) {
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    pointer-events: none;
+    opacity: 0.035;
+    mix-blend-mode: multiply;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+}
+
+/* ── Estados iniciais das animações (só com JS e sem reduced-motion) ─────── */
+.js-motion [data-hero-item] {
+  opacity: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}

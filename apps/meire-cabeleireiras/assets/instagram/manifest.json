@@ -1,0 +1,42 @@
+{
+  "fonte": "https://www.instagram.com/meire.cabeleireiras/",
+  "perfil": "Meire Costa (@meire.cabeleireiras)",
+  "coletado_em": "2026-10-20",
+  "observacao": "Capas dos reels publicados pela própria Meire Cabeleireiras (640×1136, maior resolução pública). Datas derivadas do ID de cada post. O restante do perfil exige login; para ampliar a galeria, adicione aqui os originais enviados pela Meire e rode `npm run images`.",
+  "arquivos": {
+    "escova-modelada.jpg": {
+      "post": "https://www.instagram.com/reel/Ddd-edAMCc5/",
+      "data": "2026-09-19",
+      "legenda": "#escovamodelada ⭐️"
+    },
+    "correcao-de-cor.jpg": {
+      "post": "https://www.instagram.com/reel/DeCItbnsSLG/",
+      "data": "2026-10-03",
+      "legenda": "Cabelo em transformação, um antes e depois de tirar o fôlego ✨ #correcaodecor"
+    },
+    "mechas-loiras-corte-degrade.jpg": {
+      "post": "https://www.instagram.com/reel/Ddd98uLsM2n/",
+      "data": "2026-09-19",
+      "legenda": "#cortedegrade #cabelolongo #louromanteiga #mechasloiras ✨😍"
+    },
+    "loiro-manteiga-corte-modelagem.jpg": {
+      "post": "https://www.instagram.com/reel/DaLrdMfss_h/",
+      "data": "2026-06-29",
+      "legenda": "Loiro manteiga curte e modelagem ❣️"
+    },
+    "liso.jpg": {
+      "post": "https://www.instagram.com/reel/DaLonpMswAa/",
+      "data": "2026-06-29",
+      "legenda": "(sem legenda)"
+    },
+    "loiro-bege-dourado.jpg": {
+      "post": "https://www.instagram.com/reel/DYDhVvisy0g/",
+      "data": "2026-05-07",
+      "legenda": "❣️Loiro  beje dourado ,o melhor ton  p camuflar cabelos brancos. Obrigada @maosdeouro.croche"
+    },
+    "logo-perfil.jpg": {
+      "post": "foto de perfil",
+      "legenda": "Logo: flor de lótus em traço, \"Meire Cabeleireiras\" em letra cursiva e o lema \"A arte na forma de beleza\"."
+    }
+  }
+}
