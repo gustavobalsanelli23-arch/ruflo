@@ -3,7 +3,7 @@ import { StrictMode } from 'react';
 import { renderToString } from 'react-dom/server';
 import { App } from './App';
 import { SITE_URL, business, fullAddress, hasWhatsapp, mapsUrl, pendingBusinessData } from './config/site';
-import { copy, photos, services, servicesConfirmed, works } from './data/content';
+import { photos, services, transformations, works } from './data/content';
 import { hasPhoto, meta, srcSet } from './components/Picture';
 
 export { SITE_URL };
@@ -17,9 +17,9 @@ export function render() {
 }
 
 /**
- * Schema.org (JSON-LD) só com informações verificadas. Telefone e endereço
- * entram automaticamente quando forem preenchidos em config/site.ts; os
- * serviços, só depois de confirmados.
+ * Schema.org (JSON-LD) só com informações verificadas (Instagram oficial).
+ * Telefone e horários entram automaticamente quando forem preenchidos em
+ * config/site.ts.
  */
 export function schema() {
   const { address } = business;
@@ -27,19 +27,20 @@ export function schema() {
     '@type': 'HairSalon',
     '@id': `${SITE_URL}/#barbearia`,
     name: business.name,
-    slogan: copy.phrase,
-    description: `Barbearia ${business.name}.`,
+    alternateName: business.alias,
+    slogan: business.tagline,
+    description: `${business.name}: ${services.map((s) => s.name.toLowerCase()).join(', ')}.`,
     url: `${SITE_URL}/`,
     image: [`${SITE_URL}/og.jpg`],
     logo: `${SITE_URL}/icon-512.png`,
     sameAs: [business.instagram.url],
+    knowsAbout: services.map((s) => s.name),
   };
-  if (servicesConfirmed) shop.knowsAbout = services.map((s) => s.name);
   if (hasWhatsapp) shop.telephone = `+${business.whatsapp.number}`;
   if (address) {
     shop.address = {
       '@type': 'PostalAddress',
-      streetAddress: address.street,
+      streetAddress: address.district ? `${address.street} - ${address.district}` : address.street,
       addressLocality: address.city,
       addressRegion: address.state,
       postalCode: address.postalCode,
@@ -47,7 +48,7 @@ export function schema() {
     };
     shop.hasMap = mapsUrl(address);
     shop.areaServed = { '@type': 'City', name: `${address.city}, ${address.state}` };
-    shop.description = `Barbearia ${business.name}. ${fullAddress(address)}.`;
+    shop.description = `${shop.description} ${fullAddress(address)}.`;
   }
 
   return JSON.stringify({
@@ -77,12 +78,18 @@ export function heroPreload() {
 
 /** O que ainda falta para o site estar completo (avisos do build). */
 export function pending() {
-  const missingPhotos = [photos.hero, photos.ambiente, photos.detalhe, ...works.map((w) => w.photo)]
+  const missingPhotos = [
+    photos.hero,
+    photos.ambiente,
+    photos.detalhe,
+    ...works.map((w) => w.photo),
+    ...transformations.flatMap((t) => [t.before, t.after]),
+  ]
     .filter((slot) => !hasPhoto(slot))
     .map((slot) => slot.id);
   return {
     data: pendingBusinessData(),
     photos: missingPhotos,
-    services: servicesConfirmed ? [] : ['lista de serviços (provisória)'],
+    services: services.some((s) => s.price) ? [] : ['preços e duração dos serviços (não publicados)'],
   };
 }

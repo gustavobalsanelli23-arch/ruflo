@@ -48,14 +48,14 @@ export function Header() {
     <>
       <a
         href="#conteudo"
-        className="label fixed top-3 left-3 z-[80] -translate-y-24 bg-osso px-5 py-3 text-carvao focus:translate-y-0"
+        className="label fixed top-3 left-3 z-[80] -translate-y-24 bg-creme px-5 py-3 text-cafe focus:translate-y-0"
       >
         Pular para o conteúdo
       </a>
       <header
         ref={bar}
         data-scrolled={scrolled || undefined}
-        className="fixed inset-x-0 top-0 z-50 transition-[transform,background-color,box-shadow] duration-700 ease-[var(--ease-out-expo)] data-[hidden]:-translate-y-full data-[scrolled]:bg-carvao/82 data-[scrolled]:shadow-[0_1px_0_var(--line-dark)] data-[scrolled]:backdrop-blur-md"
+        className="fixed inset-x-0 top-0 z-50 transition-[transform,background-color,box-shadow] duration-700 ease-[var(--ease-out-expo)] data-[hidden]:-translate-y-full data-[scrolled]:bg-cafe/82 data-[scrolled]:shadow-[0_1px_0_var(--line-dark)] data-[scrolled]:backdrop-blur-md"
       >
         <div className="container-x flex h-[var(--header-h)] items-center justify-between gap-6">
           <SectionLink href="#topo" data-intro="nav" className="-ml-1 rounded-sm p-1 text-[1.3rem] lg:text-[1.45rem]">
@@ -93,8 +93,8 @@ export function Header() {
             >
               Menu
               <span aria-hidden="true" className="flex h-10 w-10 flex-col items-center justify-center gap-[6px] shadow-[inset_0_0_0_1px_var(--line-dark)]">
-                <span className="h-px w-[18px] bg-osso" />
-                <span className="h-px w-[18px] bg-osso" />
+                <span className="h-px w-[18px] bg-creme" />
+                <span className="h-px w-[18px] bg-creme" />
               </span>
             </button>
           </div>
@@ -180,7 +180,7 @@ function MobileMenu({ open, onClose }: { open: boolean; onClose: () => void }) {
       aria-label="Menu"
       aria-hidden={!open}
       inert={!open}
-      className="invisible fixed inset-0 z-[60] overflow-hidden bg-grafite text-osso lg:hidden"
+      className="invisible fixed inset-0 z-[60] overflow-hidden bg-torra text-creme lg:hidden"
     >
       <div data-menu-inner className="flex h-full flex-col overflow-y-auto overscroll-contain">
         <div className="container-x flex h-[var(--header-h)] shrink-0 items-center justify-between">
@@ -189,9 +189,9 @@ function MobileMenu({ open, onClose }: { open: boolean; onClose: () => void }) {
           </span>
           <button ref={closeBtn} type="button" onClick={onClose} className="label flex h-11 items-center gap-3 pr-0.5 pl-3 text-[0.7rem]">
             Fechar
-            <span aria-hidden="true" className="relative flex h-10 w-10 items-center justify-center bg-osso">
-              <span className="absolute h-px w-[18px] rotate-45 bg-carvao" />
-              <span className="absolute h-px w-[18px] -rotate-45 bg-carvao" />
+            <span aria-hidden="true" className="relative flex h-10 w-10 items-center justify-center bg-creme">
+              <span className="absolute h-px w-[18px] rotate-45 bg-cafe" />
+              <span className="absolute h-px w-[18px] -rotate-45 bg-cafe" />
             </span>
           </button>
         </div>
@@ -208,7 +208,7 @@ function MobileMenu({ open, onClose }: { open: boolean; onClose: () => void }) {
                   <span data-menu-line className="block">
                     {item.label}
                   </span>
-                  <span data-menu-line aria-hidden="true" className="label block text-fumo tabular-nums">
+                  <span data-menu-line aria-hidden="true" className="label block text-tabaco tabular-nums">
                     0{i}
                   </span>
                 </SectionLink>
@@ -219,13 +219,13 @@ function MobileMenu({ open, onClose }: { open: boolean; onClose: () => void }) {
 
         <div className="container-x shrink-0 space-y-5 pb-[max(2rem,env(safe-area-inset-bottom))]">
           <div data-menu-fade>
-            <BookingLink className="btn btn-light w-full" />
+            <BookingLink className="btn btn-gold w-full" />
           </div>
           <div data-menu-fade className="flex items-center justify-between">
-            <InstagramLink className="link-line link-quiet label text-[0.7rem] text-fumo">
+            <InstagramLink className="link-line link-quiet label text-[0.7rem] text-tabaco">
               <InstagramIcon size={16} />@{business.instagram.handle}
             </InstagramLink>
-            <ArrowUpRight size={16} strokeWidth={1.5} className="text-fumo" aria-hidden="true" />
+            <ArrowUpRight size={16} strokeWidth={1.5} className="text-tabaco" aria-hidden="true" />
           </div>
         </div>
       </div>

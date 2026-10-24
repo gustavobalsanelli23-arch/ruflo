@@ -47,8 +47,10 @@ const newPage = async (opts = {}, { go = true } = {}) => {
   const page = await ctx.newPage();
   page.problems = [];
   page.on('pageerror', (e) => page.problems.push(`pageerror: ${e.message}`));
-  page.on('console', (m) => ['error', 'warning'].includes(m.type()) && page.problems.push(`console: ${m.text()}`));
-  page.on('response', (r) => r.status() >= 400 && page.problems.push(`HTTP ${r.status()} ${r.url()}`));
+  // O mapa é um iframe do Google: o que acontece lá dentro não é do site.
+  const ours = (url) => !url || url.startsWith(BASE);
+  page.on('console', (m) => ['error', 'warning'].includes(m.type()) && ours(m.location().url) && page.problems.push(`console: ${m.text()}`));
+  page.on('response', (r) => r.status() >= 400 && ours(r.url()) && page.problems.push(`HTTP ${r.status()} ${r.url()}`));
   if (go) await page.goto(BASE, { waitUntil: 'load' });
   return page;
 };
@@ -66,13 +68,14 @@ console.log('\nHTML pré-renderizado');
 
 await test('Conteúdo chega no HTML sem depender de JavaScript', async () => {
   const html = await (await fetch(BASE)).text();
-  for (const text of ['Fer', 'barber', 'Brandt', 'Corte com assinatura.', 'Serviços', 'Corte e barba', 'Trabalho', 'ferbarber.brandt']) {
+  for (const text of ['Fer', 'barber', 'Brandt', 'Barbearia Brandt', 'Barba e cabelo', 'Só chegar e cortar.', 'Social na tesoura', 'Leopoldo Koprowski, 1488', 'ferbarber.brandt']) {
     assert(html.includes(text), `faltando no HTML: ${text}`);
   }
   assert(!html.includes('__SITE_URL__'), 'marcador __SITE_URL__ não substituído');
   assert(!html.includes('<!--preload-->') && !html.includes('<!--schema-->'), 'marcadores do head não substituídos');
   assert(/<style>[^<]{1000,}/.test(html), 'CSS não foi embutido');
   assert(/rel="preload" as="font"[^>]+archivo/.test(html), 'fonte do título sem preload');
+  assert(/rel="preload" as="image"[^>]+hero-/.test(html), 'foto do hero sem preload');
 });
 
 await test('robots.txt e sitemap.xml publicados', async () => {
@@ -139,9 +142,12 @@ await test('SEO: título, descrição, canonical e Open Graph', async () => {
 await test('Schema.org só com dados verificados', async () => {
   const data = await desk.evaluate(() => JSON.parse(document.querySelector('script[type="application/ld+json"]').textContent));
   const shop = data['@graph'].find((n) => n['@type'] === 'HairSalon');
-  assert(shop?.name === 'Fer Barber Brandt', 'HairSalon ausente');
+  assert(shop?.name === 'Barbearia Brandt' && shop.alternateName === 'Fer Barber Brandt', 'HairSalon ausente');
   assert(shop.sameAs.includes(PROFILE), 'sameAs Instagram');
-  for (const key of ['telephone', 'address', 'openingHours', 'knowsAbout', 'priceRange']) {
+  assert(shop.address?.streetAddress.includes('Leopoldo Koprowski, 1488'), 'endereço publicado ausente');
+  assert(shop.address.addressLocality === 'Benedito Novo' && shop.address.addressRegion === 'SC', 'cidade');
+  assert(!('postalCode' in shop.address) || shop.address.postalCode === undefined, 'CEP inventado');
+  for (const key of ['telephone', 'openingHours', 'openingHoursSpecification', 'priceRange', 'geo']) {
     assert(!(key in shop), `${key} inventado no schema`);
   }
 });
@@ -162,7 +168,7 @@ await test('Estrutura: um único h1, seções rotuladas e âncoras válidas', as
   assert(info.unlabeled.length === 0, `seções sem título: ${info.unlabeled}`);
   assert(info.missing.length === 0, `âncoras sem destino: ${info.missing.join(', ')}`);
   assert(info.imgsNoAlt === 0, 'imagens sem alt');
-  for (const id of ['topo', 'sobre', 'servicos', 'galeria', 'agendar', 'contato']) {
+  for (const id of ['topo', 'sobre', 'servicos', 'antes-depois', 'galeria', 'agendar', 'contato']) {
     assert(info.sections.includes(id), `seção ausente: ${id}`);
   }
 });
@@ -202,7 +208,24 @@ await test('Serviços: a linha inteira leva ao agendamento daquele serviço', as
   assert(Math.abs(row.width - area.width) < 2 && Math.abs(row.height - area.height) < 2, 'o link não cobre a linha');
   await desk.waitForTimeout(600);
   const bg = await desk.evaluate(() => getComputedStyle(document.getElementById('servicos')).backgroundColor);
-  assert(bg === 'rgb(235, 230, 221)', `seção de serviços não ficou clara: ${bg}`);
+  assert(bg === 'rgb(233, 219, 189)', `seção de serviços não ficou no pergaminho: ${bg}`);
+});
+
+await test('Antes e depois: o comparador responde ao teclado e ao arraste', async () => {
+  const slider = desk.getByRole('slider', { name: /Comparar antes e depois/ }).first();
+  await slider.scrollIntoViewIfNeeded();
+  await desk.waitForTimeout(3200);
+  const pos = () => desk.evaluate(() => getComputedStyle(document.querySelector('#antes-depois li [style*="--pos"]')).getPropertyValue('--pos').trim());
+  assert((await pos()) === '50%', `posição inicial: ${await pos()}`);
+  await slider.focus();
+  for (let i = 0; i < 10; i++) await desk.keyboard.press('ArrowRight');
+  assert((await pos()) === '60%', `teclado: ${await pos()}`);
+  const box = await slider.boundingBox();
+  await desk.mouse.click(box.x + box.width * 0.2, box.y + box.height / 2);
+  const v = parseFloat(await pos());
+  assert(v > 12 && v < 28, `clique a 20%: ${v}`);
+  const imgs = await desk.evaluate(() => [...document.querySelectorAll('#antes-depois img')].map((i) => i.alt));
+  assert(imgs.length === 4 && imgs.some((a) => a.startsWith('Antes')) && imgs.some((a) => a.startsWith('Depois')), `imagens: ${imgs}`);
 });
 
 await test('Galeria: lightbox abre, navega com setas e fecha com Esc devolvendo o foco', async () => {
@@ -213,14 +236,14 @@ await test('Galeria: lightbox abre, navega com setas e fecha com Esc devolvendo 
   const dialog = desk.getByRole('dialog', { name: 'Foto ampliada' });
   await dialog.waitFor({ state: 'visible' });
   await desk.waitForTimeout(700);
-  assert((await dialog.innerText()).includes('01 / 08'), 'contador inicial');
+  assert((await dialog.innerText()).includes('01 / 06'), 'contador inicial');
   await desk.keyboard.press('ArrowRight');
   await desk.waitForTimeout(400);
-  assert((await dialog.innerText()).includes('02 / 08'), 'seta direita');
+  assert((await dialog.innerText()).includes('02 / 06'), 'seta direita');
   await desk.keyboard.press('ArrowLeft');
   await desk.keyboard.press('ArrowLeft');
   await desk.waitForTimeout(400);
-  assert((await dialog.innerText()).includes('08 / 08'), 'volta do primeiro para o último');
+  assert((await dialog.innerText()).includes('06 / 06'), 'volta do primeiro para o último');
   assert(await dialog.getByRole('link', { name: /Instagram|post/ }).isVisible(), 'link para o Instagram');
   await desk.keyboard.press('Escape');
   await desk.waitForTimeout(700);
@@ -245,6 +268,15 @@ await test('Todas as seções ficam visíveis ao rolar (nenhuma revelação trav
       .map((el) => el.closest('section')?.id + ':' + el.textContent.slice(0, 30)),
   );
   assert(stuck.length === 0, `ainda escondidos: ${stuck.join(' | ')}`);
+});
+
+await test('Contato: mapa do endereço publicado carrega sob demanda', async () => {
+  const frame = desk.locator('#contato iframe');
+  await desk.locator('#contato').scrollIntoViewIfNeeded();
+  await desk.waitForTimeout(800);
+  assert((await frame.count()) === 1, 'mapa ausente');
+  const src = await frame.getAttribute('src');
+  assert(decodeURIComponent(src).includes('Rua Leopoldo Koprowski, 1488, Alto Benedito Novo, Benedito Novo - SC'), `mapa: ${src}`);
 });
 
 await test('Sem erros de console, sem 404 e sem imagens quebradas', async () => {

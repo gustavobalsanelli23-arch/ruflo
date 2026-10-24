@@ -9,6 +9,7 @@ import { Hero } from './components/Hero';
 import { Manifesto } from './components/Manifesto';
 import { MobileCta } from './components/MobileCta';
 import { Services } from './components/Services';
+import { Transformations } from './components/Transformations';
 import { ScrollTrigger, setupGsap, startSmoothScroll } from './lib/motion';
 
 export function App() {
@@ -31,6 +32,7 @@ export function App() {
         <Manifesto />
         <About />
         <Services />
+        <Transformations />
         <Gallery />
         <Booking />
         <Contact />

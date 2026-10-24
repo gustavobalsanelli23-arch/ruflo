@@ -17,7 +17,7 @@ export function Contact() {
   return (
     <section ref={root} id="contato" aria-labelledby="contato-titulo" className="section-y relative">
       <div className="container-x">
-        <SectionLabel n="06" className="text-fumo">
+        <SectionLabel n="07" className="text-tabaco">
           Localização e contato
         </SectionLabel>
 
@@ -34,7 +34,7 @@ export function Contact() {
               rel="noopener noreferrer"
               className="group mt-10 inline-flex max-w-full items-center gap-4 lg:mt-14"
             >
-              <InstagramIcon size={28} className="shrink-0 text-fumo transition-colors duration-500 group-hover:text-osso" />
+              <InstagramIcon size={28} className="shrink-0 text-tabaco transition-colors duration-500 group-hover:text-creme" />
               <span className="link-line link-quiet min-w-0 truncate text-[clamp(1.6rem,0.9rem+3.2vw,3.75rem)] leading-none font-bold font-stretch-[72%]">
                 @{business.instagram.handle}
               </span>
@@ -46,7 +46,7 @@ export function Contact() {
           <div className={address ? 'lg:col-span-5 lg:row-start-2' : 'lg:col-[9/span_4] lg:self-end'}>
             <dl className={`grid gap-x-10 gap-y-8 border-t border-[var(--line-dark)] pt-8 sm:grid-cols-2 ${address ? '' : 'lg:grid-cols-1'}`}>
               <div data-reveal="fade">
-                <dt className="label text-fumo">Mensagens</dt>
+                <dt className="label text-tabaco">Mensagens</dt>
                 <dd className="mt-3 space-y-2">
                   <a href={business.instagram.direct} target="_blank" rel="noopener noreferrer" className="link-line flex w-fit">
                     Direct do Instagram
@@ -65,12 +65,12 @@ export function Contact() {
 
               {hours && (
                 <div data-reveal="fade" data-delay="0.08">
-                  <dt className="label text-fumo">Horários</dt>
+                  <dt className="label text-tabaco">Horários</dt>
                   <dd className="mt-3 space-y-1">
                     {hours.map((row) => (
                       <p key={row.days} className="flex justify-between gap-6">
                         <span>{row.days}</span>
-                        <span className="text-osso/75 tabular-nums">{row.hours}</span>
+                        <span className="text-creme/75 tabular-nums">{row.hours}</span>
                       </p>
                     ))}
                   </dd>
@@ -79,10 +79,10 @@ export function Contact() {
 
               {address && (
                 <div data-reveal="fade" data-delay="0.16" className="sm:col-span-2">
-                  <dt className="label text-fumo">Endereço</dt>
+                  <dt className="label text-tabaco">Endereço</dt>
                   <dd className="mt-3">
                     <address className="not-italic">{fullAddress(address)}</address>
-                    {address.reference && <p className="mt-1 text-fumo">{address.reference}</p>}
+                    {address.reference && <p className="mt-1 text-tabaco">{address.reference}</p>}
                     <a href={mapsUrl(address)} target="_blank" rel="noopener noreferrer" className="link-line label mt-3 text-[0.7rem]">
                       Abrir no Google Maps
                       <ArrowUpRight size={14} strokeWidth={1.5} aria-hidden="true" />
@@ -131,7 +131,7 @@ function MapEmbed({ src, title }: { src: string; title: string }) {
 
   return (
     <div ref={box} data-reveal="fade" className="relative aspect-[4/3] w-full lg:aspect-auto lg:h-full lg:min-h-[28rem]">
-      <div className="absolute inset-0 overflow-hidden bg-chumbo">
+      <div className="absolute inset-0 overflow-hidden bg-nogueira">
         {load && (
           <iframe
             src={src}
@@ -142,7 +142,7 @@ function MapEmbed({ src, title }: { src: string; title: string }) {
           />
         )}
       </div>
-      <span aria-hidden="true" className="crop-marks [--mark-color:rgb(235_230_221/0.35)]" />
+      <span aria-hidden="true" className="crop-marks [--mark-color:rgb(239_227_201/0.35)]" />
     </div>
   );
 }

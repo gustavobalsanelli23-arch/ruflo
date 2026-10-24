@@ -3,6 +3,7 @@
 // fotografias reais da barbearia, guardadas em assets/fotos/.
 //
 // Uso: npm run images
+// Origem de cada foto (post, data, legenda): assets/fotos/manifest.json.
 // Cada arquivo de assets/fotos/ vira o espaço de foto com o mesmo nome
 // (ex.: assets/fotos/hero.jpg → espaço "hero"; trabalho-03.jpg → "trabalho-03").
 // Os nomes possíveis estão em src/data/content.ts (photos e works).
@@ -25,16 +26,30 @@ const CROPS = {
 /** A foto do hero ocupa até ~60% de uma tela larga: precisa de larguras maiores. */
 const WIDTHS = { hero: [480, 800, 1200, 1600, 2000], default: [480, 800, 1200, 1600] };
 
-/** Ajuste leve e igual para todas: contraste de cinema, cor um pouco contida. Nada de retoque. */
+/**
+ * Ajuste leve e igual para todas (nada de retoque local): esquenta um pouco o
+ * branco frio da luz de janela, em direção ao marrom e creme do emblema, com
+ * contraste de cinema e cor um pouco contida.
+ */
 function grade(pipeline) {
-  return pipeline.modulate({ saturation: 0.9 }).linear(1.05, -5);
+  return pipeline
+    .recomb([
+      [1.03, 0.02, 0],
+      [0, 1, 0],
+      [0, 0.02, 0.9],
+    ])
+    .modulate({ saturation: 0.9 })
+    .linear(1.06, -7);
 }
 
 const hex = (n) => n.toString(16).padStart(2, '0');
 
 await rm(OUT, { recursive: true, force: true });
 await mkdir(OUT, { recursive: true });
-const files = (await readdir(SRC).catch(() => [])).filter((f) => /\.(jpe?g|png|webp|avif|tiff?)$/i.test(extname(f)));
+// logo-perfil.jpg é só referência de paleta (100×100): não vira imagem do site.
+const files = (await readdir(SRC).catch(() => [])).filter(
+  (f) => /\.(jpe?g|png|webp|avif|tiff?)$/i.test(extname(f)) && !f.startsWith('logo-'),
+);
 const manifest = {};
 
 for (const file of files.sort()) {

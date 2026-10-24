@@ -53,6 +53,15 @@ describe('agendamento', () => {
     expect(business.instagram.url).toBe('https://www.instagram.com/ferbarber.brandt/');
     expect(booking().channel).toBe('instagram');
   });
+
+  it('nome, faixa e endereço são os publicados pela barbearia', () => {
+    expect(business.name).toBe('Barbearia Brandt');
+    expect(business.tagline).toBe('Barba e cabelo');
+    expect(business.address && fullAddress(business.address)).toBe(
+      'Rua Leopoldo Koprowski, 1488, Alto Benedito Novo, Benedito Novo - SC',
+    );
+    expect(business.address?.reference).toBe('Em frente ao posto Zummcar');
+  });
 });
 
 describe('formatação', () => {
@@ -74,17 +83,16 @@ describe('formatação', () => {
 });
 
 describe('nada inventado', () => {
-  it('WhatsApp, endereço, horários e plataforma continuam vazios até serem confirmados', () => {
+  it('WhatsApp, horários e plataforma continuam vazios até serem confirmados', () => {
     expect(business.whatsapp.number).toBe('');
-    expect(business.address).toBeNull();
     expect(business.hours).toBeNull();
     expect(business.bookingPlatform).toBeNull();
+    expect(business.address?.postalCode).toBeUndefined();
   });
 
   it('o build lista o que falta confirmar', () => {
-    expect(pendingBusinessData()).toEqual(
-      expect.arrayContaining(['WhatsApp', 'endereço', 'horários de funcionamento']),
-    );
+    expect(pendingBusinessData()).toEqual(expect.arrayContaining(['WhatsApp', 'horários de funcionamento']));
+    expect(pendingBusinessData()).not.toContain('endereço');
     const filled = {
       ...business,
       whatsapp: { ...business.whatsapp, number: '5547912345678' },

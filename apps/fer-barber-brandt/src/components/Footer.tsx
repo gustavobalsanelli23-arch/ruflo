@@ -1,5 +1,5 @@
 import { ArrowUp } from 'lucide-react';
-import { business } from '../config/site';
+import { business, fullAddress } from '../config/site';
 import { Wordmark } from './Header';
 import { InstagramLink, NAV, SectionLink } from './ui';
 
@@ -39,11 +39,11 @@ export function Footer() {
           <Wordmark />
         </p>
 
-        <div className="mt-10 flex flex-col gap-2 text-[0.8125rem] text-fumo sm:flex-row sm:justify-between">
+        <div className="mt-10 flex flex-col gap-2 text-[0.8125rem] text-tabaco sm:flex-row sm:justify-between">
           <p>
-            © <span suppressHydrationWarning>{new Date().getFullYear()}</span> {business.name}
+            © <span suppressHydrationWarning>{new Date().getFullYear()}</span> {business.name} · @{business.instagram.handle}
           </p>
-          <p>@{business.instagram.handle}</p>
+          <p>{business.address ? fullAddress(business.address) : `@${business.instagram.handle}`}</p>
         </div>
       </div>
     </footer>

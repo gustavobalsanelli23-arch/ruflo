@@ -1,14 +1,20 @@
 import { describe, expect, it } from 'vitest';
-import { type PhotoSlot, copy, monthYear, photos, services, workTitle, works } from '../src/data/content';
-import { COLUMN_WEIGHTS, toColumns } from '../src/lib/gallery';
+import { type PhotoSlot, copy, monthYear, photos, services, transformations, workTitle, works } from '../src/data/content';
+import { COLUMN_OFFSETS, COLUMN_WEIGHTS, toColumns } from '../src/lib/gallery';
 import { hasPhoto, ratioOf } from '../src/components/Picture';
 
-const slots: PhotoSlot[] = [...Object.values(photos), ...works.map((w) => w.photo)];
+const slots: PhotoSlot[] = [
+  ...Object.values(photos),
+  ...works.map((w) => w.photo),
+  ...transformations.flatMap((t) => [t.before, t.after]),
+];
 
 describe('fotos', () => {
-  it('cada espaço de foto tem id único e pauta', () => {
-    const ids = slots.map((s) => s.id);
-    expect(new Set(ids).size).toBe(ids.length);
+  it('cada espaço de foto tem pauta, e cada lista tem ids únicos', () => {
+    for (const list of [works.map((w) => w.photo), transformations.flatMap((t) => [t.before, t.after])]) {
+      const ids = list.map((s) => s.id);
+      expect(new Set(ids).size).toBe(ids.length);
+    }
     for (const slot of slots) {
       expect(slot.brief.length).toBeGreaterThan(10);
       expect(slot.ratio).toBeGreaterThan(0);
@@ -21,8 +27,21 @@ describe('fotos', () => {
     }
   });
 
-  it('sem arquivo, a proporção é a da placa', () => {
-    expect(ratioOf(photos.hero)).toBe(photos.hero.ratio);
+  it('todas as fotos do site são reais (há arquivo para cada espaço)', () => {
+    const missing = slots.filter((s) => !hasPhoto(s)).map((s) => s.id);
+    expect(missing).toEqual([]);
+  });
+
+  it('a proporção vem da foto real', () => {
+    expect(ratioOf(photos.hero)).toBeCloseTo(1, 2);
+    expect(ratioOf(photos.ambiente)).toBeCloseTo(640 / 1136, 2);
+  });
+
+  it('galeria e antes e depois apontam para posts reais, com data', () => {
+    for (const item of [...works, ...transformations]) {
+      expect(item.post).toMatch(/^https:\/\/www\.instagram\.com\/(p|reel)\/[\w-]+\/$/);
+      expect(item.date).toMatch(/^2026-\d{2}-\d{2}$/);
+    }
   });
 });
 
@@ -39,16 +58,17 @@ describe('galeria', () => {
   it('as colunas ficam com alturas parecidas', () => {
     const count = 3;
     const weights = COLUMN_WEIGHTS[count];
+    const offsets = COLUMN_OFFSETS[count];
     const heights = toColumns(works, count).map((col, c) =>
-      col.reduce((h, w) => h + weights[c] / ratioOf(w.photo), 0),
+      col.reduce((h, w) => h + weights[c] / ratioOf(w.photo), weights[c] * offsets[c]),
     );
     const tallest = Math.max(...heights);
-    expect(Math.min(...heights) / tallest).toBeGreaterThan(0.55);
+    expect(Math.min(...heights) / tallest).toBeGreaterThan(0.7);
   });
 
   it('título padrão numerado enquanto não houver legenda', () => {
-    expect(workTitle(works[0], 0)).toBe('Trabalho 01');
-    expect(workTitle({ ...works[0], title: 'Degradê' }, 0)).toBe('Degradê');
+    expect(workTitle({ photo: works[0].photo }, 0)).toBe('Trabalho 01');
+    expect(workTitle(works[0], 0)).toBe('Degradê na zero');
   });
 
   it('data por extenso em UTC', () => {
@@ -61,9 +81,10 @@ describe('textos e serviços', () => {
     expect(copy.manifesto.split('*').length % 2).toBe(1);
   });
 
-  it('serviços com id único e sem preço inventado', () => {
+  it('serviços com id único, com fonte e sem preço inventado', () => {
     expect(new Set(services.map((s) => s.id)).size).toBe(services.length);
     for (const s of services) {
+      expect(s.source.length).toBeGreaterThan(10);
       expect(s.price).toBeUndefined();
       expect(s.duration).toBeUndefined();
     }

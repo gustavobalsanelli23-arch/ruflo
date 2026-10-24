@@ -1,11 +1,14 @@
-// Fonte única dos dados da Fer Barber Brandt. Para mudar WhatsApp, endereço,
-// horários, plataforma de agendamento ou o domínio do site, altere só este arquivo.
+// Fonte única dos dados da barbearia. Para mudar WhatsApp, endereço, horários,
+// plataforma de agendamento ou o domínio do site, altere só este arquivo.
 //
-// VERIFICADO: o nome da marca e o perfil oficial no Instagram (@ferbarber.brandt).
-// Todo o resto ficou como PLACEHOLDER (null ou vazio), porque o perfil não pôde
-// ser lido a partir do ambiente de desenvolvimento e nenhuma outra fonte pública
-// da barbearia foi encontrada. O site esconde o que não estiver preenchido e
-// nunca inventa nada no lugar.
+// VERIFICADO no Instagram oficial (@ferbarber.brandt) em 24/10/2026:
+//  - nome do perfil e do emblema: "Barbearia Brandt" (faixa: "Barba e cabelo");
+//  - endereço, nas legendas de 29/09 e 14/10/2026: "Alto Benedito, rua Leopoldo
+//    Koprowski - 1488 (em frente ao posto zummcar)", com marcação de local
+//    "Alto Benedito Novo" — bairro de Benedito Novo (SC);
+//  - canais: "me manda uma mensagem!" (Direct) e "só chegar!".
+// WhatsApp, horários, CEP e plataforma de agendamento NÃO estão públicos e
+// ficam como PLACEHOLDER: o site esconde o que falta e não inventa nada.
 
 /** PLACEHOLDER: endereço público definitivo (canonical, Open Graph, sitemap). */
 export const SITE_URL = 'https://fer-barber-brandt.vercel.app';
@@ -36,8 +39,13 @@ export interface BookingPlatform {
 }
 
 export interface Business {
+  /** Nome oficial (perfil do Instagram e emblema). */
   name: string;
-  /** Como o barbeiro é chamado nos textos e na mensagem do WhatsApp. */
+  /** Como o site assina a marca (o @ do Instagram): FER barber BRANDT. */
+  alias: string;
+  /** Faixa do emblema. */
+  tagline: string;
+  /** Como o barbeiro é chamado nas mensagens (o "Fer" de @ferbarber). */
   barber: string;
   instagram: { handle: string; url: string; direct: string };
   whatsapp: { number: string; message: string };
@@ -47,7 +55,9 @@ export interface Business {
 }
 
 export const business: Business = {
-  name: 'Fer Barber Brandt',
+  name: 'Barbearia Brandt',
+  alias: 'Fer Barber Brandt',
+  tagline: 'Barba e cabelo',
   barber: 'Fer',
   instagram: {
     handle: 'ferbarber.brandt',
@@ -66,8 +76,13 @@ export const business: Business = {
   },
   /** PLACEHOLDER: ex.: { name: 'Booksy', url: 'https://booksy.com/…' }. */
   bookingPlatform: null,
-  /** PLACEHOLDER: preencha para exibir endereço, mapa e dados estruturados. */
-  address: null,
+  address: {
+    street: 'Rua Leopoldo Koprowski, 1488',
+    district: 'Alto Benedito Novo',
+    city: 'Benedito Novo',
+    state: 'SC',
+    reference: 'Em frente ao posto Zummcar',
+  },
   /** PLACEHOLDER: ex.: [{ days: 'Terça a sexta', hours: '9h às 19h' }, { days: 'Sábado', hours: '8h às 14h' }] */
   hours: null,
 };

@@ -17,7 +17,7 @@ export function About() {
     <section ref={root} id="sobre" aria-labelledby="sobre-titulo" className="section-y relative">
       <div className="container-x grid grid-cols-1 gap-y-16 lg:grid-cols-12 lg:gap-x-6">
         <div className="lg:col-span-12">
-          <SectionLabel n="02" className="text-fumo">
+          <SectionLabel n="02" className="text-tabaco">
             Sobre
           </SectionLabel>
           <h2 id="sobre-titulo" className="text-display mt-8 lg:mt-10">
@@ -59,9 +59,9 @@ export function About() {
         {/* Texto */}
         <div className="pt-16 lg:col-[9/span_4] lg:row-start-2 lg:self-end lg:pt-0 lg:pb-[6%]">
           <div data-reveal="rule" className="hairline" />
-          <div className="mt-8 space-y-5 text-osso/78">
+          <div className="mt-8 space-y-5 text-creme/78">
             {copy.about.paragraphs.map((p, i) => (
-              <p key={i} data-reveal="fade" data-delay={i * 0.1} className={i === 0 ? 'text-lead text-osso' : ''}>
+              <p key={i} data-reveal="fade" data-delay={i * 0.1} className={i === 0 ? 'text-lead text-creme' : ''}>
                 {p}
               </p>
             ))}

@@ -1,10 +1,10 @@
 import { useRef } from 'react';
-import { business } from '../config/site';
-import { copy, photos } from '../data/content';
+import { copy, monthYear, photos } from '../data/content';
 import { useGsap } from '../hooks/useGsap';
 import { gsap } from '../lib/motion';
+import { Seal, Star } from './Emblem';
 import { hasPhoto, Picture } from './Picture';
-import { BookingLink, InstagramLink, Scale, SectionLink } from './ui';
+import { BookingLink, Scale, SectionLink } from './ui';
 
 /**
  * Primeira dobra: a fotografia à direita (no celular, no alto), o nome em
@@ -28,6 +28,8 @@ export function Hero() {
       const wide = window.matchMedia('(min-width: 1024px)').matches;
       gsap.to(q('[data-hero-media]'), { yPercent: wide ? 10 : 6, scale: 1.04, ease: 'none', scrollTrigger: scrub });
       gsap.to(q('[data-hero-content]'), { y: wide ? -90 : -40, opacity: 0.25, ease: 'none', scrollTrigger: { ...scrub } });
+      // O selo gira devagar enquanto a página desce (parado com movimento reduzido).
+      gsap.to(q('[data-seal-ring]'), { rotation: 140, transformOrigin: '50% 50%', ease: 'none', scrollTrigger: { ...scrub, end: 'bottom 20%' } });
     });
     return () => mm.revert();
   }, root);
@@ -59,15 +61,22 @@ export function Hero() {
           {/* Véu de leitura: o nome atravessa a foto sem perder contraste. */}
           <div
             aria-hidden="true"
-            className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgb(12_12_11/0.55)_0%,transparent_22%,transparent_52%,var(--color-carvao)_100%)] lg:bg-[linear-gradient(90deg,rgb(12_12_11/0.62)_0%,transparent_42%),linear-gradient(0deg,rgb(12_12_11/0.4)_0%,transparent_30%)]"
+            className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgb(27_15_8/0.55)_0%,transparent_22%,transparent_52%,var(--color-cafe)_100%)] lg:bg-[linear-gradient(90deg,rgb(27_15_8/0.62)_0%,transparent_42%),linear-gradient(0deg,rgb(27_15_8/0.4)_0%,transparent_30%)]"
           />
         </div>
         <span data-intro="extra" aria-hidden="true" className="crop-marks hidden lg:block" />
-        <p data-intro="extra" className="label absolute top-full right-0 mt-4 hidden items-center gap-3 text-fumo lg:flex">
+        {/* O selo redondo do emblema, na borda da foto. */}
+        <div data-intro="extra" className="absolute right-[var(--gutter)] bottom-[12%] hidden w-28 md:block lg:right-auto lg:bottom-[9%] lg:left-0 lg:w-36 lg:-translate-x-1/2 xl:w-40">
+          <Seal />
+        </div>
+        <p data-intro="extra" className="label absolute top-full right-0 mt-4 hidden items-center gap-3 text-tabaco lg:flex">
           <span>Fig. 01</span>
           <span aria-hidden="true" className="h-px w-6 bg-current opacity-50" />
-          {realPhoto ? (
-            <InstagramLink className="link-line link-quiet">@{business.instagram.handle}</InstagramLink>
+          {realPhoto && photos.hero.post ? (
+            <a href={photos.hero.post} target="_blank" rel="noopener noreferrer" className="link-line link-quiet">
+              Degradê{photos.hero.date ? `, ${monthYear(photos.hero.date)}` : ''}
+              <span className="sr-only">(post no Instagram, abre em nova aba)</span>
+            </a>
           ) : (
             <span>Fotografia em breve</span>
           )}
@@ -79,11 +88,11 @@ export function Hero() {
         data-hero-content
         className="container-x relative z-10 flex min-h-[100svh] flex-col justify-end pt-[calc(var(--header-h)+38svh)] pb-[max(2rem,env(safe-area-inset-bottom))] md:pt-[calc(var(--header-h)+40svh)] lg:pt-[calc(var(--header-h)+2rem)] lg:pb-12"
       >
-        <p data-intro="eyebrow" className="label flex items-center gap-3 text-osso/80">
-          <span aria-hidden="true" className="h-1.5 w-1.5 bg-osso" />
+        <p data-intro="eyebrow" className="label flex flex-wrap items-center gap-x-3 gap-y-1 text-creme/85">
+          <Star size={9} className="text-latao" />
           {copy.eyebrow}
-          <span aria-hidden="true" className="h-px w-8 bg-current opacity-40" />
-          <InstagramLink className="link-line link-quiet">@{business.instagram.handle}</InstagramLink>
+          <Star size={9} className="text-latao" />
+          <span className="text-latao">{copy.tagline}</span>
         </p>
 
         <h1 id="hero-titulo" className="text-mega mt-4 text-[min(clamp(4.5rem,0.9rem+25vw,16.5rem),31svh)] lg:mt-6 lg:text-[min(16.5rem,14.5vw,25svh)] xl:text-[min(16.5rem,15.5vw,25svh)]">
@@ -103,22 +112,22 @@ export function Hero() {
           <p data-intro="text" className="serif text-[clamp(1.75rem,1.3rem+1.5vw,2.6rem)] leading-[1.05]">
             {copy.phrase}
           </p>
-          <p data-intro="text" className="text-lead mt-3 max-w-[36ch] text-osso/72 lg:max-w-[42ch]">
+          <p data-intro="text" className="text-lead mt-3 max-w-[36ch] text-creme/72 lg:max-w-[42ch]">
             {copy.intro}
           </p>
           <div className="mt-7 flex flex-wrap items-center gap-x-8 gap-y-4 lg:mt-8">
-            <BookingLink data-intro="cta" className="btn btn-light max-sm:w-full" />
+            <BookingLink data-intro="cta" className="btn btn-gold max-sm:w-full" />
             <SectionLink data-intro="cta" href="#galeria" className="link-line label text-[0.7rem] max-sm:hidden">
               Ver trabalhos
             </SectionLink>
           </div>
         </div>
 
-        <div className="mt-10 hidden items-center gap-6 text-osso xl:flex [@media(max-height:760px)]:hidden">
-          <Scale intro ticks={36} className="w-[19rem] text-osso/60" />
-          <p data-intro="extra" className="label flex items-center gap-3 text-fumo">
+        <div className="mt-10 hidden items-center gap-6 text-creme xl:flex [@media(max-height:760px)]:hidden">
+          <Scale intro ticks={36} className="w-[19rem] text-creme/60" />
+          <p data-intro="extra" className="label flex items-center gap-3 text-tabaco">
             <span className="relative block h-7 w-px overflow-hidden bg-current/25" aria-hidden="true">
-              <span className="absolute inset-x-0 top-0 h-1/2 animate-[scrollcue_2.4s_var(--ease-in-out-quart)_infinite] bg-osso" />
+              <span className="absolute inset-x-0 top-0 h-1/2 animate-[scrollcue_2.4s_var(--ease-in-out-quart)_infinite] bg-creme" />
             </span>
             Role para conhecer
           </p>

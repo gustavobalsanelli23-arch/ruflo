@@ -106,10 +106,10 @@ export function Plate({
       <span className="sr-only">Fotografia em breve.</span>
       <div aria-hidden="true" className={`absolute inset-3 flex flex-col justify-between sm:inset-4 ${place}`}>
         <div className="flex items-start justify-between gap-4">
-          <span className="label text-[0.625rem] text-osso/70">Foto {index ?? slot.id}</span>
+          <span className="label text-[0.625rem] text-creme/70">Foto {index ?? slot.id}</span>
           <Crosshair />
         </div>
-        <p className="label max-w-[34ch] text-[0.625rem] leading-[1.6] tracking-[0.12em] text-fumo">{slot.brief}</p>
+        <p className="label max-w-[34ch] text-[0.625rem] leading-[1.6] tracking-[0.12em] text-tabaco">{slot.brief}</p>
       </div>
     </div>
   );
@@ -117,7 +117,7 @@ export function Plate({
 
 function Crosshair() {
   return (
-    <svg width="14" height="14" viewBox="0 0 14 14" className="shrink-0 text-osso/45" aria-hidden="true">
+    <svg width="14" height="14" viewBox="0 0 14 14" className="shrink-0 text-creme/45" aria-hidden="true">
       <path d="M7 0v14M0 7h14" stroke="currentColor" strokeWidth="1" />
       <circle cx="7" cy="7" r="3.5" fill="none" stroke="currentColor" strokeWidth="1" />
     </svg>

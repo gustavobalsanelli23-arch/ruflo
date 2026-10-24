@@ -33,7 +33,7 @@ export function MobileCta() {
       inert={!visible}
       className="fixed inset-x-0 bottom-0 z-40 translate-y-full px-4 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] transition-transform duration-700 ease-[var(--ease-out-expo)] data-[visible]:translate-y-0 lg:hidden"
     >
-      <BookingLink className="btn btn-light mx-auto flex w-full max-w-md shadow-[0_18px_40px_-12px_rgb(0_0_0/0.7)]" />
+      <BookingLink className="btn btn-gold mx-auto flex w-full max-w-md shadow-[0_18px_40px_-12px_rgb(0_0_0/0.7)]" />
     </div>
   );
 }

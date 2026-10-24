@@ -58,14 +58,14 @@ export function Manifesto() {
         <h2 id="manifesto-titulo" className="sr-only">
           A casa
         </h2>
-        <SectionLabel n="01" className="text-fumo">
+        <SectionLabel n="01" className="text-tabaco">
           A casa
         </SectionLabel>
         <p data-words className="text-statement mt-10 max-w-[22ch] lg:mt-14 lg:ml-[8.333%]">
           {emphasize(copy.manifesto)}
         </p>
         <div className="mt-14 flex flex-col gap-8 lg:mt-20 lg:ml-[8.333%] lg:flex-row lg:items-center lg:gap-12">
-          <Scale ticks={48} className="w-full max-w-[24rem] text-osso/60" />
+          <Scale ticks={48} className="w-full max-w-[24rem] text-creme/60" />
           <SectionLink href="#sobre" className="link-line label self-start text-[0.7rem] lg:self-auto">
             Conheça a barbearia
           </SectionLink>

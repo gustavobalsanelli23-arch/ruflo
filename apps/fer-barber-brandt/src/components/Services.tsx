@@ -7,8 +7,8 @@ import { useReveal } from '../hooks/useReveal';
 import { EASE, PLAY_ONCE, gsap, whenIdle } from '../lib/motion';
 import { SectionLabel } from './ui';
 
-const LIGHT = { bg: '#ebe6dd', fg: '#131311', soft: '#5f5b55', line: 'rgb(19 19 17 / 0.16)' };
-const DARK = { bg: '#0c0c0b', fg: '#ebe6dd', soft: '#8e8a83', line: 'rgb(235 230 221 / 0.14)' };
+const LIGHT = { bg: '#e9dbbd', fg: '#1b0f08', soft: '#6b5340', line: 'rgb(27 15 8 / 0.16)' };
+const DARK = { bg: '#1b0f08', fg: '#efe3c9', soft: '#ad9478', line: 'rgb(239 227 201 / 0.15)' };
 
 /**
  * Serviços: índice tipográfico numa seção clara. A passagem do escuro para o
@@ -54,7 +54,7 @@ export function Services() {
       ref={root}
       id="servicos"
       aria-labelledby="servicos-titulo"
-      className="section-y relative bg-[var(--sec-bg)] text-[var(--sec-fg)] [--sec-bg:#ebe6dd] [--sec-fg:#131311] [--sec-line:rgb(19_19_17/0.16)] [--sec-soft:#5f5b55]"
+      className="section-y relative bg-[var(--sec-bg)] text-[var(--sec-fg)] [--sec-bg:#e9dbbd] [--sec-fg:#1b0f08] [--sec-line:rgb(27_15_8/0.16)] [--sec-soft:#6b5340]"
       style={{ colorScheme: 'light' }}
     >
       <div className="container-x">
@@ -64,7 +64,7 @@ export function Services() {
               Serviços
             </SectionLabel>
             <h2 id="servicos-titulo" data-reveal="lines" className="text-display mt-8 lg:mt-10">
-              O serviço <span className="serif text-[0.8em]">sob medida</span>
+              Barba <span className="serif text-[0.8em]">e cabelo</span>
             </h2>
           </div>
           <p data-reveal="fade" className="max-w-[30rem] text-[var(--sec-soft)] lg:col-[9/span_4]">

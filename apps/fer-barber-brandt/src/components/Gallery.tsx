@@ -69,19 +69,19 @@ export function Gallery() {
       <div className="container-x">
         <div className="grid gap-8 lg:grid-cols-12 lg:items-end lg:gap-x-6">
           <div className="lg:col-span-8">
-            <SectionLabel n="04" className="text-fumo">
+            <SectionLabel n="05" className="text-tabaco">
               Galeria
             </SectionLabel>
             <h2 id="galeria-titulo" className="text-display mt-8 lg:mt-10">
               <span data-reveal="lines" className="block">
-                Trabalho
+                Direto
               </span>
               <span data-reveal="lines" data-delay="0.1" className="serif block pl-[0.6em] text-[0.8em] leading-[0.95]">
-                assinado
+                da cadeira.
               </span>
             </h2>
           </div>
-          <p data-reveal="fade" className="max-w-[26rem] text-fumo lg:col-[9/span_4] lg:justify-self-end">
+          <p data-reveal="fade" className="max-w-[26rem] text-tabaco lg:col-[9/span_4] lg:justify-self-end">
             Cortes publicados no Instagram da barbearia. Toque em uma foto para ampliar.
           </p>
         </div>
@@ -128,17 +128,17 @@ export function Gallery() {
                         </Frame>
                         <span
                           aria-hidden="true"
-                          className="absolute right-3 bottom-3 flex h-11 w-11 items-center justify-center bg-osso text-carvao opacity-0 transition-[opacity,transform] duration-700 ease-[var(--ease-out-expo)] group-hover:opacity-100 group-has-[:focus-visible]:opacity-100 max-lg:hidden lg:translate-y-2 lg:group-hover:translate-y-0"
+                          className="absolute right-3 bottom-3 flex h-11 w-11 items-center justify-center bg-creme text-cafe opacity-0 transition-[opacity,transform] duration-700 ease-[var(--ease-out-expo)] group-hover:opacity-100 group-has-[:focus-visible]:opacity-100 max-lg:hidden lg:translate-y-2 lg:group-hover:translate-y-0"
                         >
                           <Maximize2 size={16} strokeWidth={1.5} />
                         </span>
                       </button>
                       <figcaption className="mt-3 flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
                         <span className="flex items-baseline gap-3">
-                          <span className="label text-fumo tabular-nums">{n}</span>
+                          <span className="label text-tabaco tabular-nums">{n}</span>
                           {work.title && <span className="text-[0.9375rem] font-semibold uppercase font-stretch-[80%]">{work.title}</span>}
                         </span>
-                        {work.date && <span className="label min-w-0 text-fumo">{monthYear(work.date)}</span>}
+                        {work.date && <span className="label min-w-0 text-tabaco">{monthYear(work.date)}</span>}
                       </figcaption>
                     </figure>
                   </li>
@@ -149,7 +149,7 @@ export function Gallery() {
         </div>
 
         <div data-reveal="fade" className="mt-20 flex flex-col items-start gap-6 border-t border-[var(--line-dark)] pt-10 sm:flex-row sm:items-center sm:justify-between lg:mt-32">
-          <p className="label text-fumo">Mais trabalhos em @{business.instagram.handle}</p>
+          <p className="label text-tabaco">Mais trabalhos em @{business.instagram.handle}</p>
           <a href={business.instagram.url} target="_blank" rel="noopener noreferrer" className="btn btn-ghost max-sm:w-full">
             Ver no Instagram
             <ArrowUpRight size={16} strokeWidth={1.5} aria-hidden="true" />

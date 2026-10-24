@@ -135,12 +135,12 @@ export function Lightbox({ items, index, onChange, onClose, origins }: LightboxP
 
   const work = index !== null ? items[index] : null;
   const roundBtn =
-    'flex h-12 w-12 items-center justify-center text-osso shadow-[inset_0_0_0_1px_var(--line-dark)] transition-colors duration-500 hover:bg-osso hover:text-carvao';
+    'flex h-12 w-12 items-center justify-center text-creme shadow-[inset_0_0_0_1px_var(--line-dark)] transition-colors duration-500 hover:bg-creme hover:text-cafe';
 
   return (
     <div
       ref={root}
-      className="invisible fixed inset-0 z-[90] flex flex-col overscroll-contain bg-carvao text-osso opacity-0"
+      className="invisible fixed inset-0 z-[90] flex flex-col overscroll-contain bg-cafe text-creme opacity-0"
       role="dialog"
       aria-modal="true"
       aria-label="Foto ampliada"
@@ -148,7 +148,7 @@ export function Lightbox({ items, index, onChange, onClose, origins }: LightboxP
       inert={!open}
     >
       <div data-lightbox-ui className="container-x flex h-20 shrink-0 items-center justify-between">
-        <p className="label text-fumo tabular-nums" aria-live="polite">
+        <p className="label text-tabaco tabular-nums" aria-live="polite">
           {index !== null && (
             <>
               <span className="sr-only">Foto </span>
@@ -217,7 +217,7 @@ export function Lightbox({ items, index, onChange, onClose, origins }: LightboxP
             {work && workTitle(work, index!)}
           </p>
           {work && (work.caption || work.date) && (
-            <p className="mt-1 text-[0.875rem] text-fumo">
+            <p className="mt-1 text-[0.875rem] text-tabaco">
               {work.caption ? `“${work.caption}” ` : ''}
               {work.date && <span className="whitespace-nowrap">Publicado em {monthYear(work.date)}.</span>}
             </p>
@@ -228,7 +228,7 @@ export function Lightbox({ items, index, onChange, onClose, origins }: LightboxP
             href={work?.post ?? business.instagram.url}
             target="_blank"
             rel="noopener noreferrer"
-            className="link-line label mr-2 text-[0.7rem] text-osso"
+            className="link-line label mr-2 text-[0.7rem] text-creme"
           >
             {work?.post ? 'Ver o post' : 'Ver no Instagram'}
             <ArrowUpRight size={14} strokeWidth={1.5} aria-hidden="true" />
