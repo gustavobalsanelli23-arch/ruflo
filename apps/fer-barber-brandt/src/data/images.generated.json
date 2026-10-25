@@ -1,0 +1,121 @@
+{
+  "ambiente": {
+    "width": 640,
+    "height": 1136,
+    "widths": [
+      480,
+      640
+    ],
+    "color": "#d8d8d8"
+  },
+  "antes-01": {
+    "width": 1080,
+    "height": 1080,
+    "widths": [
+      480,
+      800,
+      1080
+    ],
+    "color": "#181818"
+  },
+  "antes-02": {
+    "width": 1080,
+    "height": 1080,
+    "widths": [
+      480,
+      800,
+      1080
+    ],
+    "color": "#d8e8e8"
+  },
+  "depois-01": {
+    "width": 1080,
+    "height": 1080,
+    "widths": [
+      480,
+      800,
+      1080
+    ],
+    "color": "#888898"
+  },
+  "depois-02": {
+    "width": 1080,
+    "height": 1080,
+    "widths": [
+      480,
+      800,
+      1080
+    ],
+    "color": "#e8e8d8"
+  },
+  "detalhe": {
+    "width": 1080,
+    "height": 1440,
+    "widths": [
+      480,
+      800,
+      1080
+    ],
+    "color": "#d8e8e8"
+  },
+  "hero": {
+    "width": 1080,
+    "height": 1080,
+    "widths": [
+      480,
+      800,
+      1080
+    ],
+    "color": "#281818"
+  },
+  "trabalho-01": {
+    "width": 1080,
+    "height": 1079,
+    "widths": [
+      480,
+      800,
+      1080
+    ],
+    "color": "#282828"
+  },
+  "trabalho-02": {
+    "width": 1080,
+    "height": 1439,
+    "widths": [
+      480,
+      800,
+      1080
+    ],
+    "color": "#483838"
+  },
+  "trabalho-03": {
+    "width": 1080,
+    "height": 1080,
+    "widths": [
+      480,
+      800,
+      1080
+    ],
+    "color": "#c8d8d8"
+  },
+  "trabalho-04": {
+    "width": 1080,
+    "height": 1439,
+    "widths": [
+      480,
+      800,
+      1080
+    ],
+    "color": "#281818"
+  },
+  "trabalho-05": {
+    "width": 1080,
+    "height": 1439,
+    "widths": [
+      480,
+      800,
+      1080
+    ],
+    "color": "#c8d8d8"
+  }
+}

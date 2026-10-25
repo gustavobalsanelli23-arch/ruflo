@@ -1,0 +1,445 @@
+@import 'tailwindcss';
+
+/* ── Fontes (self-hosted, subconjunto latino) ─────────────────────────────
+   Archivo: grotesca com eixo de largura (62–112) e peso (300–800). A mesma
+   família faz o nome em caixa-alta condensada, os títulos e o texto corrido.
+   Instrument Serif itálico: o contraponto caligráfico, usado com parcimônia. */
+@font-face {
+  font-family: 'Archivo';
+  font-style: normal;
+  font-weight: 300 800;
+  font-stretch: 62% 112%;
+  font-display: swap;
+  src: url('./fonts/archivo-latin-wdth-wght.woff2') format('woff2-variations');
+}
+@font-face {
+  font-family: 'Instrument Serif';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: url('./fonts/instrument-serif-latin-400-italic.woff2') format('woff2');
+}
+
+/* ── Tokens ───────────────────────────────────────────────────────────────
+   Paleta extraída do emblema da Barbearia Brandt (foto de perfil do Instagram):
+   o marrom café da madeira do fundo (#220E05–#361D0E), o creme das letras e da
+   faixa "Barba e cabelo" (#DABA8C–#E0C78F) e o dourado envelhecido dos filetes
+   (#A68966). Ajustados para tela e para contraste WCAG AA (todos ≥ 4,9:1). */
+@theme {
+  --color-cafe: #1b0f08; /* base: a madeira escura do emblema */
+  --color-torra: #251509; /* superfícies (agendamento, menu) */
+  --color-nogueira: #3b2618; /* placas e preenchimentos */
+  --color-tabaco: #ad9478; /* texto secundário no escuro (6,5:1) */
+  --color-creme: #efe3c9; /* texto no escuro: as letras do emblema (14,8:1) */
+  --color-marfim: #f8f0e0; /* realce claro (hover dos botões) */
+  --color-pergaminho: #e9dbbd; /* fundo das seções claras: a faixa do emblema */
+  --color-couro: #6b5340; /* texto secundário no claro (5,2:1) */
+  --color-latao: #c9a46c; /* dourado dos filetes e das estrelas (8,1:1) */
+
+  --font-sans: 'Archivo', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-serif: 'Instrument Serif', 'Iowan Old Style', Georgia, serif;
+
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out-quart: cubic-bezier(0.76, 0, 0.24, 1);
+}
+
+:root {
+  --gutter: clamp(1.25rem, 4.2vw, 4rem);
+  --section: clamp(5rem, 3rem + 7vw, 9.5rem);
+  --header-h: 4.25rem;
+  --line-dark: rgb(239 227 201 / 0.15);
+  --line-light: rgb(27 15 8 / 0.14);
+  color-scheme: dark;
+}
+
+@media (min-width: 1024px) {
+  :root {
+    --header-h: 5rem;
+  }
+}
+
+/* ── Base ───────────────────────────────────────────────────────────────── */
+@layer base {
+  html {
+    background: var(--color-cafe);
+    -webkit-text-size-adjust: 100%;
+    scroll-padding-top: var(--header-h);
+  }
+  html.lenis,
+  html.lenis body {
+    height: auto;
+  }
+  .lenis.lenis-stopped {
+    overflow: hidden;
+  }
+  body {
+    background: var(--color-cafe);
+    color: var(--color-creme);
+    font-family: var(--font-sans);
+    font-size: 1.0625rem;
+    font-stretch: 100%;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    overflow-x: clip;
+  }
+  ::selection {
+    background: var(--color-latao);
+    color: var(--color-cafe);
+  }
+  img {
+    max-width: 100%;
+    height: auto;
+  }
+  a,
+  button {
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+  }
+  button {
+    cursor: pointer;
+  }
+  @media (max-width: 1023px) {
+    /* O foco por teclado não fica escondido sob a barra fixa de agendamento. */
+    html {
+      scroll-padding-bottom: 6rem;
+    }
+  }
+  [tabindex='-1']:focus {
+    outline: none;
+  }
+  :focus-visible {
+    outline: 2px solid currentColor;
+    outline-offset: 4px;
+    border-radius: 2px;
+  }
+  h1,
+  h2,
+  h3 {
+    font-weight: 700;
+    text-wrap: balance;
+  }
+  p {
+    text-wrap: pretty;
+  }
+}
+
+/* ── Utilitários da casa ────────────────────────────────────────────────── */
+@utility container-x {
+  width: 100%;
+  max-width: 96rem;
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+}
+
+@utility section-y {
+  padding-block: var(--section);
+}
+
+/* O nome: caixa-alta ultracondensada, pesada, entrelinha mínima. */
+@utility text-mega {
+  font-family: var(--font-sans);
+  font-stretch: 62%;
+  font-weight: 800;
+  font-size: clamp(5.25rem, 1.2rem + 17.5vw, 16.5rem);
+  line-height: 0.8;
+  letter-spacing: -0.012em;
+  text-transform: uppercase;
+}
+
+@utility text-display {
+  font-family: var(--font-sans);
+  font-stretch: 66%;
+  font-weight: 760;
+  font-size: clamp(3.25rem, 1.4rem + 7.4vw, 9.5rem);
+  line-height: 0.86;
+  letter-spacing: -0.008em;
+  text-transform: uppercase;
+}
+
+@utility text-title {
+  font-family: var(--font-sans);
+  font-stretch: 72%;
+  font-weight: 700;
+  font-size: clamp(2.25rem, 1.35rem + 3.4vw, 4.75rem);
+  line-height: 0.92;
+  text-transform: uppercase;
+}
+
+/* Frase longa em grotesca semi-condensada (o manifesto). */
+@utility text-statement {
+  font-family: var(--font-sans);
+  font-stretch: 80%;
+  font-weight: 560;
+  font-size: clamp(2rem, 1.1rem + 3.9vw, 5.25rem);
+  line-height: 1;
+  letter-spacing: -0.018em;
+}
+
+/* Itálico de contraponto: nunca em bloco, só em palavras. */
+@utility serif {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-weight: 400;
+  font-stretch: 100%;
+  text-transform: none;
+  letter-spacing: -0.01em;
+}
+
+@utility text-lead {
+  font-size: clamp(1.0625rem, 0.98rem + 0.4vw, 1.25rem);
+  line-height: 1.55;
+}
+
+/* Rótulo técnico: caixa-alta larga e espaçada (o eixo de largura em 112%). */
+@utility label {
+  font-family: var(--font-sans);
+  font-stretch: 112%;
+  font-weight: 500;
+  font-size: 0.6875rem;
+  line-height: 1.3;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+/* Filete de 1px na cor do texto, a 16% (sem opacity: o elemento segue opaco para as revelações). */
+@utility hairline {
+  height: 1px;
+  background: color-mix(in srgb, currentColor 16%, transparent);
+}
+
+/* ── Componentes ────────────────────────────────────────────────────────── */
+@layer components {
+  .btn {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    min-height: 3.5rem;
+    padding: 0 1.75rem;
+    font-stretch: 108%;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    overflow: hidden;
+    isolation: isolate;
+    white-space: nowrap;
+    transition:
+      color 0.55s var(--ease-out-expo),
+      transform 0.5s var(--ease-out-expo);
+  }
+  /* O preenchimento atravessa em diagonal, como a passada de uma navalha. */
+  .btn::before {
+    content: '';
+    position: absolute;
+    inset: -2px -30%;
+    z-index: -1;
+    background: var(--btn-fill);
+    transform: translateX(-101%) skewX(-24deg);
+    transition: transform 0.75s var(--ease-out-expo);
+  }
+  .btn:hover::before,
+  .btn:focus-visible::before {
+    transform: translateX(0) skewX(-24deg);
+  }
+  .btn:active {
+    transform: scale(0.98);
+  }
+  /* Telas muito estreitas (320px): o rótulo longo cabe sem vazar. */
+  @media (max-width: 359px) {
+    .btn {
+      gap: 0.5rem;
+      padding-inline: 1rem;
+      letter-spacing: 0.07em;
+    }
+  }
+  .btn svg {
+    flex: none;
+    transition: transform 0.6s var(--ease-out-expo);
+  }
+  .btn:hover svg {
+    transform: translateX(3px);
+  }
+
+  /* Osso sobre o escuro; no hover, o preenchimento carvão inverte. */
+  .btn-light {
+    --btn-fill: var(--color-marfim);
+    background: var(--color-creme);
+    color: var(--color-cafe);
+  }
+  /* O dourado do emblema: a cor da conversão (agendar). */
+  .btn-gold {
+    --btn-fill: var(--color-creme);
+    background: var(--color-latao);
+    color: var(--color-cafe);
+  }
+  .btn-dark {
+    --btn-fill: var(--color-nogueira);
+    background: var(--color-cafe);
+    color: var(--color-creme);
+  }
+  .btn-ghost {
+    --btn-fill: var(--color-creme);
+    box-shadow: inset 0 0 0 1px var(--line-dark);
+    color: var(--color-creme);
+  }
+  .btn-ghost:hover,
+  .btn-ghost:focus-visible {
+    color: var(--color-cafe);
+  }
+  .btn-ghost-dark {
+    --btn-fill: var(--color-cafe);
+    box-shadow: inset 0 0 0 1px var(--line-light);
+    color: var(--color-cafe);
+  }
+  .btn-ghost-dark:hover,
+  .btn-ghost-dark:focus-visible {
+    color: var(--color-creme);
+  }
+
+  /* Link com sublinhado que se desenha da esquerda para a direita. */
+  .link-line {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding-block: 0.3rem;
+    background: linear-gradient(currentColor, currentColor) no-repeat left bottom / 100% 1px;
+    transition:
+      background-size 0.6s var(--ease-out-expo),
+      color 0.3s;
+  }
+  .link-line:hover {
+    background-size: 0% 1px;
+    background-position: right bottom;
+  }
+  .link-quiet {
+    background-size: 0% 1px;
+    background-position: right bottom;
+  }
+  .link-quiet:hover,
+  .link-quiet:focus-visible {
+    background-size: 100% 1px;
+    background-position: left bottom;
+  }
+  .link-line svg {
+    transition: transform 0.6s var(--ease-out-expo);
+  }
+  .link-line:hover svg {
+    transform: translate(2px, -2px);
+  }
+
+  /* Marcas de corte nos cantos da foto, como numa prova de impressão. */
+  .crop-marks {
+    --mark: 14px;
+    --mark-color: rgb(201 164 108 / 0.7);
+    position: absolute;
+    inset: calc(var(--mark) * -0.75);
+    pointer-events: none;
+    background:
+      linear-gradient(var(--mark-color), var(--mark-color)) top left / var(--mark) 1px,
+      linear-gradient(var(--mark-color), var(--mark-color)) top left / 1px var(--mark),
+      linear-gradient(var(--mark-color), var(--mark-color)) top right / var(--mark) 1px,
+      linear-gradient(var(--mark-color), var(--mark-color)) top right / 1px var(--mark),
+      linear-gradient(var(--mark-color), var(--mark-color)) bottom left / var(--mark) 1px,
+      linear-gradient(var(--mark-color), var(--mark-color)) bottom left / 1px var(--mark),
+      linear-gradient(var(--mark-color), var(--mark-color)) bottom right / var(--mark) 1px,
+      linear-gradient(var(--mark-color), var(--mark-color)) bottom right / 1px var(--mark);
+    background-repeat: no-repeat;
+  }
+
+  /* Placa de espera: ocupa o lugar de uma fotografia real que ainda não chegou. */
+  .plate {
+    position: relative;
+    overflow: hidden;
+    background:
+      radial-gradient(120% 90% at 28% 18%, rgb(201 164 108 / 0.12), transparent 60%),
+      radial-gradient(90% 70% at 80% 100%, rgb(0 0 0 / 0.55), transparent 70%),
+      var(--color-nogueira);
+    color: var(--color-tabaco);
+  }
+  .plate::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    opacity: 0.22;
+    mix-blend-mode: overlay;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+}
+
+/* Zoom contínuo e lento da foto principal (o "respiro" da imagem). */
+@keyframes drift {
+  from {
+    transform: scale(1);
+  }
+  to {
+    transform: scale(1.07);
+  }
+}
+.drift {
+  animation: drift 26s ease-in-out 2.6s infinite alternate both;
+}
+
+/* Indicador de rolagem: um traço que desce pelo trilho. */
+@keyframes scrollcue {
+  0% {
+    transform: translateY(-100%);
+  }
+  65%,
+  100% {
+    transform: translateY(210%);
+  }
+}
+
+/* Grão de filme muito leve sobre a página, só em telas grandes. */
+@media (min-width: 1024px) {
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    pointer-events: none;
+    opacity: 0.05;
+    mix-blend-mode: overlay;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+}
+
+/* ── Estados iniciais da abertura (só com JS e sem reduced-motion) ─────────
+   O script do <head> põe .js-intro antes da primeira pintura; a timeline
+   assume o controle (fill: backwards) e retira a classe. Se o JS falhar,
+   um timer de segurança retira a classe e tudo aparece no lugar. */
+/* 0.001 e não 0: invisível ao olho, mas o navegador pinta o elemento já na
+   primeira pintura (com 0 ele é ignorado até o fim da animação, e o LCP atrasa). */
+.js-intro [data-intro] {
+  opacity: 0.001;
+}
+/* Celular: abertura mais leve. Descrição e agendamento já chegam na primeira
+   pintura (são o LCP e a conversão); animam a foto, a identificação e o nome. */
+@media (max-width: 1023px) {
+  .js-intro [data-intro='text'],
+  .js-intro [data-intro='cta'] {
+    opacity: 1;
+  }
+}
+.intro-running [data-intro] {
+  will-change: transform, opacity;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+  .drift {
+    animation: none;
+  }
+}

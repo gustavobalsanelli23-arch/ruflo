@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Barbearia Brandt | Barbearia em Benedito Novo, SC (Fer Barber Brandt)</title>
+    <meta
+      name="description"
+      content="Barbearia Brandt, no Alto Benedito Novo, em Benedito Novo (SC): degradê, corte social na tesoura e barba. Veja antes e depois e agende."
+    />
+    <link rel="canonical" href="__SITE_URL__/" />
+    <meta name="robots" content="index, follow, max-image-preview:large" />
+    <meta name="theme-color" content="#1B0F08" />
+    <meta name="geo.region" content="BR-SC" />
+    <meta name="geo.placename" content="Benedito Novo" />
+    <meta name="color-scheme" content="dark" />
+    <meta name="format-detection" content="telephone=no" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="pt_BR" />
+    <meta property="og:site_name" content="Barbearia Brandt" />
+    <meta property="og:url" content="__SITE_URL__/" />
+    <meta property="og:title" content="Barbearia Brandt | Só chegar e cortar." />
+    <meta
+      property="og:description"
+      content="Barba e cabelo no Alto Benedito Novo, Benedito Novo (SC). Degradê, social na tesoura, antes e depois e agendamento."
+    />
+    <meta property="og:image" content="__SITE_URL__/og.jpg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Fer Barber Brandt: o nome da Barbearia Brandt ao lado de um degradê visto de trás" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Barbearia Brandt | Só chegar e cortar." />
+    <meta name="twitter:image" content="__SITE_URL__/og.jpg" />
+
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="icon" href="/favicon-32.png" type="image/png" sizes="32x32" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" sizes="180x180" />
+    <link rel="manifest" href="/site.webmanifest" />
+    <!--preload-->
+
+    <!-- Antes da primeira pintura: decide se há abertura animada. Sem JS, ou
+         com prefers-reduced-motion, nada é escondido. Se o script da abertura
+         não chegar em 4s (ou algo travar até 7s), tudo aparece sem animação. -->
+    <script>
+      (function () {
+        var d = document.documentElement;
+        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+        d.classList.add('js-intro');
+        setTimeout(function () {
+          if (!window.__fbbIntro) d.classList.remove('js-intro');
+        }, 4000);
+        setTimeout(function () {
+          d.classList.remove('js-intro');
+        }, 7000);
+      })();
+    </script>
+    <!--schema-->
+  </head>
+  <body>
+    <div id="root"><!--app-html--></div>
+    <!--intro-->
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
