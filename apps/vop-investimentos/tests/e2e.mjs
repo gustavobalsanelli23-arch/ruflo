@@ -42,15 +42,23 @@ function assert(cond, message) {
 }
 
 const browser = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH || undefined });
-const newPage = async (opts = {}, { go = true } = {}) => {
+// A cena 3D do hero desenha sem parar e, sem GPU (Chromium de teste), custa
+// muita CPU: só os testes do hero a carregam (scene3d); nos demais o pedaço
+// dela é bloqueado e fica o quadro parado — o mesmo caminho de quem não tem WebGL.
+const newPage = async (opts = {}, { go = true, scene3d = false } = {}) => {
   const ctx = await browser.newContext({ locale: 'pt-BR', ...opts });
+  if (!scene3d) await ctx.route(/\/assets\/vopScene-[\w-]+\.js$/, (route) => route.abort());
   const page = await ctx.newPage();
   page.problems = [];
   page.on('pageerror', (e) => page.problems.push(`pageerror: ${e.message}`));
   const ours = (url) => !url || url.startsWith(BASE);
   // Avisos de desempenho do driver de GL (o Chromium de teste desenha sem GPU) não são erros do site.
   const driverNote = (text) => /GL Driver Message|GPU stall/.test(text);
-  page.on('console', (m) => ['error', 'warning'].includes(m.type()) && ours(m.location().url) && !driverNote(m.text()) && page.problems.push(`console: ${m.text()}`));
+  const blocked = (url) => !scene3d && /vopScene-/.test(url ?? '');
+  page.on('console', (m) => {
+    if (!['error', 'warning'].includes(m.type()) || !ours(m.location().url) || driverNote(m.text()) || blocked(m.location().url)) return;
+    page.problems.push(`console: ${m.text()}`);
+  });
   page.on('response', (r) => r.status() >= 400 && ours(r.url()) && page.problems.push(`HTTP ${r.status()} ${r.url()}`));
   if (go) await page.goto(BASE, { waitUntil: 'load' });
   return page;
@@ -99,7 +107,7 @@ await test('desktop: sem erros, tudo revelado após a rolagem, um único h1', as
 });
 
 await test('hero: o quadro parado pinta primeiro; depois do load a cena 3D da casa VOP entra por cima', async () => {
-  const page = await newPage(desktop);
+  const page = await newPage(desktop, { scene3d: true });
   const bg = await page.locator('#inicio .st-bg').evaluate((el) => ({ img: getComputedStyle(el).backgroundImage, hidden: el.getAttribute('aria-hidden') }));
   assert(bg.img.includes('/images/hero/casa-vop') && bg.hidden === 'true', JSON.stringify(bg));
   assert((await page.locator('#inicio video').count()) === 0, 'sem vídeo no hero');
@@ -110,7 +118,7 @@ await test('hero: o quadro parado pinta primeiro; depois do load a cena 3D da ca
 });
 
 await test('hero: capítulos movem a câmera e trocam o texto; clique rápido vale o último', async () => {
-  const page = await newPage(desktop);
+  const page = await newPage(desktop, { scene3d: true });
   await page.waitForSelector('#inicio canvas[data-ready]', { timeout: 30000 });
   const rail = page.getByRole('list', { name: 'Capítulos' });
   await rail.getByRole('button', { name: 'INVESTIMENTOS' }).click();
@@ -124,7 +132,7 @@ await test('hero: capítulos movem a câmera e trocam o texto; clique rápido va
 });
 
 await test('hero: 3D ON/OFF pausa e retoma a cena', async () => {
-  const page = await newPage(desktop);
+  const page = await newPage(desktop, { scene3d: true });
   await page.waitForSelector('#inicio canvas[data-ready]', { timeout: 30000 });
   await page.getByRole('button', { name: 'Pausar a animação 3D' }).click();
   await page.getByRole('button', { name: 'Retomar a animação 3D' }).waitFor({ timeout: 2000 });
