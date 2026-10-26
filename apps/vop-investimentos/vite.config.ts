@@ -11,5 +11,8 @@ export default defineConfig({
   build: {
     target: 'es2020',
     assetsInlineLimit: 0,
+    // A cena 3D do hero (three.js, ~130 kB gzip) é um pedaço à parte,
+    // baixado só depois do load; o aviso padrão de 500 kB não se aplica.
+    chunkSizeWarningLimit: 560,
   },
 });

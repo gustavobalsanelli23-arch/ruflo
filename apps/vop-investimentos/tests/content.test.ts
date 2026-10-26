@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { about, chapters, hero, investments, nav, pendingContent, regions, services } from '../src/data/content';
-import { chapterScene, chapterStill, ctaClip, photos, videoSources } from '../src/data/media';
+import { ctaClip, heroPoster, photos, videoSources } from '../src/data/media';
 import { catalog, demoProperties } from '../src/data/properties';
 import images from '../src/data/images.generated.json';
 import {
@@ -64,13 +64,12 @@ describe('mídia', () => {
     }
   });
 
-  it('todo capítulo do hero tem a sua cena, e o quadro parado existe', () => {
-    expect(existsSync(join(root, 'public', chapterStill))).toBe(true);
-    expect(new Set(chapters.map((c) => c.scene)).size).toBe(chapters.length);
-    for (const c of chapters) {
-      expect(existsSync(join(root, 'public', chapterScene(c.scene))), c.scene).toBe(true);
-      expect(c.headline.every((l) => l.length > 2)).toBe(true);
+  it('o quadro parado da cena 3D existe nas duas orientações e formatos', () => {
+    for (const base of Object.values(heroPoster)) {
+      for (const ext of ['avif', 'webp']) expect(existsSync(join(root, 'public', `${base}.${ext}`)), `${base}.${ext}`).toBe(true);
     }
+    expect(new Set(chapters.map((c) => c.label)).size).toBe(chapters.length);
+    for (const c of chapters) expect(c.headline.every((l) => l.length > 2)).toBe(true);
   });
 
   it('o primeiro capítulo é a frase do briefing', () => {

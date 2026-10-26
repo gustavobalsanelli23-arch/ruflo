@@ -4,7 +4,7 @@ import { renderToString } from 'react-dom/server';
 import { App } from './App';
 import { SITE_URL, business, fullAddress, hasWhatsapp, pendingBusinessData } from './config/site';
 import { pendingContent, regions, services } from './data/content';
-import { chapterStill } from './data/media';
+import { heroPoster } from './data/media';
 import { catalog } from './data/properties';
 
 export { SITE_URL };
@@ -67,9 +67,10 @@ export function schema() {
   });
 }
 
-/** <link rel="preload"> do quadro parado do hero (a primeira pintura grande). */
+/** <link rel="preload"> do quadro parado do hero (a primeira pintura grande), na orientação da tela. */
 export function heroPreload() {
-  return `<link rel="preload" as="image" type="image/webp" href="${chapterStill}" fetchpriority="high">`;
+  const link = (base: string, media: string) => `<link rel="preload" as="image" type="image/avif" href="${base}.avif" media="${media}" fetchpriority="high">`;
+  return link(heroPoster.landscape, '(min-aspect-ratio: 1/1)') + link(heroPoster.portrait, '(max-aspect-ratio: 1/1)');
 }
 
 /** O que ainda falta para o site estar completo (avisos do build). */
@@ -81,7 +82,6 @@ export function pending() {
     media: [
       'logotipo: vetor redesenhado da foto de perfil do Instagram (confirmar com o arquivo original)',
       'fotografias e vídeos próprios da VOP (hoje: banco de imagens)',
-      'direito de uso comercial das cenas do hero (vindas do prompt de referência)',
     ],
   };
 }

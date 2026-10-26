@@ -46,8 +46,6 @@ export const services = {
 export interface Chapter {
   /** Rótulo no trilho do hero. */
   label: string;
-  /** Cena em public/videos/capitulos/ (ver data/media.ts). */
-  scene: string;
   /** Título em duas linhas. */
   headline: readonly [string, string];
   blurb: string;
@@ -56,14 +54,15 @@ export interface Chapter {
 /**
  * Capítulos do hero: a frase do briefing abre, e cada serviço vira um
  * capítulo com o próprio texto (mesma pendência de confirmação dos serviços).
+ * Cada um tem um ângulo de câmera na cena 3D (components/hero/vopScene).
  */
 export const chapters: readonly Chapter[] = [
-  { label: 'Visão', scene: 'background', headline: hero.headline, blurb: hero.subheadline },
-  { label: 'Assessoria', scene: 'expression', headline: ['Assessoria imobiliária', 'do início à escritura.'], blurb: services.items[0].description },
-  { label: 'Investimentos', scene: 'refinement', headline: ['O imóvel visto', 'também como ativo.'], blurb: services.items[1].description },
-  { label: 'Oportunidades', scene: 'craftsmanship', headline: ['Oportunidades estudadas', 'antes da proposta.'], blurb: services.items[2].description },
-  { label: 'Crédito', scene: 'origin', headline: ['Crédito imobiliário', 'que cabe no seu plano.'], blurb: services.items[3].description },
-  { label: 'Segurança', scene: 'balance', headline: ['Segurança', 'em cada etapa.'], blurb: services.items[4].description },
+  { label: 'Visão', headline: hero.headline, blurb: hero.subheadline },
+  { label: 'Assessoria', headline: ['Assessoria imobiliária', 'do início à escritura.'], blurb: services.items[0].description },
+  { label: 'Investimentos', headline: ['O imóvel visto', 'também como ativo.'], blurb: services.items[1].description },
+  { label: 'Oportunidades', headline: ['Oportunidades estudadas', 'antes da proposta.'], blurb: services.items[2].description },
+  { label: 'Crédito', headline: ['Crédito imobiliário', 'que cabe no seu plano.'], blurb: services.items[3].description },
+  { label: 'Segurança', headline: ['Segurança', 'em cada etapa.'], blurb: services.items[4].description },
 ];
 
 export const intro = {

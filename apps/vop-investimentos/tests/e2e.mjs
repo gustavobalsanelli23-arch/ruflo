@@ -48,7 +48,9 @@ const newPage = async (opts = {}, { go = true } = {}) => {
   page.problems = [];
   page.on('pageerror', (e) => page.problems.push(`pageerror: ${e.message}`));
   const ours = (url) => !url || url.startsWith(BASE);
-  page.on('console', (m) => ['error', 'warning'].includes(m.type()) && ours(m.location().url) && page.problems.push(`console: ${m.text()}`));
+  // Avisos de desempenho do driver de GL (o Chromium de teste desenha sem GPU) não são erros do site.
+  const driverNote = (text) => /GL Driver Message|GPU stall/.test(text);
+  page.on('console', (m) => ['error', 'warning'].includes(m.type()) && ours(m.location().url) && !driverNote(m.text()) && page.problems.push(`console: ${m.text()}`));
   page.on('response', (r) => r.status() >= 400 && ours(r.url()) && page.problems.push(`HTTP ${r.status()} ${r.url()}`));
   if (go) await page.goto(BASE, { waitUntil: 'load' });
   return page;
@@ -81,7 +83,7 @@ await test('HTML pré-renderizado traz título, h1, seções e JSON-LD', async (
   for (const id of ['inicio', 'inteligencia', 'imoveis', 'investimentos', 'regioes', 'sobre', 'contato']) assert(html.includes(`id="${id}"`), `seção #${id}`);
   assert(html.includes('"@type":"RealEstateAgent"'), 'JSON-LD');
   assert(!html.includes('areaServed'), 'regiões não confirmadas não entram no JSON-LD');
-  assert(html.includes('og:image') && html.includes('rel="preload" as="image" type="image/webp" href="/images/capitulos/background.webp"'), 'OG e preload do quadro do hero');
+  assert(html.includes('og:image') && html.includes('href="/images/hero/casa-vop.avif" media="(min-aspect-ratio: 1/1)"'), 'OG e preload do quadro do hero');
   assert(/<html[^>]*class="no-js"/.test(html) && html.includes("d.classList.add('anim')"), 'coreografia de entrada (classe anim) no <head>');
   assert(!html.includes('__SITE_URL__'), 'placeholder de URL resolvido');
 });
@@ -96,40 +98,39 @@ await test('desktop: sem erros, tudo revelado após a rolagem, um único h1', as
   await page.context().close();
 });
 
-await test('hero: o quadro parado pinta primeiro; depois do load entra só a cena do 1º capítulo', async () => {
+await test('hero: o quadro parado pinta primeiro; depois do load a cena 3D da casa VOP entra por cima', async () => {
   const page = await newPage(desktop);
   const bg = await page.locator('#inicio .st-bg').evaluate((el) => ({ img: getComputedStyle(el).backgroundImage, hidden: el.getAttribute('aria-hidden') }));
-  assert(bg.img.includes('/images/capitulos/background.webp') && bg.hidden === 'true', JSON.stringify(bg));
-  await page.waitForFunction(() => document.querySelector('#inicio video.on')?.currentSrc.includes('/videos/capitulos/background.mp4'), null, { timeout: 8000 });
-  const state = await page.locator('#inicio video').evaluateAll((vs) => vs.map((v) => ({ src: Boolean(v.getAttribute('src')), muted: v.muted, inline: v.playsInline, loop: v.loop })));
-  assert(state.length === 6, `${state.length} cenas`);
-  assert(state.every((v) => v.muted && v.inline && v.loop), 'mudo, inline e em loop');
-  assert(state.filter((v) => v.src).length === 1, 'só a primeira cena baixada');
+  assert(bg.img.includes('/images/hero/casa-vop') && bg.hidden === 'true', JSON.stringify(bg));
+  assert((await page.locator('#inicio video').count()) === 0, 'sem vídeo no hero');
+  await page.waitForSelector('#inicio canvas[data-ready].on', { timeout: 30000 });
+  assert((await page.locator('#inicio canvas').getAttribute('data-chapter')) === '0', 'cena no 1º capítulo');
+  assert(page.problems.length === 0, page.problems.join('\n'));
   await page.context().close();
 });
 
-await test('hero: capítulos trocam a cena e o texto; clique rápido vale o último', async () => {
+await test('hero: capítulos movem a câmera e trocam o texto; clique rápido vale o último', async () => {
   const page = await newPage(desktop);
-  await page.waitForFunction(() => document.querySelector('#inicio video.on'), null, { timeout: 8000 });
+  await page.waitForSelector('#inicio canvas[data-ready]', { timeout: 30000 });
   const rail = page.getByRole('list', { name: 'Capítulos' });
   await rail.getByRole('button', { name: 'INVESTIMENTOS' }).click();
   await rail.getByRole('button', { name: 'CRÉDITO' }).click();
   await page.waitForFunction(() => document.querySelector('#inicio h1')?.textContent.includes('Crédito imobiliário'), null, { timeout: 3000 });
-  await page.waitForFunction(() => document.querySelector('#inicio video.on')?.currentSrc.includes('/origin.mp4'), null, { timeout: 8000 });
-  assert((await page.locator('#inicio video.on').count()) === 1, 'uma cena visível');
+  assert((await page.locator('#inicio canvas').getAttribute('data-chapter')) === '4', 'câmera no capítulo Crédito');
   assert((await rail.locator('[aria-current="step"]').textContent()).includes('CRÉDITO'), 'trilho marca o capítulo');
   await page.waitForFunction(() => !document.querySelector('#inicio').classList.contains('swapping'), null, { timeout: 2000 });
   assert(page.problems.length === 0, page.problems.join('\n'));
   await page.context().close();
 });
 
-await test('hero: VÍDEO ON/OFF pausa e retoma a cena', async () => {
+await test('hero: 3D ON/OFF pausa e retoma a cena', async () => {
   const page = await newPage(desktop);
-  await page.waitForFunction(() => document.querySelector('#inicio video.on') && !document.querySelector('#inicio video.on').paused, null, { timeout: 8000 });
-  await page.getByRole('button', { name: 'Pausar o vídeo de fundo' }).click();
-  assert(await page.locator('#inicio video.on').evaluate((v) => v.paused), 'não pausou');
-  await page.getByRole('button', { name: 'Retomar o vídeo de fundo' }).click();
-  await page.waitForFunction(() => !document.querySelector('#inicio video.on').paused, null, { timeout: 3000 });
+  await page.waitForSelector('#inicio canvas[data-ready]', { timeout: 30000 });
+  await page.getByRole('button', { name: 'Pausar a animação 3D' }).click();
+  await page.getByRole('button', { name: 'Retomar a animação 3D' }).waitFor({ timeout: 2000 });
+  assert((await page.locator('#inicio .audio').getAttribute('class')).includes('muted'), 'estado pausado');
+  await page.getByRole('button', { name: 'Retomar a animação 3D' }).click();
+  await page.getByRole('button', { name: 'Pausar a animação 3D' }).waitFor({ timeout: 2000 });
   await page.context().close();
 });
 
@@ -150,6 +151,7 @@ await test('reduzir movimento: sem vídeo, conteúdo visível sem animação', a
   const page = await newPage({ ...desktop, reducedMotion: 'reduce' });
   await page.waitForTimeout(800);
   assert((await page.locator('video[src]').count()) === 0, 'vídeo carregado com reduced-motion');
+  assert((await page.locator('#inicio canvas[data-ready]').count()) === 0, 'cena 3D carregada com reduced-motion');
   assert(!(await page.evaluate(() => document.documentElement.classList.contains('anim'))), 'coreografia de entrada com reduced-motion');
   const hidden = await hiddenReveals(page);
   const heroHidden = hidden.filter((t) => /Mais|Construir|Conectamos/.test(t));
@@ -168,9 +170,7 @@ await test('sem JavaScript: todo o conteúdo aparece', async () => {
 await test('menu: âncoras levam às seções e o link ativo acompanha', async () => {
   const page = await newPage(desktop);
   await page.getByRole('navigation', { name: 'Principal' }).getByRole('link', { name: 'INVESTIMENTOS', exact: true }).click();
-  await page.waitForTimeout(1500);
-  const top = await page.locator('#investimentos').evaluate((el) => el.getBoundingClientRect().top);
-  assert(Math.abs(top) < 120, `seção fora do lugar (${top})`);
+  await page.waitForFunction(() => Math.abs(document.querySelector('#investimentos').getBoundingClientRect().top) < 120, null, { timeout: 5000 });
   const current = await page.locator('[aria-current="location"]').first().textContent();
   assert(current?.includes('INVESTIMENTOS'), `ativo: ${current}`);
   await page.context().close();

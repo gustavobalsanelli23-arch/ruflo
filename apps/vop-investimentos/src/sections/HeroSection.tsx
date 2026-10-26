@@ -1,8 +1,8 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { DecodeText } from '../components/Decode';
+import type { VopScene } from '../components/hero/vopScene';
 import { BubbleIcon, CtaEdge, DoubleChevronIcon, MotionIcon, PixelIcon } from '../components/StratumIcons';
 import { chapters } from '../data/content';
-import { chapterScene } from '../data/media';
 import { REDUCED_MOTION, useMediaQuery } from '../hooks/useMediaQuery';
 
 /** Tempo (ms) em que o texto desce na máscara antes de trocar de capítulo. */
@@ -11,10 +11,11 @@ const SWAP_OUT = 340;
 /**
  * Hero na estética de referência: palco de uma tela com moldura de fio,
  * trilho de capítulos à esquerda, título que sobe de uma máscara, CTA de
- * vidro octogonal e dock embaixo. Cada capítulo tem uma cena em loop,
- * carregada só quando escolhida; a nova aparece por cima quando já pode
- * tocar, e o texto troca descendo e subindo na máscara. O fundo e o texto
- * seguem o ponteiro (paralaxe com inclinação 3D) e se afastam ao rolar.
+ * vidro octogonal e dock embaixo. Ao fundo, a casa da VOP (o símbolo da
+ * marca) em 3D sobre um lago: o quadro parado pinta primeiro e a cena
+ * WebGL entra por cima depois do load; cada capítulo leva a câmera a outro
+ * ângulo, e o texto troca descendo e subindo na máscara. O texto inclina
+ * com o ponteiro e se afasta ao rolar.
  */
 export function HeroSection() {
   const reduce = useMediaQuery(REDUCED_MOTION);
@@ -25,71 +26,69 @@ export function HeroSection() {
   const stage = useRef<HTMLElement>(null);
   const bg = useRef<HTMLDivElement>(null);
   const copy = useRef<HTMLDivElement>(null);
-  const videos = useRef<(HTMLVideoElement | null)[]>([]);
-  const request = useRef(0);
-  const visible = useRef(0);
+  const canvas = useRef<HTMLCanvasElement>(null);
+  const scene = useRef<VopScene | null>(null);
+  const loading = useRef<Promise<void> | null>(null);
+  const activeRef = useRef(0);
   const pausedRef = useRef(false);
-  const inView = useRef(true);
   const swapTimer = useRef(0);
 
-  /** Mostra a cena `i` assim que ela puder tocar; um clique mais novo vence. */
-  const showScene = useCallback((i: number) => {
-    const v = videos.current[i];
-    if (!v) return;
-    const token = ++request.current;
-    v.muted = true;
-    if (!v.getAttribute('src') && v.dataset.src) {
-      v.src = v.dataset.src;
-      v.load();
-    }
-    const reveal = () => {
-      if (token !== request.current) return;
-      v.classList.add('on');
-      visible.current = i;
-      videos.current.forEach((o, j) => {
-        if (!o || j === i) return;
-        o.classList.remove('on');
-        window.setTimeout(() => !o.classList.contains('on') && o.pause(), 900);
+  /** Carrega a cena 3D (three.js, num pedaço separado). Sem WebGL, fica o quadro parado. */
+  const startScene = () => {
+    if (loading.current || !canvas.current) return;
+    const el = canvas.current;
+    loading.current = import('../components/hero/vopScene')
+      .then(({ createVopScene }) => {
+        const s = createVopScene(el, { reduce: false, onReady: () => el.classList.add('on') });
+        s.setChapter(activeRef.current, true);
+        s.setPaused(pausedRef.current);
+        scene.current = s;
+      })
+      .catch(() => {
+        /* sem WebGL: o quadro parado continua */
       });
-    };
-    if (pausedRef.current || !inView.current) {
-      if (v.readyState >= 2) reveal();
-      else v.addEventListener('loadeddata', reveal, { once: true });
-      return;
-    }
-    v.play().catch(() => {});
-    if (v.readyState >= 3) reveal();
-    else v.addEventListener('canplay', reveal, { once: true });
-  }, []);
+  };
 
-  // Primeira cena depois que a página carregou (a foto parada é a primeira pintura).
+  // Depois do load e da coreografia de entrada (o quadro parado é a primeira
+  // pintura; compilar a cena antes disso atrasaria o texto). Com "reduzir
+  // movimento", nada carrega: o quadro parado basta, e o 3D ON liga a cena.
   useEffect(() => {
     pausedRef.current = reduce;
     setPaused(reduce);
     if (reduce) return;
-    const start = () => showScene(0);
-    if (document.readyState === 'complete') start();
-    else window.addEventListener('load', start, { once: true });
-    return () => window.removeEventListener('load', start);
-  }, [reduce, showScene]);
+    const html = document.documentElement;
+    const watch = new MutationObserver(() => {
+      if (html.classList.contains('anim')) return;
+      watch.disconnect();
+      startScene();
+    });
+    const begin = () => {
+      if (!html.classList.contains('anim')) startScene();
+      else watch.observe(html, { attributes: true, attributeFilter: ['class'] });
+    };
+    if (document.readyState === 'complete') begin();
+    else window.addEventListener('load', begin, { once: true });
+    return () => {
+      watch.disconnect();
+      window.removeEventListener('load', begin);
+    };
+    // startScene só lê e escreve refs
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [reduce]);
 
-  // Fora da tela, a cena pausa; de volta, retoma (se o vídeo estiver ligado).
+  useEffect(() => () => scene.current?.dispose(), []);
+
+  // Fora da tela, a cena para de desenhar.
   useEffect(() => {
     const el = stage.current;
     if (!el || typeof IntersectionObserver === 'undefined') return;
-    const io = new IntersectionObserver(([e]) => {
-      inView.current = e.isIntersecting;
-      const v = videos.current[visible.current];
-      if (!v || !v.getAttribute('src')) return;
-      if (e.isIntersecting && !pausedRef.current) v.play().catch(() => {});
-      else v.pause();
-    });
+    const io = new IntersectionObserver(([e]) => scene.current?.setActive(e.isIntersecting));
     io.observe(el);
     return () => io.disconnect();
   }, []);
 
-  // Paralaxe: o fundo desliza contra o ponteiro, o texto inclina em 3D a
-  // favor dele; ao rolar, o fundo desce mais devagar e o texto se afasta.
+  // Paralaxe: o texto inclina em 3D a favor do ponteiro (a câmera da cena já
+  // segue o ponteiro); ao rolar, o fundo desce mais devagar e o texto se afasta.
   useEffect(() => {
     const el = stage.current;
     const b = bg.current;
@@ -105,7 +104,7 @@ export function HeroSection() {
       y += (ty - y) * 0.045;
       const h = el.offsetHeight || 1;
       const s = Math.min(1, Math.max(0, window.scrollY / h));
-      b.style.transform = `translate3d(${(-x * 14).toFixed(2)}px, ${(-y * 9 + s * h * 0.3).toFixed(2)}px, 0) scale(${(1.045 + s * 0.08).toFixed(4)})`;
+      b.style.transform = `translate3d(0, ${(s * h * 0.3).toFixed(2)}px, 0) scale(${(1 + s * 0.08).toFixed(4)})`;
       c.style.transform = `perspective(1100px) translate3d(${(x * 6).toFixed(2)}px, ${(-s * h * 0.12).toFixed(2)}px, ${(-s * 160).toFixed(1)}px) rotateX(${(-y * 2.4).toFixed(3)}deg) rotateY(${(x * 3.2).toFixed(3)}deg)`;
       c.style.opacity = String(Math.max(0, 1 - s * 1.5));
       raf = Math.abs(tx - x) > 0.0004 || Math.abs(ty - y) > 0.0004 ? requestAnimationFrame(tick) : 0;
@@ -146,7 +145,8 @@ export function HeroSection() {
     // Um clique durante a entrada encerra a coreografia (senão ela segura o texto).
     document.documentElement.classList.remove('anim');
     setActive(i);
-    showScene(i);
+    activeRef.current = i;
+    scene.current?.setChapter(i);
     clearTimeout(swapTimer.current);
     if (reduce) {
       setShown(i);
@@ -159,17 +159,12 @@ export function HeroSection() {
     }, SWAP_OUT);
   };
 
-  const toggleVideo = () => {
+  const toggleMotion = () => {
     const next = !paused;
     pausedRef.current = next;
     setPaused(next);
-    const v = videos.current[visible.current];
-    if (next) {
-      v?.pause();
-      return;
-    }
-    if (v?.getAttribute('src')) v.play().catch(() => {});
-    else showScene(active);
+    if (scene.current) scene.current.setPaused(next);
+    else if (!next) startScene();
   };
 
   const chapter = chapters[shown];
@@ -177,21 +172,7 @@ export function HeroSection() {
   return (
     <section ref={stage} id="inicio" aria-label="Apresentação" className={['st-stage', swapping && 'swapping'].filter(Boolean).join(' ')}>
       <div ref={bg} className="st-bg" aria-hidden="true">
-        {chapters.map((c, i) => (
-          <video
-            key={c.scene}
-            ref={(el) => {
-              videos.current[i] = el;
-            }}
-            data-src={chapterScene(c.scene)}
-            muted
-            loop
-            playsInline
-            preload="none"
-            disablePictureInPicture
-            tabIndex={-1}
-          />
-        ))}
+        <canvas ref={canvas} />
       </div>
       <div className="st-veil" aria-hidden="true" />
 
@@ -208,7 +189,7 @@ export function HeroSection() {
 
         <ol className="st-index" aria-label="Capítulos">
           {chapters.map((c, i) => (
-            <li key={c.scene} className={i === active ? 'on' : undefined}>
+            <li key={c.label} className={i === active ? 'on' : undefined}>
               <button type="button" aria-current={i === active ? 'step' : undefined} onClick={() => select(i)}>
                 <DecodeText text={c.label.toUpperCase()} delay={600 + i * 40} />
               </button>
@@ -243,11 +224,11 @@ export function HeroSection() {
           <button
             type="button"
             className={['audio', paused && 'muted'].filter(Boolean).join(' ')}
-            onClick={toggleVideo}
-            aria-label={paused ? 'Retomar o vídeo de fundo' : 'Pausar o vídeo de fundo'}
+            onClick={toggleMotion}
+            aria-label={paused ? 'Retomar a animação 3D' : 'Pausar a animação 3D'}
           >
             <MotionIcon />
-            <DecodeText text={paused ? 'VÍDEO OFF' : 'VÍDEO ON'} delay={960} />
+            <DecodeText text={paused ? '3D OFF' : '3D ON'} delay={960} />
           </button>
           <a href="#inteligencia" className="scroll">
             <DoubleChevronIcon />

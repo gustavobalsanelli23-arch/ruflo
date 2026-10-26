@@ -41,17 +41,5 @@
       "pagina": "https://mixkit.co/free-stock-video/white-luxury-boutique-hotel-room-4046/",
       "origem": "https://assets.mixkit.co/videos/4046/4046-720.mp4"
     }
-  },
-  "capitulos": {
-    "observacao": "Cenas do hero (capítulos). Vêm do prompt de estética de referência enviado pelo cliente (\"Stratum\"): geradas com Seedance (Higgsfield) a partir de uma única imagem — um monólito de pedra com arco iluminado num lago. Não mostram imóveis da VOP. CONFIRMAR com o cliente o direito de uso comercial dessas cenas antes da publicação definitiva. Conversão: npm run chapters (comandos exatos da referência).",
-    "still": "https://d2ol7oe51mr4n9.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/b5f79c5a-2ebd-41ef-865e-24c660ac98bd.png",
-    "cenas": {
-      "vision": "https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260928_024808_abbfad57-4496-4906-9abc-49f0d153d287.mp4",
-      "expression": "https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260928_025948_2befd859-101e-49a4-8cb0-cdbb28cb11a7.mp4",
-      "craftsmanship": "https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260928_071544_17524fe8-2f07-4fbc-8a55-47518532df6f.mp4",
-      "refinement": "https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260928_025948_9fe460cc-21c2-476c-8e61-6bf57c2d6775.mp4",
-      "balance": "https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260928_072855_ba37e93c-1119-4b93-a3cd-6b29ced17dc2.mp4",
-      "origin": "https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260928_031433_64aea4c7-c53b-4e13-a1fc-bd73673b4fa5.mp4"
-    }
   }
 }

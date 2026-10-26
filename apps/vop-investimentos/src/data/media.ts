@@ -54,9 +54,7 @@ export function videoSources(clip: VideoClip, orientation: 'landscape' | 'portra
   return `/videos/${clip.id}-${orientation === 'portrait' ? 540 : 1280}.mp4`;
 }
 
-/** Cena de um capítulo do hero, em loop (gerada por `npm run chapters`). */
-export const chapterScene = (scene: string) => `/videos/capitulos/${scene}.mp4`;
-/** Quadro parado das cenas: a primeira pintura do hero, antes de qualquer vídeo. */
-export const chapterStill = '/images/capitulos/background.webp';
+/** Quadro parado da cena 3D do hero (npm run poster): a primeira pintura. */
+export const heroPoster = { landscape: '/images/hero/casa-vop', portrait: '/images/hero/casa-vop-retrato' } as const;
 
 export const ctaClip: VideoClip = { id: 'cta-horizonte', label: 'Horizonte', poster: photos.ctaHorizonte };
