@@ -2,10 +2,9 @@
 import { StrictMode } from 'react';
 import { renderToString } from 'react-dom/server';
 import { App } from './App';
-import { meta, srcSet } from './components/Picture';
 import { SITE_URL, business, fullAddress, hasWhatsapp, pendingBusinessData } from './config/site';
 import { pendingContent, regions, services } from './data/content';
-import { heroClips } from './data/media';
+import { chapterStill } from './data/media';
 import { catalog } from './data/properties';
 
 export { SITE_URL };
@@ -68,13 +67,9 @@ export function schema() {
   });
 }
 
-/** <link rel="preload"> do pôster do hero (a primeira pintura grande). */
+/** <link rel="preload"> do quadro parado do hero (a primeira pintura grande). */
 export function heroPreload() {
-  const slot = heroClips[0].poster;
-  const m = meta(slot);
-  if (!m) return '';
-  const mid = m.widths.find((w) => w >= 1440) ?? m.widths[m.widths.length - 1];
-  return `<link rel="preload" as="image" type="image/avif" href="/images/${slot.id}-${mid}.avif" imagesrcset="${srcSet(slot.id, m, 'avif')}" imagesizes="100vw" fetchpriority="high">`;
+  return `<link rel="preload" as="image" type="image/webp" href="${chapterStill}" fetchpriority="high">`;
 }
 
 /** O que ainda falta para o site estar completo (avisos do build). */

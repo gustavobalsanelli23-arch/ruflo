@@ -12,14 +12,15 @@ const { render, schema, heroPreload, pending, SITE_URL } = await import(pathToFi
 
 /**
  * Embute o CSS no HTML (elimina a requisição que bloqueia a renderização) e
- * pré-carrega as fontes da primeira dobra: o itálico do título e o Barlow.
+ * pré-carrega as fontes da primeira dobra: Inter (título e texto) e Chakra
+ * Petch (rótulos).
  */
 async function inlineCss(html) {
   const re = /<link rel="stylesheet"[^>]*href="(\/assets\/[^"]+\.css)"[^>]*>/g;
   const preloads = new Set();
   for (const [tag, href] of [...html.matchAll(re)]) {
     const css = await readFile(join(dist, href), 'utf8');
-    for (const font of css.match(/\/assets\/(instrument-serif-latin-400-italic|barlow-latin-(300|500)-normal)-[\w-]+\.woff2/g) ?? []) preloads.add(font);
+    for (const font of css.match(/\/assets\/(inter-latin-(400|700)-normal|chakra-petch-latin-700-normal)-[\w-]+\.woff2/g) ?? []) preloads.add(font);
     html = html.replace(tag, `<style>${css}</style>`);
   }
   const links = [...preloads]
@@ -36,7 +37,7 @@ html = html.replace('<!--preload-->', heroPreload());
 html = html.replace('<!--schema-->', `<script type="application/ld+json">${schema().replace(/</g, '\\u003c')}</script>`);
 html = html.replaceAll('__SITE_URL__', SITE_URL);
 // O HTML já chega pronto: o JS (hidratação e animações) cede a banda para o
-// pôster do hero e as fontes, que decidem a primeira impressão (LCP).
+// quadro do hero e as fontes, que decidem a primeira impressão (LCP).
 html = html.replace('<script type="module" crossorigin', '<script type="module" fetchpriority="low" crossorigin');
 html = await inlineCss(html);
 await writeFile(file, html);

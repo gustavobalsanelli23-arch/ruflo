@@ -1,7 +1,9 @@
 import { AnimatePresence, LayoutGroup, m } from 'framer-motion';
-import { ChevronDown, X } from 'lucide-react';
-import { useCallback, useId, useMemo, useState } from 'react';
+import { ChevronDown } from 'lucide-react';
+import { useCallback, useEffect, useId, useMemo, useState } from 'react';
 import { BlurText } from '../components/BlurText';
+import { ENTER_EVENT } from '../components/Navbar';
+import { CloseIcon } from '../components/StratumIcons';
 import { PropertyCard } from '../components/PropertyCard';
 import { PropertyTour, type TourTarget } from '../components/tour/PropertyTour';
 import { Reveal } from '../components/Reveal';
@@ -26,6 +28,13 @@ export function PropertiesSection() {
   const set = <K extends keyof Filters>(key: K, value: Filters[K]) => setFilters((f) => ({ ...f, [key]: value }));
   const close = useCallback(() => setTour(null), []);
   const open = useCallback((property: Property, origin: DOMRect | null) => setTour({ property, origin }), []);
+
+  // ENTRAR (cabeçalho): abre o percurso do primeiro imóvel, de onde estiver.
+  useEffect(() => {
+    const onEnter = () => setTour({ property: catalog.properties[0], origin: null });
+    window.addEventListener(ENTER_EVENT, onEnter);
+    return () => window.removeEventListener(ENTER_EVENT, onEnter);
+  }, []);
 
   return (
     <section id="imoveis" aria-labelledby="imoveis-titulo" className="section-y relative bg-ebony">
@@ -63,7 +72,7 @@ export function PropertiesSection() {
         </LayoutGroup>
 
         {results.length === 0 && (
-          <div className="mt-6 flex flex-col items-start gap-5 rounded-[6px] border border-line px-6 py-10 sm:px-10">
+          <div className="cut-frame mt-6 flex flex-col items-start gap-5 bg-white/[0.02] px-6 py-10 shadow-[inset_0_0_0_1px_var(--color-line)] sm:px-10">
             <p className="display display-md">Nenhum imóvel com esses filtros.</p>
             <p className="text-mineral">Tente outra combinação ou conte para a VOP o que você procura.</p>
             <div className="flex flex-wrap gap-3">
@@ -102,13 +111,9 @@ function FilterBar({ filters, options, onChange, onReset, count }: FilterBarProp
   const { show } = options;
   return (
     <div className="flex flex-col gap-4">
-      <div
-        role="search"
-        aria-label="Filtrar imóveis"
-        className="liquid-glass-strong flex flex-col gap-1 rounded-[22px] p-2 lg:flex-row lg:items-center lg:rounded-full"
-      >
+      <div role="search" aria-label="Filtrar imóveis" className="filter-bar flex flex-col lg:flex-row lg:items-stretch">
         {show.purpose && (
-          <div role="radiogroup" aria-label="Finalidade" className="flex rounded-full bg-night/40 p-1">
+          <div role="radiogroup" aria-label="Finalidade" className="flex p-1.5 lg:border-r lg:border-line">
             {purposeOptions.map((opt) => {
               const checked = filters.purpose === opt.id;
               return (
@@ -119,14 +124,14 @@ function FilterBar({ filters, options, onChange, onReset, count }: FilterBarProp
                   aria-checked={checked}
                   onClick={() => onChange('purpose', opt.id)}
                   className={[
-                    'relative h-10 flex-1 rounded-full px-5 text-[0.875rem] font-medium transition-colors duration-300 lg:flex-none',
-                    checked ? 'text-night' : 'text-mineral hover:text-linen',
+                    'lbl relative h-11 flex-1 px-5 transition-colors duration-300 lg:flex-none',
+                    checked ? 'text-ink' : 'text-[rgb(232_238_250/0.6)] hover:text-linen',
                   ].join(' ')}
                 >
                   {checked && (
                     <m.span
                       layoutId="finalidade-ativa"
-                      className="absolute inset-0 rounded-full bg-linen"
+                      className="cut-tr absolute inset-0 bg-champagne"
                       transition={{ type: 'spring', stiffness: 380, damping: 32 }}
                     />
                   )}
@@ -137,7 +142,7 @@ function FilterBar({ filters, options, onChange, onReset, count }: FilterBarProp
           </div>
         )}
 
-        <div className="grid grid-cols-1 gap-1 xs:grid-cols-2 md:grid-cols-3 lg:flex lg:flex-1 lg:items-center">
+        <div className="grid grid-cols-1 border-t border-line xs:grid-cols-2 md:grid-cols-3 lg:flex lg:flex-1 lg:border-t-0">
           {show.type && (
             <Select label="Tipo de imóvel" value={filters.type} onChange={(v) => onChange('type', v as Filters['type'])}>
               <option value="todos">Todos os tipos</option>
@@ -170,13 +175,13 @@ function FilterBar({ filters, options, onChange, onReset, count }: FilterBarProp
         </div>
       </div>
 
-      <div className="flex min-h-9 items-center justify-between gap-4 px-2">
-        <p className="text-[0.875rem] text-mineral" role="status" aria-live="polite">
+      <div className="flex min-h-9 items-center justify-between gap-4">
+        <p className="lbl text-[rgb(232_238_250/0.55)]" role="status" aria-live="polite">
           {count === 0 ? 'Nenhum imóvel encontrado' : `${plural(count, 'imóvel', 'imóveis')}${isFiltered(filters) ? ' com esses filtros' : ''}`}
         </p>
         {isFiltered(filters) && (
-          <button type="button" onClick={onReset} className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[0.875rem] text-linen hover:bg-white/5">
-            <X size={14} strokeWidth={1.6} aria-hidden="true" />
+          <button type="button" onClick={onReset} className="lbl inline-flex items-center gap-2 px-1 py-2 text-linen hover:text-champagne">
+            <CloseIcon className="ico size-2.5" />
             Limpar filtros
           </button>
         )}
@@ -189,20 +194,20 @@ function Select({ label, value, onChange, children }: { label: string; value: st
   const id = useId();
   const active = !['todos', 'todas'].includes(value);
   return (
-    <div className="relative flex-1 rounded-full transition-colors hover:bg-white/[0.04] lg:border-l lg:border-line lg:first:border-l-0 lg:hover:border-transparent">
-      <label htmlFor={id} className="pointer-events-none absolute left-5 top-2 flex items-center gap-1.5 text-[0.6875rem] text-mineral">
+    <div className="relative flex-1 border-t border-line transition-colors first:border-t-0 hover:bg-white/[0.03] lg:border-l lg:border-t-0 lg:first:border-l-0">
+      <label htmlFor={id} className="kicker pointer-events-none absolute left-5 top-2.5 flex items-center gap-1.5 !text-[0.625rem]">
         {label}
-        {active && <span aria-hidden="true" className="size-1 rounded-full bg-champagne" />}
+        {active && <span aria-hidden="true" className="size-1 bg-champagne" />}
       </label>
       <select
         id={id}
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="h-14 w-full cursor-pointer appearance-none rounded-full bg-transparent pb-1.5 pl-5 pr-10 pt-5 text-[0.9375rem] text-linen outline-offset-0 [&>option]:bg-graphite"
+        className="h-[3.75rem] w-full cursor-pointer appearance-none bg-transparent pb-2 pl-5 pr-10 pt-6 text-[0.9375rem] text-linen outline-offset-[-2px] [&>option]:bg-graphite"
       >
         {children}
       </select>
-      <ChevronDown size={16} strokeWidth={1.5} aria-hidden="true" className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-mineral" />
+      <ChevronDown size={15} strokeWidth={1.5} aria-hidden="true" className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-mineral" />
     </div>
   );
 }

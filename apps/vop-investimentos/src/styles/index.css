@@ -1,30 +1,31 @@
 @import 'tailwindcss';
-@import '@fontsource/instrument-serif/latin-400.css';
-@import '@fontsource/instrument-serif/latin-400-italic.css';
-@import '@fontsource/barlow/latin-300.css';
-@import '@fontsource/barlow/latin-400.css';
-@import '@fontsource/barlow/latin-500.css';
-@import '@fontsource/barlow/latin-600.css';
+@import '@fontsource/inter/latin-400.css';
+@import '@fontsource/inter/latin-700.css';
+@import '@fontsource/chakra-petch/latin-700.css';
+@import './stratum.css';
+@import './depth.css';
 
 /* ── Tokens ─────────────────────────────────────────────────────────────
-   Preto e neutros dominam; o champanhe só marca o que importa (foco,
-   filtro ativo, cotas de metragem, o traço do indicador de vídeo). */
+   Estética de referência "Stratum": azul-noite quase preto, fios brancos a
+   13%, creme rosado só no que é ação principal e no foco. Os nomes dos
+   tokens ficaram (night, linen, champagne…) e os valores mudaram. */
 @theme {
-  --color-night: #050505;
-  --color-ebony: #0b0b0b;
-  --color-graphite: #171717;
-  --color-linen: #f4f1eb;
-  --color-mineral: #a5a5a5;
-  --color-champagne: #b8a17a;
-  /* Mineral sobre preto passa AA para texto pequeno; o "mute" é só para
-     legendas grandes e elementos não textuais. */
-  --color-mute: #6f6f6f;
-  --color-line: rgb(244 241 235 / 0.12);
+  --color-night: #04070d;
+  --color-ebony: #070b13;
+  --color-graphite: #0e1420;
+  --color-linen: #e6eaf5;
+  --color-mineral: #a7aebb;
+  --color-champagne: #e8d1cb;
+  --color-ink: #15131b;
+  /* só para legendas grandes e elementos não textuais */
+  --color-mute: #5f6676;
+  --color-line: rgb(255 255 255 / 0.13);
 
-  --font-serif: 'Instrument Serif', 'Times New Roman', serif;
-  --font-sans: 'Barlow', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-sans: 'Inter', -apple-system, 'Helvetica Neue', Arial, sans-serif;
+  --font-serif: 'Inter', -apple-system, 'Helvetica Neue', Arial, sans-serif;
+  --font-label: 'Chakra Petch', 'Inter', sans-serif;
 
-  --ease-out-soft: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-out-soft: cubic-bezier(0.16, 1, 0.3, 1);
   --ease-cinema: cubic-bezier(0.65, 0, 0.35, 1);
 
   --breakpoint-xs: 26rem;
@@ -37,7 +38,7 @@
     color: var(--color-linen);
     color-scheme: dark;
     -webkit-text-size-adjust: 100%;
-    text-rendering: optimizeLegibility;
+    text-rendering: geometricPrecision;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     scroll-padding-top: 5.5rem;
@@ -49,19 +50,19 @@
   }
   body {
     font-family: var(--font-sans);
-    font-weight: 300;
-    font-size: 1rem;
-    line-height: 1.65;
+    font-weight: 400;
+    font-size: 0.9375rem;
+    line-height: 1.7;
     overflow-x: clip;
     min-height: 100dvh;
   }
   ::selection {
     background: var(--color-champagne);
-    color: var(--color-night);
+    color: var(--color-ink);
   }
   :focus-visible {
-    outline: 1px solid var(--color-champagne);
-    outline-offset: 4px;
+    outline: 1.5px solid var(--color-champagne);
+    outline-offset: 3px;
   }
   img,
   video {
@@ -75,118 +76,152 @@
   }
 }
 
-/* ── Tipografia editorial ─────────────────────────────────────────────── */
+/* ── Tipografia ──────────────────────────────────────────────────────────
+   Títulos em Inter 700 caixa-alta com tracking aberto (o do hero, 1.53/31.5);
+   rótulos em Chakra Petch 700. */
 @layer components {
   .display {
-    font-family: var(--font-serif);
-    font-style: italic;
-    font-weight: 400;
-    letter-spacing: -0.02em;
-    line-height: 0.95;
+    font-family: var(--font-sans);
+    font-style: normal;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.048em;
+    line-height: 1.04;
     text-wrap: balance;
   }
   .display-xl {
-    font-size: clamp(2.45rem, 1rem + 6.7vw, 8.25rem);
-    letter-spacing: -0.028em;
-    line-height: 0.9;
-  }
-  .display-lg {
-    font-size: clamp(2.35rem, 1.2rem + 4.2vw, 5.6rem);
-  }
-  .display-md {
-    font-size: clamp(1.9rem, 1.15rem + 2.4vw, 3.4rem);
+    font-size: clamp(1.75rem, 1rem + 2.6vw, 3.2rem);
     line-height: 1.02;
   }
-  /* Rótulo pequeno: frase curta, tom mineral. Sem caixa-alta. */
+  .display-lg {
+    font-size: clamp(1.5rem, 0.95rem + 2.1vw, 2.75rem);
+  }
+  .display-md {
+    font-size: clamp(1.1rem, 0.9rem + 0.85vw, 1.55rem);
+    line-height: 1.12;
+  }
+  /* Rótulo: Chakra Petch caixa-alta, como o trilho de capítulos. */
   .kicker {
-    font-size: 0.8125rem;
-    font-weight: 500;
-    letter-spacing: 0.02em;
-    color: var(--color-mineral);
+    font-family: var(--font-label);
+    font-size: 0.6875rem;
+    font-weight: 700;
+    letter-spacing: 0.13em;
+    line-height: 1.2;
+    text-transform: uppercase;
+    color: rgb(232 238 250 / 0.55);
   }
   .lede {
-    font-size: clamp(1.0625rem, 0.98rem + 0.35vw, 1.25rem);
-    line-height: 1.6;
-    color: rgb(244 241 235 / 0.78);
-    max-width: 34rem;
+    font-size: clamp(0.9375rem, 0.88rem + 0.25vw, 1.0625rem);
+    line-height: 1.78;
+    color: rgb(224 232 245 / 0.72);
+    max-width: 32rem;
     text-wrap: pretty;
   }
   .container-x {
     width: 100%;
     max-width: 92rem;
     margin-inline: auto;
-    padding-inline: clamp(1rem, 0.4rem + 3.2vw, 4rem);
+    padding-inline: clamp(1.25rem, 0.4rem + 3.6vw, 4.5rem);
   }
   .section-y {
-    padding-block: clamp(5.5rem, 3.5rem + 9vw, 11rem);
+    padding-block: clamp(5rem, 3.2rem + 8vw, 10rem);
   }
   .hairline {
     height: 1px;
     background: var(--color-line);
   }
+  /* Chanfros da referência: canto superior direito (pill creme) e octógono
+     (CTA de vidro). O contorno do octógono é um anel feito com evenodd. */
+  .cut-tr {
+    clip-path: polygon(0 0, calc(100% - 15px) 0, 100% 15px, 100% 100%, 0 100%);
+  }
+  .cut-oct {
+    clip-path: polygon(3px 0, calc(100% - 10px) 0, 100% 10px, 100% calc(100% - 3px), calc(100% - 3px) 100%, 10px 100%, 0 calc(100% - 10px), 0 3px);
+  }
+  .cut-frame {
+    clip-path: polygon(0 0, calc(100% - 22px) 0, 100% 22px, 100% 100%, 22px 100%, 0 calc(100% - 22px));
+  }
+  .edge-oct,
+  .edge-frame {
+    position: relative;
+  }
+  .edge-oct::after,
+  .edge-frame::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: rgb(255 255 255 / var(--edge, 0.12));
+    transition: background 0.3s ease;
+    z-index: 2;
+  }
+  .edge-oct::after {
+    clip-path: polygon(
+      evenodd,
+      3px 0,
+      calc(100% - 10px) 0,
+      100% 10px,
+      100% calc(100% - 3px),
+      calc(100% - 3px) 100%,
+      10px 100%,
+      0 calc(100% - 10px),
+      0 3px,
+      3px 0,
+      3.4px 1px,
+      1px 3.4px,
+      1px calc(100% - 10.4px),
+      10.4px calc(100% - 1px),
+      calc(100% - 3.4px) calc(100% - 1px),
+      calc(100% - 1px) calc(100% - 3.4px),
+      calc(100% - 1px) 10.4px,
+      calc(100% - 10.4px) 1px,
+      3.4px 1px
+    );
+  }
+  .edge-frame::after {
+    clip-path: polygon(
+      evenodd,
+      0 0,
+      calc(100% - 22px) 0,
+      100% 22px,
+      100% 100%,
+      22px 100%,
+      0 calc(100% - 22px),
+      0 0,
+      1px 1px,
+      1px calc(100% - 22.4px),
+      22.4px calc(100% - 1px),
+      calc(100% - 1px) calc(100% - 1px),
+      calc(100% - 1px) 22.4px,
+      calc(100% - 22.4px) 1px,
+      1px 1px
+    );
+  }
+  .edge-oct:hover::after {
+    --edge: 0.24;
+  }
 }
 
-/* ── Liquid glass ─────────────────────────────────────────────────────────
-   Duas intensidades. A borda é um pseudo-elemento com gradiente vertical
-   recortado por máscara (só o anel de 1.4px aparece). */
+/* ── Vidro ────────────────────────────────────────────────────────────
+   O vidro da referência: véu quente a 5% com desfoque de 12px (pill ENTER)
+   e o painel escuro com 16px (painel do menu). Sem anel arredondado: as
+   bordas, quando existem, são fios ou chanfros. */
 @layer components {
   .liquid-glass,
   .liquid-glass-strong {
     position: relative;
     overflow: hidden;
     border: none;
-    background: rgb(255 255 255 / 0.01);
-    background-blend-mode: luminosity;
   }
   .liquid-glass {
-    -webkit-backdrop-filter: blur(4px);
-    backdrop-filter: blur(4px);
-    box-shadow: inset 0 1px 1px rgb(255 255 255 / 0.1);
+    background: rgb(255 250 246 / 0.05);
+    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(12px);
   }
   .liquid-glass-strong {
-    -webkit-backdrop-filter: blur(50px);
-    backdrop-filter: blur(50px);
-    box-shadow:
-      4px 4px 4px rgb(0 0 0 / 0.05),
-      inset 0 1px 1px rgb(255 255 255 / 0.15);
-  }
-  .liquid-glass::before,
-  .liquid-glass-strong::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    z-index: 0;
-    border-radius: inherit;
-    padding: 1.4px;
-    pointer-events: none;
-    background: linear-gradient(
-      180deg,
-      rgb(255 255 255 / 0.45) 0%,
-      rgb(255 255 255 / 0.15) 20%,
-      rgb(255 255 255 / 0) 40%,
-      rgb(255 255 255 / 0) 60%,
-      rgb(255 255 255 / 0.15) 80%,
-      rgb(255 255 255 / 0.45) 100%
-    );
-    -webkit-mask:
-      linear-gradient(#fff 0 0) content-box,
-      linear-gradient(#fff 0 0);
-    -webkit-mask-composite: xor;
-    mask:
-      linear-gradient(#fff 0 0) content-box,
-      linear-gradient(#fff 0 0);
-    mask-composite: exclude;
-  }
-  .liquid-glass-strong::before {
-    background: linear-gradient(
-      180deg,
-      rgb(255 255 255 / 0.55) 0%,
-      rgb(255 255 255 / 0.22) 20%,
-      rgb(255 255 255 / 0) 40%,
-      rgb(255 255 255 / 0) 60%,
-      rgb(255 255 255 / 0.22) 80%,
-      rgb(255 255 255 / 0.55) 100%
-    );
+    background: rgb(11 16 26 / 0.74);
+    -webkit-backdrop-filter: blur(16px);
+    backdrop-filter: blur(16px);
   }
   /* Brilho que acompanha o ponteiro dentro do card (cards de investimento). */
   .spotlight::after {
@@ -196,7 +231,7 @@
     z-index: 0;
     border-radius: inherit;
     pointer-events: none;
-    background: radial-gradient(380px circle at var(--mx, 50%) var(--my, 50%), rgb(184 161 122 / 0.16), transparent 62%);
+    background: radial-gradient(380px circle at var(--mx, 50%) var(--my, 50%), rgb(232 209 203 / 0.12), transparent 62%);
     opacity: 0;
     transition: opacity 0.5s;
   }
@@ -211,58 +246,59 @@
     position: relative;
     z-index: 1;
   }
-  /* Sobre fundos claros de foto, o vidro ganha um véu para manter a leitura. */
+  /* Sobre fotos claras, o vidro ganha um véu para manter a leitura. */
   .glass-veil {
-    background: rgb(5 5 5 / 0.32);
-  }
-  /* Celular: o blur de 50px custa caro em GPU modesta. */
-  @media (max-width: 767px) {
-    .liquid-glass-strong {
-      -webkit-backdrop-filter: blur(22px);
-      backdrop-filter: blur(22px);
-    }
+    background: rgb(4 7 13 / 0.42);
   }
   @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
     .liquid-glass,
     .liquid-glass-strong {
-      background: rgb(23 23 23 / 0.86);
+      background: rgb(11 16 26 / 0.9);
     }
   }
 }
 
-/* ── Botões ───────────────────────────────────────────────────────────── */
+/* ── Botões ──────────────────────────────────────────────────────────────
+   Rótulo em Chakra Petch, 41px de altura. Sólido = o pill creme com o canto
+   superior direito cortado; vidro = o CTA octogonal com contorno de fio. */
 @layer components {
   .btn {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 0.6rem;
-    min-height: 3rem;
-    padding: 0 1.4rem;
-    border-radius: 999px;
-    font-size: 0.9375rem;
-    font-weight: 500;
-    letter-spacing: 0.01em;
+    gap: 0.5rem;
+    min-height: 2.6rem;
+    padding: 0 1.25rem;
+    font-family: var(--font-label);
+    font-size: 0.6875rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
     white-space: nowrap;
+    line-height: 1;
     transition:
-      background-color 0.35s var(--ease-out-soft),
-      color 0.35s var(--ease-out-soft),
-      box-shadow 0.35s var(--ease-out-soft);
+      background-color 0.3s ease,
+      color 0.3s ease;
   }
   .btn-solid {
-    background: var(--color-linen);
-    color: var(--color-night);
+    background: var(--color-champagne);
+    color: var(--color-ink);
+    clip-path: polygon(0 0, calc(100% - 15px) 0, 100% 15px, 100% 100%, 0 100%);
   }
   .btn-solid:hover {
-    background: #fff;
+    background: #f1dfda;
   }
   .btn-glass {
-    color: var(--color-linen);
+    color: #e9eef7;
+    background: rgb(255 255 255 / 0.035);
+    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(12px);
   }
   .btn-glass:hover {
-    background: rgb(255 255 255 / 0.07);
+    background: rgb(255 255 255 / 0.075);
   }
   .btn .btn-icon {
+    flex: none;
     transition: transform 0.45s var(--ease-out-soft);
   }
   .btn:hover .btn-icon {
@@ -270,7 +306,7 @@
   }
   .link-quiet {
     text-decoration: underline;
-    text-decoration-color: rgb(244 241 235 / 0.3);
+    text-decoration-color: rgb(230 234 245 / 0.3);
     text-underline-offset: 0.25em;
     transition: text-decoration-color 0.3s;
   }
@@ -293,24 +329,6 @@
   .slow-zoom {
     animation: slow-zoom 18s var(--ease-cinema) infinite alternate;
     will-change: transform;
-  }
-  /* Entrada da primeira dobra em CSS: começa na primeira pintura, sem esperar
-     o JavaScript (o texto do hero é o LCP). Mesma linguagem do Framer Motion:
-     desfoque 10px → 0, opacidade 0 → 1, subindo --rise. */
-  @keyframes rise-blur {
-    from {
-      opacity: 0;
-      filter: blur(10px);
-      transform: translateY(var(--rise, 20px));
-    }
-    to {
-      opacity: 1;
-      filter: none;
-      transform: none;
-    }
-  }
-  .intro-anim {
-    animation: rise-blur var(--dur, 0.8s) ease-out var(--delay, 0s) both;
   }
   /* Percurso: a câmera avança devagar dentro do ambiente. */
   @keyframes tour-push {
@@ -354,14 +372,13 @@
   @media (prefers-reduced-motion: reduce) {
     .slow-zoom,
     .scroll-cue,
-    .intro-anim,
     .tour-push,
     .hotspot-ring {
       animation: none;
     }
   }
   .text-shadow-soft {
-    text-shadow: 0 1px 24px rgb(0 0 0 / 0.35);
+    text-shadow: 0 1px 24px rgb(4 7 13 / 0.45);
   }
   .no-scrollbar {
     scrollbar-width: none;

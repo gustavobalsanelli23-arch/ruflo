@@ -31,7 +31,7 @@ export function IntroSection() {
                     aria-hidden="true"
                     className="absolute left-0 top-[-1px] h-px w-0 bg-champagne transition-[width] duration-700 ease-out group-hover:w-full"
                   />
-                  <h3 className="text-[1.0625rem] font-medium text-linen sm:col-span-5">{s.name}</h3>
+                  <h3 className="display display-md !text-[1rem] text-linen sm:col-span-5">{s.name}</h3>
                   <p className="text-[0.9375rem] leading-relaxed text-mineral sm:col-span-7">{s.description}</p>
                 </RevealItem>
               ))}
@@ -40,7 +40,7 @@ export function IntroSection() {
         </div>
 
         <div className="relative lg:col-span-5 lg:mt-48">
-          <Aperture className="relative aspect-[4/5] overflow-hidden rounded-[4px] md:aspect-[16/11] lg:aspect-[4/5]">
+          <Aperture className="relative aspect-[4/5] overflow-hidden md:aspect-[16/11] lg:aspect-[4/5]">
             <Parallax range={7}>
               <Picture
                 slot={photos.edificioPedestre}
@@ -54,7 +54,7 @@ export function IntroSection() {
           <Aperture
             from="bottom"
             delay={0.35}
-            className="relative -mt-24 ml-auto aspect-[3/2] w-[58%] overflow-hidden rounded-[4px] ring-8 ring-night sm:-mt-32 xl:-ml-[22%] xl:mr-auto"
+            className="relative -mt-24 ml-auto aspect-[3/2] w-[58%] overflow-hidden ring-8 ring-night sm:-mt-32 xl:-ml-[22%] xl:mr-auto"
           >
             <Picture slot={photos.escadaLuz} sizes="(min-width: 1024px) 22vw, 58vw" className="block size-full" imgClassName="size-full object-cover slow-zoom" />
           </Aperture>

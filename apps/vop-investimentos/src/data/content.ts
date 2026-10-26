@@ -12,9 +12,9 @@ export interface NavItem {
 
 /** Âncoras do menu, na ordem do site. */
 export const nav: readonly NavItem[] = [
-  { id: 'inicio', label: 'Início' },
   { id: 'imoveis', label: 'Imóveis' },
   { id: 'investimentos', label: 'Investimentos' },
+  { id: 'regioes', label: 'Regiões' },
   { id: 'sobre', label: 'Sobre' },
   { id: 'contato', label: 'Contato' },
 ];
@@ -22,7 +22,7 @@ export const nav: readonly NavItem[] = [
 export const hero = {
   badge: 'Inteligência imobiliária',
   /** Quebras planejadas: uma linha por item. */
-  headline: ['Mais do que', 'encontrar imóveis.', 'Construir patrimônio.'],
+  headline: ['Mais do que encontrar imóveis.', 'Construir patrimônio.'] as const,
   subheadline:
     'Conectamos pessoas a oportunidades imobiliárias através de estratégia, conhecimento de mercado e assessoria especializada.',
 };
@@ -42,6 +42,29 @@ export const services = {
     { name: 'Suporte técnico e jurídico', description: 'Contratos, vistorias e documentos acompanhados até a escritura.' },
   ] satisfies Service[],
 };
+
+export interface Chapter {
+  /** Rótulo no trilho do hero. */
+  label: string;
+  /** Cena em public/videos/capitulos/ (ver data/media.ts). */
+  scene: string;
+  /** Título em duas linhas. */
+  headline: readonly [string, string];
+  blurb: string;
+}
+
+/**
+ * Capítulos do hero: a frase do briefing abre, e cada serviço vira um
+ * capítulo com o próprio texto (mesma pendência de confirmação dos serviços).
+ */
+export const chapters: readonly Chapter[] = [
+  { label: 'Visão', scene: 'background', headline: hero.headline, blurb: hero.subheadline },
+  { label: 'Assessoria', scene: 'expression', headline: ['Assessoria imobiliária', 'do início à escritura.'], blurb: services.items[0].description },
+  { label: 'Investimentos', scene: 'refinement', headline: ['O imóvel visto', 'também como ativo.'], blurb: services.items[1].description },
+  { label: 'Oportunidades', scene: 'craftsmanship', headline: ['Oportunidades estudadas', 'antes da proposta.'], blurb: services.items[2].description },
+  { label: 'Crédito', scene: 'origin', headline: ['Crédito imobiliário', 'que cabe no seu plano.'], blurb: services.items[3].description },
+  { label: 'Segurança', scene: 'balance', headline: ['Segurança', 'em cada etapa.'], blurb: services.items[4].description },
+];
 
 export const intro = {
   title: ['Inteligência por trás', 'de cada escolha.'],

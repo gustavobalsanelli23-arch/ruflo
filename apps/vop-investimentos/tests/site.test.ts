@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { business, formatPhone, isWhatsappNumber, pendingBusinessData, resolveChannel, whatsappUrl, type Business } from '../src/config/site';
 import { composeMessage, emptyContact, maskPhone, phoneDigits, postContact, resolveDelivery, validateContact, type ContactInput } from '../src/lib/contact';
 import { distanceKm, mapSize, project } from '../src/lib/geo';
-import { hotspotOnScreen, parseFocus, stageBox, walkReducer } from '../src/lib/stage';
+import { cameraAt, cameraTarget, depthLook, lane, panelSize, roomPose, SPACING, travelTime, walkReducer, YAW } from '../src/lib/stage';
 
 const withWhatsapp: Business = { ...business, whatsapp: { ...business.whatsapp, number: '5511999998888' } };
 const filled: ContactInput = {
@@ -133,46 +133,62 @@ describe('mapa esquemático', () => {
   });
 });
 
-describe('percurso pelo imóvel', () => {
-  it('foto deitada cobre a tela respeitando o ponto de interesse', () => {
-    const b = stageBox(3000, 2000, 1440, 900, '50% 80%');
-    expect(b.mode).toBe('cover');
-    expect(b.width).toBe(1440);
-    expect(b.height).toBe(960);
-    expect(b.top).toBeCloseTo(-48);
-    expect(b.left).toBe(0);
+describe('percurso 3D pelo imóvel', () => {
+  it('o painel mostra a foto inteira, dentro da área livre', () => {
+    const wide = panelSize(3000, 2000, 1440, 900);
+    expect(wide.width / wide.height).toBeCloseTo(1.5, 1);
+    expect(wide.width).toBeLessThanOrEqual(1440 * 0.6);
+    expect(wide.height).toBeLessThanOrEqual(900 * 0.58);
+    const tall = panelSize(2000, 3000, 1440, 900);
+    expect(tall.height).toBe(Math.round(900 * 0.58));
+    expect(tall.width / tall.height).toBeCloseTo(2 / 3, 1);
+    const phone = panelSize(3000, 2000, 390, 844);
+    expect(phone.width).toBeLessThanOrEqual(390 * 0.84 + 1);
+    expect(phone.height).toBeLessThanOrEqual(844 * 0.46 + 1);
   });
 
-  it('foto em pé numa tela deitada aparece inteira (contain), à direita do título', () => {
-    const b = stageBox(2000, 3000, 1440, 900);
-    expect(b.mode).toBe('contain');
-    expect(b.height).toBeCloseTo(900 * 0.78);
-    expect(b.left + b.width / 2).toBeGreaterThan(720);
-    expect(b.top + b.height).toBeLessThan(900);
+  it('os ambientes se alternam de lado e se afastam em profundidade', () => {
+    expect([0, 1, 2, 3].map(lane)).toEqual([0, 1, -1, 1]);
+    expect(roomPose(0, 800)).toEqual({ x: 0, z: -0, yaw: 0 });
+    expect(roomPose(2, 800)).toEqual({ x: -800, z: -2 * SPACING, yaw: -YAW });
   });
 
-  it('foto deitada no celular em pé ocupa o alto da tela, sem invadir os controles', () => {
-    const b = stageBox(3000, 2000, 390, 844, '50% 80%');
-    expect(b.mode).toBe('cover');
-    expect(b.top + b.height).toBeCloseTo(844 * 0.76);
-    expect(b.width).toBeGreaterThan(390);
+  it('parada num ambiente, a câmera fica diante dele e o encara', () => {
+    for (const i of [0, 1, 2, 3]) {
+      const at = cameraAt(i, 4, 800);
+      const pose = roomPose(i, 800);
+      expect(at.x).toBeCloseTo(pose.x);
+      expect(at.yaw).toBeCloseTo(pose.yaw);
+      expect(at.z).toBeCloseTo(-pose.z);
+    }
   });
 
-  it('no celular em pé, a foto em pé cobre a tela', () => {
-    expect(stageBox(2000, 3000, 390, 844).mode).toBe('cover');
+  it('no meio do caminho, a câmera está entre os dois ambientes', () => {
+    const at = cameraAt(1.5, 4, 800);
+    expect(at.x).toBeCloseTo(0);
+    expect(at.yaw).toBeCloseTo(0);
+    expect(at.z).toBeCloseTo(1.5 * SPACING);
+    // antes do primeiro (entrada) e depois do último (fim), o lado não muda
+    expect(cameraAt(-0.85, 4, 800).x).toBe(0);
+    expect(cameraAt(3.3, 4, 800).x).toBe(roomPose(3, 800).x);
   });
 
-  it('pontos de interesse fora da área livre ficam ocultos', () => {
-    const b = stageBox(3000, 2000, 1440, 900);
-    expect(hotspotOnScreen(b, 50, 50, 1440, 900).visible).toBe(true);
-    expect(hotspotOnScreen(b, 2, 50, 1440, 900).visible).toBe(false);
-    expect(hotspotOnScreen(b, 50, 95, 1440, 900).visible).toBe(false);
+  it('névoa à frente; o que a câmera atravessa some antes do olho', () => {
+    expect(depthLook(1, 1)).toEqual({ fog: 0, opacity: 1, hidden: false });
+    expect(depthLook(2, 1).fog).toBeCloseTo(0.5);
+    expect(depthLook(3, 1).fog).toBeGreaterThan(depthLook(2, 1).fog);
+    expect(depthLook(1, 1.3).opacity).toBeLessThan(1);
+    expect(depthLook(1, 1.7).hidden).toBe(true);
+    expect(depthLook(5, 1).hidden).toBe(true);
   });
 
-  it('parseFocus lê porcentagens e limita a 0–1', () => {
-    expect(parseFocus('40% 70%')).toEqual([0.4, 0.7]);
-    expect(parseFocus()).toEqual([0.5, 0.5]);
-    expect(parseFocus('150% -10%')).toEqual([1, 0]);
+  it('a câmera para longe na entrada, no ambiente atual e um passo além no fim', () => {
+    const w = { index: 2, dir: 1, ended: false };
+    expect(cameraTarget(w, false, 4)).toBeLessThan(0);
+    expect(cameraTarget(w, true, 4)).toBe(2);
+    expect(cameraTarget({ ...w, ended: true }, true, 4)).toBeGreaterThan(3);
+    expect(travelTime(0, 3)).toBeGreaterThan(travelTime(0, 1));
+    expect(travelTime(0, 40)).toBeLessThanOrEqual(2.4);
   });
 
   it('avança, volta, encerra, pula e recomeça', () => {

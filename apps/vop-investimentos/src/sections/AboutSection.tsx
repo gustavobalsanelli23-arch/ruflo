@@ -23,7 +23,7 @@ export function AboutSection() {
         />
 
         <div className="mt-16 grid gap-14 md:mt-24 lg:grid-cols-12 lg:gap-10">
-          <Aperture className="relative aspect-[4/5] overflow-hidden rounded-[4px] md:aspect-[16/10] lg:col-span-5 lg:aspect-[4/5]">
+          <Aperture className="relative aspect-[4/5] overflow-hidden md:aspect-[16/10] lg:col-span-5 lg:aspect-[4/5]">
             <Parallax range={6}>
               <Picture
                 slot={photos.piscinaInterna}
@@ -41,7 +41,7 @@ export function AboutSection() {
                 Desde {about.foundedYear}
               </Reveal>
             )}
-            <Reveal as="p" className="font-serif text-[clamp(1.5rem,1.1rem+1.2vw,2.15rem)] leading-[1.28] text-linen">
+            <Reveal as="p" className="text-[clamp(1.35rem,1rem+1vw,1.9rem)] leading-[1.34] text-linen">
               {about.philosophy}
             </Reveal>
 
@@ -54,7 +54,7 @@ export function AboutSection() {
             <RevealGroup as="dl" step={0.1} className="mt-14 grid gap-x-10 gap-y-9 sm:grid-cols-2">
               {about.differentials.map((d) => (
                 <RevealItem key={d.title} className="border-t border-line pt-5">
-                  <dt className="text-[1.0625rem] font-medium">{d.title}</dt>
+                  <dt className="display display-md !text-[1rem]">{d.title}</dt>
                   <dd className="mt-2 text-[0.9375rem] leading-relaxed text-mineral">{d.text}</dd>
                 </RevealItem>
               ))}
@@ -72,7 +72,7 @@ export function AboutSection() {
                     <Picture
                       slot={person.photo}
                       sizes="(min-width: 1024px) 22vw, (min-width: 640px) 46vw, 100vw"
-                      className="mb-5 block aspect-[4/5] overflow-hidden rounded-[4px]"
+                      className="cut-frame mb-5 block aspect-[4/5] overflow-hidden"
                       imgClassName="size-full object-cover"
                     />
                   )}
@@ -108,11 +108,11 @@ export function AboutSection() {
             <RevealGroup as="ol" step={0.15} delay={0.2} className="grid gap-10 md:grid-cols-4 md:gap-8">
               {about.process.map((step, i) => (
                 <RevealItem as="li" key={step.title} className="relative grid grid-cols-[3rem_1fr] gap-x-4 md:block">
-                  <span className="display relative flex size-11 items-center justify-center rounded-full bg-ebony text-[1.35rem] text-champagne ring-1 ring-champagne/50">
-                    {i + 1}
+                  <span className="lbl cut-oct relative flex size-11 items-center justify-center bg-ebony text-champagne shadow-[inset_0_0_0_1px_rgb(232_209_203/0.5)]">
+                    {String(i + 1).padStart(2, '0')}
                   </span>
                   <div className="md:mt-7">
-                    <h4 className="text-[1.0625rem] font-medium">{step.title}</h4>
+                    <h4 className="display display-md !text-[1rem]">{step.title}</h4>
                     <p className="mt-2 text-[0.9375rem] leading-relaxed text-mineral">{step.text}</p>
                   </div>
                 </RevealItem>

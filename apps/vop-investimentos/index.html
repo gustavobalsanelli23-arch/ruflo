@@ -10,7 +10,7 @@
     />
     <link rel="canonical" href="__SITE_URL__/" />
     <meta name="robots" content="index, follow, max-image-preview:large" />
-    <meta name="theme-color" content="#050505" />
+    <meta name="theme-color" content="#04070d" />
     <meta name="color-scheme" content="dark" />
     <meta name="format-detection" content="telephone=no" />
 
@@ -39,11 +39,25 @@
 
     <!-- Antes da primeira pintura: com JS, as entradas animadas começam
          escondidas (o Framer Motion as revela). Se o app não hidratar em 6s,
-         a classe volta e tudo aparece sem animação. Sem JS, nada se esconde. -->
+         a classe volta e tudo aparece sem animação. Sem JS, nada se esconde.
+         A classe anim dispara uma vez a coreografia de entrada do hero e do
+         cabeçalho (CSS) e sai assim que a última animação (o FALE CONOSCO do
+         dock) termina: enquanto ela está presente, o navegador não conta o
+         texto do hero como pintado (LCP). 3,2s é a garantia. -->
     <script>
       (function () {
         var d = document.documentElement;
         d.classList.remove('no-js');
+        if (!(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches)) {
+          var done = function () {
+            d.classList.remove('anim');
+          };
+          d.classList.add('anim');
+          document.addEventListener('animationend', function (e) {
+            if (e.target && e.target.classList && e.target.classList.contains('talk')) done();
+          });
+          setTimeout(done, 3200);
+        }
         setTimeout(function () {
           if (!window.__vopReady) d.classList.add('no-js');
         }, 6000);

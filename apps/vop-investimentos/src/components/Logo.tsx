@@ -7,18 +7,14 @@ import { business } from '../config/site';
  */
 export function Logo({ compact = false, className }: { compact?: boolean; className?: string }) {
   return (
-    <span className={['inline-flex items-center gap-3 leading-none text-linen', className].filter(Boolean).join(' ')}>
-      <span className="font-sans text-[1.32rem] font-semibold tracking-[0.34em]" style={{ marginRight: '-0.34em' }}>
-        {business.name}
-      </span>
+    <span className={['inline-flex items-center gap-2.5 leading-none text-linen', className].filter(Boolean).join(' ')}>
+      <span className="font-label text-[1.6rem] font-bold tracking-[0.16em]">{business.name}</span>
       {!compact && (
-        <>
-          <span aria-hidden="true" className="h-7 w-px bg-champagne/70" />
-          <span className="flex flex-col text-[0.6875rem] font-normal leading-[1.25] tracking-[0.06em] text-mineral">
-            <span>Investimentos</span>
-            <span>Imobiliários</span>
-          </span>
-        </>
+        <span className="border-l border-line pl-2.5 font-label text-[0.5625rem] font-bold uppercase leading-[1.3] tracking-[0.12em] text-[rgb(232_238_250/0.55)]">
+          Investimentos
+          <br />
+          Imobiliários
+        </span>
       )}
     </span>
   );

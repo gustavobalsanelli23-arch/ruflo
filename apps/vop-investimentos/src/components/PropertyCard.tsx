@@ -1,11 +1,13 @@
-import { AnimatePresence, m, useMotionValue, useReducedMotion, useSpring } from 'framer-motion';
+import { AnimatePresence, m, useMotionTemplate, useMotionValue, useReducedMotion, useSpring } from 'framer-motion';
 import { ArrowUpRight } from 'lucide-react';
 import { useRef, useState, type PointerEvent } from 'react';
 import { coverOf, type Property } from '../data/properties';
 import { FINE_POINTER, useMediaQuery } from '../hooks/useMediaQuery';
 import { formatArea, formatPrice, plural } from '../lib/catalog';
-import { EASE_OUT, enter, enterTransition } from '../lib/motion';
+import { EASE_MASK, EASE_OUT, EASE_SOFT } from '../lib/motion';
+import { DecodeText } from './Decode';
 import { Picture } from './Picture';
+import { PixelIcon } from './StratumIcons';
 
 /** Cota de desenho técnico: um traço com marcas nas pontas antes da medida. */
 export function Dimension({ children, className }: { children: React.ReactNode; className?: string }) {
@@ -20,17 +22,9 @@ export function Dimension({ children, className }: { children: React.ReactNode; 
   );
 }
 
+/** Rótulo curto em Chakra Petch com o canto chanfrado. */
 export function Chip({ children, tone = 'glass' }: { children: React.ReactNode; tone?: 'glass' | 'demo' }) {
-  return (
-    <span
-      className={[
-        'liquid-glass glass-veil inline-flex h-7 items-center rounded-full px-3 text-[0.75rem] font-medium',
-        tone === 'demo' ? 'text-champagne' : 'text-linen/90',
-      ].join(' ')}
-    >
-      {children}
-    </span>
-  );
+  return <span className={['chip lbl', tone === 'demo' ? 'chip-demo' : ''].filter(Boolean).join(' ')}>{children}</span>;
 }
 
 const purposeLabel = { comprar: 'Comprar', investir: 'Investir' } as const;
@@ -42,6 +36,13 @@ interface PropertyCardProps {
   onOpen: (property: Property, origin: DOMRect | null) => void;
 }
 
+/**
+ * Card em camadas 3D: a foto no fundo, a moldura de fio, os rótulos, o
+ * título e o selo ENTRAR flutuam a distâncias diferentes à frente dela.
+ * Com o mouse, o card inclina e as camadas se deslocam entre si (paralaxe
+ * real, não simulada); um brilho segue o ponteiro. Ao entrar na tela, o card
+ * se levanta do plano (giro em X).
+ */
 export function PropertyCard({ property: p, wide, onOpen }: PropertyCardProps) {
   const reduce = useReducedMotion();
   const fine = useMediaQuery(FINE_POINTER);
@@ -50,18 +51,18 @@ export function PropertyCard({ property: p, wide, onOpen }: PropertyCardProps) {
   const rooms = p.suites ?? p.bedrooms;
   const frame = useRef<HTMLDivElement>(null);
   const [hover, setHover] = useState(false);
-  // Inclinação leve da foto e o círculo "Entrar" que segue o ponteiro.
-  const tiltX = useSpring(0, { stiffness: 140, damping: 18 });
-  const tiltY = useSpring(0, { stiffness: 140, damping: 18 });
+  const tiltX = useSpring(0, { stiffness: 120, damping: 16 });
+  const tiltY = useSpring(0, { stiffness: 120, damping: 16 });
   const cursorX = useMotionValue(0);
   const cursorY = useMotionValue(0);
+  const glare = useMotionTemplate`radial-gradient(420px circle at ${cursorX}px ${cursorY}px, rgb(232 209 203 / 0.16), transparent 60%)`;
   const onMove = (e: PointerEvent) => {
     if (!interactive || !frame.current) return;
     const r = frame.current.getBoundingClientRect();
     const px = (e.clientX - r.left) / r.width;
     const py = (e.clientY - r.top) / r.height;
-    tiltY.set((px - 0.5) * 5);
-    tiltX.set((0.5 - py) * 4);
+    tiltY.set((px - 0.5) * 9);
+    tiltX.set((0.5 - py) * 7);
     cursorX.set(e.clientX - r.left);
     cursorY.set(e.clientY - r.top);
     if (!hover) setHover(true);
@@ -74,32 +75,38 @@ export function PropertyCard({ property: p, wide, onOpen }: PropertyCardProps) {
   return (
     <m.article
       layout={!reduce}
-      variants={enter}
-      exit={{ opacity: 0, filter: 'blur(6px)', scale: 0.985, transition: { duration: 0.3 } }}
-      transition={reduce ? { duration: 0 } : { ...enterTransition, layout: { duration: 0.6, ease: [0.22, 1, 0.36, 1] } }}
+      variants={{
+        hidden: { opacity: 0, y: 46, rotateX: reduce ? 0 : 16 },
+        visible: { opacity: 1, y: 0, rotateX: 0 },
+      }}
+      exit={{ opacity: 0, scale: 0.97, transition: { duration: 0.3 } }}
+      transition={reduce ? { duration: 0 } : { duration: 1.1, ease: EASE_MASK, layout: { duration: 0.6, ease: EASE_SOFT } }}
+      style={{ transformPerspective: 1200, transformOrigin: '50% 100%' }}
       data-reveal
       aria-labelledby={titleId}
-      className={['group relative [perspective:1400px]', wide ? 'md:col-span-2' : ''].join(' ')}
+      className={['card3d group relative', wide ? 'md:col-span-2' : ''].join(' ')}
       onPointerMove={onMove}
       onPointerLeave={onLeave}
     >
       <m.div
         ref={frame}
-        style={interactive ? { rotateX: tiltX, rotateY: tiltY } : undefined}
-        className={[
-          'relative overflow-hidden rounded-[6px] bg-graphite',
-          wide ? 'aspect-[4/5] sm:aspect-[16/10] lg:aspect-[21/9]' : 'aspect-[4/5] lg:aspect-[5/6]',
-        ].join(' ')}
+        style={interactive ? { rotateX: tiltX, rotateY: tiltY, transformPerspective: 1400 } : undefined}
+        className={['card3d-frame relative', wide ? 'aspect-[4/5] sm:aspect-[16/10] lg:aspect-[21/9]' : 'aspect-[4/5] lg:aspect-[5/6]'].join(' ')}
       >
-        <Picture
-          slot={coverOf(p)}
-          sizes={wide ? '(min-width: 768px) 92vw, 100vw' : '(min-width: 768px) 46vw, 100vw'}
-          className="block size-full"
-          imgClassName="size-full object-cover transition-transform duration-[1400ms] ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-[1.045]"
-        />
-        <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgb(5_5_5/0.35)_0%,rgb(5_5_5/0)_30%,rgb(5_5_5/0.1)_55%,rgb(5_5_5/0.85)_100%)]" />
+        <span aria-hidden="true" className="card3d-shadow" />
+        <div className="card3d-photo cut-frame">
+          <Picture
+            slot={coverOf(p)}
+            sizes={wide ? '(min-width: 768px) 92vw, 100vw' : '(min-width: 768px) 46vw, 100vw'}
+            className="block size-full"
+            imgClassName="size-full object-cover transition-transform duration-[1400ms] ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-[1.06]"
+          />
+          <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgb(4_7_13/0.4)_0%,rgb(4_7_13/0)_30%,rgb(4_7_13/0.1)_55%,rgb(4_7_13/0.88)_100%)]" />
+          {interactive && <m.div aria-hidden="true" className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-500 group-hover:opacity-100" style={{ background: glare }} />}
+        </div>
+        <span aria-hidden="true" className="card3d-edge" />
 
-        <div className="absolute inset-x-4 top-4 flex flex-wrap items-start gap-2 sm:inset-x-5 sm:top-5">
+        <div className="card3d-layer card3d-chips">
           {p.demo && <Chip tone="demo">Exemplo</Chip>}
           <Chip>{p.type}</Chip>
           <span className="ml-auto flex gap-2">
@@ -109,41 +116,41 @@ export function PropertyCard({ property: p, wide, onOpen }: PropertyCardProps) {
           </span>
         </div>
 
-        <div className="absolute inset-x-4 bottom-4 sm:inset-x-6 sm:bottom-6">
-          <p className="text-[0.8125rem] text-linen/75">{p.location.label}</p>
-          <h3 id={titleId} className={['display mt-1.5 text-linen', wide ? 'text-[clamp(1.9rem,1.2rem+2.4vw,3.6rem)]' : 'text-[clamp(1.75rem,1.2rem+1.4vw,2.6rem)]'].join(' ')}>
+        <div className="card3d-layer card3d-title">
+          <p className="lbl text-[rgb(232_238_250/0.72)]">{p.location.label}</p>
+          <h3 id={titleId} className={['display mt-2 text-linen', wide ? 'text-[clamp(1.6rem,1rem+2vw,3rem)]' : 'text-[clamp(1.45rem,1rem+1.2vw,2.2rem)]'].join(' ')}>
             {p.title}
           </h3>
+          {/* Toque: um selo fixo. Mouse: o selo ENTRAR acompanha o ponteiro, à frente de tudo. */}
+          {!interactive && (
+            <span className="card3d-badge lbl">
+              <PixelIcon />
+              Entrar no imóvel
+            </span>
+          )}
         </div>
 
-        {/* Toque: um selo fixo. Mouse: o círculo "Entrar" acompanha o ponteiro. */}
-        {!interactive && (
-          <span className="liquid-glass glass-veil absolute bottom-4 right-4 inline-flex h-9 items-center gap-1.5 rounded-full px-3.5 text-[0.8125rem] text-linen sm:bottom-6 sm:right-6">
-            Entrar no imóvel
-            <ArrowUpRight size={14} strokeWidth={1.6} aria-hidden="true" />
-          </span>
-        )}
         <AnimatePresence>
           {interactive && hover && (
             <m.span
               aria-hidden="true"
-              className="pointer-events-none absolute left-0 top-0 z-20"
-              style={{ x: cursorX, y: cursorY }}
-              initial={{ opacity: 0, scale: 0.4 }}
+              className="card3d-cursor"
+              style={{ x: cursorX, y: cursorY, z: 90 }}
+              initial={{ opacity: 0, scale: 0.5 }}
               animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.4 }}
+              exit={{ opacity: 0, scale: 0.5 }}
               transition={{ duration: 0.35, ease: EASE_OUT }}
             >
-              <span className="liquid-glass-strong glass-veil -ml-12 -mt-12 flex size-24 flex-col items-center justify-center gap-1 rounded-full text-[0.8125rem] font-medium text-linen">
-                Entrar
-                <ArrowUpRight size={15} strokeWidth={1.6} />
+              <span className="card3d-cursor-in lbl">
+                <PixelIcon />
+                <DecodeText text="ENTRAR" />
               </span>
             </m.span>
           )}
         </AnimatePresence>
       </m.div>
 
-      <div className="mt-4 flex flex-wrap items-end justify-between gap-x-6 gap-y-3 sm:mt-5">
+      <div className="mt-5 flex flex-wrap items-end justify-between gap-x-6 gap-y-3">
         <dl className="flex flex-wrap items-center gap-x-6 gap-y-2 text-[0.875rem] text-mineral">
           <div>
             <dt className="sr-only">Área</dt>
@@ -169,11 +176,8 @@ export function PropertyCard({ property: p, wide, onOpen }: PropertyCardProps) {
             {formatPrice(p.price)}
             {p.demo && p.price !== null && <span className="ml-2 text-[0.75rem] text-mineral">valor ilustrativo</span>}
           </span>
-          <span
-            aria-hidden="true"
-            className="liquid-glass flex size-9 items-center justify-center rounded-full transition-colors duration-500 group-hover:bg-linen group-hover:text-night"
-          >
-            <ArrowUpRight size={16} strokeWidth={1.6} />
+          <span aria-hidden="true" className="t3-nav !size-9 !min-h-0 !min-w-0 transition-colors duration-500 group-hover:!bg-champagne group-hover:text-ink">
+            <ArrowUpRight size={15} strokeWidth={1.6} />
           </span>
         </p>
       </div>
@@ -185,10 +189,10 @@ export function PropertyCard({ property: p, wide, onOpen }: PropertyCardProps) {
         aria-haspopup="dialog"
         aria-labelledby={titleId}
         aria-describedby={`${titleId}-acao`}
-        className={['absolute inset-0 z-10 rounded-[6px] focus-visible:outline-offset-8', interactive ? 'cursor-none' : ''].join(' ')}
+        className={['absolute inset-0 z-10 focus-visible:outline-offset-8', interactive ? 'cursor-none' : ''].join(' ')}
       >
         <span id={`${titleId}-acao`} className="sr-only">
-          Entrar no imóvel
+          Entrar no imóvel em 3D
         </span>
       </button>
     </m.article>

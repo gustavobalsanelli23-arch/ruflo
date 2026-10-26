@@ -76,11 +76,13 @@ console.log(`\nVOP Investimentos — e2e em ${BASE}\n`);
 await test('HTML pré-renderizado traz título, h1, seções e JSON-LD', async () => {
   const html = await (await fetch(BASE)).text();
   assert(html.includes('<title>VOP Investimentos Imobiliários'), 'title');
-  assert(/<h1[^>]*>.*Mais do que encontrar imóveis\. Construir patrimônio\./s.test(html), 'h1 no HTML');
+  const h1 = html.match(/<h1[^>]*>(.*?)<\/h1>/s)?.[1].replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim();
+  assert(h1 === 'Mais do que encontrar imóveis. Construir patrimônio.', `h1 no HTML: ${h1}`);
   for (const id of ['inicio', 'inteligencia', 'imoveis', 'investimentos', 'regioes', 'sobre', 'contato']) assert(html.includes(`id="${id}"`), `seção #${id}`);
   assert(html.includes('"@type":"RealEstateAgent"'), 'JSON-LD');
   assert(!html.includes('areaServed'), 'regiões não confirmadas não entram no JSON-LD');
-  assert(html.includes('og:image') && html.includes('rel="preload" as="image"'), 'OG e preload do pôster');
+  assert(html.includes('og:image') && html.includes('rel="preload" as="image" type="image/webp" href="/images/capitulos/background.webp"'), 'OG e preload do quadro do hero');
+  assert(/<html[^>]*class="no-js"/.test(html) && html.includes("d.classList.add('anim')"), 'coreografia de entrada (classe anim) no <head>');
   assert(!html.includes('__SITE_URL__'), 'placeholder de URL resolvido');
 });
 
@@ -94,56 +96,61 @@ await test('desktop: sem erros, tudo revelado após a rolagem, um único h1', as
   await page.context().close();
 });
 
-await test('hero: vídeo começa invisível, entra em fade e o pôster sai', async () => {
+await test('hero: o quadro parado pinta primeiro; depois do load entra só a cena do 1º capítulo', async () => {
   const page = await newPage(desktop);
-  const video = page.locator('#inicio video');
-  await video.waitFor({ state: 'attached', timeout: 5000 });
-  await page.waitForFunction(() => {
-    const v = document.querySelector('#inicio video');
-    return v && v.currentSrc.includes('hero-arquitetura-1280.mp4') && parseFloat(getComputedStyle(v).opacity) > 0.95;
-  }, null, { timeout: 8000 });
-  const attrs = await video.evaluate((v) => ({ muted: v.muted, inline: v.playsInline, auto: v.autoplay, preload: v.preload, hidden: v.getAttribute('aria-hidden') }));
-  assert(attrs.muted && attrs.inline && attrs.auto && attrs.preload === 'auto' && attrs.hidden === 'true', JSON.stringify(attrs));
-  await page.waitForTimeout(1300);
-  const posterOpacity = await page.evaluate(() => getComputedStyle(document.querySelector('#inicio picture').parentElement).opacity);
-  assert(posterOpacity === '0', `pôster ainda visível (${posterOpacity})`);
+  const bg = await page.locator('#inicio .st-bg').evaluate((el) => ({ img: getComputedStyle(el).backgroundImage, hidden: el.getAttribute('aria-hidden') }));
+  assert(bg.img.includes('/images/capitulos/background.webp') && bg.hidden === 'true', JSON.stringify(bg));
+  await page.waitForFunction(() => document.querySelector('#inicio video.on')?.currentSrc.includes('/videos/capitulos/background.mp4'), null, { timeout: 8000 });
+  const state = await page.locator('#inicio video').evaluateAll((vs) => vs.map((v) => ({ src: Boolean(v.getAttribute('src')), muted: v.muted, inline: v.playsInline, loop: v.loop })));
+  assert(state.length === 6, `${state.length} cenas`);
+  assert(state.every((v) => v.muted && v.inline && v.loop), 'mudo, inline e em loop');
+  assert(state.filter((v) => v.src).length === 1, 'só a primeira cena baixada');
   await page.context().close();
 });
 
-await test('hero: sequência avança para o próximo clipe com fade-out antes do fim', async () => {
+await test('hero: capítulos trocam a cena e o texto; clique rápido vale o último', async () => {
   const page = await newPage(desktop);
-  await page.waitForFunction(() => document.querySelector('#inicio video')?.readyState >= 2, null, { timeout: 8000 });
-  // Pula para perto do fim: o fade-out (0,55s) começa e o próximo clipe entra.
-  await page.evaluate(() => {
-    const v = document.querySelector('#inicio video');
-    v.currentTime = v.duration - 0.8;
-  });
-  await page.waitForFunction(() => parseFloat(document.querySelector('#inicio video').style.opacity) === 0, null, { timeout: 4000 });
-  await page.waitForFunction(() => document.querySelector('#inicio video').currentSrc.includes('hero-interiores'), null, { timeout: 6000 });
-  await page.waitForFunction(() => document.querySelector('#inicio video').style.opacity === '1', null, { timeout: 6000 });
+  await page.waitForFunction(() => document.querySelector('#inicio video.on'), null, { timeout: 8000 });
+  const rail = page.getByRole('list', { name: 'Capítulos' });
+  await rail.getByRole('button', { name: 'INVESTIMENTOS' }).click();
+  await rail.getByRole('button', { name: 'CRÉDITO' }).click();
+  await page.waitForFunction(() => document.querySelector('#inicio h1')?.textContent.includes('Crédito imobiliário'), null, { timeout: 3000 });
+  await page.waitForFunction(() => document.querySelector('#inicio video.on')?.currentSrc.includes('/origin.mp4'), null, { timeout: 8000 });
+  assert((await page.locator('#inicio video.on').count()) === 1, 'uma cena visível');
+  assert((await rail.locator('[aria-current="step"]').textContent()).includes('CRÉDITO'), 'trilho marca o capítulo');
+  await page.waitForFunction(() => !document.querySelector('#inicio').classList.contains('swapping'), null, { timeout: 2000 });
+  assert(page.problems.length === 0, page.problems.join('\n'));
   await page.context().close();
 });
 
-await test('hero: botão pausa e retoma o vídeo', async () => {
+await test('hero: VÍDEO ON/OFF pausa e retoma a cena', async () => {
   const page = await newPage(desktop);
-  await page.waitForFunction(() => !document.querySelector('#inicio video')?.paused, null, { timeout: 8000 });
+  await page.waitForFunction(() => document.querySelector('#inicio video.on') && !document.querySelector('#inicio video.on').paused, null, { timeout: 8000 });
   await page.getByRole('button', { name: 'Pausar o vídeo de fundo' }).click();
-  assert(await page.locator('#inicio video').evaluate((v) => v.paused), 'não pausou');
+  assert(await page.locator('#inicio video.on').evaluate((v) => v.paused), 'não pausou');
   await page.getByRole('button', { name: 'Retomar o vídeo de fundo' }).click();
-  await page.waitForFunction(() => !document.querySelector('#inicio video').paused, null, { timeout: 3000 });
+  await page.waitForFunction(() => !document.querySelector('#inicio video.on').paused, null, { timeout: 3000 });
   await page.context().close();
 });
 
-await test('celular em pé recebe o vídeo em retrato', async () => {
+await test('celular: título, CTA e dock cabem na primeira tela', async () => {
   const page = await newPage(phone);
-  await page.waitForFunction(() => document.querySelector('#inicio video')?.currentSrc.includes('-540.mp4'), null, { timeout: 8000 });
+  await page.waitForTimeout(1500);
+  const boxes = await page.evaluate(() =>
+    ['#inicio h1', '#inicio .cta', '#inicio .dock'].map((sel) => {
+      const r = document.querySelector(sel).getBoundingClientRect();
+      return { sel, top: r.top, bottom: r.bottom };
+    }),
+  );
+  for (const b of boxes) assert(b.top >= 0 && b.bottom <= 844, `${b.sel} fora da tela (${Math.round(b.top)}–${Math.round(b.bottom)})`);
   await page.context().close();
 });
 
 await test('reduzir movimento: sem vídeo, conteúdo visível sem animação', async () => {
   const page = await newPage({ ...desktop, reducedMotion: 'reduce' });
   await page.waitForTimeout(800);
-  assert((await page.locator('video').count()) === 0, 'vídeo carregado com reduced-motion');
+  assert((await page.locator('video[src]').count()) === 0, 'vídeo carregado com reduced-motion');
+  assert(!(await page.evaluate(() => document.documentElement.classList.contains('anim'))), 'coreografia de entrada com reduced-motion');
   const hidden = await hiddenReveals(page);
   const heroHidden = hidden.filter((t) => /Mais|Construir|Conectamos/.test(t));
   assert(heroHidden.length === 0, `hero escondido: ${heroHidden.join(' | ')}`);
@@ -160,12 +167,12 @@ await test('sem JavaScript: todo o conteúdo aparece', async () => {
 
 await test('menu: âncoras levam às seções e o link ativo acompanha', async () => {
   const page = await newPage(desktop);
-  await page.getByRole('navigation', { name: 'Principal' }).getByRole('link', { name: 'Investimentos', exact: true }).click();
+  await page.getByRole('navigation', { name: 'Principal' }).getByRole('link', { name: 'INVESTIMENTOS', exact: true }).click();
   await page.waitForTimeout(1500);
   const top = await page.locator('#investimentos').evaluate((el) => el.getBoundingClientRect().top);
   assert(Math.abs(top) < 120, `seção fora do lugar (${top})`);
   const current = await page.locator('[aria-current="location"]').first().textContent();
-  assert(current?.includes('Investimentos'), `ativo: ${current}`);
+  assert(current?.includes('INVESTIMENTOS'), `ativo: ${current}`);
   await page.context().close();
 });
 
@@ -206,7 +213,9 @@ await test('filtros: finalidade, tipo, região, preço, vazio e limpar', async (
   await page.context().close();
 });
 
-await test('percurso: abre do card, caminha pelos ambientes (botão, teclado, rolagem), ficha, fim, Esc devolve o foco', async () => {
+const liveText = () => document.querySelector('[aria-labelledby="percurso-titulo"] [aria-live=polite]')?.textContent ?? '';
+
+await test('percurso 3D: abre do card, entra, caminha (botão, teclado, rolagem, trilho), ficha, fim, Esc devolve o foco', async () => {
   const page = await newPage(desktop);
   await page.locator('#imoveis').scrollIntoViewIfNeeded();
   await page.waitForTimeout(600);
@@ -215,20 +224,26 @@ await test('percurso: abre do card, caminha pelos ambientes (botão, teclado, ro
   const tour = page.getByRole('dialog', { name: /Percurso pelo imóvel Residência contemporânea/ });
   await tour.waitFor();
   assert(await page.evaluate(() => getComputedStyle(document.body).overflow === 'hidden'), 'rolagem travada');
+  assert((await tour.locator('.t3-panel').count()) === 4, 'um painel 3D por ambiente');
   const live = tour.locator('[aria-live=polite]');
-  await tour.getByRole('button', { name: 'Entrar no imóvel' }).click();
-  await page.waitForFunction(() => document.querySelector('[aria-labelledby="percurso-titulo"] [aria-live=polite]')?.textContent?.includes('Ambiente 2 de 4: Hall de entrada'), null, { timeout: 3000 });
-  await page.waitForTimeout(1300);
+  await tour.getByRole('button', { name: 'ENTRAR NO IMÓVEL', exact: true }).click();
+  await page.waitForFunction((t) => (0, eval)(t)().includes('Ambiente 1 de 4: Fachada'), liveText.toString(), { timeout: 3000 });
+  await page.waitForTimeout(1250);
+  await tour.getByRole('button', { name: 'Próximo ambiente' }).click();
+  await page.waitForFunction((t) => (0, eval)(t)().includes('Ambiente 2 de 4: Hall de entrada'), liveText.toString(), { timeout: 3000 });
+  await page.waitForTimeout(1250);
   await page.keyboard.press('ArrowRight');
-  await page.waitForFunction(() => document.querySelector('[aria-labelledby="percurso-titulo"] [aria-live=polite]')?.textContent?.includes('Living'), null, { timeout: 3000 });
+  await page.waitForFunction((t) => (0, eval)(t)().includes('Living'), liveText.toString(), { timeout: 3000 });
+  await page.waitForTimeout(1600);
   assert(await tour.getByRole('button', { name: 'Lareira embutida' }).isVisible(), 'ponto de interesse do living');
-  await page.waitForTimeout(1300);
+  // A câmera parou diante do living: o painel dele está na frente (z = 0 relativo).
+  await page.waitForFunction(() => /translate3d\([^,]+, 0px, 3000px\)/.test(document.querySelector('.t3-world').style.transform), null, { timeout: 4000 });
   await page.mouse.move(700, 400);
   await page.mouse.wheel(0, 120);
-  await page.waitForFunction(() => document.querySelector('[aria-labelledby="percurso-titulo"] [aria-live=polite]')?.textContent?.includes('Cozinha'), null, { timeout: 3000 });
-  await tour.getByRole('button', { name: 'Fachada' }).click();
-  await page.waitForFunction(() => document.querySelector('[aria-labelledby="percurso-titulo"] [aria-live=polite]')?.textContent?.includes('Ambiente 1 de 4'), null, { timeout: 3000 });
-  await tour.getByRole('button', { name: 'Ficha do imóvel' }).click();
+  await page.waitForFunction((t) => (0, eval)(t)().includes('Cozinha'), liveText.toString(), { timeout: 3000 });
+  await tour.getByRole('button', { name: '01 FACHADA' }).click();
+  await page.waitForFunction((t) => (0, eval)(t)().includes('Ambiente 1 de 4'), liveText.toString(), { timeout: 3000 });
+  await tour.getByRole('button', { name: 'FICHA DO IMÓVEL' }).click();
   const ficha = tour.getByRole('complementary', { name: 'Ficha do imóvel' });
   await ficha.waitFor();
   assert(await ficha.getByText('Código EX-01', { exact: true }).isVisible(), 'código na ficha');
@@ -237,6 +252,8 @@ await test('percurso: abre do card, caminha pelos ambientes (botão, teclado, ro
   await page.keyboard.press('Escape');
   await ficha.waitFor({ state: 'detached', timeout: 3000 });
   assert((await tour.count()) === 1, 'Esc com a ficha aberta deve fechar só a ficha');
+  // Um passo por gesto: espera a viagem do salto terminar antes de seguir.
+  await page.waitForTimeout(1200);
   for (let i = 0; i < 4; i++) {
     await page.keyboard.press('ArrowRight');
     await page.waitForTimeout(1250);
@@ -247,10 +264,18 @@ await test('percurso: abre do card, caminha pelos ambientes (botão, teclado, ro
   await tour.waitFor({ state: 'detached', timeout: 3000 });
   assert(await opener.evaluate((el) => el === document.activeElement), 'foco não voltou ao card');
   assert(await page.evaluate(() => getComputedStyle(document.body).overflow !== 'hidden'), 'rolagem destravada');
+  assert(page.problems.length === 0, page.problems.join('\n'));
   await page.context().close();
 });
 
-await test('percurso no celular: deslizar avança para o próximo ambiente', async () => {
+await test('ENTRAR no cabeçalho abre o percurso do primeiro imóvel', async () => {
+  const page = await newPage(desktop);
+  await page.getByRole('button', { name: 'Entrar: percorrer um imóvel em 3D' }).click();
+  await page.getByRole('dialog', { name: /Percurso pelo imóvel Residência contemporânea/ }).waitFor({ timeout: 3000 });
+  await page.context().close();
+});
+
+await test('percurso no celular: deslizar entra e avança para o próximo ambiente', async () => {
   const page = await newPage(phone);
   await page.locator('#imoveis').scrollIntoViewIfNeeded();
   await page.waitForTimeout(600);
@@ -263,7 +288,10 @@ await test('percurso no celular: deslizar avança para o próximo ambiente', asy
     await tour.dispatchEvent('touchend', { touches: [], changedTouches: [{ identifier: 0, clientX: 200, clientY: 380 }] });
   };
   await swipe();
-  await page.waitForFunction(() => document.querySelector('[aria-labelledby="percurso-titulo"] [aria-live=polite]')?.textContent?.includes('Ambiente 2 de 3: Sala'), null, { timeout: 3000 });
+  await page.waitForFunction((t) => (0, eval)(t)().includes('Ambiente 1 de 3: Fachada'), liveText.toString(), { timeout: 3000 });
+  await page.waitForTimeout(1250);
+  await swipe();
+  await page.waitForFunction((t) => (0, eval)(t)().includes('Ambiente 2 de 3: Sala'), liveText.toString(), { timeout: 3000 });
   assert(page.problems.length === 0, page.problems.join('\n'));
   await page.context().close();
 });
@@ -295,20 +323,25 @@ await test('formulário: valida, mostra erros e entrega pelo Direct com a mensag
   await page.context().close();
 });
 
-await test('celular: menu abre, prende o foco, navega e fecha', async () => {
+await test('celular: MENU abre o painel, Esc fecha e devolve o foco, link navega e fecha', async () => {
   const page = await newPage(phone);
-  await page.getByRole('button', { name: 'Abrir menu' }).click();
-  const menu = page.getByRole('dialog', { name: 'Menu' });
-  await menu.waitFor();
-  assert(await page.evaluate(() => document.activeElement?.textContent?.includes('Início')), 'foco no primeiro link');
-  for (let i = 0; i < 12; i++) await page.keyboard.press('Tab');
-  const inside = await page.evaluate(() => Boolean(document.activeElement?.closest('header, #menu-movel')));
-  assert(inside, 'foco escapou do menu');
-  await menu.getByRole('link', { name: 'Sobre' }).click();
-  await menu.waitFor({ state: 'detached', timeout: 3000 });
-  await page.waitForTimeout(1200);
-  const top = await page.locator('#sobre').evaluate((el) => el.getBoundingClientRect().top);
-  assert(Math.abs(top) < 120, `#sobre em ${top}`);
+  const toggle = page.getByRole('button', { name: 'MENU', exact: true });
+  const sobre = page.getByRole('navigation', { name: 'Principal' }).getByRole('link', { name: 'SOBRE', exact: true });
+  assert(!(await sobre.isVisible()), 'painel aberto antes do toque');
+  await toggle.click();
+  assert((await page.locator('.menu-toggle').getAttribute('aria-expanded')) === 'true', 'aria-expanded');
+  await sobre.waitFor({ state: 'visible', timeout: 2000 });
+  assert(await page.getByRole('button', { name: 'FECHAR', exact: true }).isVisible(), 'rótulo FECHAR');
+  await page.keyboard.press('Escape');
+  await page.waitForTimeout(450);
+  assert(!(await sobre.isVisible()), 'Esc não fechou');
+  assert(await page.evaluate(() => document.activeElement?.classList.contains('menu-toggle')), 'foco não voltou ao MENU');
+  await page.locator('.menu-toggle').click();
+  await sobre.waitFor({ state: 'visible', timeout: 2000 });
+  await sobre.click();
+  await page.waitForTimeout(500);
+  assert(!(await sobre.isVisible()), 'painel ficou aberto');
+  await page.waitForFunction(() => Math.abs(document.querySelector('#sobre').getBoundingClientRect().top) < 120, null, { timeout: 5000 });
   await page.context().close();
 });
 

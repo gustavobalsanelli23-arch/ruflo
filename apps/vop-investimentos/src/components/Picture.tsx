@@ -54,7 +54,7 @@ interface PictureProps {
 export function Picture({ slot, sizes, className, imgClassName, priority, position, style, alt }: PictureProps) {
   const m = images[slot.id];
   if (!m) {
-    return <span role="img" aria-label={alt ?? slot.alt} className={className} style={{ backgroundColor: '#171717', ...style }} />;
+    return <span role="img" aria-label={alt ?? slot.alt} className={className} style={{ backgroundColor: '#0e1420', ...style }} />;
   }
   const fallback = `/images/${slot.id}-${m.widths.find((w) => w >= 1200) ?? m.widths[m.widths.length - 1]}.webp`;
   return (

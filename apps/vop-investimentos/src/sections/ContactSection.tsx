@@ -19,7 +19,7 @@ import {
   type ContactInput,
   type FieldErrors,
 } from '../lib/contact';
-import { EASE_OUT, SETTLE } from '../lib/motion';
+import { EASE_OUT } from '../lib/motion';
 
 type Status =
   | { state: 'idle' }
@@ -141,19 +141,19 @@ function ContactForm() {
   };
 
   return (
-    <div className="relative overflow-hidden rounded-[14px] border border-line bg-graphite/40">
+    <div className="cut-frame relative overflow-hidden bg-graphite/40 shadow-[inset_0_0_0_1px_var(--color-line)]">
       <AnimatePresence mode="wait" initial={false}>
         {status.state === 'sent' ? (
           <m.div
             key="sent"
             role="status"
             className="flex min-h-[34rem] flex-col justify-center p-6 sm:p-10"
-            initial={{ opacity: 0, filter: 'blur(10px)', y: 20 }}
-            animate={{ opacity: 1, filter: 'blur(0px)', y: 0, ...SETTLE }}
+            initial={{ opacity: 0, y: 18 }}
+            animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0 }}
             transition={{ duration: reduce ? 0 : 0.7, ease: EASE_OUT }}
           >
-            <span className="flex size-12 items-center justify-center rounded-full ring-1 ring-champagne/60">
+            <span className="cut-oct flex size-12 items-center justify-center shadow-[inset_0_0_0_1px_rgb(232_209_203/0.6)]">
               <Check size={20} strokeWidth={1.5} className="text-champagne" aria-hidden="true" />
             </span>
             <SentMessage status={status} />
@@ -254,7 +254,7 @@ function ContactForm() {
                   onChange={(e) => update('consent', e.target.checked)}
                   aria-invalid={Boolean(errors.consent) || undefined}
                   aria-describedby={errors.consent ? 'erro-consent' : undefined}
-                  className="mt-1 size-4 shrink-0 cursor-pointer accent-[#b8a17a]"
+                  className="mt-1 size-4 shrink-0 cursor-pointer accent-[#e8d1cb]"
                 />
                 Autorizo a VOP a entrar em contato comigo sobre este assunto.
               </label>
@@ -328,7 +328,7 @@ function SentMessage({ status }: { status: Extract<Status, { state: 'sent' }> })
           value={status.text}
           rows={5}
           onFocus={(e) => e.currentTarget.select()}
-          className="w-full resize-none rounded-[8px] border border-line bg-night/50 p-4 text-[0.875rem] leading-relaxed text-linen/85"
+          className="w-full resize-none border border-line bg-night/50 p-4 text-[0.875rem] leading-relaxed text-linen/85"
         />
       </label>
       <a href={status.href} target="_blank" rel="noopener noreferrer" className="btn btn-solid mt-6 self-start">

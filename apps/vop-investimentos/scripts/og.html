@@ -2,36 +2,45 @@
 <html lang="pt-BR">
   <head>
     <meta charset="UTF-8" />
-    <!-- Arte de compartilhamento (1200×630), renderizada por scripts/brand-assets.mjs -->
+    <!-- Arte de compartilhamento (1200×630), renderizada por scripts/brand-assets.mjs,
+         na estética do site: moldura de fio com chanfros, Inter 700 caixa-alta e
+         rótulos em Chakra Petch. -->
     <style>
-      @font-face { font-family: 'Instrument Serif'; font-style: italic; src: url('../node_modules/@fontsource/instrument-serif/files/instrument-serif-latin-400-italic.woff2') format('woff2'); }
-      @font-face { font-family: 'Barlow'; font-weight: 400; src: url('../node_modules/@fontsource/barlow/files/barlow-latin-400-normal.woff2') format('woff2'); }
-      @font-face { font-family: 'Barlow'; font-weight: 600; src: url('../node_modules/@fontsource/barlow/files/barlow-latin-600-normal.woff2') format('woff2'); }
+      @font-face { font-family: 'Inter'; font-weight: 400; src: url('../node_modules/@fontsource/inter/files/inter-latin-400-normal.woff2') format('woff2'); }
+      @font-face { font-family: 'Inter'; font-weight: 700; src: url('../node_modules/@fontsource/inter/files/inter-latin-700-normal.woff2') format('woff2'); }
+      @font-face { font-family: 'Chakra Petch'; font-weight: 700; src: url('../node_modules/@fontsource/chakra-petch/files/chakra-petch-latin-700-normal.woff2') format('woff2'); }
       * { margin: 0; box-sizing: border-box; }
-      body { width: 1200px; height: 630px; overflow: hidden; background: #050505; color: #F4F1EB; font-family: 'Barlow', sans-serif; position: relative; }
+      body { width: 1200px; height: 630px; overflow: hidden; background: #04070d; color: #fff; font-family: 'Inter', sans-serif; position: relative; }
       .bg { position: absolute; inset: 0; background-size: cover; background-position: 50% 50%; }
-      .veil { position: absolute; inset: 0; background: linear-gradient(90deg, rgba(5,5,5,.9) 0%, rgba(5,5,5,.55) 55%, rgba(5,5,5,.25) 100%), linear-gradient(180deg, rgba(5,5,5,.2) 0%, rgba(5,5,5,.75) 100%); }
-      .logo { position: absolute; left: 72px; top: 64px; display: flex; align-items: center; gap: 18px; }
-      .logo b { font-weight: 600; font-size: 30px; letter-spacing: .34em; }
-      .logo i { width: 1px; height: 38px; background: #B8A17A; }
-      .logo span { font-size: 15px; line-height: 1.25; letter-spacing: .06em; color: #A5A5A5; }
-      h1 { position: absolute; left: 72px; bottom: 76px; font-family: 'Instrument Serif', serif; font-style: italic; font-weight: 400; font-size: 88px; line-height: .95; letter-spacing: -.025em; }
+      .veil { position: absolute; inset: 0; background: linear-gradient(90deg, rgba(4,7,13,.9) 0%, rgba(4,7,13,.55) 58%, rgba(4,7,13,.3) 100%), linear-gradient(180deg, rgba(4,7,13,.25) 0%, rgba(4,7,13,.8) 100%); }
+      /* moldura: 30px de recuo, fio a 13%, chanfro de 26px */
+      .frame { position: absolute; inset: 30px; }
+      .frame b { position: absolute; background: rgba(255,255,255,.18); }
+      .t { left: 26px; right: 26px; top: 0; height: 1px; } .bo { left: 26px; right: 26px; bottom: 0; height: 1px; }
+      .l { top: 26px; bottom: 26px; left: 0; width: 1px; } .r { top: 26px; bottom: 26px; right: 0; width: 1px; }
+      .c { position: absolute; width: 26px; height: 26px; }
+      .tl, .br { background: linear-gradient(to bottom right, transparent calc(50% - .7px), rgba(255,255,255,.18) calc(50% - .7px), rgba(255,255,255,.18) calc(50% + .7px), transparent calc(50% + .7px)); }
+      .tr, .bl { background: linear-gradient(to bottom left, transparent calc(50% - .7px), rgba(255,255,255,.18) calc(50% - .7px), rgba(255,255,255,.18) calc(50% + .7px), transparent calc(50% + .7px)); }
+      .tl { left: 0; top: 0; } .tr { right: 0; top: 0; } .br { right: 0; bottom: 0; } .bl { left: 0; bottom: 0; }
+      .logo { position: absolute; left: 72px; top: 66px; display: flex; align-items: center; gap: 14px; font-family: 'Chakra Petch', sans-serif; font-weight: 700; }
+      .logo b { font-size: 34px; letter-spacing: .16em; }
+      .logo span { font-size: 11px; line-height: 1.3; letter-spacing: .12em; text-transform: uppercase; color: rgba(232,238,250,.6); border-left: 1px solid rgba(255,255,255,.2); padding-left: 12px; }
+      .tag { position: absolute; right: 72px; top: 70px; height: 40px; display: flex; align-items: center; gap: 9px; padding: 0 20px; background: #e8d1cb; color: #15131b; font-family: 'Chakra Petch', sans-serif; font-weight: 700; font-size: 13px; letter-spacing: .04em; text-transform: uppercase; clip-path: polygon(0 0, calc(100% - 14px) 0, 100% 14px, 100% 100%, 0 100%); }
+      h1 { position: absolute; left: 72px; bottom: 120px; font-weight: 700; font-size: 48px; line-height: 1.06; letter-spacing: .045em; text-transform: uppercase; }
       h1 span { display: block; }
-      h1 span:last-child { padding-left: 1.3em; }
-      .cota { position: absolute; right: 72px; top: 82px; display: flex; align-items: center; gap: 14px; font-size: 15px; letter-spacing: .24em; text-transform: uppercase; color: rgba(244,241,235,.85); }
-      .cota s { position: relative; display: block; width: 56px; height: 1px; background: #B8A17A; }
-      .cota s::before, .cota s::after { content: ''; position: absolute; top: -5px; width: 1px; height: 11px; background: #B8A17A; }
-      .cota s::before { left: 0; } .cota s::after { right: 0; }
+      p { position: absolute; left: 72px; bottom: 76px; font-size: 19px; color: rgba(224,232,245,.75); }
     </style>
   </head>
   <body>
     <div class="bg" id="bg"></div>
     <div class="veil"></div>
-    <div class="logo"><b>VOP</b><i></i><span>Investimentos<br />Imobiliários</span></div>
-    <div class="cota"><s></s>Inteligência imobiliária</div>
+    <div class="frame"><b class="t"></b><b class="r"></b><b class="bo"></b><b class="l"></b><i class="c tl"></i><i class="c tr"></i><i class="c br"></i><i class="c bl"></i></div>
+    <div class="logo"><b>VOP</b><span>Investimentos<br />Imobiliários</span></div>
+    <div class="tag">Inteligência imobiliária</div>
     <h1><span>Mais do que encontrar imóveis.</span><span>Construir patrimônio.</span></h1>
+    <p>Assessoria imobiliária, investimentos e oportunidades estratégicas.</p>
     <script>
-      // O pôster do hero entra quando existir (brand-assets passa ?bg=<arquivo>).
+      // O pôster entra quando existir (brand-assets passa ?bg=<arquivo>).
       const bg = new URLSearchParams(location.search).get('bg');
       if (bg) document.getElementById('bg').style.backgroundImage = `url('../public/images/${bg}')`;
     </script>

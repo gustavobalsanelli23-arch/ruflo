@@ -54,11 +54,9 @@ export function videoSources(clip: VideoClip, orientation: 'landscape' | 'portra
   return `/videos/${clip.id}-${orientation === 'portrait' ? 540 : 1280}.mp4`;
 }
 
-/** Sequência do hero, na ordem de exibição. */
-export const heroClips: readonly VideoClip[] = [
-  { id: 'hero-arquitetura', label: 'Arquitetura', poster: photos.heroArquitetura },
-  { id: 'hero-interiores', label: 'Interiores', poster: photos.heroInteriores },
-  { id: 'hero-cidade', label: 'Cidade', poster: photos.heroCidade },
-];
+/** Cena de um capítulo do hero, em loop (gerada por `npm run chapters`). */
+export const chapterScene = (scene: string) => `/videos/capitulos/${scene}.mp4`;
+/** Quadro parado das cenas: a primeira pintura do hero, antes de qualquer vídeo. */
+export const chapterStill = '/images/capitulos/background.webp';
 
 export const ctaClip: VideoClip = { id: 'cta-horizonte', label: 'Horizonte', poster: photos.ctaHorizonte };

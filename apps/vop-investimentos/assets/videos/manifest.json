@@ -2,34 +2,6 @@
   "observacao": "Vídeos de banco de imagens com licença comercial gratuita (Mixkit Stock Video Free License: uso comercial e pessoal, sem atribuição obrigatória, sem revenda como banco). Nenhum deles mostra imóveis da VOP: são ilustrativos. Os originais ficam em assets/videos/src (fora do git) e são baixados de novo por `npm run videos` se faltarem. Clipes com 'Mixkit Restricted License' (só uso pessoal) foram descartados: 48394, 47286, 27543, 24945.",
   "coletado_em": "2026-10-26",
   "clipes": {
-    "hero-arquitetura": {
-      "titulo": "Indoor pool with a great view",
-      "pagina": "https://mixkit.co/free-stock-video/indoor-pool-with-a-great-view-4641/",
-      "origem": "https://assets.mixkit.co/videos/4641/4641-1080.mp4",
-      "arquivo": "4641-1080.mp4",
-      "licenca": "Mixkit Stock Video Free License",
-      "inicio": 0,
-      "duracao": 9
-    },
-    "hero-interiores": {
-      "titulo": "Luxury hotel room panning shot",
-      "pagina": "https://mixkit.co/free-stock-video/luxury-hotel-room-panning-shot-4196/",
-      "origem": "https://assets.mixkit.co/videos/4196/4196-720.mp4",
-      "arquivo": "4196-720.mp4",
-      "licenca": "Mixkit Stock Video Free License",
-      "inicio": 5,
-      "duracao": 9
-    },
-    "hero-cidade": {
-      "titulo": "Aerial view of the glass corporate buildings of a big city at night",
-      "pagina": "https://mixkit.co/free-stock-video/aerial-view-of-the-glass-corporate-buildings-of-a-big-49845/",
-      "origem": "https://assets.mixkit.co/videos/49845/49845-1080.mp4",
-      "arquivo": "49845-1080.mp4",
-      "licenca": "Mixkit Stock Video Free License",
-      "inicio": 12.5,
-      "duracao": 8,
-      "nota": "Os primeiros 11s mostram a marca de uma empresa numa fachada; o trecho usado começa quando a torre em primeiro plano a encobre."
-    },
     "cta-horizonte": {
       "titulo": "Tour high above a city at dusk",
       "pagina": "https://mixkit.co/free-stock-video/tour-high-above-a-city-at-dusk-41375/",
@@ -68,6 +40,18 @@
       "tempo": 3,
       "pagina": "https://mixkit.co/free-stock-video/white-luxury-boutique-hotel-room-4046/",
       "origem": "https://assets.mixkit.co/videos/4046/4046-720.mp4"
+    }
+  },
+  "capitulos": {
+    "observacao": "Cenas do hero (capítulos). Vêm do prompt de estética de referência enviado pelo cliente (\"Stratum\"): geradas com Seedance (Higgsfield) a partir de uma única imagem — um monólito de pedra com arco iluminado num lago. Não mostram imóveis da VOP. CONFIRMAR com o cliente o direito de uso comercial dessas cenas antes da publicação definitiva. Conversão: npm run chapters (comandos exatos da referência).",
+    "still": "https://d2ol7oe51mr4n9.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/b5f79c5a-2ebd-41ef-865e-24c660ac98bd.png",
+    "cenas": {
+      "vision": "https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260928_024808_abbfad57-4496-4906-9abc-49f0d153d287.mp4",
+      "expression": "https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260928_025948_2befd859-101e-49a4-8cb0-cdbb28cb11a7.mp4",
+      "craftsmanship": "https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260928_071544_17524fe8-2f07-4fbc-8a55-47518532df6f.mp4",
+      "refinement": "https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260928_025948_9fe460cc-21c2-476c-8e61-6bf57c2d6775.mp4",
+      "balance": "https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260928_072855_ba37e93c-1119-4b93-a3cd-6b29ced17dc2.mp4",
+      "origin": "https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260928_031433_64aea4c7-c53b-4e13-a1fc-bd73673b4fa5.mp4"
     }
   }
 }

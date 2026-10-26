@@ -1,9 +1,9 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-  <!-- Monograma provisório (até o logotipo oficial): o V da assinatura e,
-       embaixo, a cota de desenho técnico usada no site. -->
-  <rect width="64" height="64" fill="#050505"/>
-  <path d="M18 15 L32 45 L46 15" fill="none" stroke="#F4F1EB" stroke-width="4.6" stroke-linejoin="miter"/>
-  <g stroke="#B8A17A" stroke-width="2.2">
+  <!-- Monograma provisório (até o logotipo oficial): o V da assinatura sobre
+       o azul-noite, com o chanfro dos pills do site e a cota em creme. -->
+  <path d="M0 0 H52 L64 12 V64 H0 Z" fill="#04070d"/>
+  <path d="M18 15 L32 45 L46 15" fill="none" stroke="#E6EAF5" stroke-width="4.6" stroke-linejoin="miter"/>
+  <g stroke="#E8D1CB" stroke-width="2.2">
     <path d="M22 53 H42"/>
     <path d="M22 49.5 V56.5 M42 49.5 V56.5"/>
   </g>

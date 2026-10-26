@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { about, hero, investments, nav, pendingContent, regions, services } from '../src/data/content';
-import { heroClips, photos, videoSources } from '../src/data/media';
+import { about, chapters, hero, investments, nav, pendingContent, regions, services } from '../src/data/content';
+import { chapterScene, chapterStill, ctaClip, photos, videoSources } from '../src/data/media';
 import { catalog, demoProperties } from '../src/data/properties';
 import images from '../src/data/images.generated.json';
 import {
@@ -28,11 +28,11 @@ describe('textos do briefing', () => {
   });
 
   it('menu na ordem pedida', () => {
-    expect(nav.map((n) => n.label)).toEqual(['Início', 'Imóveis', 'Investimentos', 'Sobre', 'Contato']);
+    expect(nav.map((n) => n.label)).toEqual(['Imóveis', 'Investimentos', 'Regiões', 'Sobre', 'Contato']);
   });
 
   it('não promete rentabilidade nem inventa números', () => {
-    const all = JSON.stringify({ hero, services, investments, regions, about });
+    const all = JSON.stringify({ hero, chapters, services, investments, regions, about });
     expect(all).not.toMatch(/garantid|rentabilidade de|\d+ anos|\d+\s?%|clientes satisfeitos|milhões em/i);
     expect(about.foundedYear).toBeNull();
     expect(about.history).toEqual([]);
@@ -58,12 +58,24 @@ describe('mídia', () => {
     }
   });
 
-  it('todo clipe tem as versões paisagem e retrato', () => {
-    for (const clip of heroClips) {
-      for (const o of ['landscape', 'portrait'] as const) {
-        expect(existsSync(join(root, 'public', videoSources(clip, o))), videoSources(clip, o)).toBe(true);
-      }
+  it('o clipe do CTA tem as versões paisagem e retrato', () => {
+    for (const o of ['landscape', 'portrait'] as const) {
+      expect(existsSync(join(root, 'public', videoSources(ctaClip, o))), videoSources(ctaClip, o)).toBe(true);
     }
+  });
+
+  it('todo capítulo do hero tem a sua cena, e o quadro parado existe', () => {
+    expect(existsSync(join(root, 'public', chapterStill))).toBe(true);
+    expect(new Set(chapters.map((c) => c.scene)).size).toBe(chapters.length);
+    for (const c of chapters) {
+      expect(existsSync(join(root, 'public', chapterScene(c.scene))), c.scene).toBe(true);
+      expect(c.headline.every((l) => l.length > 2)).toBe(true);
+    }
+  });
+
+  it('o primeiro capítulo é a frase do briefing', () => {
+    expect(chapters[0].headline).toBe(hero.headline);
+    expect(chapters[0].blurb).toBe(hero.subheadline);
   });
 });
 

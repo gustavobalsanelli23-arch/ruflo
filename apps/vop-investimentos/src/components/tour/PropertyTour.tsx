@@ -1,25 +1,25 @@
-import { AnimatePresence, m, useReducedMotion, useSpring } from 'framer-motion';
-import { ArrowLeft, ChevronLeft, ChevronRight, RotateCcw } from 'lucide-react';
-import { useCallback, useEffect, useReducer, useRef, useState, type PointerEvent, type TouchEvent, type WheelEvent } from 'react';
+import { animate, AnimatePresence, m, useMotionValue, useReducedMotion } from 'framer-motion';
+import { useCallback, useEffect, useReducer, useRef, useState, type TouchEvent, type WheelEvent } from 'react';
 import type { Property } from '../../data/properties';
 import { useFocusTrap } from '../../hooks/useFocusTrap';
-import { FINE_POINTER, useMediaQuery } from '../../hooks/useMediaQuery';
 import { useScrollLock } from '../../hooks/useScrollLock';
 import { useViewport } from '../../hooks/useViewport';
-import { EASE_CINEMA, EASE_OUT, SETTLE } from '../../lib/motion';
-import { walkReducer, type Step } from '../../lib/stage';
+import { EASE_CINEMA } from '../../lib/motion';
+import { cameraTarget, travelTime, walkReducer, type Step } from '../../lib/stage';
+import { DecodeText } from '../Decode';
+import { MaskLine } from '../MaskLine';
 import { Picture } from '../Picture';
-import { Chip } from '../PropertyCard';
-import { RoomStage } from './RoomStage';
-import { InterestLink, TourPanel } from './TourPanel';
+import { BackIcon, CtaEdge, DotsIcon, PixelIcon } from '../StratumIcons';
+import { Corridor } from './Corridor';
+import { EndCard, TourPanel } from './TourPanel';
 
 export interface TourTarget {
   property: Property;
-  /** Retângulo da foto do card clicado: o percurso se abre a partir dele. */
+  /** Retângulo da foto do card clicado: o percurso se abre a partir dele (null = do centro). */
   origin: DOMRect | null;
 }
 
-/** Percurso imersivo pelo imóvel, ambiente por ambiente. */
+/** Percurso 3D pelo imóvel, ambiente por ambiente. */
 export function PropertyTour({ target, onClose }: { target: TourTarget | null; onClose: () => void }) {
   return <AnimatePresence>{target && <Tour key={target.property.id} {...target} onClose={onClose} />}</AnimatePresence>;
 }
@@ -28,7 +28,6 @@ const pad = (n: number) => String(n).padStart(2, '0');
 
 function Tour({ property: p, origin, onClose }: TourTarget & { onClose: () => void }) {
   const reduce = Boolean(useReducedMotion());
-  const fine = useMediaQuery(FINE_POINTER);
   const viewport = useViewport();
   const rooms = p.rooms;
   const [walk, dispatch] = useReducer(walkReducer(rooms.length), { index: 0, dir: 1, ended: false });
@@ -37,26 +36,36 @@ function Tour({ property: p, origin, onClose }: TourTarget & { onClose: () => vo
   const root = useRef<HTMLDivElement>(null);
   const lockUntil = useRef(0);
   const touch = useRef<{ x: number; y: number } | null>(null);
-  const lookX = useSpring(0, { stiffness: 50, damping: 18 });
-  const lookY = useSpring(0, { stiffness: 50, damping: 18 });
+  // A câmera começa mais longe e se aproxima enquanto o percurso se abre.
+  const cam = useMotionValue(reduce ? -0.85 : -1.7);
   const room = rooms[walk.index];
-  const next = rooms[walk.index + 1];
-  const custom = { dir: walk.dir, reduce };
 
   useScrollLock(true);
   const onEscape = useCallback(() => (panel ? setPanel(false) : onClose()), [panel, onClose]);
   useFocusTrap(root, true, onEscape);
 
-  // Um passo por gesto: a rolagem e o deslize não atropelam a transição.
+  useEffect(() => {
+    const to = cameraTarget(walk, entered, rooms.length);
+    const ctrl = animate(cam, to, reduce ? { duration: 0 } : { duration: travelTime(cam.get(), to), ease: EASE_CINEMA });
+    return () => ctrl.stop();
+  }, [cam, walk, entered, rooms.length, reduce]);
+
+  // Um passo por gesto: a rolagem e o deslize não atropelam a viagem da câmera.
+  // Na entrada, qualquer avanço só entra no imóvel (o 1º ambiente).
   const step = useCallback(
     (a: Step) => {
       const now = performance.now();
       if (a.type !== 'jump' && now < lockUntil.current) return;
-      lockUntil.current = now + (reduce ? 350 : 1150);
-      setEntered(true);
+      lockUntil.current = now + (reduce ? 350 : 1100);
+      if (!entered) {
+        if (a.type === 'prev') return;
+        setEntered(true);
+        if (a.type === 'jump') dispatch(a);
+        return;
+      }
       dispatch(a);
     },
-    [reduce],
+    [reduce, entered],
   );
 
   useEffect(() => {
@@ -92,28 +101,23 @@ function Tour({ property: p, origin, onClose }: TourTarget & { onClose: () => vo
     const d = Math.abs(dx) > Math.abs(dy) ? dx : dy;
     if (Math.abs(d) > 50) step({ type: d < 0 ? 'next' : 'prev' });
   };
-  // Olhar ao redor: a imagem desliza um pouco contra o ponteiro.
-  const onPointerMove = (e: PointerEvent) => {
-    if (!fine || reduce || e.pointerType !== 'mouse') return;
-    lookX.set((e.clientX / viewport.width - 0.5) * -30);
-    lookY.set((e.clientY / viewport.height - 0.5) * -20);
-  };
 
   // A abertura parte da foto do card (recorte que se expande até a tela toda).
   const [clipFrom] = useState(() => {
-    if (!origin) return 'inset(50% 50% 50% 50% round 6px)';
+    if (!origin) return 'inset(50% 50% 50% 50%)';
     const { innerWidth: w, innerHeight: h } = window;
     const c = (n: number) => Math.max(0, Math.round(n));
-    return `inset(${c(origin.top)}px ${c(w - origin.right)}px ${c(h - origin.bottom)}px ${c(origin.left)}px round 6px)`;
+    return `inset(${c(origin.top)}px ${c(w - origin.right)}px ${c(h - origin.bottom)}px ${c(origin.left)}px)`;
   });
   const opening = reduce
     ? { initial: { opacity: 0 }, animate: { opacity: 1 }, exit: { opacity: 0 }, transition: { duration: 0.3 } }
     : {
         initial: { clipPath: clipFrom },
-        animate: { clipPath: 'inset(0px 0px 0px 0px round 0px)' },
+        animate: { clipPath: 'inset(0px 0px 0px 0px)' },
         exit: { clipPath: clipFrom, transition: { duration: 0.8, ease: EASE_CINEMA } },
         transition: { duration: 1.05, ease: EASE_CINEMA },
       };
+  const atStart = !entered || (walk.index === 0 && !walk.ended);
 
   return (
     <m.div
@@ -121,85 +125,101 @@ function Tour({ property: p, origin, onClose }: TourTarget & { onClose: () => vo
       role="dialog"
       aria-modal="true"
       aria-labelledby="percurso-titulo"
-      className="fixed inset-0 z-[70] touch-none select-none overflow-hidden bg-night text-linen"
+      className="t3-tour fixed inset-0 z-[70] touch-none select-none overflow-hidden text-linen"
       {...opening}
       onWheel={onWheel}
       onTouchStart={onTouchStart}
       onTouchEnd={onTouchEnd}
-      onPointerMove={onPointerMove}
     >
-      <AnimatePresence custom={custom} initial={false}>
-        <RoomStage key={`${walk.index}-${room.photo.id}`} room={room} custom={custom} viewport={viewport} lookX={lookX} lookY={lookY} priority={walk.index === 0} />
+      {/* Luz ambiente: a cor do ambiente atual, muito desfocada, atrás do corredor. */}
+      <AnimatePresence initial={false}>
+        <m.div
+          key={walk.index}
+          className="t3-ambient"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: reduce ? 0 : 1.4 }}
+        >
+          <Picture slot={room.photo} alt="" sizes="20vw" className="block size-full" imgClassName="size-full object-cover" />
+        </m.div>
       </AnimatePresence>
-      {next && (
-        <div aria-hidden="true" className="pointer-events-none absolute size-px overflow-hidden opacity-0">
-          <Picture slot={next.photo} alt="" sizes="100vw" priority />
-        </div>
-      )}
-      <div className="pointer-events-none absolute inset-0 z-[5] bg-[linear-gradient(180deg,rgb(5_5_5/0.65)_0%,rgb(5_5_5/0)_20%,rgb(5_5_5/0)_52%,rgb(5_5_5/0.9)_100%)]" />
 
-      {/* Barra superior */}
-      <div className="absolute inset-x-0 top-0 z-20 flex items-center justify-between gap-3 px-4 pt-4 sm:px-8 sm:pt-6">
-        <button type="button" onClick={onClose} className="btn btn-glass liquid-glass glass-veil h-11 min-h-0 px-4 text-[0.875rem]">
-          <ArrowLeft size={16} strokeWidth={1.6} aria-hidden="true" />
-          <span className="hidden sm:inline">Voltar aos imóveis</span>
-          <span className="sm:hidden">Voltar</span>
+      <Corridor rooms={rooms} cam={cam} current={walk.index} hotspots={entered && !walk.ended} viewport={viewport} reduce={reduce} />
+      <div className="t3-vignette" aria-hidden="true" />
+
+      <div className="st-frame t3-frame" aria-hidden="true">
+        <span className="ln ln-t" />
+        <span className="ln ln-r" />
+        <span className="ln ln-b" />
+        <span className="ln ln-l" />
+        <span className="cn cn-tl" />
+        <span className="cn cn-tr" />
+        <span className="cn cn-br" />
+        <span className="cn cn-bl" />
+      </div>
+
+      {/* Barra de cima: voltar, código e ficha. */}
+      <div className="t3-top">
+        <button type="button" onClick={onClose} className="pill enter lbl" aria-label="Voltar aos imóveis">
+          <BackIcon />
+          <DecodeText text="VOLTAR" delay={500} />
         </button>
-        <div className="flex items-center gap-2">
-          <span className="hidden items-center gap-2 sm:flex">
-            {p.demo && <Chip tone="demo">Exemplo</Chip>}
-            <Chip>{p.code}</Chip>
+        <div className="flex items-center gap-[calc(8*var(--t))]">
+          <span className="t3-code lbl max-sm:!hidden">
+            {p.demo && <span className="text-champagne">EXEMPLO&nbsp;·&nbsp;</span>}
+            {p.code}
           </span>
           <button
             type="button"
             onClick={() => setPanel((v) => !v)}
             aria-expanded={panel}
             aria-controls="ficha-imovel"
-            className="btn btn-glass liquid-glass glass-veil h-11 min-h-0 px-4 text-[0.875rem]"
+            className="pill menu lbl"
           >
-            <span>Ficha do imóvel</span>
+            <DotsIcon />
+            <DecodeText text={panel ? 'FECHAR FICHA' : 'FICHA DO IMÓVEL'} delay={560} />
           </button>
         </div>
       </div>
 
-      {/* Ambiente atual, controles e progresso */}
-      <div className="absolute inset-x-0 bottom-0 z-10 px-4 pb-[max(1.5rem,env(safe-area-inset-bottom))] sm:px-8 sm:pb-8">
+      {/* Ambiente atual (ou a entrada), controles e trilho de ambientes. */}
+      <div className="t3-bottom">
         <div className="flex items-end justify-between gap-6">
           <div className="min-w-0">
             <AnimatePresence mode="wait" initial={false}>
               {entered ? (
-                <m.div
-                  key={walk.index}
-                  initial={{ opacity: 0, y: 24, filter: 'blur(10px)' }}
-                  animate={{ opacity: 1, y: 0, filter: 'blur(0px)', ...SETTLE }}
-                  exit={{ opacity: 0, y: -12, filter: 'blur(6px)' }}
-                  transition={{ duration: reduce ? 0 : 0.7, ease: EASE_OUT, delay: reduce ? 0 : 0.35 }}
-                >
-                  <p className="text-[0.8125rem] tabular-nums text-linen/70">
-                    Ambiente {pad(walk.index + 1)} de {pad(rooms.length)}
+                <m.div key={walk.index} exit={{ opacity: 0, transition: { duration: 0.3 } }}>
+                  <p className="lbl text-[rgb(232_238_250/0.6)]">
+                    <DecodeText text={`AMBIENTE ${pad(walk.index + 1)} / ${pad(rooms.length)}`} />
                   </p>
-                  <p className="display display-lg mt-1 text-shadow-soft">{room.name}</p>
+                  <p className="display display-lg mt-2">
+                    <MaskLine delay={0.5} reduce={reduce}>
+                      {room.name}
+                    </MaskLine>
+                  </p>
                 </m.div>
               ) : (
-                <m.div
-                  key="entrada"
-                  initial={{ opacity: 0, y: 24, filter: 'blur(10px)' }}
-                  animate={{ opacity: 1, y: 0, filter: 'blur(0px)', ...SETTLE }}
-                  exit={{ opacity: 0, y: -16, filter: 'blur(8px)' }}
-                  transition={{ duration: reduce ? 0 : 0.8, ease: EASE_OUT, delay: reduce ? 0 : 0.7 }}
-                >
-                  <p className="text-[0.8125rem] text-linen/75">{p.location.label}</p>
-                  <p className="display display-lg mt-1 max-w-[16ch] text-shadow-soft">{p.title}</p>
-                  <div className="mt-6 flex flex-wrap items-center gap-4">
-                    <button type="button" data-autofocus onClick={() => step({ type: 'next' })} className="btn btn-solid">
-                      Entrar no imóvel
-                      <ChevronRight className="btn-icon" size={18} strokeWidth={1.6} aria-hidden="true" />
-                    </button>
-                    <span className="hidden items-center gap-3 text-[0.8125rem] text-linen/70 sm:inline-flex">
-                      <span aria-hidden="true" className="relative block h-8 w-px overflow-hidden bg-linen/20">
-                        <span className="scroll-cue absolute inset-x-0 top-0 block h-1/3 bg-linen" />
+                <m.div key="entrada" exit={{ opacity: 0, transition: { duration: 0.35 } }}>
+                  <p className="lbl text-[rgb(232_238_250/0.6)]">
+                    <DecodeText text={p.location.label.toUpperCase()} delay={700} />
+                  </p>
+                  <p className="display display-lg mt-2 max-w-[18ch]">
+                    <MaskLine delay={0.75} reduce={reduce}>
+                      {p.title}
+                    </MaskLine>
+                  </p>
+                  <div className="mt-[calc(18*var(--t))] flex flex-wrap items-center gap-x-6 gap-y-3">
+                    <button type="button" data-autofocus onClick={() => step({ type: 'next' })} className="cta lbl !mt-0">
+                      <span className="cta-glass" />
+                      <CtaEdge />
+                      <span className="cta-in">
+                        <PixelIcon />
+                        <DecodeText text="ENTRAR NO IMÓVEL" delay={900} />
                       </span>
-                      ou role, deslize e use as setas
+                    </button>
+                    <span className="lbl hidden text-[rgb(232_238_250/0.5)] sm:inline">
+                      <DecodeText text="ROLE, DESLIZE OU USE AS SETAS" delay={1000} />
                     </span>
                   </div>
                 </m.div>
@@ -210,92 +230,42 @@ function Tour({ property: p, origin, onClose }: TourTarget & { onClose: () => vo
             </h2>
           </div>
 
-          <div className="flex shrink-0 items-center gap-2">
-            <button
-              type="button"
-              onClick={() => step({ type: 'prev' })}
-              disabled={walk.index === 0 && !walk.ended}
-              className="liquid-glass glass-veil flex size-12 items-center justify-center rounded-full disabled:opacity-35"
-            >
+          {/* Na entrada, no celular, o CTA basta: o título ganha a largura toda. */}
+          <div className={['flex shrink-0 items-center gap-[calc(8*var(--t))]', entered ? '' : 'max-sm:!hidden'].join(' ')}>
+            <button type="button" onClick={() => step({ type: 'prev' })} disabled={atStart} className="t3-nav">
               <span className="sr-only">Ambiente anterior</span>
-              <ChevronLeft size={20} strokeWidth={1.5} aria-hidden="true" />
+              <BackIcon />
             </button>
-            <button
-              type="button"
-              onClick={() => step({ type: 'next' })}
-              disabled={walk.ended}
-              className="liquid-glass glass-veil flex size-12 items-center justify-center rounded-full disabled:opacity-35"
-            >
-              <span className="sr-only">{walk.index === rooms.length - 1 ? 'Concluir o percurso' : 'Próximo ambiente'}</span>
-              <ChevronRight size={20} strokeWidth={1.5} aria-hidden="true" />
+            <button type="button" onClick={() => step({ type: 'next' })} disabled={walk.ended} className="t3-nav">
+              <span className="sr-only">{!entered ? 'Entrar no imóvel' : walk.index === rooms.length - 1 ? 'Concluir o percurso' : 'Próximo ambiente'}</span>
+              <BackIcon className="ico rotate-180" />
             </button>
           </div>
         </div>
 
-        <ol aria-label="Ambientes" className="mt-6 flex gap-2 sm:gap-3">
-          {rooms.map((r, i) => (
-            <li key={`${i}-${r.name}`} className="flex-1">
-              <button
-                type="button"
-                onClick={() => step({ type: 'jump', to: i })}
-                aria-current={i === walk.index && !walk.ended ? 'step' : undefined}
-                className="group block w-full py-2 text-left"
-              >
-                <span className="relative block h-px overflow-hidden bg-linen/25">
-                  <span
-                    className="absolute inset-0 origin-left bg-champagne transition-transform duration-700 ease-out"
-                    style={{ transform: `scaleX(${i <= walk.index ? 1 : 0})` }}
-                  />
-                </span>
-                <span
-                  className={[
-                    'mt-2 block truncate text-[0.75rem] transition-colors',
-                    i === walk.index ? 'text-linen' : 'text-linen/50 group-hover:text-linen/80',
-                  ].join(' ')}
-                >
-                  <span className="hidden sm:inline">{r.name}</span>
-                  <span className="sm:hidden">{pad(i + 1)}</span>
-                </span>
-              </button>
-            </li>
-          ))}
+        <ol aria-label="Ambientes" className="t3-rail">
+          {rooms.map((r, i) => {
+            const on = entered && i === walk.index && !walk.ended;
+            return (
+              <li key={`${i}-${r.name}`}>
+                <button type="button" onClick={() => step({ type: 'jump', to: i })} aria-current={on ? 'step' : undefined} className="lbl">
+                  <span className="t3-rail-line">
+                    <span className="t3-rail-fill" style={{ transform: `scaleX(${entered && i <= walk.index ? 1 : 0})` }} />
+                  </span>
+                  <span className={on ? 'text-linen' : 'text-[rgb(232_238_250/0.42)]'}>
+                    <span className="max-sm:hidden">
+                      <DecodeText text={`${pad(i + 1)} ${r.name.toUpperCase()}`} delay={1100 + i * 40} />
+                    </span>
+                    <span className="sm:hidden">{pad(i + 1)}</span>
+                  </span>
+                </button>
+              </li>
+            );
+          })}
         </ol>
       </div>
 
-      <AnimatePresence>
-        {walk.ended && (
-          <m.div
-            className="absolute inset-0 z-20 flex items-center bg-night/75 backdrop-blur-md"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: reduce ? 0 : 0.6 }}
-          >
-            <m.div
-              className="container-x"
-              initial={{ opacity: 0, y: 24, filter: 'blur(10px)' }}
-              animate={{ opacity: 1, y: 0, filter: 'blur(0px)', ...SETTLE }}
-              transition={{ duration: reduce ? 0 : 0.8, ease: EASE_OUT, delay: reduce ? 0 : 0.2 }}
-            >
-              <p className="text-[0.875rem] text-linen/70">Fim do percurso</p>
-              <p className="display display-xl mt-3">Conheça pessoalmente.</p>
-              <p className="lede mt-6">Fale com um especialista da VOP e combine uma visita a este imóvel.</p>
-              {p.demo && <p className="mt-4 text-[0.8125rem] text-mineral">Este é um imóvel demonstrativo, com fotos de banco de imagens.</p>}
-              <div className="mt-10 flex flex-col gap-3 sm:flex-row sm:items-center">
-                <InterestLink property={p} />
-                <button type="button" onClick={() => step({ type: 'restart' })} className="btn btn-glass liquid-glass">
-                  <RotateCcw size={16} strokeWidth={1.6} aria-hidden="true" />
-                  <span>Refazer o percurso</span>
-                </button>
-                <button type="button" onClick={onClose} className="link-quiet px-2 py-3 text-[0.9375rem]">
-                  Ver outros imóveis
-                </button>
-              </div>
-            </m.div>
-          </m.div>
-        )}
-      </AnimatePresence>
-
+      <AnimatePresence>{walk.ended && <EndCard property={p} reduce={reduce} onRestart={() => step({ type: 'restart' })} onClose={onClose} />}</AnimatePresence>
       <AnimatePresence>{panel && <TourPanel property={p} onClose={() => setPanel(false)} />}</AnimatePresence>
 
       <p className="sr-only" aria-live="polite">
