@@ -1,0 +1,208 @@
+{
+  "casa-condominio": {
+    "width": 2400,
+    "height": 1601,
+    "widths": [
+      480,
+      800,
+      1200,
+      1600,
+      2000
+    ],
+    "color": "#e8e8e8"
+  },
+  "casa-contemporanea": {
+    "width": 2400,
+    "height": 1720,
+    "widths": [
+      480,
+      800,
+      1200,
+      1600,
+      2000
+    ],
+    "color": "#9898a8"
+  },
+  "cidade-noite": {
+    "width": 1320,
+    "height": 860,
+    "widths": [
+      480,
+      800,
+      1200,
+      1320
+    ],
+    "color": "#080808"
+  },
+  "cozinha-ilha": {
+    "width": 2400,
+    "height": 1557,
+    "widths": [
+      480,
+      800,
+      1200,
+      1600,
+      2000
+    ],
+    "color": "#a8a8a8"
+  },
+  "cozinha-janelas": {
+    "width": 2400,
+    "height": 1369,
+    "widths": [
+      480,
+      800,
+      1200,
+      1600,
+      2000
+    ],
+    "color": "#989898"
+  },
+  "cta-horizonte": {
+    "width": 1280,
+    "height": 720,
+    "widths": [
+      640,
+      960,
+      1280
+    ],
+    "color": "#080808"
+  },
+  "edificio-pedestre": {
+    "width": 2400,
+    "height": 1600,
+    "widths": [
+      480,
+      800,
+      1200,
+      1600,
+      2000
+    ],
+    "color": "#081818"
+  },
+  "escada-luz": {
+    "width": 2400,
+    "height": 1600,
+    "widths": [
+      640,
+      960,
+      1440,
+      1920,
+      2400
+    ],
+    "color": "#080808"
+  },
+  "hero-arquitetura": {
+    "width": 1920,
+    "height": 1080,
+    "widths": [
+      640,
+      960,
+      1440,
+      1920
+    ],
+    "color": "#080808"
+  },
+  "hero-cidade": {
+    "width": 1920,
+    "height": 1080,
+    "widths": [
+      640,
+      960,
+      1440,
+      1920
+    ],
+    "color": "#080808"
+  },
+  "hero-interiores": {
+    "width": 1280,
+    "height": 720,
+    "widths": [
+      640,
+      960,
+      1280
+    ],
+    "color": "#080808"
+  },
+  "living-integrado": {
+    "width": 2400,
+    "height": 1600,
+    "widths": [
+      480,
+      800,
+      1200,
+      1600,
+      2000
+    ],
+    "color": "#989888"
+  },
+  "piscina-borda": {
+    "width": 2400,
+    "height": 1600,
+    "widths": [
+      480,
+      800,
+      1200,
+      1600,
+      2000
+    ],
+    "color": "#e8e8e8"
+  },
+  "piscina-interna": {
+    "width": 1920,
+    "height": 1080,
+    "widths": [
+      480,
+      800,
+      1200,
+      1600,
+      1920
+    ],
+    "color": "#283828"
+  },
+  "quarto-luz": {
+    "width": 1280,
+    "height": 720,
+    "widths": [
+      480,
+      800,
+      1200,
+      1280
+    ],
+    "color": "#080808"
+  },
+  "quarto-madeira": {
+    "width": 2400,
+    "height": 3600,
+    "widths": [
+      480,
+      800,
+      1200,
+      1600,
+      2000
+    ],
+    "color": "#a8a8a8"
+  },
+  "suite-branca": {
+    "width": 1280,
+    "height": 720,
+    "widths": [
+      480,
+      800,
+      1200,
+      1280
+    ],
+    "color": "#080808"
+  },
+  "torre-noite": {
+    "width": 1920,
+    "height": 1080,
+    "widths": [
+      640,
+      960,
+      1440,
+      1920
+    ],
+    "color": "#080808"
+  }
+}

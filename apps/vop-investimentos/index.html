@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="pt-BR" class="no-js">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>VOP Investimentos Imobiliários | Assessoria imobiliária e investimentos</title>
+    <meta
+      name="description"
+      content="VOP Investimentos Imobiliários: assessoria imobiliária, investimentos e análise de oportunidades, com atendimento personalizado do primeiro contato à escritura."
+    />
+    <link rel="canonical" href="__SITE_URL__/" />
+    <meta name="robots" content="index, follow, max-image-preview:large" />
+    <meta name="theme-color" content="#050505" />
+    <meta name="color-scheme" content="dark" />
+    <meta name="format-detection" content="telephone=no" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="pt_BR" />
+    <meta property="og:site_name" content="VOP Investimentos Imobiliários" />
+    <meta property="og:url" content="__SITE_URL__/" />
+    <meta property="og:title" content="VOP | Mais do que encontrar imóveis. Construir patrimônio." />
+    <meta
+      property="og:description"
+      content="Assessoria imobiliária, investimentos e oportunidades estratégicas, com estratégia e conhecimento de mercado."
+    />
+    <meta property="og:image" content="__SITE_URL__/og.jpg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="VOP Investimentos Imobiliários: Mais do que encontrar imóveis. Construir patrimônio." />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="VOP | Mais do que encontrar imóveis. Construir patrimônio." />
+    <meta name="twitter:image" content="__SITE_URL__/og.jpg" />
+
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="icon" href="/favicon-32.png" type="image/png" sizes="32x32" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" sizes="180x180" />
+    <link rel="manifest" href="/site.webmanifest" />
+    <!--preload-->
+
+    <!-- Antes da primeira pintura: com JS, as entradas animadas começam
+         escondidas (o Framer Motion as revela). Se o app não hidratar em 6s,
+         a classe volta e tudo aparece sem animação. Sem JS, nada se esconde. -->
+    <script>
+      (function () {
+        var d = document.documentElement;
+        d.classList.remove('no-js');
+        setTimeout(function () {
+          if (!window.__vopReady) d.classList.add('no-js');
+        }, 6000);
+      })();
+    </script>
+    <!--schema-->
+  </head>
+  <body>
+    <div id="root"><!--app-html--></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

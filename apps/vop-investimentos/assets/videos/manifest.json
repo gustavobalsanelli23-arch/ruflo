@@ -1,0 +1,73 @@
+{
+  "observacao": "Vídeos de banco de imagens com licença comercial gratuita (Mixkit Stock Video Free License: uso comercial e pessoal, sem atribuição obrigatória, sem revenda como banco). Nenhum deles mostra imóveis da VOP: são ilustrativos. Os originais ficam em assets/videos/src (fora do git) e são baixados de novo por `npm run videos` se faltarem. Clipes com 'Mixkit Restricted License' (só uso pessoal) foram descartados: 48394, 47286, 27543, 24945.",
+  "coletado_em": "2026-10-26",
+  "clipes": {
+    "hero-arquitetura": {
+      "titulo": "Indoor pool with a great view",
+      "pagina": "https://mixkit.co/free-stock-video/indoor-pool-with-a-great-view-4641/",
+      "origem": "https://assets.mixkit.co/videos/4641/4641-1080.mp4",
+      "arquivo": "4641-1080.mp4",
+      "licenca": "Mixkit Stock Video Free License",
+      "inicio": 0,
+      "duracao": 9
+    },
+    "hero-interiores": {
+      "titulo": "Luxury hotel room panning shot",
+      "pagina": "https://mixkit.co/free-stock-video/luxury-hotel-room-panning-shot-4196/",
+      "origem": "https://assets.mixkit.co/videos/4196/4196-720.mp4",
+      "arquivo": "4196-720.mp4",
+      "licenca": "Mixkit Stock Video Free License",
+      "inicio": 5,
+      "duracao": 9
+    },
+    "hero-cidade": {
+      "titulo": "Aerial view of the glass corporate buildings of a big city at night",
+      "pagina": "https://mixkit.co/free-stock-video/aerial-view-of-the-glass-corporate-buildings-of-a-big-49845/",
+      "origem": "https://assets.mixkit.co/videos/49845/49845-1080.mp4",
+      "arquivo": "49845-1080.mp4",
+      "licenca": "Mixkit Stock Video Free License",
+      "inicio": 12.5,
+      "duracao": 8,
+      "nota": "Os primeiros 11s mostram a marca de uma empresa numa fachada; o trecho usado começa quando a torre em primeiro plano a encobre."
+    },
+    "cta-horizonte": {
+      "titulo": "Tour high above a city at dusk",
+      "pagina": "https://mixkit.co/free-stock-video/tour-high-above-a-city-at-dusk-41375/",
+      "origem": "https://assets.mixkit.co/videos/41375/41375-720.mp4",
+      "arquivo": "41375-720.mp4",
+      "licenca": "Mixkit Stock Video Free License",
+      "inicio": 0,
+      "duracao": 12
+    }
+  },
+  "quadros": {
+    "cidade-noite": {
+      "arquivo": "49845-1080.mp4",
+      "tempo": 1,
+      "recorte": "1320:860:600:0",
+      "pagina": "https://mixkit.co/free-stock-video/aerial-view-of-the-glass-corporate-buildings-of-a-big-49845/",
+      "nota": "Recorte à direita: fora do quadro fica a marca de uma empresa na fachada à esquerda."
+    },
+    "torre-noite": {
+      "arquivo": "49845-1080.mp4",
+      "tempo": 16.5,
+      "pagina": "https://mixkit.co/free-stock-video/aerial-view-of-the-glass-corporate-buildings-of-a-big-49845/"
+    },
+    "piscina-interna": {
+      "arquivo": "4641-1080.mp4",
+      "tempo": 8,
+      "pagina": "https://mixkit.co/free-stock-video/indoor-pool-with-a-great-view-4641/"
+    },
+    "quarto-luz": {
+      "arquivo": "4196-720.mp4",
+      "tempo": 11,
+      "pagina": "https://mixkit.co/free-stock-video/luxury-hotel-room-panning-shot-4196/"
+    },
+    "suite-branca": {
+      "arquivo": "4046-720.mp4",
+      "tempo": 3,
+      "pagina": "https://mixkit.co/free-stock-video/white-luxury-boutique-hotel-room-4046/",
+      "origem": "https://assets.mixkit.co/videos/4046/4046-720.mp4"
+    }
+  }
+}
