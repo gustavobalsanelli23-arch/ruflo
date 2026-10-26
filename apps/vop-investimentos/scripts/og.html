@@ -22,8 +22,8 @@
       .tl, .br { background: linear-gradient(to bottom right, transparent calc(50% - .7px), rgba(255,255,255,.18) calc(50% - .7px), rgba(255,255,255,.18) calc(50% + .7px), transparent calc(50% + .7px)); }
       .tr, .bl { background: linear-gradient(to bottom left, transparent calc(50% - .7px), rgba(255,255,255,.18) calc(50% - .7px), rgba(255,255,255,.18) calc(50% + .7px), transparent calc(50% + .7px)); }
       .tl { left: 0; top: 0; } .tr { right: 0; top: 0; } .br { right: 0; bottom: 0; } .bl { left: 0; bottom: 0; }
-      .logo { position: absolute; left: 72px; top: 66px; display: flex; align-items: center; gap: 14px; font-family: 'Chakra Petch', sans-serif; font-weight: 700; }
-      .logo b { font-size: 34px; letter-spacing: .16em; }
+      .logo { position: absolute; left: 72px; top: 60px; display: flex; align-items: center; gap: 14px; font-family: 'Chakra Petch', sans-serif; font-weight: 700; }
+      .logo .sym { height: 54px; width: auto; } .logo .word { height: 21px; width: auto; }
       .logo span { font-size: 11px; line-height: 1.3; letter-spacing: .12em; text-transform: uppercase; color: rgba(232,238,250,.6); border-left: 1px solid rgba(255,255,255,.2); padding-left: 12px; }
       .tag { position: absolute; right: 72px; top: 70px; height: 40px; display: flex; align-items: center; gap: 9px; padding: 0 20px; background: #e8d1cb; color: #15131b; font-family: 'Chakra Petch', sans-serif; font-weight: 700; font-size: 13px; letter-spacing: .04em; text-transform: uppercase; clip-path: polygon(0 0, calc(100% - 14px) 0, 100% 14px, 100% 100%, 0 100%); }
       h1 { position: absolute; left: 72px; bottom: 120px; font-weight: 700; font-size: 48px; line-height: 1.06; letter-spacing: .045em; text-transform: uppercase; }
@@ -35,7 +35,12 @@
     <div class="bg" id="bg"></div>
     <div class="veil"></div>
     <div class="frame"><b class="t"></b><b class="r"></b><b class="bo"></b><b class="l"></b><i class="c tl"></i><i class="c tr"></i><i class="c br"></i><i class="c bl"></i></div>
-    <div class="logo"><b>VOP</b><span>Investimentos<br />Imobiliários</span></div>
+    <div class="logo">
+      <!-- marca da VOP (mesmo vetor de src/components/VopMark.tsx) -->
+      <svg class="sym" viewBox="240 194 250 282"><g fill="none" stroke="#fff" stroke-width="6.6"><path d="M245 311.5 L365 208.5 L485 313"/><path d="M269 331 V374 M317.5 287 V414.5 M364 257 V472.5 M413 198 V429 M461 331 V374.5"/></g></svg>
+      <svg class="word" viewBox="248 524 234 68"><g fill="none" stroke="#fff" stroke-width="8.2"><path d="M254.5 528 L276.5 587.8 L298.5 528" stroke-linejoin="bevel"/><ellipse cx="369.5" cy="558" rx="27.5" ry="26.2"/><path d="M445 588.5 V531.6 H459.5 A14.7 14.7 0 0 1 459.5 561 H445"/></g></svg>
+      <span>Investimentos<br />Imobiliários</span>
+    </div>
     <div class="tag">Inteligência imobiliária</div>
     <h1><span>Mais do que encontrar imóveis.</span><span>Construir patrimônio.</span></h1>
     <p>Assessoria imobiliária, investimentos e oportunidades estratégicas.</p>

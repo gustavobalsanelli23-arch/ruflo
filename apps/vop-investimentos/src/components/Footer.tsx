@@ -12,7 +12,7 @@ export function Footer({ year }: { year: number }) {
       <div className="container-x">
         <div className="grid gap-12 md:grid-cols-12">
           <div className="md:col-span-5">
-            <Logo />
+            <Logo stacked />
             <p className="mt-6 max-w-xs text-[0.9375rem] leading-relaxed text-mineral">
               Assessoria imobiliária, investimentos e oportunidades estratégicas.
             </p>

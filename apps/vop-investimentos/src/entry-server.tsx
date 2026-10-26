@@ -78,6 +78,10 @@ export function pending() {
     data: pendingBusinessData(),
     content: pendingContent(),
     catalog: catalog.demo ? ['catálogo de imóveis (hoje só exemplos demonstrativos)'] : [],
-    media: ['logotipo oficial em vetor (SVG)', 'fotografias e vídeos próprios da VOP (hoje: banco de imagens)'],
+    media: [
+      'logotipo: vetor redesenhado da foto de perfil do Instagram (confirmar com o arquivo original)',
+      'fotografias e vídeos próprios da VOP (hoje: banco de imagens)',
+      'direito de uso comercial das cenas do hero (vindas do prompt de referência)',
+    ],
   };
 }

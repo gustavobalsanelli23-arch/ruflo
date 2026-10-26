@@ -195,20 +195,24 @@
 .st-logo {
   position: absolute;
   left: calc(30 * var(--u) + 24 * var(--t));
-  top: calc(30 * var(--u) + 22 * var(--t) - 5 * var(--t));
+  top: calc(30 * var(--u) + 14 * var(--t));
   display: flex;
   align-items: center;
   gap: calc(10 * var(--t));
   color: #fff;
   text-decoration: none;
 }
-.st-logo-mark {
+/* a marca da VOP (components/VopMark): o símbolo e o "VOP" lado a lado */
+.st-logo-symbol {
   display: block;
-  font-family: var(--font-label);
-  font-weight: 700;
-  font-size: calc(26 * var(--t));
-  line-height: calc(29 * var(--t));
-  letter-spacing: calc(4 * var(--t));
+  height: calc(37 * var(--t));
+  width: auto;
+}
+.st-logo-word {
+  display: block;
+  height: calc(14 * var(--t));
+  width: auto;
+  margin-left: calc(-2 * var(--t));
 }
 .st-logo-sub {
   display: block;
@@ -845,7 +849,7 @@ button:focus-visible {
   }
   .st-logo {
     left: calc(22 * var(--u) + 16 * var(--t));
-    top: calc(22 * var(--u) + 22 * var(--t) - 5 * var(--t));
+    top: calc(22 * var(--u) + 14 * var(--t));
   }
   .st-logo-sub {
     display: none;

@@ -3,6 +3,7 @@ import { business, resolveChannel } from '../config/site';
 import { nav } from '../data/content';
 import { DecodeText } from './Decode';
 import { DotsIcon, PixelIcon } from './StratumIcons';
+import { VopSymbol, VopWordmark } from './VopMark';
 
 /** Evento que abre o percurso do primeiro imóvel (ouvido em PropertiesSection). */
 export const ENTER_EVENT = 'vop:entrar';
@@ -99,7 +100,10 @@ export function Navbar() {
 
       <a href="#inicio" className="st-logo" aria-label={`${business.fullName}, voltar ao início`}>
         <span className="st-logo-clip">
-          <span className="st-logo-mark">{business.name}</span>
+          <VopSymbol className="st-logo-symbol" />
+        </span>
+        <span className="st-logo-clip">
+          <VopWordmark className="st-logo-word" />
         </span>
         <span className="st-logo-clip" aria-hidden="true">
           <span className="st-logo-sub">

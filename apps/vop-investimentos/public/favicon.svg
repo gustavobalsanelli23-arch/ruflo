@@ -1,10 +1,12 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-  <!-- Monograma provisório (até o logotipo oficial): o V da assinatura sobre
-       o azul-noite, com o chanfro dos pills do site e a cota em creme. -->
+  <!-- Símbolo da VOP (telhado e traços), redesenhado da foto de perfil, sobre
+       o azul-noite do site com o chanfro dos pills. Traço mais grosso que o
+       da assinatura para continuar legível a 16–32px. -->
   <path d="M0 0 H52 L64 12 V64 H0 Z" fill="#04070d"/>
-  <path d="M18 15 L32 45 L46 15" fill="none" stroke="#E6EAF5" stroke-width="4.6" stroke-linejoin="miter"/>
-  <g stroke="#E8D1CB" stroke-width="2.2">
-    <path d="M22 53 H42"/>
-    <path d="M22 49.5 V56.5 M42 49.5 V56.5"/>
-  </g>
+  <svg x="9" y="7" width="46" height="50" viewBox="240 194 250 282">
+    <g fill="none" stroke="#E6EAF5" stroke-width="13" stroke-linecap="butt" stroke-linejoin="miter">
+      <path d="M245 311.5 L365 208.5 L485 313"/>
+      <path d="M269 331 V374 M317.5 287 V414.5 M364 257 V472.5 M413 198 V429 M461 331 V374.5"/>
+    </g>
+  </svg>
 </svg>
