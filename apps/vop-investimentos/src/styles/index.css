@@ -188,6 +188,23 @@
       rgb(255 255 255 / 0.55) 100%
     );
   }
+  /* Brilho que acompanha o ponteiro dentro do card (cards de investimento). */
+  .spotlight::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    border-radius: inherit;
+    pointer-events: none;
+    background: radial-gradient(380px circle at var(--mx, 50%) var(--my, 50%), rgb(184 161 122 / 0.16), transparent 62%);
+    opacity: 0;
+    transition: opacity 0.5s;
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .spotlight:hover::after {
+      opacity: 1;
+    }
+  }
   /* Conteúdo acima do anel. */
   .liquid-glass > *,
   .liquid-glass-strong > * {
@@ -295,6 +312,33 @@
   .intro-anim {
     animation: rise-blur var(--dur, 0.8s) ease-out var(--delay, 0s) both;
   }
+  /* Percurso: a câmera avança devagar dentro do ambiente. */
+  @keyframes tour-push {
+    from {
+      transform: scale(1);
+    }
+    to {
+      transform: scale(1.07);
+    }
+  }
+  .tour-push {
+    animation: tour-push 16s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+  /* Pontos de interesse: um anel que se expande e some. */
+  @keyframes hotspot-ring {
+    0% {
+      transform: scale(1);
+      opacity: 0.85;
+    }
+    80%,
+    100% {
+      transform: scale(2.1);
+      opacity: 0;
+    }
+  }
+  .hotspot-ring {
+    animation: hotspot-ring 2.4s ease-out infinite;
+  }
   @keyframes scroll-cue {
     0% {
       transform: translateY(-100%);
@@ -310,7 +354,9 @@
   @media (prefers-reduced-motion: reduce) {
     .slow-zoom,
     .scroll-cue,
-    .intro-anim {
+    .intro-anim,
+    .tour-push,
+    .hotspot-ring {
       animation: none;
     }
   }

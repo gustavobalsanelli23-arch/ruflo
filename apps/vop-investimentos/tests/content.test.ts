@@ -73,13 +73,23 @@ describe('catálogo', () => {
     expect(demoProperties.every((p) => p.demo && p.code.startsWith('EX-'))).toBe(true);
   });
 
-  it('ids e códigos únicos; regiões existem; ao menos duas fotos', () => {
+  it('ids e códigos únicos; regiões existem; percurso com ao menos dois ambientes', () => {
     expect(new Set(demoProperties.map((p) => p.id)).size).toBe(demoProperties.length);
     expect(new Set(demoProperties.map((p) => p.code)).size).toBe(demoProperties.length);
     const names = regions.items.map((r) => r.name);
     for (const p of demoProperties) {
       expect(names).toContain(p.location.region);
-      expect(p.photos.length).toBeGreaterThanOrEqual(2);
+      expect(p.rooms.length).toBeGreaterThanOrEqual(2);
+      for (const room of p.rooms) {
+        expect(room.name.length).toBeGreaterThan(2);
+        expect((images as Record<string, unknown>)[room.photo.id], room.photo.id).toBeTruthy();
+        for (const h of room.hotspots ?? []) {
+          expect(h.x).toBeGreaterThanOrEqual(0);
+          expect(h.x).toBeLessThanOrEqual(100);
+          expect(h.y).toBeGreaterThanOrEqual(0);
+          expect(h.y).toBeLessThanOrEqual(100);
+        }
+      }
     }
   });
 

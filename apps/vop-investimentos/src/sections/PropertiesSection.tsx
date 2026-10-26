@@ -3,7 +3,7 @@ import { ChevronDown, X } from 'lucide-react';
 import { useCallback, useId, useMemo, useState } from 'react';
 import { BlurText } from '../components/BlurText';
 import { PropertyCard } from '../components/PropertyCard';
-import { PropertyDialog } from '../components/PropertyDialog';
+import { PropertyTour, type TourTarget } from '../components/tour/PropertyTour';
 import { Reveal } from '../components/Reveal';
 import { catalog, type Property } from '../data/properties';
 import {
@@ -20,11 +20,12 @@ import { stagger, VIEWPORT } from '../lib/motion';
 
 export function PropertiesSection() {
   const [filters, setFilters] = useState<Filters>(defaultFilters);
-  const [selected, setSelected] = useState<Property | null>(null);
+  const [tour, setTour] = useState<TourTarget | null>(null);
   const options = useMemo(() => filterOptions(catalog.properties), []);
   const results = useMemo(() => filterProperties(catalog.properties, filters), [filters]);
   const set = <K extends keyof Filters>(key: K, value: Filters[K]) => setFilters((f) => ({ ...f, [key]: value }));
-  const close = useCallback(() => setSelected(null), []);
+  const close = useCallback(() => setTour(null), []);
+  const open = useCallback((property: Property, origin: DOMRect | null) => setTour({ property, origin }), []);
 
   return (
     <section id="imoveis" aria-labelledby="imoveis-titulo" className="section-y relative bg-ebony">
@@ -32,7 +33,7 @@ export function PropertiesSection() {
         <div className="grid gap-8 lg:grid-cols-12 lg:items-end">
           <BlurText as="h2" id="imoveis-titulo" lines={['O próximo capítulo', 'começa aqui.']} className="display display-lg lg:col-span-7" />
           <Reveal className="lg:col-span-5 lg:pb-3" delay={0.15}>
-            <p className="lede">Imóveis apresentados com o cuidado que uma decisão de patrimônio pede: fotografia, ficha clara e contato direto.</p>
+            <p className="lede">Clique em um imóvel para entrar nele: percorra os ambientes, veja os detalhes de perto e abra a ficha completa.</p>
             {catalog.demo && (
               <p className="mt-5 border-l border-champagne/60 pl-4 text-[0.875rem] leading-relaxed text-mineral">
                 Catálogo em preparação. Os imóveis abaixo são exemplos ilustrativos, com fotos de banco de imagens.
@@ -55,7 +56,7 @@ export function PropertiesSection() {
           >
             <AnimatePresence mode="popLayout">
               {results.map((p, i) => (
-                <PropertyCard key={p.id} property={p} wide={isWide(i, results.length)} onOpen={setSelected} />
+                <PropertyCard key={p.id} property={p} wide={isWide(i, results.length)} onOpen={open} />
               ))}
             </AnimatePresence>
           </m.div>
@@ -84,7 +85,7 @@ export function PropertiesSection() {
         </Reveal>
       </div>
 
-      <PropertyDialog property={selected} onClose={close} />
+      <PropertyTour target={tour} onClose={close} />
     </section>
   );
 }

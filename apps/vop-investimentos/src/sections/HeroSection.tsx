@@ -1,5 +1,6 @@
+import { m, useScroll, useTransform } from 'framer-motion';
 import { ArrowUpRight, Pause, Play } from 'lucide-react';
-import { useMemo, useState, type CSSProperties } from 'react';
+import { useMemo, useRef, useState, type CSSProperties } from 'react';
 import { BlurText } from '../components/BlurText';
 import { FadingVideo } from '../components/FadingVideo';
 import { Magnetic } from '../components/Magnetic';
@@ -20,12 +21,19 @@ export function HeroSection() {
   const hasVideo = !reduceQuery && !unavailable;
   // Entradas da primeira dobra em CSS (.intro-anim): começam na primeira pintura.
   const at = (delay: number, dur = 0.8) => ({ '--delay': `${delay}s`, '--dur': `${dur}s` }) as CSSProperties;
+  // Saída de cena ao rolar: o texto sobe e se dissolve, o fundo se aproxima.
+  const section = useRef<HTMLElement>(null);
+  const { scrollYProgress } = useScroll({ target: section, offset: ['start start', 'end start'] });
+  const contentY = useTransform(scrollYProgress, [0, 1], ['0%', '-22%']);
+  const contentOpacity = useTransform(scrollYProgress, [0, 0.65], [1, 0]);
+  const bgScale = useTransform(scrollYProgress, [0, 1], [1, 1.12]);
+  const exit = !reduceQuery;
 
   return (
-    <section id="inicio" aria-label="Apresentação" className="relative isolate flex min-h-[100svh] flex-col overflow-hidden bg-night">
+    <section ref={section} id="inicio" aria-label="Apresentação" className="relative isolate flex min-h-[100svh] flex-col overflow-hidden bg-night">
       {/* Fundo: pôster (primeira pintura) e, por cima, a sequência de vídeos.
           Entre um capítulo e outro o vídeo passa pelo preto, como num corte de cinema. */}
-      <div className="absolute inset-0 -z-10">
+      <m.div className="absolute inset-0 -z-10" style={exit ? { scale: bgScale } : undefined}>
         <div
           className="absolute inset-0 transition-opacity duration-[1200ms] ease-out"
           style={{ opacity: playing ? 0 : 1 }}
@@ -55,9 +63,9 @@ export function HeroSection() {
         <div className="absolute inset-0 bg-[linear-gradient(180deg,rgb(5_5_5/0.6)_0%,rgb(5_5_5/0.15)_24%,rgb(5_5_5/0.55)_52%,rgb(5_5_5/0.95)_100%)] md:bg-[linear-gradient(180deg,rgb(5_5_5/0.55)_0%,rgb(5_5_5/0.05)_22%,rgb(5_5_5/0.15)_50%,rgb(5_5_5/0.92)_100%)]" />
         <div className="absolute inset-0 bg-[linear-gradient(90deg,rgb(5_5_5/0.68)_0%,rgb(5_5_5/0.2)_45%,rgb(5_5_5/0)_68%)]" />
         <div className="absolute inset-0 bg-[radial-gradient(120%_90%_at_50%_40%,transparent_55%,rgb(5_5_5/0.5)_100%)]" />
-      </div>
+      </m.div>
 
-      <div className="container-x relative mt-auto pb-6 pt-32 sm:pb-8">
+      <m.div className="container-x relative mt-auto pb-6 pt-32 sm:pb-8" style={exit ? { y: contentY, opacity: contentOpacity } : undefined}>
         <p
           style={at(0.3)}
           className="intro-anim liquid-glass mb-7 inline-flex items-center gap-2.5 rounded-full px-4 py-2 text-[0.6875rem] font-medium uppercase tracking-[0.24em] text-linen/90"
@@ -139,7 +147,7 @@ export function HeroSection() {
             </div>
           )}
         </div>
-      </div>
+      </m.div>
     </section>
   );
 }

@@ -1,6 +1,7 @@
 import { LazyMotion, MotionConfig } from 'framer-motion';
 import { Footer } from './components/Footer';
 import { Navbar } from './components/Navbar';
+import { ScrollProgress } from './components/ScrollProgress';
 import { AboutSection } from './sections/AboutSection';
 import { ContactSection } from './sections/ContactSection';
 import { FinalCtaSection } from './sections/FinalCtaSection';
@@ -23,6 +24,7 @@ export function App() {
         >
           Pular para o conteúdo
         </a>
+        <ScrollProgress />
         <Navbar />
         <main id="conteudo">
           <HeroSection />

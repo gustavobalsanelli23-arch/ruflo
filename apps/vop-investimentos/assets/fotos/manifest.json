@@ -6,23 +6,93 @@
     "mixkit": "Mixkit Stock Video Free License — uso comercial e pessoal. https://mixkit.co/license/"
   },
   "arquivos": {
-    "casa-contemporanea.jpg": { "fonte": "burst", "pagina": "https://www.shopify.com/stock-photos/photos/luxurious-home-in-the-desert" },
-    "cozinha-janelas.jpg": { "fonte": "burst", "pagina": "https://www.shopify.com/stock-photos/photos/new-modern-kitchen-with-large-windows" },
-    "quarto-madeira.jpg": { "fonte": "burst", "pagina": "https://www.shopify.com/stock-photos/photos/mid-century-modern-home-interior" },
-    "piscina-borda.jpg": { "fonte": "burst", "pagina": "https://www.shopify.com/stock-photos/photos/luxury-hotel-infinity-pool" },
-    "cozinha-ilha.jpg": { "fonte": "burst", "pagina": "https://www.shopify.com/stock-photos/photos/full-view-of-modern-kitchen" },
-    "casa-condominio.jpg": { "fonte": "burst", "pagina": "https://www.shopify.com/stock-photos/photos/modern-house" },
-    "living-integrado.jpg": { "fonte": "burst", "pagina": "https://www.shopify.com/stock-photos/photos/open-plan-mid-century-modern-apartment" },
-    "escada-luz.jpg": { "fonte": "burst", "pagina": "https://www.shopify.com/stock-photos/photos/modern-staircase-lighting" },
-    "edificio-pedestre.jpg": { "fonte": "burst", "pagina": "https://www.shopify.com/stock-photos/photos/man-walking-in-front-of-modern-building" },
-    "hero-arquitetura.jpg": { "fonte": "mixkit", "pagina": "https://mixkit.co/free-stock-video/indoor-pool-with-a-great-view-4641/" },
-    "hero-interiores.jpg": { "fonte": "mixkit", "pagina": "https://mixkit.co/free-stock-video/luxury-hotel-room-panning-shot-4196/" },
-    "hero-cidade.jpg": { "fonte": "mixkit", "pagina": "https://mixkit.co/free-stock-video/aerial-view-of-the-glass-corporate-buildings-of-a-big-49845/" },
-    "cta-horizonte.jpg": { "fonte": "mixkit", "pagina": "https://mixkit.co/free-stock-video/tour-high-above-a-city-at-dusk-41375/" },
-    "cidade-noite.jpg": { "fonte": "mixkit", "pagina": "https://mixkit.co/free-stock-video/aerial-view-of-the-glass-corporate-buildings-of-a-big-49845/" },
-    "torre-noite.jpg": { "fonte": "mixkit", "pagina": "https://mixkit.co/free-stock-video/aerial-view-of-the-glass-corporate-buildings-of-a-big-49845/" },
-    "piscina-interna.jpg": { "fonte": "mixkit", "pagina": "https://mixkit.co/free-stock-video/indoor-pool-with-a-great-view-4641/" },
-    "quarto-luz.jpg": { "fonte": "mixkit", "pagina": "https://mixkit.co/free-stock-video/luxury-hotel-room-panning-shot-4196/" },
-    "suite-branca.jpg": { "fonte": "mixkit", "pagina": "https://mixkit.co/free-stock-video/white-luxury-boutique-hotel-room-4046/" }
+    "casa-contemporanea.jpg": {
+      "fonte": "burst",
+      "pagina": "https://www.shopify.com/stock-photos/photos/luxurious-home-in-the-desert"
+    },
+    "cozinha-janelas.jpg": {
+      "fonte": "burst",
+      "pagina": "https://www.shopify.com/stock-photos/photos/new-modern-kitchen-with-large-windows"
+    },
+    "quarto-madeira.jpg": {
+      "fonte": "burst",
+      "pagina": "https://www.shopify.com/stock-photos/photos/mid-century-modern-home-interior"
+    },
+    "piscina-borda.jpg": {
+      "fonte": "burst",
+      "pagina": "https://www.shopify.com/stock-photos/photos/luxury-hotel-infinity-pool"
+    },
+    "cozinha-ilha.jpg": {
+      "fonte": "burst",
+      "pagina": "https://www.shopify.com/stock-photos/photos/full-view-of-modern-kitchen"
+    },
+    "casa-condominio.jpg": {
+      "fonte": "burst",
+      "pagina": "https://www.shopify.com/stock-photos/photos/modern-house"
+    },
+    "living-integrado.jpg": {
+      "fonte": "burst",
+      "pagina": "https://www.shopify.com/stock-photos/photos/open-plan-mid-century-modern-apartment"
+    },
+    "escada-luz.jpg": {
+      "fonte": "burst",
+      "pagina": "https://www.shopify.com/stock-photos/photos/modern-staircase-lighting"
+    },
+    "edificio-pedestre.jpg": {
+      "fonte": "burst",
+      "pagina": "https://www.shopify.com/stock-photos/photos/man-walking-in-front-of-modern-building"
+    },
+    "hero-arquitetura.jpg": {
+      "fonte": "mixkit",
+      "pagina": "https://mixkit.co/free-stock-video/indoor-pool-with-a-great-view-4641/"
+    },
+    "hero-interiores.jpg": {
+      "fonte": "mixkit",
+      "pagina": "https://mixkit.co/free-stock-video/luxury-hotel-room-panning-shot-4196/"
+    },
+    "hero-cidade.jpg": {
+      "fonte": "mixkit",
+      "pagina": "https://mixkit.co/free-stock-video/aerial-view-of-the-glass-corporate-buildings-of-a-big-49845/"
+    },
+    "cta-horizonte.jpg": {
+      "fonte": "mixkit",
+      "pagina": "https://mixkit.co/free-stock-video/tour-high-above-a-city-at-dusk-41375/"
+    },
+    "cidade-noite.jpg": {
+      "fonte": "mixkit",
+      "pagina": "https://mixkit.co/free-stock-video/aerial-view-of-the-glass-corporate-buildings-of-a-big-49845/"
+    },
+    "torre-noite.jpg": {
+      "fonte": "mixkit",
+      "pagina": "https://mixkit.co/free-stock-video/aerial-view-of-the-glass-corporate-buildings-of-a-big-49845/"
+    },
+    "piscina-interna.jpg": {
+      "fonte": "mixkit",
+      "pagina": "https://mixkit.co/free-stock-video/indoor-pool-with-a-great-view-4641/"
+    },
+    "quarto-luz.jpg": {
+      "fonte": "mixkit",
+      "pagina": "https://mixkit.co/free-stock-video/luxury-hotel-room-panning-shot-4196/"
+    },
+    "suite-branca.jpg": {
+      "fonte": "mixkit",
+      "pagina": "https://mixkit.co/free-stock-video/white-luxury-boutique-hotel-room-4046/"
+    },
+    "hall-entrada.jpg": {
+      "fonte": "burst",
+      "pagina": "https://www.shopify.com/stock-photos/photos/doorway-view-of-a-living-room"
+    },
+    "living-lareira.jpg": {
+      "fonte": "burst",
+      "pagina": "https://www.shopify.com/stock-photos/photos/living-room-bathed-in-natural-light-through-a-window"
+    },
+    "living-concreto.jpg": {
+      "fonte": "burst",
+      "pagina": "https://www.shopify.com/stock-photos/photos/living-room-designed-in-grey-and-gold"
+    },
+    "sala-familia.jpg": {
+      "fonte": "burst",
+      "pagina": "https://www.shopify.com/stock-photos/photos/family-room-with-large-screen-doors"
+    }
   }
 }

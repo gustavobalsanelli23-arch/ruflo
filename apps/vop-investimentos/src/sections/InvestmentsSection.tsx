@@ -1,3 +1,4 @@
+import type { PointerEvent } from 'react';
 import { BlurText } from '../components/BlurText';
 import { CompassIcon, LinesIcon, ShieldIcon } from '../components/Icons';
 import { Parallax } from '../components/Parallax';
@@ -7,6 +8,13 @@ import { investments } from '../data/content';
 import { photos } from '../data/media';
 
 const icons = { compass: CompassIcon, lines: LinesIcon, shield: ShieldIcon } as const;
+
+/** Leva a posição do ponteiro para o brilho do card (.spotlight, em CSS). */
+function followPointer(e: PointerEvent<HTMLElement>) {
+  const r = e.currentTarget.getBoundingClientRect();
+  e.currentTarget.style.setProperty('--mx', `${e.clientX - r.left}px`);
+  e.currentTarget.style.setProperty('--my', `${e.clientY - r.top}px`);
+}
 
 export function InvestmentsSection() {
   return (
@@ -31,7 +39,8 @@ export function InvestmentsSection() {
               <RevealItem
                 as="li"
                 key={pillar.title}
-                className="liquid-glass-strong group flex min-h-[15rem] flex-col rounded-[14px] p-7 transition-colors duration-500 hover:bg-white/[0.03] sm:p-8 lg:min-h-[19rem]"
+                className="spotlight liquid-glass-strong group flex min-h-[15rem] flex-col rounded-[14px] p-7 transition-colors duration-500 hover:bg-white/[0.03] sm:p-8 lg:min-h-[19rem]"
+                onPointerMove={followPointer}
               >
                 <div className="flex items-start justify-between">
                   <span className="display text-[2.75rem] leading-none text-champagne/90" aria-hidden="true">

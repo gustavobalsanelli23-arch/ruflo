@@ -206,28 +206,65 @@ await test('filtros: finalidade, tipo, região, preço, vazio e limpar', async (
   await page.context().close();
 });
 
-await test('detalhe do imóvel: abre, troca foto (botão e teclado), fecha com Esc e devolve o foco', async () => {
+await test('percurso: abre do card, caminha pelos ambientes (botão, teclado, rolagem), ficha, fim, Esc devolve o foco', async () => {
   const page = await newPage(desktop);
   await page.locator('#imoveis').scrollIntoViewIfNeeded();
   await page.waitForTimeout(600);
   const opener = page.getByRole('button', { name: /Residência contemporânea/ });
   await opener.click();
-  const dialog = page.getByRole('dialog', { name: 'Residência contemporânea' });
-  await dialog.waitFor();
-  assert(await dialog.getByText('Imóvel demonstrativo').isVisible(), 'aviso de demonstração');
-  assert(await dialog.getByText('Código EX-01', { exact: true }).isVisible(), 'código');
-  await dialog.getByRole('button', { name: 'Próxima foto' }).click();
-  await page.waitForTimeout(500);
-  assert((await dialog.locator('[aria-live=polite]').textContent()).includes('2 / 2'), 'foto 2');
-  await page.keyboard.press('ArrowRight');
-  await page.waitForTimeout(500);
-  assert((await dialog.locator('[aria-live=polite]').textContent()).includes('1 / 2'), 'volta à foto 1');
-  const cta = await dialog.getByRole('link', { name: 'Quero conhecer este imóvel' }).getAttribute('href');
-  assert(cta === DIRECT, cta);
+  const tour = page.getByRole('dialog', { name: /Percurso pelo imóvel Residência contemporânea/ });
+  await tour.waitFor();
   assert(await page.evaluate(() => getComputedStyle(document.body).overflow === 'hidden'), 'rolagem travada');
+  const live = tour.locator('[aria-live=polite]');
+  await tour.getByRole('button', { name: 'Entrar no imóvel' }).click();
+  await page.waitForFunction(() => document.querySelector('[aria-labelledby="percurso-titulo"] [aria-live=polite]')?.textContent?.includes('Ambiente 2 de 4: Hall de entrada'), null, { timeout: 3000 });
+  await page.waitForTimeout(1300);
+  await page.keyboard.press('ArrowRight');
+  await page.waitForFunction(() => document.querySelector('[aria-labelledby="percurso-titulo"] [aria-live=polite]')?.textContent?.includes('Living'), null, { timeout: 3000 });
+  assert(await tour.getByRole('button', { name: 'Lareira embutida' }).isVisible(), 'ponto de interesse do living');
+  await page.waitForTimeout(1300);
+  await page.mouse.move(700, 400);
+  await page.mouse.wheel(0, 120);
+  await page.waitForFunction(() => document.querySelector('[aria-labelledby="percurso-titulo"] [aria-live=polite]')?.textContent?.includes('Cozinha'), null, { timeout: 3000 });
+  await tour.getByRole('button', { name: 'Fachada' }).click();
+  await page.waitForFunction(() => document.querySelector('[aria-labelledby="percurso-titulo"] [aria-live=polite]')?.textContent?.includes('Ambiente 1 de 4'), null, { timeout: 3000 });
+  await tour.getByRole('button', { name: 'Ficha do imóvel' }).click();
+  const ficha = tour.getByRole('complementary', { name: 'Ficha do imóvel' });
+  await ficha.waitFor();
+  assert(await ficha.getByText('Código EX-01', { exact: true }).isVisible(), 'código na ficha');
+  assert(await ficha.getByText(/Imóvel demonstrativo/).isVisible(), 'aviso de demonstração');
+  assert((await ficha.getByRole('link', { name: 'Quero conhecer este imóvel' }).getAttribute('href')) === DIRECT, 'CTA da ficha');
   await page.keyboard.press('Escape');
-  await dialog.waitFor({ state: 'detached', timeout: 3000 });
+  await ficha.waitFor({ state: 'detached', timeout: 3000 });
+  assert((await tour.count()) === 1, 'Esc com a ficha aberta deve fechar só a ficha');
+  for (let i = 0; i < 4; i++) {
+    await page.keyboard.press('ArrowRight');
+    await page.waitForTimeout(1250);
+  }
+  await live.filter({ hasText: 'Fim do percurso' }).waitFor({ timeout: 3000 });
+  assert(await tour.getByRole('button', { name: 'Refazer o percurso' }).isVisible(), 'fim do percurso');
+  await page.keyboard.press('Escape');
+  await tour.waitFor({ state: 'detached', timeout: 3000 });
   assert(await opener.evaluate((el) => el === document.activeElement), 'foco não voltou ao card');
+  assert(await page.evaluate(() => getComputedStyle(document.body).overflow !== 'hidden'), 'rolagem destravada');
+  await page.context().close();
+});
+
+await test('percurso no celular: deslizar avança para o próximo ambiente', async () => {
+  const page = await newPage(phone);
+  await page.locator('#imoveis').scrollIntoViewIfNeeded();
+  await page.waitForTimeout(600);
+  await page.getByRole('button', { name: /Casa em condomínio fechado/ }).click();
+  const tour = page.getByRole('dialog', { name: /Percurso pelo imóvel Casa em condomínio/ });
+  await tour.waitFor();
+  await page.waitForTimeout(1200);
+  const swipe = async () => {
+    await tour.dispatchEvent('touchstart', { touches: [{ identifier: 0, clientX: 200, clientY: 600 }], changedTouches: [{ identifier: 0, clientX: 200, clientY: 600 }] });
+    await tour.dispatchEvent('touchend', { touches: [], changedTouches: [{ identifier: 0, clientX: 200, clientY: 380 }] });
+  };
+  await swipe();
+  await page.waitForFunction(() => document.querySelector('[aria-labelledby="percurso-titulo"] [aria-live=polite]')?.textContent?.includes('Ambiente 2 de 3: Sala'), null, { timeout: 3000 });
+  assert(page.problems.length === 0, page.problems.join('\n'));
   await page.context().close();
 });
 

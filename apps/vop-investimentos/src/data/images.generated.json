@@ -92,6 +92,18 @@
     ],
     "color": "#080808"
   },
+  "hall-entrada": {
+    "width": 2000,
+    "height": 3000,
+    "widths": [
+      480,
+      800,
+      1200,
+      1600,
+      2000
+    ],
+    "color": "#080808"
+  },
   "hero-arquitetura": {
     "width": 1920,
     "height": 1080,
@@ -124,6 +136,18 @@
     ],
     "color": "#080808"
   },
+  "living-concreto": {
+    "width": 2000,
+    "height": 3207,
+    "widths": [
+      480,
+      800,
+      1200,
+      1600,
+      2000
+    ],
+    "color": "#f8f8f8"
+  },
   "living-integrado": {
     "width": 2400,
     "height": 1600,
@@ -135,6 +159,16 @@
       2000
     ],
     "color": "#989888"
+  },
+  "living-lareira": {
+    "width": 1080,
+    "height": 1616,
+    "widths": [
+      480,
+      800,
+      1080
+    ],
+    "color": "#383838"
   },
   "piscina-borda": {
     "width": 2400,
@@ -182,6 +216,18 @@
       2000
     ],
     "color": "#a8a8a8"
+  },
+  "sala-familia": {
+    "width": 2400,
+    "height": 1600,
+    "widths": [
+      480,
+      800,
+      1200,
+      1600,
+      2000
+    ],
+    "color": "#d8d8d8"
   },
   "suite-branca": {
     "width": 1280,

@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { business, formatPhone, isWhatsappNumber, pendingBusinessData, resolveChannel, whatsappUrl, type Business } from '../src/config/site';
 import { composeMessage, emptyContact, maskPhone, phoneDigits, postContact, resolveDelivery, validateContact, type ContactInput } from '../src/lib/contact';
 import { distanceKm, mapSize, project } from '../src/lib/geo';
+import { hotspotOnScreen, parseFocus, stageBox, walkReducer } from '../src/lib/stage';
 
 const withWhatsapp: Business = { ...business, whatsapp: { ...business.whatsapp, number: '5511999998888' } };
 const filled: ContactInput = {
@@ -129,5 +130,66 @@ describe('mapa esquemático', () => {
     const pb = project(b.lat, b.lon);
     const mapKm = Math.hypot(pb.x - pa.x, pb.y - pa.y) / 10;
     expect(Math.abs(mapKm - distanceKm(a, b))).toBeLessThan(0.3);
+  });
+});
+
+describe('percurso pelo imóvel', () => {
+  it('foto deitada cobre a tela respeitando o ponto de interesse', () => {
+    const b = stageBox(3000, 2000, 1440, 900, '50% 80%');
+    expect(b.mode).toBe('cover');
+    expect(b.width).toBe(1440);
+    expect(b.height).toBe(960);
+    expect(b.top).toBeCloseTo(-48);
+    expect(b.left).toBe(0);
+  });
+
+  it('foto em pé numa tela deitada aparece inteira (contain), à direita do título', () => {
+    const b = stageBox(2000, 3000, 1440, 900);
+    expect(b.mode).toBe('contain');
+    expect(b.height).toBeCloseTo(900 * 0.78);
+    expect(b.left + b.width / 2).toBeGreaterThan(720);
+    expect(b.top + b.height).toBeLessThan(900);
+  });
+
+  it('foto deitada no celular em pé ocupa o alto da tela, sem invadir os controles', () => {
+    const b = stageBox(3000, 2000, 390, 844, '50% 80%');
+    expect(b.mode).toBe('cover');
+    expect(b.top + b.height).toBeCloseTo(844 * 0.76);
+    expect(b.width).toBeGreaterThan(390);
+  });
+
+  it('no celular em pé, a foto em pé cobre a tela', () => {
+    expect(stageBox(2000, 3000, 390, 844).mode).toBe('cover');
+  });
+
+  it('pontos de interesse fora da área livre ficam ocultos', () => {
+    const b = stageBox(3000, 2000, 1440, 900);
+    expect(hotspotOnScreen(b, 50, 50, 1440, 900).visible).toBe(true);
+    expect(hotspotOnScreen(b, 2, 50, 1440, 900).visible).toBe(false);
+    expect(hotspotOnScreen(b, 50, 95, 1440, 900).visible).toBe(false);
+  });
+
+  it('parseFocus lê porcentagens e limita a 0–1', () => {
+    expect(parseFocus('40% 70%')).toEqual([0.4, 0.7]);
+    expect(parseFocus()).toEqual([0.5, 0.5]);
+    expect(parseFocus('150% -10%')).toEqual([1, 0]);
+  });
+
+  it('avança, volta, encerra, pula e recomeça', () => {
+    const r = walkReducer(3);
+    let s = { index: 0, dir: 1, ended: false };
+    s = r(s, { type: 'prev' });
+    expect(s).toEqual({ index: 0, dir: 1, ended: false });
+    s = r(s, { type: 'next' });
+    s = r(s, { type: 'next' });
+    expect(s).toEqual({ index: 2, dir: 1, ended: false });
+    s = r(s, { type: 'next' });
+    expect(s.ended).toBe(true);
+    expect(r(s, { type: 'next' })).toBe(s);
+    s = r(s, { type: 'prev' });
+    expect(s).toEqual({ index: 2, dir: -1, ended: false });
+    s = r(s, { type: 'jump', to: 0 });
+    expect(s).toEqual({ index: 0, dir: -1, ended: false });
+    expect(r({ index: 1, dir: 1, ended: true }, { type: 'restart' })).toEqual({ index: 0, dir: -1, ended: false });
   });
 });
