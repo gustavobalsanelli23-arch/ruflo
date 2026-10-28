@@ -5,10 +5,12 @@ import type { Database } from '@/types/database';
 
 /**
  * Client with the secret (service_role) key. It bypasses RLS, so it is used
- * for exactly one thing: the pre-authentication rate limiter
- * (public.check_rate_limit, executable only by service_role). The
- * `server-only` import makes the build fail if this module ever reaches a
- * client bundle.
+ * for exactly two things, both RPCs only service_role may execute:
+ *   * the pre-authentication rate limiter (public.check_rate_limit);
+ *   * writing the Intelligence Engine's results (public.sync_opportunities),
+ *     after the server checked the user's role.
+ * The `server-only` import makes the build fail if this module ever reaches
+ * a client bundle.
  */
 export function createSupabaseAdminClient() {
   const config = getSupabaseConfig();

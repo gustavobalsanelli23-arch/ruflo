@@ -101,6 +101,9 @@ begin
   ) then
     raise exception 'solus:forbidden' using errcode = '42501';
   end if;
+  -- Duas análises simultâneas da mesma organização: uma espera a outra.
+  perform pg_advisory_xact_lock(hashtextextended('solus:opportunities:' || p_organization_id::text, 0));
+
   if jsonb_typeof(p_items) is distinct from 'array' or jsonb_array_length(p_items) > 1000
     or jsonb_typeof(p_limitations) is distinct from 'array' then
     raise exception 'solus:invalid_opportunities' using errcode = '22023';
