@@ -1,5 +1,5 @@
 import { afterAll, describe, expect, inject, it } from 'vitest';
-import { asUser, closePool, type Outcome, type Session } from './support/session';
+import { asSystem, asUser, closePool, type Outcome, type Session } from './support/session';
 import type { Person } from './support/world';
 
 const { users, orgs, memberships, imports } = inject('world');
@@ -61,8 +61,8 @@ describe('organização: renomear, excluir e campos protegidos', () => {
   });
 });
 
-describe('dados analíticos (data_imports)', () => {
-  const insert = `insert into public.data_imports (organization_id, dataset, file_name) values ($1, 'products', 'produtos.csv')`;
+describe('importações (data_imports)', () => {
+  const create = `select * from public.create_import($1, 'products', 'produtos.csv', 'csv', 2048, repeat('a', 64))`;
 
   it.each([
     ['ownerA', 'allowed'],
@@ -70,24 +70,31 @@ describe('dados analíticos (data_imports)', () => {
     ['analystA', 'allowed'],
     ['viewerA', 'denied'],
   ] as const)('%s registrando uma importação: %s', async (person, expected) => {
-    const { verdict: result } = await tryAs(person, insert, [orgs.a]);
+    const { verdict: result, error } = await tryAs(person, create, [orgs.a]);
     expect(result).toBe(expected);
+    if (expected === 'denied') expect(error?.message).toBe('solus:forbidden');
   });
 
-  it('o registro nasce pendente e em nome de quem enviou, sem aceitar status ou autor forjados', async () => {
+  it('o registro nasce pendente, em nome de quem enviou, com o caminho do Storage dentro da organização', async () => {
     await asUser(users.analystA, async (s) => {
-      const [row] = await s.query<{ status: string; created_by: string }>(`${insert} returning status, created_by`, [orgs.a]);
+      const [created] = await s.query<{ import_id: string; object_path: string }>(create, [orgs.a]);
+      expect(created!.object_path).toBe(`${orgs.a}/${created!.import_id}/original.csv`);
+      const [row] = await s.query<{ status: string; created_by: string }>(
+        'select status, created_by from public.data_imports where id = $1',
+        [created!.import_id],
+      );
       expect(row).toEqual({ status: 'pending', created_by: users.analystA });
-
-      for (const forged of [
-        `insert into public.data_imports (organization_id, dataset, file_name, status) values ($1, 'sales', 'x.csv', 'completed')`,
-        `insert into public.data_imports (organization_id, dataset, file_name, created_by) values ($1, 'sales', 'x.csv', '${users.ownerA}')`,
-        `insert into public.data_imports (organization_id, dataset, file_name, record_count) values ($1, 'sales', 'x.csv', 999)`,
-      ]) {
-        const outcome = await s.attempt(forged, [orgs.a]);
-        expect(outcome.ok, forged).toBe(false);
-      }
     });
+  });
+
+  it.each(['ownerA', 'adminA', 'analystA', 'viewerA'] as const)('%s não insere importações diretamente na tabela', async (person) => {
+    const { verdict: result, error } = await tryAs(
+      person,
+      `insert into public.data_imports (organization_id, dataset, file_name, status) values ($1, 'sales', 'x.csv', 'completed')`,
+      [orgs.a],
+    );
+    expect(result).toBe('denied');
+    expect(error?.code).toBe('42501');
   });
 
   it.each(['ownerA', 'adminA', 'analystA', 'viewerA'] as const)('%s não altera status de importação pelo cliente', async (person) => {
@@ -100,9 +107,26 @@ describe('dados analíticos (data_imports)', () => {
     ['adminA', 'allowed'],
     ['analystA', 'no-rows'],
     ['viewerA', 'no-rows'],
-  ] as const)('%s excluindo uma importação: %s', async (person, expected) => {
+  ] as const)('%s excluindo do histórico uma importação cancelada: %s', async (person, expected) => {
     const { verdict: result } = await tryAs(person, 'delete from public.data_imports where id = $1', [imports.a]);
     expect(result).toBe(expected);
+  });
+
+  it('uma importação concluída não sai do histórico por DELETE: antes precisa ser desfeita', async () => {
+    const [completed] = await asSystem(
+      (s) =>
+        s.query<{ id: string }>(
+          `insert into public.data_imports (organization_id, dataset, file_name, status) values ($1, 'sales', 'feita.csv', 'completed') returning id`,
+          [orgs.a],
+        ),
+      { commit: true },
+    );
+    try {
+      const { verdict: result } = await tryAs('ownerA', 'delete from public.data_imports where id = $1', [completed!.id]);
+      expect(result).toBe('no-rows');
+    } finally {
+      await asSystem((s) => s.query('delete from public.data_imports where id = $1', [completed!.id]), { commit: true });
+    }
   });
 });
 

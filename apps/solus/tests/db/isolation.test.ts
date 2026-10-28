@@ -79,17 +79,14 @@ describe('membro de A tentando acessar dados de B', () => {
     expect(state).toEqual({ name: 'Mercado Boreal', members: 3, imports: 1, owner_name: 'Pessoa ownerB' });
   });
 
-  it('inserir dados com organization_id de B é barrado pelo RLS', async () => {
+  it('registrar uma importação na organização B é recusado pelo banco', async () => {
     await asUser(users.analystA, async (s) => {
       const outcome = await s.attempt(
-        `insert into public.data_imports (organization_id, dataset, file_name) values ($1, 'sales', 'b.csv')`,
+        `select * from public.create_import($1, 'sales', 'b.csv', 'csv', 10, repeat('b', 64))`,
         [orgs.b],
       );
       expect(outcome.ok).toBe(false);
-      if (!outcome.ok) {
-        expect(outcome.error.code).toBe('42501');
-        expect(outcome.error.message).toMatch(/row-level security/);
-      }
+      if (!outcome.ok) expect(outcome.error.message).toBe('solus:forbidden');
     });
   });
 
@@ -155,11 +152,10 @@ describe('usuário pertencente a várias organizações', () => {
       const inviteA = await s.attempt(`select * from public.create_invitation($1, 'novo.a@exemplo.test', 'viewer')`, [orgs.a]);
       expect(inviteA.ok).toBe(false);
 
-      const importA = await s.attempt(
-        `insert into public.data_imports (organization_id, dataset, file_name) values ($1, 'sales', 'a.csv')`,
-        [orgs.a],
-      );
+      const importA = await s.attempt(`select * from public.create_import($1, 'sales', 'a.csv', 'csv', 10, repeat('c', 64))`, [orgs.a]);
       expect(importA.ok).toBe(false);
+      const importB = await s.attempt(`select * from public.create_import($1, 'sales', 'b.csv', 'csv', 10, repeat('c', 64))`, [orgs.b]);
+      expect(importB.ok).toBe(true);
     });
   });
 });

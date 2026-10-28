@@ -95,11 +95,13 @@ export async function buildWorld(client: ClientBase): Promise<World> {
     memberships[`${person}@${row.organization_id === orgs.a ? 'a' : 'b'}`] = row.id;
   }
 
+  // One canceled import per organization: a history row with no data behind
+  // it (the analytics tests create their own imports through the RPCs).
   const imports = { a: '', b: '' };
   for (const org of ['a', 'b'] as const) {
     const { rows: inserted } = await client.query<{ id: string }>(
-      `insert into public.data_imports (organization_id, dataset, file_name, status, record_count)
-       values ($1, 'sales', $2, 'completed', 120) returning id`,
+      `insert into public.data_imports (organization_id, dataset, file_name, status)
+       values ($1, 'sales', $2, 'canceled') returning id`,
       [orgs[org], `vendas_${org}.csv`],
     );
     imports[org] = inserted[0]!.id;

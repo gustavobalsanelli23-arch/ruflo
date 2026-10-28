@@ -16,11 +16,23 @@ describe('estrutura de segurança do banco', () => {
       ),
     );
     expect(tables.map((t) => t.name)).toEqual([
+      'analysis_runs',
+      'analysis_settings',
+      'categories',
       'data_imports',
+      'import_batches',
+      'import_errors',
+      'inventory_snapshots',
+      'opportunities',
+      'opportunity_events',
       'organization_invitations',
       'organization_members',
       'organizations',
+      'products',
       'profiles',
+      'sale_items',
+      'sales',
+      'suppliers',
     ]);
     expect(tables.filter((t) => !t.rls)).toEqual([]);
   });
