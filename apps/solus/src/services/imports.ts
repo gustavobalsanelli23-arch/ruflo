@@ -186,3 +186,54 @@ export async function pendingBatches(supabase: SolusClient, importId: string): P
 export function todayInBrazil() {
   return new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Sao_Paulo' }).format(new Date());
 }
+
+export interface ImportHistoryItem {
+  id: string;
+  fileName: string;
+  dataset: Dataset;
+  format: 'csv' | 'xlsx' | null;
+  status: ImportStatus;
+  totalRows: number;
+  records: number;
+  errors: number;
+  warnings: number;
+  skipped: number;
+  periodStart: string | null;
+  periodEnd: string | null;
+  createdAt: string;
+  createdBy: string | null;
+  author: string | null;
+}
+
+/** The organization's imports, newest first (RLS: members only). */
+export async function listImportHistory(supabase: SolusClient, organizationId: string): Promise<ImportHistoryItem[]> {
+  const { data, error } = await supabase
+    .from('data_imports')
+    .select(
+      'id, file_name, dataset, file_format, status, total_rows, record_count, error_count, warning_count, skipped_rows, period_start, period_end, created_at, created_by, author:profiles!data_imports_created_by_fkey(full_name, email)',
+    )
+    .eq('organization_id', organizationId)
+    .order('created_at', { ascending: false })
+    .limit(200);
+  if (error) {
+    logServerError('importações: histórico', error);
+    throw new Error('Não foi possível carregar o histórico de importações.');
+  }
+  return data.map((row) => ({
+    id: row.id,
+    fileName: row.file_name,
+    dataset: row.dataset,
+    format: row.file_format,
+    status: row.status,
+    totalRows: row.total_rows,
+    records: row.record_count,
+    errors: row.error_count,
+    warnings: row.warning_count,
+    skipped: row.skipped_rows,
+    periodStart: row.period_start,
+    periodEnd: row.period_end,
+    createdAt: row.created_at,
+    createdBy: row.created_by,
+    author: row.author?.full_name ?? row.author?.email ?? null,
+  }));
+}

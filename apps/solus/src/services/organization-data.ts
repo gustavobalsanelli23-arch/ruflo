@@ -2,7 +2,6 @@ import 'server-only';
 import type { Role } from '@/lib/data/types';
 import { logServerError } from '@/lib/log';
 import type { SolusClient } from '@/lib/supabase/server';
-import type { ImportDataset, ImportStatus } from '@/types/database';
 
 /**
  * Reads for the settings and data screens. Every query runs with the
@@ -25,16 +24,6 @@ export interface InvitationRow {
   role: Role;
   expiresAt: string;
   expired: boolean;
-  createdAt: string;
-}
-
-export interface ImportRow {
-  id: string;
-  fileName: string;
-  dataset: ImportDataset;
-  status: ImportStatus;
-  records: number;
-  errors: number;
   createdAt: string;
 }
 
@@ -85,27 +74,6 @@ export async function listPendingInvitations(supabase: SolusClient, organization
     role: row.role,
     expiresAt: row.expires_at,
     expired: new Date(row.expires_at).getTime() <= now,
-    createdAt: row.created_at,
-  }));
-}
-
-export async function listImports(supabase: SolusClient, organizationId: string): Promise<ImportRow[]> {
-  const rows = unwrap(
-    'importações: listar',
-    await supabase
-      .from('data_imports')
-      .select('id, file_name, dataset, status, record_count, error_count, created_at')
-      .eq('organization_id', organizationId)
-      .order('created_at', { ascending: false })
-      .limit(100),
-  );
-  return rows.map((row) => ({
-    id: row.id,
-    fileName: row.file_name,
-    dataset: row.dataset,
-    status: row.status,
-    records: row.record_count,
-    errors: row.error_count,
     createdAt: row.created_at,
   }));
 }
