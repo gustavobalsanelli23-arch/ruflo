@@ -1,61 +1,61 @@
 import Link from 'next/link';
-import {
-  ArrowRight,
-  Database,
-  MessageSquareText,
-  Radar,
-  TriangleAlert,
-  UserPlus,
-  type LucideIcon,
-} from 'lucide-react';
+import { Database, MessageSquareText, OctagonAlert, PackageX, Radar, TriangleAlert, UserPlus, type LucideIcon } from 'lucide-react';
 import { Delta } from '@/components/data/delta';
 import { Meter } from '@/components/data/meter';
 import { Panel } from '@/components/data/panel';
 import { OPPORTUNITY_CATEGORY, PriorityMark } from '@/components/data/status';
-import type { ActivityItem, CategoryPerformance, InventorySnapshot, Opportunity } from '@/lib/data/types';
-import { formatCurrency, formatDateTime, formatDays, formatPercent, relativeChange } from '@/lib/format';
+import { TextLink } from '@/components/data/text-link';
+import type { ActivityItem, CategoryPerformance, InventorySnapshot, Opportunity, OpportunitySummary } from '@/lib/data/types';
+import { formatCurrency, formatDateTime, formatDays, formatPercent, pluralize, relativeChange } from '@/lib/format';
 import { cn } from '@/lib/utils';
 import { impactShort } from '@/modules/opportunities/impact';
 
-function MoreLink({ href, children }: { href: string; children: React.ReactNode }) {
-  return (
-    <Link
-      href={href}
-      className="inline-flex items-center gap-1 rounded text-sm font-medium text-brand underline-offset-4 outline-none hover:underline focus-visible:ring-2 focus-visible:ring-ring/60"
-    >
-      {children}
-      <ArrowRight aria-hidden="true" className="size-3.5" />
-    </Link>
-  );
-}
-
-export function TopOpportunities({ items, total }: { items: Opportunity[]; total: number }) {
+export function TopOpportunities({ items, summary }: { items: Opportunity[]; summary: OpportunitySummary }) {
   return (
     <Panel
       title="Oportunidades prioritárias"
-      description="Ordenadas por prioridade e ganho esperado."
-      footer={<MoreLink href="/oportunidades">Ver todas as {total} oportunidades abertas</MoreLink>}
+      description="O que a SOLUS encontrou nos dados, por prioridade e ganho esperado."
+      action={<TextLink href="/oportunidades">Ver todas</TextLink>}
+      footer={
+        <p className="text-xs text-subtle-foreground">
+          Valores estimados com as premissas descritas em cada oportunidade. Não são ganhos garantidos.
+        </p>
+      }
       className="h-full"
-      bodyClassName="px-2 pb-2"
     >
-      <ol className="flex flex-col">
+      <dl className="grid grid-cols-2 gap-4 border-b pb-4">
+        <div>
+          <dt className="text-xs text-muted-foreground">Ganho mensal estimado</dt>
+          <dd className="mt-0.5 text-xl font-semibold tracking-[-0.02em] text-foreground">
+            {formatCurrency(summary.monthlyImpact, { whole: true })}
+            <span className="ml-1 text-xs font-normal text-subtle-foreground">/mês</span>
+          </dd>
+        </div>
+        <div>
+          <dt className="text-xs text-muted-foreground">Ganhos pontuais estimados</dt>
+          <dd className="mt-0.5 text-xl font-semibold tracking-[-0.02em] text-foreground">
+            {formatCurrency(summary.oneOffImpact, { whole: true })}
+          </dd>
+        </div>
+      </dl>
+      <ol className="-mx-2 mt-2 flex flex-col" aria-label={`${summary.open} oportunidades abertas, as 3 primeiras`}>
         {items.map((op, index) => {
           const impact = impactShort(op);
           return (
             <li key={op.id}>
               <Link
                 href={`/oportunidades?id=${op.id}`}
-                className="group flex gap-3 rounded-lg px-3 py-3 outline-none transition-colors hover:bg-accent focus-visible:bg-accent"
+                className="group flex gap-3 rounded-lg px-2 py-2.5 outline-none transition-colors hover:bg-accent focus-visible:bg-accent focus-visible:ring-2 focus-visible:ring-ring/60"
               >
                 <span
                   aria-hidden="true"
-                  className="mt-0.5 grid size-6 shrink-0 place-items-center rounded-md bg-neutral-soft text-xs font-semibold text-muted-foreground tabular"
+                  className="mt-0.5 grid size-6 shrink-0 place-items-center rounded-md bg-brand-soft text-xs font-semibold text-brand tabular"
                 >
                   {index + 1}
                 </span>
                 <span className="min-w-0 flex-1">
-                  <span className="block text-sm leading-5 font-medium text-foreground group-hover:text-foreground">{op.title}</span>
-                  <span className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1">
+                  <span className="block text-sm leading-5 font-medium text-foreground">{op.title}</span>
+                  <span className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1">
                     <PriorityMark priority={op.priority} />
                     <span className="text-xs text-subtle-foreground">{OPPORTUNITY_CATEGORY[op.category]}</span>
                   </span>
@@ -73,97 +73,135 @@ export function TopOpportunities({ items, total }: { items: Opportunity[]; total
   );
 }
 
+export function InventoryHealth({ inventory }: { inventory: InventorySnapshot }) {
+  return (
+    <Panel
+      title="Estoque"
+      description="Posição atual, sem filtro de período."
+      action={<TextLink href="/estoque">Ver estoque</TextLink>}
+      className="h-full"
+    >
+      <dl className="grid grid-cols-3 gap-4 border-b pb-4">
+        <div>
+          <dt className="text-xs text-muted-foreground">Estoque a custo</dt>
+          <dd className="mt-0.5 text-xl font-semibold tracking-[-0.02em]">{formatCurrency(inventory.stockValue, { compact: true })}</dd>
+        </div>
+        <div>
+          <dt className="text-xs text-muted-foreground">Cobertura média</dt>
+          <dd className="mt-0.5 text-xl font-semibold tracking-[-0.02em]">{formatDays(inventory.averageCoverageDays)}</dd>
+        </div>
+        <div>
+          <dt className="text-xs text-muted-foreground">Itens saudáveis</dt>
+          <dd className="mt-0.5 text-xl font-semibold tracking-[-0.02em]">{formatPercent(inventory.healthyShare, 0)}</dd>
+          <dd className="mt-1.5">
+            <Meter value={inventory.healthyShare} tone="positive" label="Itens em situação saudável" />
+          </dd>
+        </div>
+      </dl>
+
+      <section aria-labelledby="ruptura-titulo" className="mt-4">
+        <h3 id="ruptura-titulo" className="flex items-center gap-2 text-sm font-medium text-foreground">
+          <OctagonAlert aria-hidden="true" className="size-4 text-critical-text" />
+          Risco de ruptura
+          <span className="font-normal text-muted-foreground">{pluralize(inventory.ruptureRiskCount, 'item', 'itens')}</span>
+        </h3>
+        <ul className="mt-2 flex flex-col divide-y text-sm">
+          {inventory.ruptureItems.slice(0, 3).map((item) => (
+            <li key={item.productId} className="flex items-baseline justify-between gap-3 py-2">
+              <span className="min-w-0 truncate text-foreground">{item.name}</span>
+              <span className="shrink-0 text-xs tabular text-muted-foreground">
+                cobre {formatDays(item.coverageDays)}, entrega em {formatDays(item.leadTimeDays)}
+              </span>
+            </li>
+          ))}
+        </ul>
+      </section>
+
+      <p className="mt-2 flex items-center gap-2 rounded-lg bg-warning-soft px-3 py-2 text-sm text-foreground">
+        <PackageX aria-hidden="true" className="size-4 shrink-0 text-warning-text" />
+        <span className="min-w-0 flex-1">
+          {formatCurrency(inventory.stalledValue, { whole: true })} parados há mais de 60 dias, em {pluralize(inventory.stalledCount, 'item', 'itens')}
+        </span>
+      </p>
+    </Panel>
+  );
+}
+
+const LOW_CATEGORY_MARGIN = 0.3;
+
 export function CategoryBreakdown({ categories }: { categories: CategoryPerformance[] }) {
   const max = Math.max(...categories.map((c) => c.revenue));
   return (
     <Panel
       title="Desempenho por categoria"
-      description="Receita no período, com margem bruta e variação."
-      action={<MoreLink href="/lucratividade">Lucratividade</MoreLink>}
+      description="Receita no período, participação, lucro bruto e margem, com a variação contra o período anterior."
+      action={<TextLink href="/lucratividade">Ver lucratividade</TextLink>}
+      className="h-full"
     >
-      <div className="hidden grid-cols-[minmax(9.5rem,1.4fr)_minmax(0,2fr)_6rem_4.5rem_5rem] gap-4 pb-2 text-xs text-subtle-foreground md:grid">
-        <span>Categoria</span>
-        <span>Receita</span>
-        <span className="text-right">Valor</span>
-        <span className="text-right">Margem</span>
-        <span className="text-right">Variação</span>
+      <div className="-mx-5 overflow-x-auto">
+        <table className="w-full text-sm">
+          <caption className="sr-only">Desempenho por categoria no período</caption>
+          <thead>
+            <tr className="border-y text-xs text-muted-foreground">
+              <th scope="col" className="h-9 pl-5 text-left font-medium">
+                Categoria
+              </th>
+              <th scope="col" className="hidden h-9 px-3 text-left font-medium md:table-cell">
+                <span className="sr-only">Participação na receita, em barra</span>
+              </th>
+              <th scope="col" className="h-9 px-3 text-right font-medium">
+                Receita
+              </th>
+              <th scope="col" className="hidden h-9 px-3 text-right font-medium sm:table-cell">
+                Lucro bruto
+              </th>
+              <th scope="col" className="h-9 px-3 text-right font-medium">
+                Margem
+              </th>
+              <th scope="col" className="hidden h-9 pr-5 pl-3 text-right font-medium sm:table-cell">
+                Var. receita
+              </th>
+            </tr>
+          </thead>
+          <tbody className="divide-y">
+            {categories.map((category) => {
+              const low = category.margin < LOW_CATEGORY_MARGIN;
+              return (
+                <tr key={category.categoryId} className="transition-colors hover:bg-accent/60">
+                  <th scope="row" className="py-2.5 pl-5 text-left font-normal text-foreground">
+                    <span className="block truncate">{category.name}</span>
+                    <span className="block text-xs text-subtle-foreground tabular">{formatPercent(category.share)} da receita</span>
+                  </th>
+                  <td className="hidden w-[28%] px-3 md:table-cell" aria-hidden="true">
+                    <span className="block h-2 rounded-r-[3px] bg-series-1" style={{ width: `${(category.revenue / max) * 100}%` }} />
+                  </td>
+                  <td className="px-3 text-right font-medium tabular text-foreground">
+                    {formatCurrency(category.revenue, { compact: true, whole: true })}
+                  </td>
+                  <td className="hidden px-3 text-right tabular text-muted-foreground sm:table-cell">
+                    {formatCurrency(category.grossProfit, { compact: true, whole: true })}
+                  </td>
+                  <td className="px-3 text-right tabular">
+                    <span className="inline-flex items-center gap-1 text-foreground">
+                      {low && <TriangleAlert aria-hidden="true" className="size-3.5 text-warning-text" />}
+                      {formatPercent(category.margin)}
+                      {low && <span className="sr-only">, abaixo de {formatPercent(LOW_CATEGORY_MARGIN, 0)}</span>}
+                    </span>
+                    <Delta size="xs" kind="points" value={category.margin - category.previousMargin} className="flex justify-end" />
+                  </td>
+                  <td className="hidden pr-5 pl-3 text-right sm:table-cell">
+                    <Delta size="xs" value={relativeChange(category.revenue, category.previousRevenue)} />
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
       </div>
-      <ul className="flex flex-col divide-y">
-        {categories.map((category) => {
-          const lowMargin = category.margin < 0.3;
-          return (
-            <li
-              key={category.categoryId}
-              className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-4 gap-y-1.5 py-2.5 md:grid-cols-[minmax(9.5rem,1.4fr)_minmax(0,2fr)_6rem_4.5rem_5rem]"
-            >
-              <span className="truncate text-sm text-foreground">{category.name}</span>
-              <span className="col-span-2 row-start-2 md:col-span-1 md:row-start-auto" aria-hidden="true">
-                <span className="block h-2 overflow-hidden rounded-full">
-                  <span
-                    className="block h-full rounded-r-[4px] bg-series-1"
-                    style={{ width: `${(category.revenue / max) * 100}%` }}
-                  />
-                </span>
-              </span>
-              <span className="text-right text-sm font-medium tabular text-foreground">
-                {formatCurrency(category.revenue, { compact: true, whole: true })}
-              </span>
-              <span
-                className={cn(
-                  'hidden items-center justify-end gap-1 text-right text-sm tabular md:flex',
-                  lowMargin ? 'text-warning-text' : 'text-muted-foreground',
-                )}
-              >
-                {lowMargin && <TriangleAlert aria-label="Margem abaixo de 30%" className="size-3.5" />}
-                {formatPercent(category.margin)}
-              </span>
-              <span className="hidden justify-end md:flex">
-                <Delta size="xs" value={relativeChange(category.revenue, category.previousRevenue)} />
-              </span>
-            </li>
-          );
-        })}
-      </ul>
-    </Panel>
-  );
-}
-
-export function InventoryHealth({ inventory }: { inventory: InventorySnapshot }) {
-  return (
-    <Panel title="Saúde do estoque" action={<MoreLink href="/estoque">Estoque</MoreLink>}>
-      <dl className="grid grid-cols-2 gap-x-4 gap-y-4">
-        <div>
-          <dt className="text-sm text-muted-foreground">Estoque a custo</dt>
-          <dd className="mt-1 text-xl font-semibold tracking-[-0.02em]">{formatCurrency(inventory.stockValue, { compact: true })}</dd>
-        </div>
-        <div>
-          <dt className="text-sm text-muted-foreground">Cobertura média</dt>
-          <dd className="mt-1 text-xl font-semibold tracking-[-0.02em]">{formatDays(inventory.averageCoverageDays)}</dd>
-        </div>
-      </dl>
-      <div className="mt-5">
-        <div className="mb-1.5 flex items-baseline justify-between text-sm">
-          <span className="text-muted-foreground">Itens em situação saudável</span>
-          <span className="font-medium tabular">{formatPercent(inventory.healthyShare, 0)}</span>
-        </div>
-        <Meter value={inventory.healthyShare} tone="positive" label="Itens em situação saudável" />
-      </div>
-      <ul className="mt-5 flex flex-col gap-2 text-sm">
-        <li className="flex items-center justify-between gap-3 rounded-lg bg-critical-soft px-3 py-2">
-          <span className="flex items-center gap-2 text-foreground">
-            <span className="size-1.5 rounded-full bg-critical" aria-hidden="true" />
-            Risco de ruptura
-          </span>
-          <span className="font-semibold tabular text-critical-text">{inventory.ruptureRiskCount} itens</span>
-        </li>
-        <li className="flex items-center justify-between gap-3 rounded-lg bg-warning-soft px-3 py-2">
-          <span className="flex items-center gap-2 text-foreground">
-            <span className="size-1.5 rounded-full bg-warning" aria-hidden="true" />
-            Parado há mais de 60 dias
-          </span>
-          <span className="font-semibold tabular text-warning-text">{formatCurrency(inventory.stalledValue, { whole: true })}</span>
-        </li>
-      </ul>
+      <p className="mt-3 flex items-center gap-1.5 text-xs text-subtle-foreground">
+        <TriangleAlert aria-hidden="true" className="size-3.5 text-warning-text" />
+        Margem abaixo de {formatPercent(LOW_CATEGORY_MARGIN, 0)}, a referência definida para esta demonstração.
+      </p>
     </Panel>
   );
 }
@@ -178,22 +216,22 @@ const ACTIVITY_ICON: Record<ActivityItem['kind'], LucideIcon> = {
 
 export function RecentActivity({ items }: { items: ActivityItem[] }) {
   return (
-    <Panel title="Atividade recente">
-      <ol className="relative flex flex-col gap-4">
+    <Panel title="Atividade recente" description="Importações, análises e oportunidades da equipe." className="h-full">
+      <ol className="relative flex flex-col gap-4 before:absolute before:top-2 before:bottom-2 before:left-[13px] before:w-px before:bg-border">
         {items.map((item) => {
           const Icon = ACTIVITY_ICON[item.kind];
           return (
-            <li key={item.id} className="flex gap-3">
+            <li key={item.id} className="relative flex gap-3">
               <span
                 aria-hidden="true"
                 className={cn(
-                  'grid size-7 shrink-0 place-items-center rounded-md border bg-muted',
+                  'grid size-7 shrink-0 place-items-center rounded-full border bg-card',
                   item.kind === 'alert' ? 'text-warning-text' : 'text-muted-foreground',
                 )}
               >
                 <Icon className="size-3.5" />
               </span>
-              <div className="min-w-0 flex-1">
+              <div className="min-w-0 flex-1 pt-0.5">
                 <p className="text-sm font-medium text-foreground">{item.title}</p>
                 <p className="text-sm text-muted-foreground">{item.detail}</p>
                 <p className="mt-0.5 text-xs text-subtle-foreground">

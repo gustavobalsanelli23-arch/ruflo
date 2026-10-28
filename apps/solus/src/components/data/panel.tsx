@@ -35,7 +35,7 @@ export function Panel({
     >
       {(title || action) && (
         <header className="flex flex-wrap items-start justify-between gap-x-4 gap-y-2 px-5 pt-4">
-          <div className="min-w-0">
+          <div className="min-w-0 flex-[1_1_16rem]">
             {title && (
               <h2 id={headingId} className="text-base font-semibold tracking-[-0.01em] text-foreground">
                 {title}
@@ -43,7 +43,7 @@ export function Panel({
             )}
             {description && <p className="mt-0.5 text-sm text-muted-foreground">{description}</p>}
           </div>
-          {action && <div className="flex shrink-0 items-center gap-2">{action}</div>}
+          {action && <div className="flex max-w-full min-w-0 items-center gap-2">{action}</div>}
         </header>
       )}
       <div className={cn('min-w-0 flex-1 px-5 pt-4 pb-5', bodyClassName)}>{children}</div>

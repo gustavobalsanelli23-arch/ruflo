@@ -117,6 +117,7 @@ export function categoryPerformance(period: Period): CategoryPerformance[] {
         previousRevenue: before.revenue,
         grossProfit: now.revenue - now.cost,
         margin: margin(now.revenue, now.cost),
+        previousMargin: margin(before.revenue, before.cost),
         share: total > 0 ? now.revenue / total : 0,
       };
     })

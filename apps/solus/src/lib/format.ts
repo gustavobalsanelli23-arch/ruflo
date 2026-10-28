@@ -8,6 +8,7 @@ const currencyCompact = new Intl.NumberFormat(LOCALE, {
   style: 'currency',
   currency: 'BRL',
   notation: 'compact',
+  minimumFractionDigits: 0,
   maximumFractionDigits: 1,
 });
 const integer = new Intl.NumberFormat(LOCALE, { maximumFractionDigits: 0 });
@@ -20,6 +21,22 @@ export function formatCurrency(value: number, options: { compact?: boolean; whol
   if (options.compact && Math.abs(value) >= 10_000) return currencyCompact.format(value);
   if (options.whole) return currencyWhole.format(value);
   return currency.format(value);
+}
+
+const currencyAxis = new Intl.NumberFormat(LOCALE, {
+  style: 'currency',
+  currency: 'BRL',
+  notation: 'compact',
+  minimumFractionDigits: 0,
+  maximumFractionDigits: 1,
+});
+
+/**
+ * Axis labels share one notation: when the axis reaches R$ 10 mil every tick is
+ * compact ("R$ 2,5 mil"), otherwise every tick is whole reais ("R$ 900").
+ */
+export function formatCurrencyAxis(value: number, axisMax: number): string {
+  return Math.abs(axisMax) >= 10_000 ? currencyAxis.format(value) : currencyWhole.format(value);
 }
 
 export function formatNumber(value: number, options: { compact?: boolean } = {}): string {

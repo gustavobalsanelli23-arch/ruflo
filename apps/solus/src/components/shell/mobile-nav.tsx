@@ -46,16 +46,19 @@ export function MobileMenu({
   open,
   onOpenChange,
   context,
+  onCloseAutoFocus,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   context: ShellContext;
+  onCloseAutoFocus?: (event: Event) => void;
 }) {
   const pathname = usePathname();
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent
         side="left"
+        onCloseAutoFocus={onCloseAutoFocus}
         className="w-[min(86vw,320px)] gap-0 overscroll-contain border-sidebar-border bg-sidebar p-0 text-sidebar-foreground backdrop-blur-xl"
       >
         <SheetHeader className="border-b border-sidebar-border px-5 py-4">

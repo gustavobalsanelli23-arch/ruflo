@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { motion } from 'motion/react';
-import { ChevronsUpDown, LogOut, Settings, UserRound } from 'lucide-react';
+import { ChevronsUpDown, LogOut, PanelLeftClose, PanelLeftOpen, Settings, UserRound } from 'lucide-react';
 import { Logo } from '@/components/brand/logo';
 import {
   DropdownMenu,
@@ -17,89 +17,105 @@ import {
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { NAV_GROUPS, NAV_ITEMS, type NavItem } from '@/config/navigation';
 import { cn } from '@/lib/utils';
+import { useSidebarCollapsed } from './sidebar-state';
 import type { ShellContext } from './types';
 
 function isActive(pathname: string, item: NavItem) {
   return pathname === item.href || pathname.startsWith(`${item.href}/`);
 }
 
-function NavLink({ item, active, count }: { item: NavItem; active: boolean; count?: number }) {
+/** Tooltip that only appears while the sidebar shows icons alone. */
+function CompactTip({ label, collapsed, children }: { label: string; collapsed: boolean; children: React.ReactNode }) {
   return (
     <Tooltip>
-      <TooltipTrigger asChild>
-        <Link
-          href={item.href}
-          aria-current={active ? 'page' : undefined}
-          className={cn(
-            'group relative flex h-9 items-center gap-3 rounded-lg px-2.5 text-sm text-sidebar-foreground outline-none',
-            'transition-colors duration-150 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground',
-            'focus-visible:ring-2 focus-visible:ring-sidebar-ring/70',
-            'lg:justify-center xl:justify-start',
-            active && 'text-sidebar-accent-foreground',
-          )}
-        >
-          {active && (
-            <motion.span
-              layoutId="sidebar-active"
-              className="absolute inset-0 rounded-lg bg-sidebar-accent shadow-[inset_0_1px_0_rgb(255_255_255/0.05)]"
-              transition={{ type: 'spring', stiffness: 520, damping: 42 }}
-            />
-          )}
-          {active && (
-            <motion.span
-              layoutId="sidebar-marker"
-              className="absolute top-2 bottom-2 -left-3 w-0.5 rounded-r bg-sidebar-primary"
-              transition={{ type: 'spring', stiffness: 520, damping: 42 }}
-            />
-          )}
-          <item.icon
-            aria-hidden="true"
-            className={cn('relative size-[17px] shrink-0', active ? 'text-sidebar-primary' : 'text-sidebar-muted group-hover:text-sidebar-foreground')}
-          />
-          <span className="relative truncate lg:sr-only xl:not-sr-only">{item.label}</span>
-          {count !== undefined && count > 0 && (
-            <span
-              className={cn(
-                'relative ml-auto min-w-5 rounded-md px-1.5 text-center text-2xs font-medium tabular leading-5',
-                'bg-sidebar-primary/15 text-sidebar-primary lg:absolute lg:top-0.5 lg:right-0.5 lg:min-w-4 lg:px-1 lg:leading-4 xl:static xl:min-w-5 xl:px-1.5 xl:leading-5',
-              )}
-            >
-              <span className="sr-only">, </span>
-              {count}
-              <span className="sr-only"> abertas</span>
-            </span>
-          )}
-        </Link>
-      </TooltipTrigger>
-      <TooltipContent side="right" sideOffset={10} className="xl:hidden">
-        {item.label}
+      <TooltipTrigger asChild>{children}</TooltipTrigger>
+      <TooltipContent side="right" sideOffset={10} className={cn(!collapsed && 'xl:hidden')}>
+        {label}
       </TooltipContent>
     </Tooltip>
   );
 }
 
+function NavLink({ item, active, count, collapsed }: { item: NavItem; active: boolean; count?: number; collapsed: boolean }) {
+  return (
+    <CompactTip label={item.label} collapsed={collapsed}>
+      <Link
+        href={item.href}
+        aria-current={active ? 'page' : undefined}
+        className={cn(
+          'group relative isolate flex h-9 items-center justify-center gap-3 rounded-lg px-2.5 text-sm text-sidebar-foreground outline-none',
+          'transition-colors duration-150 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground',
+          'focus-visible:ring-2 focus-visible:ring-sidebar-ring/70 expanded:justify-start',
+          active && 'font-medium text-sidebar-accent-foreground',
+        )}
+      >
+        {active && (
+          <motion.span
+            layoutId="sidebar-active"
+            className="absolute inset-0 -z-10 rounded-lg bg-sidebar-accent shadow-[inset_0_1px_0_rgb(255_255_255/0.05)]"
+            transition={{ type: 'spring', stiffness: 520, damping: 42 }}
+          />
+        )}
+        {active && (
+          <motion.span
+            layoutId="sidebar-marker"
+            className="absolute top-2 bottom-2 -left-3 w-0.5 rounded-r bg-sidebar-primary"
+            transition={{ type: 'spring', stiffness: 520, damping: 42 }}
+          />
+        )}
+        <item.icon
+          aria-hidden="true"
+          className={cn('relative size-[17px] shrink-0', active ? 'text-sidebar-primary' : 'text-sidebar-muted group-hover:text-sidebar-foreground')}
+        />
+        <span className="sr-only truncate expanded:not-sr-only">{item.label}</span>
+        {count !== undefined && count > 0 && (
+          <span
+            className={cn(
+              'absolute top-0.5 right-0.5 min-w-4 rounded-md px-1 text-center text-2xs font-medium tabular leading-4',
+              'bg-sidebar-primary/15 text-sidebar-primary expanded:static expanded:ml-auto expanded:min-w-5 expanded:px-1.5 expanded:leading-5',
+            )}
+          >
+            <span className="sr-only">, </span>
+            {count}
+            <span className="sr-only"> abertas</span>
+          </span>
+        )}
+      </Link>
+    </CompactTip>
+  );
+}
+
 export function Sidebar({ context }: { context: ShellContext }) {
   const pathname = usePathname();
+  const [collapsed, toggle] = useSidebarCollapsed();
   return (
-    <aside className="fixed inset-y-0 left-0 z-40 hidden w-[72px] flex-col border-r border-sidebar-border bg-sidebar backdrop-blur-xl backdrop-saturate-150 lg:flex xl:w-[248px]">
-      <div className="flex h-14 shrink-0 items-center px-5 lg:justify-center lg:px-0 xl:justify-start xl:px-5">
-        <Link href="/visao-geral" className="rounded-md outline-none focus-visible:ring-2 focus-visible:ring-sidebar-ring/70" aria-label="SOLUS, ir para a visão executiva">
-          <Logo className="lg:hidden xl:inline-flex" />
-          <Logo compact className="hidden lg:inline-flex xl:hidden" />
+    <aside
+      aria-label="Navegação lateral"
+      className="fixed inset-y-0 left-0 z-40 hidden w-[72px] flex-col border-r border-sidebar-border bg-sidebar backdrop-blur-xl backdrop-saturate-150 transition-[width] duration-200 ease-(--ease-out-quint) lg:flex expanded:w-[248px]"
+    >
+      <div className="flex h-14 shrink-0 items-center justify-center px-0 expanded:justify-start expanded:px-5">
+        <Link
+          href="/visao-geral"
+          className="rounded-md outline-none focus-visible:ring-2 focus-visible:ring-sidebar-ring/70"
+          aria-label="SOLUS, ir para a visão executiva"
+        >
+          <Logo className="hidden expanded:inline-flex" />
+          <Logo compact className="inline-flex expanded:hidden" />
         </Link>
       </div>
 
-      <nav aria-label="Principal" className="flex-1 overflow-y-auto px-3 pt-3 pb-4">
+      <nav aria-label="Principal" className="flex-1 overflow-x-hidden overflow-y-auto px-3 pt-3 pb-4">
         {NAV_GROUPS.map((group, index) => (
           <div key={group.id} className={cn(index > 0 && 'mt-6')}>
-            <p className="mb-1.5 hidden px-2.5 text-2xs font-medium text-sidebar-muted xl:block">{group.label}</p>
-            {index > 0 && <div className="mx-auto mb-3 h-px w-6 bg-sidebar-border xl:hidden" aria-hidden="true" />}
+            <p className="mb-1.5 hidden px-2.5 text-2xs font-medium text-sidebar-muted expanded:block">{group.label}</p>
+            {index > 0 && <div className="mx-auto mb-3 h-px w-6 bg-sidebar-border expanded:hidden" aria-hidden="true" />}
             <ul className="flex flex-col gap-0.5">
               {group.items.map((item) => (
                 <li key={item.id}>
                   <NavLink
                     item={item}
                     active={isActive(pathname, item)}
+                    collapsed={collapsed}
                     count={item.id === 'opportunities' ? context.openOpportunities : undefined}
                   />
                 </li>
@@ -110,9 +126,9 @@ export function Sidebar({ context }: { context: ShellContext }) {
       </nav>
 
       <div className="shrink-0 border-t border-sidebar-border px-3 py-3">
-        <NavLink item={NAV_ITEMS.settings} active={isActive(pathname, NAV_ITEMS.settings)} />
+        <NavLink item={NAV_ITEMS.settings} active={isActive(pathname, NAV_ITEMS.settings)} collapsed={collapsed} />
         {context.organization.isDemo && (
-          <div className="mt-2 hidden rounded-lg border border-sidebar-border px-3 py-2.5 xl:block">
+          <div className="mt-2 hidden rounded-lg border border-sidebar-border px-3 py-2.5 expanded:block">
             <p className="flex items-center gap-2 text-xs font-medium text-sidebar-accent-foreground">
               <span className="size-1.5 rounded-full bg-warning" aria-hidden="true" />
               Ambiente de demonstração
@@ -121,6 +137,18 @@ export function Sidebar({ context }: { context: ShellContext }) {
           </div>
         )}
         <UserMenu context={context} />
+        <CompactTip label={collapsed ? 'Expandir menu' : 'Recolher menu'} collapsed={collapsed}>
+          <button
+            type="button"
+            onClick={toggle}
+            aria-pressed={collapsed}
+            aria-label={collapsed ? 'Expandir menu lateral' : 'Recolher menu lateral'}
+            className="mt-1 hidden h-8 w-full items-center justify-center gap-2.5 rounded-lg px-2.5 text-xs text-sidebar-muted outline-none transition-colors hover:bg-sidebar-accent hover:text-sidebar-foreground focus-visible:ring-2 focus-visible:ring-sidebar-ring/70 xl:flex expanded:justify-start"
+          >
+            {collapsed ? <PanelLeftOpen aria-hidden="true" className="size-4" /> : <PanelLeftClose aria-hidden="true" className="size-4" />}
+            <span className="sr-only expanded:not-sr-only">Recolher menu</span>
+          </button>
+        </CompactTip>
       </div>
     </aside>
   );
@@ -132,17 +160,17 @@ function UserMenu({ context }: { context: ShellContext }) {
       <DropdownMenuTrigger asChild>
         <button
           type="button"
-          className="mt-2 flex w-full items-center gap-2.5 rounded-lg p-1.5 text-left outline-none transition-colors hover:bg-sidebar-accent focus-visible:ring-2 focus-visible:ring-sidebar-ring/70 lg:justify-center xl:justify-start"
+          className="mt-2 flex w-full items-center justify-center gap-2.5 rounded-lg p-1.5 text-left outline-none transition-colors hover:bg-sidebar-accent focus-visible:ring-2 focus-visible:ring-sidebar-ring/70 expanded:justify-start"
           aria-label={`Conta de ${context.user.name}`}
         >
           <span className="grid size-8 shrink-0 place-items-center rounded-lg bg-sidebar-primary/15 text-xs font-semibold text-sidebar-primary">
             {context.user.initials}
           </span>
-          <span className="min-w-0 flex-1 lg:hidden xl:block">
+          <span className="hidden min-w-0 flex-1 expanded:block">
             <span className="block truncate text-sm font-medium text-sidebar-accent-foreground">{context.user.name}</span>
             <span className="block truncate text-2xs text-sidebar-muted">{context.organization.name}</span>
           </span>
-          <ChevronsUpDown aria-hidden="true" className="size-4 shrink-0 text-sidebar-muted lg:hidden xl:block" />
+          <ChevronsUpDown aria-hidden="true" className="hidden size-4 shrink-0 text-sidebar-muted expanded:block" />
         </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent side="top" align="start" className="w-60">

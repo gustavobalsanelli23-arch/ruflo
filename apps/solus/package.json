@@ -2,7 +2,7 @@
   "name": "solus",
   "version": "0.1.0",
   "private": true,
-  "description": "SOLUS — AI-Powered Business Intelligence. Fase 01: design system e interface com dados de demonstração.",
+  "description": "SOLUS — AI-Powered Business Intelligence. Interface completa com dados de demonstração (Fases 01 e 02), sem backend.",
   "scripts": {
     "dev": "next dev",
     "build": "next build",

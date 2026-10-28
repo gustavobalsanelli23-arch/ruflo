@@ -76,6 +76,7 @@ export interface CategoryPerformance {
   previousRevenue: number;
   grossProfit: number;
   margin: number;
+  previousMargin: number;
   share: number;
 }
 
@@ -87,6 +88,16 @@ export interface InventorySnapshot {
   stalledCount: number;
   skuCount: number;
   healthyShare: number;
+  /** Items whose stock runs out before the next delivery, most urgent first. */
+  ruptureItems: { productId: string; name: string; coverageDays: number; leadTimeDays: number }[];
+}
+
+/** Open opportunities in one line: how many, and what they are estimated to be worth. */
+export interface OpportunitySummary {
+  open: number;
+  highPriority: number;
+  monthlyImpact: number;
+  oneOffImpact: number;
 }
 
 export type BriefingSegment =
@@ -113,6 +124,7 @@ export interface OverviewData {
   trend: TrendPoint[];
   categories: CategoryPerformance[];
   inventory: InventorySnapshot;
+  opportunitySummary: OpportunitySummary;
   topOpportunities: Opportunity[];
   activity: ActivityItem[];
 }
@@ -215,6 +227,8 @@ export interface Evidence {
   label: string;
   value: string;
   detail?: string;
+  /** 'fact' is read from the data; 'estimate' depends on the stated assumptions. Defaults to fact. */
+  basis?: 'fact' | 'estimate';
 }
 
 export interface EvidenceSeries {
@@ -233,12 +247,20 @@ export interface Opportunity {
   confidence: number;
   status: OpportunityStatus;
   detectedAt: string;
+  /** One line for cards and lists. */
   summary: string;
-  explanation: string;
+  /** What was identified, stated as facts from the data. */
+  finding: string;
+  /** Why it deserves attention now. */
+  whyItMatters: string;
+  /** Premises behind the estimated impact; the impact is never a guaranteed gain. */
+  assumptions: string[];
   recommendation: string[];
   evidence: Evidence[];
   series?: EvidenceSeries;
   products: string[];
+  /** Suggested analyst question that explores this opportunity, when one exists. */
+  relatedQuestionId?: string;
 }
 
 /* ---------- AI Analyst ---------- */
@@ -247,7 +269,15 @@ export type AnswerBlock =
   | { kind: 'summary'; text: string }
   | { kind: 'metrics'; items: { label: string; value: string; delta?: string; tone?: Tone }[] }
   | { kind: 'chart'; title: string; unit: 'currency' | 'percent'; points: { label: string; value: number }[] }
+  | {
+      kind: 'table';
+      title: string;
+      columns: { key: string; label: string; align?: 'left' | 'right' }[];
+      rows: Record<string, string>[];
+      note?: string;
+    }
   | { kind: 'findings'; facts: string[]; hypotheses: string[] }
+  | { kind: 'recommendation'; items: string[] }
   | { kind: 'sources'; items: { name: string; detail: string }[] }
   | { kind: 'next'; items: string[] };
 
@@ -293,6 +323,8 @@ export interface ImportRecord {
   uploadedAt: string;
   uploadedBy: string;
   progress?: number;
+  /** What went wrong and how to fix it, for imports with errors or that failed. */
+  issues?: string[];
 }
 
 export interface ColumnMapping {
@@ -315,6 +347,11 @@ export interface DataHubData {
   targetFields: { id: string; label: string; required: boolean }[];
   sample: {
     fileName: string;
+    sizeBytes: number;
+    delimiter: string;
+    encoding: string;
+    firstDate: string;
+    lastDate: string;
     columns: string[];
     rows: string[][];
     totalRows: number;

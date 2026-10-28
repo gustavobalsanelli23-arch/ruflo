@@ -13,6 +13,18 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/*
+ * The sidebar is expanded from 1280px up unless the person collapsed it.
+ * The choice lives on <html data-sidebar>, set before paint (see layout).
+ */
+@custom-variant expanded {
+  @media (width >= 80rem) {
+    &:where(html:not([data-sidebar="collapsed"]) *) {
+      @slot;
+    }
+  }
+}
+
 @theme inline {
   --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-geist-mono), ui-monospace, monospace;
@@ -124,8 +136,8 @@
   --secondary: #eef2f5;
   --secondary-foreground: #17212b;
   --muted: #f0f3f5;
-  --muted-foreground: #66727e;
-  --subtle-foreground: #6b7783;
+  --muted-foreground: #56626e;
+  --subtle-foreground: #606c78;
   --accent: #eef2f5;
   --accent-foreground: #17212b;
   --destructive: #c24848;
@@ -143,7 +155,7 @@
   --warning-text: #8f6014;
   --warning-soft: rgb(217 154 54 / 0.13);
   --critical: #d65c5c;
-  --critical-text: #c24848;
+  --critical-text: #b23e3e;
   --critical-soft: rgb(214 92 92 / 0.1);
   --neutral-soft: rgb(23 33 43 / 0.05);
 
@@ -152,7 +164,7 @@
   --series-3: #1baf7a;
   --series-muted: #c9d1d9;
   --chart-grid: #edf0f3;
-  --chart-axis: #6b7783;
+  --chart-axis: #606c78;
 
   --glass-bg: rgb(255 255 255 / 0.74);
   --glass-border: rgb(16 25 35 / 0.07);
@@ -312,9 +324,11 @@
   font-variant-numeric: tabular-nums;
 }
 
-@utility hairline-x {
-  background-image: linear-gradient(90deg, transparent, var(--border-strong) 18%, var(--border-strong) 82%, transparent);
-  height: 1px;
+@utility no-scrollbar {
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -33,6 +33,18 @@ describe('demo dataset coherence', () => {
     expect(profit.negativeMarginCount).toBe(profit.products.filter((p) => p.margin < 0).length);
   });
 
+  it('overview diagnostics agree with the opportunity and inventory screens', async () => {
+    const [overview, opportunities, inventory] = await Promise.all([
+      repository.getOverview('30d'),
+      repository.getOpportunities(),
+      repository.getInventory(),
+    ]);
+    const open = opportunities.filter((o) => o.status !== 'done' && o.status !== 'dismissed');
+    expect(overview.opportunitySummary.open).toBe(open.length);
+    expect(overview.opportunitySummary.monthlyImpact).toBe(open.filter((o) => o.impactKind === 'monthly').reduce((s, o) => s + o.impact, 0));
+    expect(overview.inventory.ruptureItems).toHaveLength(inventory.ruptureRiskCount);
+  });
+
   it('inventory value is the sum of product positions', async () => {
     const inventory = await repository.getInventory();
     expect(inventory.products.reduce((sum, p) => sum + p.stockValue, 0)).toBeCloseTo(inventory.stockValue, 2);
@@ -48,6 +60,10 @@ describe('demo dataset coherence', () => {
       expect(op.confidence).toBeGreaterThan(0);
       expect(op.confidence).toBeLessThanOrEqual(1);
       expect(op.recommendation.length).toBeGreaterThan(0);
+      expect(op.finding.length, op.id).toBeGreaterThan(0);
+      expect(op.whyItMatters.length, op.id).toBeGreaterThan(0);
+      expect(op.assumptions.length, `${op.id} explains its estimate`).toBeGreaterThan(0);
+      expect(op.evidence.some((e) => e.basis !== 'estimate'), `${op.id} has a verified fact`).toBe(true);
     }
     const closedIndex = opportunities.findIndex((o) => o.status === 'done' || o.status === 'dismissed');
     expect(opportunities.slice(closedIndex).every((o) => o.status === 'done' || o.status === 'dismissed')).toBe(true);
@@ -60,6 +76,11 @@ describe('demo dataset coherence', () => {
       expect(blocks, suggestion.id).toBeDefined();
       expect(blocks?.some((b) => b.kind === 'findings')).toBe(true);
       expect(blocks?.some((b) => b.kind === 'sources')).toBe(true);
+      expect(blocks?.some((b) => b.kind === 'recommendation')).toBe(true);
+      for (const block of blocks ?? []) {
+        if (block.kind !== 'table') continue;
+        for (const row of block.rows) for (const column of block.columns) expect(row[column.key], `${suggestion.id}:${column.key}`).toBeDefined();
+      }
     }
   });
 

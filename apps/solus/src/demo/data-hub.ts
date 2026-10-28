@@ -8,10 +8,10 @@ export const dataHub: DataHubData = {
   imports: [
     { id: 'imp-1029', fileName: 'vendas_2026-10-25.csv', format: 'csv', dataset: 'Vendas', status: 'completed', records: 1284, errors: 0, uploadedAt: '2026-10-26T06:02:00-03:00', uploadedBy: 'Importação automática' },
     { id: 'imp-1028', fileName: 'estoque_fechamento_out.xlsx', format: 'xlsx', dataset: 'Estoque', status: 'processing', records: 44, errors: 0, uploadedAt: '2026-10-26T05:58:00-03:00', uploadedBy: 'Rafael Lins', progress: 0.62 },
-    { id: 'imp-1027', fileName: 'notas_compra_boa_vista.xlsx', format: 'xlsx', dataset: 'Compras', status: 'with-errors', records: 312, errors: 7, uploadedAt: '2026-10-24T14:20:00-03:00', uploadedBy: 'Bianca Moraes' },
+    { id: 'imp-1027', fileName: 'notas_compra_boa_vista.xlsx', format: 'xlsx', dataset: 'Compras', status: 'with-errors', records: 312, errors: 7, uploadedAt: '2026-10-24T14:20:00-03:00', uploadedBy: 'Bianca Moraes', issues: ['7 linhas com código de produto que não existe no cadastro (ex.: FRI-0599). Cadastre os itens ou corrija os códigos e reenvie só essas linhas.'] },
     { id: 'imp-1026', fileName: 'vendas_2026-10-24.csv', format: 'csv', dataset: 'Vendas', status: 'completed', records: 1197, errors: 0, uploadedAt: '2026-10-25T06:01:00-03:00', uploadedBy: 'Importação automática' },
     { id: 'imp-1025', fileName: 'cadastro_produtos_v3.xlsx', format: 'xlsx', dataset: 'Produtos', status: 'completed', records: 44, errors: 0, uploadedAt: '2026-10-20T11:42:00-03:00', uploadedBy: 'Helena Prado' },
-    { id: 'imp-1024', fileName: 'fornecedores.csv', format: 'csv', dataset: 'Fornecedores', status: 'failed', records: 0, errors: 1, uploadedAt: '2026-10-18T09:15:00-03:00', uploadedBy: 'Rafael Lins' },
+    { id: 'imp-1024', fileName: 'fornecedores.csv', format: 'csv', dataset: 'Fornecedores', status: 'failed', records: 0, errors: 1, uploadedAt: '2026-10-18T09:15:00-03:00', uploadedBy: 'Rafael Lins', issues: ['O arquivo não tem a coluna de CNPJ, obrigatória para fornecedores. Adicione a coluna e envie de novo.'] },
   ],
   targetFields: [
     { id: 'date', label: 'Data da venda', required: true },
@@ -25,6 +25,11 @@ export const dataHub: DataHubData = {
   ],
   sample: {
     fileName: 'vendas_outubro.csv',
+    sizeBytes: 1_948_000,
+    delimiter: ';',
+    encoding: 'UTF-8',
+    firstDate: '2026-10-01',
+    lastDate: '2026-10-26',
     totalRows: 31482,
     columns: ['data', 'cod_produto', 'descricao', 'qtd', 'vlr_unit', 'desc', 'cupom', 'filial'],
     rows: [

@@ -8,8 +8,8 @@ import { cn } from '@/lib/utils';
 export function Sparkline({
   values,
   className,
-  width = 96,
-  height = 28,
+  width = 72,
+  height = 22,
 }: {
   values: number[];
   className?: string;

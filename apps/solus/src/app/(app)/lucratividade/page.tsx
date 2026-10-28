@@ -1,11 +1,12 @@
 import type { Metadata } from 'next';
+import { TriangleAlert } from 'lucide-react';
 import { Delta } from '@/components/data/delta';
 import { PageHeader } from '@/components/data/page-header';
 import { Panel } from '@/components/data/panel';
 import { PeriodFrame, PeriodScope, PeriodSelect } from '@/components/data/period-scope';
 import { Stat, StatStrip } from '@/components/data/stat';
 import { getRepository } from '@/lib/data';
-import { formatCurrency, formatPercent, relativeChange } from '@/lib/format';
+import { formatCurrency, formatPercent, pluralize, relativeChange } from '@/lib/format';
 import { parsePeriod } from '@/lib/period';
 import { CategoryMargins, MarginTrend, ProfitabilityMap } from '@/modules/profit/profit-charts';
 import { ProductsTable } from '@/modules/profit/products-table';
@@ -21,6 +22,8 @@ export default async function ProfitPage({
   const period = parsePeriod((await searchParams).periodo);
   const data = await getRepository().getProfitAnalytics(period);
   const threshold = data.lowMarginThreshold;
+  const compact = (value: number) => formatCurrency(value, { compact: true });
+  const cost = { value: data.revenue.value - data.grossProfit.value, previous: data.revenue.previous - data.grossProfit.previous };
 
   return (
     <PeriodScope period={period}>
@@ -31,32 +34,41 @@ export default async function ProfitPage({
       />
 
       <PeriodFrame className="mt-8 flex flex-col gap-6">
-        <StatStrip>
+        <StatStrip label={`Resultado, ${data.period.label.toLowerCase()}`} className="md:grid-cols-3 xl:grid-cols-5">
+          <Stat
+            label="Receita"
+            value={compact(data.revenue.value)}
+            delta={<Delta size="xs" value={relativeChange(data.revenue.value, data.revenue.previous)} />}
+            hint={`contra ${compact(data.revenue.previous)}`}
+          />
+          <Stat
+            label="Custo das mercadorias"
+            value={compact(cost.value)}
+            delta={<Delta size="xs" goodWhen="down" value={relativeChange(cost.value, cost.previous)} />}
+            hint={`contra ${compact(cost.previous)}`}
+          />
           <Stat
             label="Lucro bruto"
-            size="lg"
-            value={formatCurrency(data.grossProfit.value, { compact: true })}
-            delta={<Delta value={relativeChange(data.grossProfit.value, data.grossProfit.previous)} />}
-            hint={`Receita de ${formatCurrency(data.revenue.value, { compact: true })}`}
+            value={compact(data.grossProfit.value)}
+            delta={<Delta size="xs" value={relativeChange(data.grossProfit.value, data.grossProfit.previous)} />}
+            hint={`contra ${compact(data.grossProfit.previous)}`}
           />
           <Stat
             label="Margem bruta"
-            size="lg"
             value={formatPercent(data.grossMargin.value)}
-            delta={<Delta kind="points" value={data.grossMargin.value - data.grossMargin.previous} />}
-            hint={`Anterior: ${formatPercent(data.grossMargin.previous)}`}
+            delta={<Delta size="xs" kind="points" value={data.grossMargin.value - data.grossMargin.previous} />}
+            hint={`contra ${formatPercent(data.grossMargin.previous)}`}
           />
           <Stat
-            label={`Itens com margem abaixo de ${formatPercent(threshold, 0)}`}
-            size="lg"
-            value={<span className="text-warning-text">{data.lowMarginCount}</span>}
-            hint="Vendem bem, deixam pouco por unidade"
-          />
-          <Stat
-            label="Itens com margem negativa"
-            size="lg"
-            value={<span className="text-critical-text">{data.negativeMarginCount}</span>}
-            hint="Vendidos abaixo do custo"
+            className="col-span-2 md:col-span-2 xl:col-span-1"
+            label={
+              <span className="inline-flex items-center gap-1.5">
+                <TriangleAlert aria-hidden="true" className="size-3.5 text-warning-text" />
+                Margem em alerta
+              </span>
+            }
+            value={pluralize(data.lowMarginCount + data.negativeMarginCount, 'produto', 'produtos')}
+            hint={`${pluralize(data.negativeMarginCount, 'vendido', 'vendidos')} abaixo do custo, ${data.lowMarginCount} abaixo de ${formatPercent(threshold, 0)}`}
           />
         </StatStrip>
 
@@ -68,7 +80,7 @@ export default async function ProfitPage({
           >
             <ProfitabilityMap products={data.products} threshold={threshold} />
           </Panel>
-          <Panel className="xl:col-span-5" title="Margem por categoria" description={`A linha tracejada marca o corte de ${formatPercent(threshold, 0)}.`}>
+          <Panel className="xl:col-span-5" title="Margem por categoria" description="Quanto sobra de cada real vendido em cada categoria.">
             <CategoryMargins categories={data.categories} threshold={threshold} />
           </Panel>
         </div>
@@ -86,7 +98,11 @@ export default async function ProfitPage({
           </div>
         </div>
 
-        <Panel title="Produtos" description="Ordene por qualquer coluna. Margem com variação em pontos percentuais contra o período anterior.">
+        <Panel
+          id="produtos"
+          title="Produtos"
+          description="Receita, custo e lucro bruto de cada item. A variação da margem aparece quando passa de 0,1 ponto percentual."
+        >
           <ProductsTable products={data.products} threshold={threshold} />
         </Panel>
       </PeriodFrame>

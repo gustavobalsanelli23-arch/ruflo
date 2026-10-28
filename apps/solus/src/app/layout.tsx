@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from 'next';
 import { GeistMono } from 'geist/font/mono';
 import { GeistSans } from 'geist/font/sans';
 import { Providers } from '@/components/providers';
+import { SIDEBAR_BOOT_SCRIPT } from '@/components/shell/sidebar-boot';
 import './globals.css';
 
 export const metadata: Metadata = {
@@ -20,6 +21,9 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="pt-BR" className={`${GeistSans.variable} ${GeistMono.variable}`} suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: SIDEBAR_BOOT_SCRIPT }} />
+      </head>
       <body>
         <Providers>{children}</Providers>
       </body>

@@ -1,21 +1,32 @@
 'use client';
 
-import { Check, History, Loader2, Plus, SendHorizontal } from 'lucide-react';
+import { Check, Copy, Database, History, Loader2, Plus, SendHorizontal, ThumbsDown, ThumbsUp } from 'lucide-react';
 import { useReducedMotion } from 'motion/react';
 import { useSearchParams } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
+import { toast } from 'sonner';
 import { LogoMark } from '@/components/brand/logo';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
+import { Skeleton } from '@/components/ui/skeleton';
 import { Textarea } from '@/components/ui/textarea';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import type { AnalystData, AnalystMessage, AnalystThread, AnswerBlock } from '@/lib/data/types';
 import { formatDateTime } from '@/lib/format';
+import { useReturnFocus } from '@/lib/use-return-focus';
 import { cn } from '@/lib/utils';
-import { AnswerBlocks } from './answer-blocks';
+import { AnswerBlocks, answerToText } from './answer-blocks';
 
 const THINKING_STEPS = ['Lendo vendas por item', 'Comparando com o período anterior', 'Separando fatos de hipóteses'];
-const DATA_SCOPE = ['Vendas por item, 730 dias', 'Posição de estoque', 'Custos de compra', 'Cadastro de produtos'];
+const DATA_SCOPE = [
+  { name: 'Vendas por item', detail: '730 dias' },
+  { name: 'Posição de estoque', detail: 'Diária' },
+  { name: 'Custos de compra', detail: 'Notas fiscais' },
+  { name: 'Cadastro de produtos', detail: '44 itens' },
+];
+
+type Feedback = 'up' | 'down';
 
 function demoNotice(data: AnalystData): AnswerBlock[] {
   return [
@@ -39,7 +50,7 @@ function ThreadList({
   onNew: () => void;
 }) {
   return (
-    <div className="flex flex-col gap-3">
+    <div className="flex flex-col gap-5">
       <Button variant="outline" className="justify-start" onClick={onNew}>
         <Plus aria-hidden="true" />
         Nova análise
@@ -58,26 +69,128 @@ function ThreadList({
                   thread.id === activeId && 'bg-accent',
                 )}
               >
-                <span className="block truncate text-sm text-foreground">{thread.title}</span>
+                <span className={cn('block truncate text-sm', thread.id === activeId ? 'font-medium text-foreground' : 'text-foreground/90')}>{thread.title}</span>
                 <span className="block text-xs text-subtle-foreground">{formatDateTime(thread.updatedAt)}</span>
               </button>
             </li>
           ))}
         </ul>
       </nav>
+      <section aria-labelledby="escopo-dados" className="rounded-lg border p-3">
+        <h2 id="escopo-dados" className="text-xs font-medium text-muted-foreground">
+          Dados que o analista consulta
+        </h2>
+        <ul className="mt-2 flex flex-col gap-1.5 text-xs">
+          {DATA_SCOPE.map((scope) => (
+            <li key={scope.name} className="flex items-center gap-2">
+              <Database aria-hidden="true" className="size-3.5 shrink-0 text-subtle-foreground" />
+              <span className="text-foreground">{scope.name}</span>
+              <span className="ml-auto text-subtle-foreground">{scope.detail}</span>
+            </li>
+          ))}
+        </ul>
+        <p className="mt-3 border-t pt-2.5 text-2xs leading-4 text-subtle-foreground">
+          Demonstração: respostas roteirizadas sobre dados fictícios. Nenhum modelo de IA é chamado.
+        </p>
+      </section>
     </div>
   );
 }
 
-function AnalystHeader({ at }: { at: string }) {
+function IconAction({ label, pressed, onClick, children }: { label: string; pressed?: boolean; onClick: () => void; children: React.ReactNode }) {
   return (
-    <div className="mb-4 flex flex-wrap items-center gap-2.5">
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <Button
+          variant="ghost"
+          size="icon-sm"
+          aria-label={label}
+          aria-pressed={pressed}
+          onClick={onClick}
+          className={cn('text-muted-foreground hover:text-foreground', pressed && 'bg-accent text-foreground')}
+        >
+          {children}
+        </Button>
+      </TooltipTrigger>
+      <TooltipContent>{label}</TooltipContent>
+    </Tooltip>
+  );
+}
+
+function AnswerHeader({
+  message,
+  feedback,
+  onFeedback,
+}: {
+  message: AnalystMessage;
+  feedback: Feedback | undefined;
+  onFeedback: (value: Feedback) => void;
+}) {
+  const [copied, setCopied] = useState(false);
+  const copy = async () => {
+    try {
+      await navigator.clipboard.writeText(answerToText(message.blocks ?? []));
+      setCopied(true);
+      toast.success('Resposta copiada', { description: 'Texto com a resposta, os números, os fatos e as recomendações.' });
+      window.setTimeout(() => setCopied(false), 1600);
+    } catch {
+      toast.error('Não foi possível copiar', { description: 'O navegador bloqueou a área de transferência. Selecione o texto e copie manualmente.' });
+    }
+  };
+  return (
+    <div className="mb-4 flex flex-wrap items-center gap-x-2.5 gap-y-2">
       <LogoMark className="size-6 text-brand" />
       <span className="text-sm font-medium text-foreground">Analista SOLUS</span>
       <Badge variant="warning">Resposta de demonstração</Badge>
-      <time dateTime={at} className="text-xs text-subtle-foreground">
-        {formatDateTime(at)}
+      <time dateTime={message.at} className="text-xs text-subtle-foreground">
+        {formatDateTime(message.at)}
       </time>
+      <div className="ml-auto flex items-center gap-0.5">
+        <IconAction label={copied ? 'Copiada' : 'Copiar resposta'} onClick={copy}>
+          {copied ? <Check aria-hidden="true" className="text-positive-text" /> : <Copy aria-hidden="true" />}
+        </IconAction>
+        <IconAction label="Resposta útil" pressed={feedback === 'up'} onClick={() => onFeedback('up')}>
+          <ThumbsUp aria-hidden="true" />
+        </IconAction>
+        <IconAction label="Resposta não ajudou" pressed={feedback === 'down'} onClick={() => onFeedback('down')}>
+          <ThumbsDown aria-hidden="true" />
+        </IconAction>
+      </div>
+    </div>
+  );
+}
+
+function Thinking({ step }: { step: number }) {
+  return (
+    <div role="status" aria-label="Analisando a pergunta" className="flex flex-col gap-4">
+      <div className="flex items-center gap-2.5">
+        <LogoMark className="size-6 animate-pulse text-brand motion-reduce:animate-none" />
+        <span className="text-sm font-medium text-foreground">Analisando…</span>
+      </div>
+      <ol className="flex flex-col gap-1.5 text-sm">
+        {THINKING_STEPS.map((label, index) => (
+          <li key={label} className={cn('flex items-center gap-2', index > step ? 'text-subtle-foreground' : 'text-muted-foreground')}>
+            {index < step ? (
+              <Check aria-hidden="true" className="size-3.5 text-positive-text" />
+            ) : index === step ? (
+              <Loader2 aria-hidden="true" className="size-3.5 animate-spin text-brand" />
+            ) : (
+              <span aria-hidden="true" className="size-3.5" />
+            )}
+            {label}…
+          </li>
+        ))}
+      </ol>
+      <div aria-hidden="true" className="flex flex-col gap-2.5">
+        <Skeleton className="h-4 w-[92%]" />
+        <Skeleton className="h-4 w-[78%]" />
+        <div className="mt-2 grid grid-cols-3 gap-3">
+          <Skeleton className="h-16 rounded-lg" />
+          <Skeleton className="h-16 rounded-lg" />
+          <Skeleton className="h-16 rounded-lg" />
+        </div>
+        <Skeleton className="mt-1 h-40 rounded-lg" />
+      </div>
     </div>
   );
 }
@@ -90,18 +203,25 @@ export function AnalystWorkspace({ data }: { data: AnalystData }) {
   const [draft, setDraft] = useState('');
   const [thinking, setThinking] = useState<number | null>(null);
   const [historyOpen, setHistoryOpen] = useState(false);
-  const endRef = useRef<HTMLDivElement>(null);
+  const [feedback, setFeedback] = useState<Record<string, Feedback>>({});
+  const lastMessageRef = useRef<HTMLDivElement>(null);
+  const composerRef = useRef<HTMLTextAreaElement>(null);
   const asked = useRef(false);
+  const scrollOnNext = useRef(false);
+  const returnFocus = useReturnFocus();
 
   const active = threads.find((thread) => thread.id === activeId) ?? null;
+  const messageCount = active?.messages.length ?? 0;
 
-  const ask = (question: string) => {
+  /** `fresh` starts a new conversation even when one is open (deep links always do). */
+  const ask = (question: string, options: { fresh?: boolean } = {}) => {
     const text = question.trim();
     if (!text || thinking !== null) return;
     const now = new Date().toISOString();
     const userMessage: AnalystMessage = { id: `u-${now}`, role: 'user', at: now, text };
-    let threadId = activeId;
-    if (!active) {
+    const current = options.fresh ? null : active;
+    let threadId = current?.id ?? null;
+    if (!current) {
       threadId = `t-${now}`;
       setThreads((previous) => [{ id: threadId as string, title: text, updatedAt: now, messages: [userMessage] }, ...previous]);
       setActiveId(threadId);
@@ -110,6 +230,7 @@ export function AnalystWorkspace({ data }: { data: AnalystData }) {
     }
     setDraft('');
     setThinking(0);
+    scrollOnNext.current = true;
     const scripted = data.suggestions.find((s) => s.question === text);
     const blocks = scripted ? data.scriptedAnswers[scripted.id] : undefined;
     const stepMs = reduce ? 150 : 520;
@@ -122,18 +243,20 @@ export function AnalystWorkspace({ data }: { data: AnalystData }) {
     }, THINKING_STEPS.length * stepMs);
   };
 
+  // A new question or answer scrolls to its start, so reading begins at the top of what changed.
   useEffect(() => {
-    endRef.current?.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'end' });
-  }, [threads, thinking, reduce]);
+    if (!scrollOnNext.current) return;
+    lastMessageRef.current?.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'start' });
+    if (thinking === null) scrollOnNext.current = false;
+  }, [messageCount, thinking, reduce]);
 
-  // Deep link from the command menu: /analista?pergunta=<suggestion id>.
+  // Deep link from the command menu or an opportunity: /analista?pergunta=<suggestion id>.
   useEffect(() => {
     const id = params.get('pergunta');
     const suggestion = data.suggestions.find((s) => s.id === id);
     if (!suggestion || asked.current) return;
     asked.current = true;
-    setActiveId(null);
-    const timer = window.setTimeout(() => ask(suggestion.question), 0);
+    const timer = window.setTimeout(() => ask(suggestion.question, { fresh: true }), 0);
     return () => window.clearTimeout(timer);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [params]);
@@ -141,6 +264,21 @@ export function AnalystWorkspace({ data }: { data: AnalystData }) {
   const startNew = () => {
     setActiveId(null);
     setHistoryOpen(false);
+    window.setTimeout(() => composerRef.current?.focus(), 0);
+  };
+
+  const rate = (messageId: string, value: Feedback) => {
+    setFeedback((previous) => {
+      const next = { ...previous };
+      if (previous[messageId] === value) delete next[messageId];
+      else next[messageId] = value;
+      return next;
+    });
+    if (feedback[messageId] !== value) {
+      toast.success(value === 'up' ? 'Obrigado pelo retorno' : 'Retorno registrado', {
+        description: 'Ambiente de demonstração: a avaliação não é salva.',
+      });
+    }
   };
 
   const list = (
@@ -156,14 +294,21 @@ export function AnalystWorkspace({ data }: { data: AnalystData }) {
   );
 
   return (
-    <div className="grid grid-cols-1 gap-8 lg:grid-cols-[240px_minmax(0,1fr)]">
-      <aside className="hidden lg:block">
+    <div className="grid grid-cols-1 gap-8 lg:grid-cols-[248px_minmax(0,1fr)]">
+      <aside className="hidden lg:block" aria-label="Histórico e contexto">
         <div className="sticky top-20">{list}</div>
       </aside>
 
-      <div className="flex min-w-0 flex-col">
+      <div className="flex min-h-[calc(100dvh-14rem)] min-w-0 flex-col">
         <div className="mb-4 flex items-center gap-2 lg:hidden">
-          <Button variant="outline" size="sm" onClick={() => setHistoryOpen(true)}>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => {
+              returnFocus.capture();
+              setHistoryOpen(true);
+            }}
+          >
             <History aria-hidden="true" />
             Conversas
           </Button>
@@ -173,77 +318,56 @@ export function AnalystWorkspace({ data }: { data: AnalystData }) {
           </Button>
         </div>
 
-        <div className="flex min-h-[50vh] flex-col gap-10 pb-6" aria-live="polite">
+        <div className="flex max-w-4xl flex-1 flex-col gap-10 pb-8">
           {!active && (
-            <section aria-labelledby="analyst-start" className="pt-4">
+            <section aria-labelledby="analyst-start" className="pt-2">
               <h2 id="analyst-start" className="text-2xl font-semibold tracking-[-0.02em] text-foreground">
                 O que você quer entender?
               </h2>
               <p className="mt-1 max-w-[60ch] text-base text-muted-foreground">
-                Pergunte sobre vendas, margem, estoque ou fornecedores. Cada resposta mostra os números, separa fatos de hipóteses e cita os dados usados.
+                Pergunte sobre vendas, margem, estoque ou fornecedores. Cada resposta traz os números, separa fatos de hipóteses, recomenda o que fazer e
+                cita os dados usados.
               </p>
-              <div className="mt-6 grid grid-cols-1 gap-3 md:grid-cols-2">
+              <ul className="mt-6 grid grid-cols-1 gap-3 md:grid-cols-2">
                 {data.suggestions.map((suggestion) => (
-                  <button
-                    key={suggestion.id}
-                    type="button"
-                    onClick={() => ask(suggestion.question)}
-                    className="surface rounded-xl p-4 text-left outline-none transition-[border-color,background-color] hover:border-border-strong focus-visible:ring-2 focus-visible:ring-ring/60"
-                  >
-                    <span className="block text-xs text-subtle-foreground">{suggestion.theme}</span>
-                    <span className="mt-1 block text-base font-medium leading-6 text-foreground">{suggestion.question}</span>
-                  </button>
+                  <li key={suggestion.id}>
+                    <button
+                      type="button"
+                      onClick={() => ask(suggestion.question)}
+                      className="surface group flex h-full w-full flex-col rounded-xl p-4 text-left outline-none transition-[border-color,background-color] hover:border-border-strong focus-visible:ring-2 focus-visible:ring-ring/60"
+                    >
+                      <span className="text-xs text-subtle-foreground">{suggestion.theme}</span>
+                      <span className="mt-1 text-base leading-6 font-medium text-foreground">{suggestion.question}</span>
+                      <span className="mt-3 inline-flex items-center gap-1 text-xs font-medium text-brand underline-offset-4 group-hover:underline">
+                        <SendHorizontal aria-hidden="true" className="size-3.5" />
+                        Perguntar
+                      </span>
+                    </button>
+                  </li>
                 ))}
-              </div>
-              <div className="mt-6">
-                <p className="text-xs text-subtle-foreground">Dados disponíveis para o analista</p>
-                <ul className="mt-2 flex flex-wrap gap-2">
-                  {DATA_SCOPE.map((scope) => (
-                    <li key={scope} className="rounded-md border px-2.5 py-1 text-xs text-muted-foreground">
-                      {scope}
-                    </li>
-                  ))}
-                </ul>
-              </div>
+              </ul>
             </section>
           )}
 
-          {active?.messages.map((message) =>
-            message.role === 'user' ? (
-              <div key={message.id} className="border-b pb-4">
-                <h2 className="text-xl font-semibold tracking-[-0.015em] text-foreground sm:text-2xl">{message.text}</h2>
-              </div>
-            ) : (
-              <article key={message.id} aria-label="Resposta do analista">
-                <AnalystHeader at={message.at} />
-                <AnswerBlocks blocks={message.blocks ?? []} onFollowUp={ask} />
-              </article>
-            ),
-          )}
-
-          {thinking !== null && (
-            <div role="status" className="rounded-xl border border-dashed p-4">
-              <div className="mb-3 flex items-center gap-2.5">
-                <LogoMark className="size-6 text-brand" />
-                <span className="text-sm font-medium text-foreground">Analisando…</span>
-              </div>
-              <ol className="flex flex-col gap-1.5 text-sm">
-                {THINKING_STEPS.map((step, index) => (
-                  <li key={step} className={cn('flex items-center gap-2', index > thinking ? 'text-subtle-foreground' : 'text-muted-foreground')}>
-                    {index < thinking ? (
-                      <Check aria-hidden="true" className="size-3.5 text-positive-text" />
-                    ) : index === thinking ? (
-                      <Loader2 aria-hidden="true" className="size-3.5 animate-spin text-brand" />
-                    ) : (
-                      <span aria-hidden="true" className="size-3.5" />
-                    )}
-                    {step}…
-                  </li>
-                ))}
-              </ol>
-            </div>
-          )}
-          <div ref={endRef} />
+          <div aria-live="polite" className="flex flex-col gap-10">
+            {active?.messages.map((message, index) => {
+              const isLast = index === active.messages.length - 1;
+              return message.role === 'user' ? (
+                <div key={message.id} ref={isLast ? lastMessageRef : undefined} className="scroll-mt-24 border-b pb-4">
+                  <p className="text-xs text-subtle-foreground">
+                    Pergunta, <time dateTime={message.at}>{formatDateTime(message.at)}</time>
+                  </p>
+                  <h2 className="mt-1 text-xl font-semibold tracking-[-0.015em] text-foreground sm:text-2xl">{message.text}</h2>
+                </div>
+              ) : (
+                <article key={message.id} ref={isLast ? lastMessageRef : undefined} aria-label="Resposta do analista" className="scroll-mt-24">
+                  <AnswerHeader message={message} feedback={feedback[message.id]} onFeedback={(value) => rate(message.id, value)} />
+                  <AnswerBlocks blocks={message.blocks ?? []} onFollowUp={ask} />
+                </article>
+              );
+            })}
+            {thinking !== null && <Thinking step={thinking} />}
+          </div>
         </div>
 
         <form
@@ -251,13 +375,14 @@ export function AnalystWorkspace({ data }: { data: AnalystData }) {
             event.preventDefault();
             ask(draft);
           }}
-          className="glass sticky bottom-16 z-10 rounded-xl border p-2 shadow-raised lg:bottom-4"
+          className="glass sticky bottom-[calc(4.5rem+env(safe-area-inset-bottom))] z-10 max-w-4xl rounded-xl border p-2 shadow-raised lg:bottom-4"
         >
           <label htmlFor="pergunta" className="sr-only">
             Pergunta para o analista
           </label>
           <div className="flex items-end gap-2">
             <Textarea
+              ref={composerRef}
               id="pergunta"
               name="pergunta"
               autoComplete="off"
@@ -271,10 +396,10 @@ export function AnalystWorkspace({ data }: { data: AnalystData }) {
               }}
               rows={1}
               placeholder="Pergunte sobre vendas, margem ou estoque…"
-              className="max-h-40 min-h-10 resize-none border-0 bg-transparent shadow-none focus-visible:ring-0 dark:bg-transparent"
+              className="max-h-40 min-h-10 resize-none border-0 bg-transparent shadow-none [field-sizing:content] focus-visible:ring-0 dark:bg-transparent"
             />
             <Button type="submit" size="icon" aria-label="Enviar pergunta" disabled={!draft.trim() || thinking !== null}>
-              <SendHorizontal aria-hidden="true" />
+              {thinking !== null ? <Loader2 aria-hidden="true" className="animate-spin" /> : <SendHorizontal aria-hidden="true" />}
             </Button>
           </div>
           <p className="hidden px-2 pt-1 pb-0.5 text-2xs text-subtle-foreground sm:block">
@@ -284,7 +409,7 @@ export function AnalystWorkspace({ data }: { data: AnalystData }) {
       </div>
 
       <Sheet open={historyOpen} onOpenChange={setHistoryOpen}>
-        <SheetContent side="left" className="w-[min(86vw,320px)] overscroll-contain p-4">
+        <SheetContent side="left" className="w-[min(86vw,320px)] overflow-y-auto overscroll-contain p-4" onCloseAutoFocus={returnFocus.onCloseAutoFocus}>
           <SheetHeader className="p-0 pb-3">
             <SheetTitle>Conversas</SheetTitle>
           </SheetHeader>
