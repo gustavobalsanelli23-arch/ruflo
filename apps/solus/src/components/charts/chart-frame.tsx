@@ -47,12 +47,15 @@ export function Legend({ items, className }: { items: LegendItem[]; className?: 
 export function ChartFrame({
   legend,
   table,
+  summary,
   children,
   toolbar,
   className,
 }: {
   legend?: LegendItem[];
   table: ChartTable;
+  /** One or two sentences a screen reader hears instead of the picture. */
+  summary?: string;
   children: React.ReactNode;
   toolbar?: React.ReactNode;
   className?: string;
@@ -60,9 +63,9 @@ export function ChartFrame({
   const [view, setView] = useState<'chart' | 'table'>('chart');
   return (
     <figure className={cn('flex min-w-0 flex-col gap-3', className)}>
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        {legend ? <Legend items={legend} /> : <span />}
-        <div className="flex items-center gap-2">
+      <div className="flex items-start justify-between gap-3">
+        {legend ? <Legend items={legend} className="min-w-0 flex-1 pt-1.5" /> : <span />}
+        <div className="flex shrink-0 items-center gap-2">
           {toolbar}
           <Segmented
             size="sm"
@@ -80,12 +83,12 @@ export function ChartFrame({
         <div className="min-w-0">{children}</div>
       ) : (
         <div className="max-h-80 overflow-auto rounded-lg border">
-          <Table>
+          <Table className="[&_td:first-child]:pl-3 [&_td:last-child]:pr-3 [&_th:first-child]:pl-3 [&_th:last-child]:pr-3">
             <caption className="sr-only">{table.caption}</caption>
-            <TableHeader className="sticky top-0 bg-card">
-              <TableRow>
+            <TableHeader className="sticky top-0 z-10 bg-card">
+              <TableRow className="hover:bg-transparent">
                 {table.columns.map((column) => (
-                  <TableHead key={column.key} className={cn(column.align === 'right' && 'text-right')}>
+                  <TableHead key={column.key} className={cn('h-9 text-xs text-muted-foreground', column.align === 'right' && 'text-right')}>
                     {column.label}
                   </TableHead>
                 ))}
@@ -105,7 +108,10 @@ export function ChartFrame({
           </Table>
         </div>
       )}
-      <figcaption className="sr-only">{table.caption}</figcaption>
+      <figcaption className="sr-only">
+        {table.caption}
+        {summary ? `. ${summary}` : ''}
+      </figcaption>
     </figure>
   );
 }

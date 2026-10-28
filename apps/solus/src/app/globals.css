@@ -13,6 +13,18 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/*
+ * The sidebar is expanded from 1280px up unless the person collapsed it.
+ * The choice lives on <html data-sidebar>, set before paint (see layout).
+ */
+@custom-variant expanded {
+  @media (width >= 80rem) {
+    &:where(html:not([data-sidebar="collapsed"]) *) {
+      @slot;
+    }
+  }
+}
+
 @theme inline {
   --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-geist-mono), ui-monospace, monospace;
@@ -312,9 +324,11 @@
   font-variant-numeric: tabular-nums;
 }
 
-@utility hairline-x {
-  background-image: linear-gradient(90deg, transparent, var(--border-strong) 18%, var(--border-strong) 82%, transparent);
-  height: 1px;
+@utility no-scrollbar {
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

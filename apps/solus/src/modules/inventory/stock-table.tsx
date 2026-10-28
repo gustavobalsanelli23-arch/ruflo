@@ -1,13 +1,14 @@
 'use client';
 
-import { DataTable, type Column } from '@/components/data/data-table';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import { DataTable, type Column, type TableFilter } from '@/components/data/data-table';
 import { Meter } from '@/components/data/meter';
 import { STOCK_STATUS, StatusBadge } from '@/components/data/status';
 import type { ProductStock } from '@/lib/data/types';
 import { formatCurrency, formatDays, formatDecimal, formatNumber } from '@/lib/format';
 
 function Coverage({ item }: { item: ProductStock }) {
-  if (item.coverageDays === null) return <span className="text-warning-text">Sem venda</span>;
+  if (item.coverageDays === null) return <span className="text-muted-foreground">Sem venda</span>;
   const tone = item.status === 'rupture-risk' ? 'critical' : item.status === 'low-turnover' ? 'warning' : 'positive';
   return (
     <span className="inline-flex w-28 flex-col items-end gap-1">
@@ -31,7 +32,9 @@ const columns: Column<ProductStock>[] = [
     cell: (s) => (
       <div className="min-w-0">
         <p className="truncate font-medium text-foreground">{s.name}</p>
-        <p className="text-xs text-subtle-foreground">{s.category}</p>
+        <p className="text-xs text-subtle-foreground">
+          <span translate="no">{s.sku}</span>, {s.category}
+        </p>
       </div>
     ),
   },
@@ -52,7 +55,30 @@ const columns: Column<ProductStock>[] = [
   { id: 'status', header: 'Situação', sortValue: (s) => s.status, cell: (s) => <StatusBadge spec={STOCK_STATUS[s.status]} /> },
 ];
 
+const FILTERS: TableFilter<ProductStock>[] = [
+  { id: 'atencao', label: 'Precisam de atenção', predicate: (s) => s.status !== 'healthy' },
+  { id: 'ruptura', label: 'Ruptura', predicate: (s) => s.status === 'rupture-risk' },
+  { id: 'parados', label: 'Parados', predicate: (s) => s.status === 'stalled' },
+  { id: 'baixo-giro', label: 'Baixo giro', predicate: (s) => s.status === 'low-turnover' },
+  { id: 'todos', label: 'Todos', predicate: () => true },
+];
+
+/** The active filter lives in the URL (?filtro=), so the signal cards can link straight to it. */
 export function StockTable({ items }: { items: ProductStock[] }) {
+  const router = useRouter();
+  const pathname = usePathname();
+  const params = useSearchParams();
+  const requested = params.get('filtro');
+  const filter = FILTERS.some((f) => f.id === requested) ? (requested as string) : 'atencao';
+
+  const setFilter = (id: string) => {
+    const next = new URLSearchParams(params.toString());
+    if (id === 'atencao') next.delete('filtro');
+    else next.set('filtro', id);
+    const query = next.toString();
+    router.replace(query ? `${pathname}?${query}` : pathname, { scroll: false });
+  };
+
   return (
     <DataTable
       rows={items}
@@ -63,18 +89,15 @@ export function StockTable({ items }: { items: ProductStock[] }) {
       searchText={(s) => `${s.name} ${s.sku} ${s.category}`}
       searchPlaceholder="Buscar produto ou categoria…"
       initialSort={{ id: 'value', dir: 'desc' }}
-      filters={[
-        { id: 'attention', label: 'Precisam de atenção', predicate: (s) => s.status !== 'healthy' },
-        { id: 'rupture', label: 'Ruptura', predicate: (s) => s.status === 'rupture-risk' },
-        { id: 'stalled', label: 'Parados', predicate: (s) => s.status === 'stalled' },
-        { id: 'slow', label: 'Baixo giro', predicate: (s) => s.status === 'low-turnover' },
-        { id: 'all', label: 'Todos', predicate: () => true },
-      ]}
+      filters={FILTERS}
+      filterValue={filter}
+      onFilterChange={setFilter}
+      rowClassName={(s) => (s.status === 'rupture-risk' ? 'bg-critical-soft/60 hover:bg-critical-soft' : undefined)}
       mobileRow={(s) => (
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
             <p className="truncate text-sm font-medium text-foreground">{s.name}</p>
-            <p className="mt-0.5 text-xs text-muted-foreground">
+            <p className="mt-0.5 text-xs text-muted-foreground tabular">
               {formatNumber(s.onHand)} un., {formatCurrency(s.stockValue, { whole: true })}
               {s.coverageDays !== null && `, cobre ${formatDays(s.coverageDays)}`}
             </p>

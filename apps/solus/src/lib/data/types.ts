@@ -76,6 +76,7 @@ export interface CategoryPerformance {
   previousRevenue: number;
   grossProfit: number;
   margin: number;
+  previousMargin: number;
   share: number;
 }
 
@@ -87,6 +88,16 @@ export interface InventorySnapshot {
   stalledCount: number;
   skuCount: number;
   healthyShare: number;
+  /** Items whose stock runs out before the next delivery, most urgent first. */
+  ruptureItems: { productId: string; name: string; coverageDays: number; leadTimeDays: number }[];
+}
+
+/** Open opportunities in one line: how many, and what they are estimated to be worth. */
+export interface OpportunitySummary {
+  open: number;
+  highPriority: number;
+  monthlyImpact: number;
+  oneOffImpact: number;
 }
 
 export type BriefingSegment =
@@ -113,6 +124,7 @@ export interface OverviewData {
   trend: TrendPoint[];
   categories: CategoryPerformance[];
   inventory: InventorySnapshot;
+  opportunitySummary: OpportunitySummary;
   topOpportunities: Opportunity[];
   activity: ActivityItem[];
 }

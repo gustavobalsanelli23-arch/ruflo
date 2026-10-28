@@ -2,13 +2,22 @@ import { TriangleAlert } from 'lucide-react';
 import { Panel } from '@/components/data/panel';
 import type { SupplierProfit } from '@/lib/data/types';
 import { formatCurrency, formatPercent, pluralize } from '@/lib/format';
-import { cn } from '@/lib/utils';
 
 /** Gross profit per supplier as bars (magnitude), margin as the second read. */
 export function SupplierPanel({ suppliers, threshold }: { suppliers: SupplierProfit[]; threshold: number }) {
   const max = Math.max(...suppliers.map((s) => s.grossProfit));
   return (
-    <Panel title="Rentabilidade por fornecedor" description="Lucro bruto gerado no período e margem média dos itens de cada fornecedor.">
+    <Panel
+      title="Rentabilidade por fornecedor"
+      description="Lucro bruto gerado no período (barra) e margem média dos itens de cada fornecedor."
+      footer={
+        <p className="flex items-center gap-1.5 text-xs text-subtle-foreground">
+          <TriangleAlert aria-hidden="true" className="size-3.5 text-warning-text" />
+          Margem a menos de 10 pontos do corte de {formatPercent(threshold, 0)}.
+        </p>
+      }
+      className="h-full"
+    >
       <ul className="flex flex-col gap-3.5">
         {suppliers.map((supplier) => {
           const weak = supplier.margin < threshold + 0.1;
@@ -21,9 +30,10 @@ export function SupplierPanel({ suppliers, threshold }: { suppliers: SupplierPro
                 </p>
                 <p className="shrink-0 text-sm tabular">
                   <span className="font-semibold text-foreground">{formatCurrency(supplier.grossProfit, { compact: true, whole: true })}</span>
-                  <span className={cn('ml-2 inline-flex items-center gap-1', weak ? 'text-warning-text' : 'text-muted-foreground')}>
-                    {weak && <TriangleAlert aria-label="Margem próxima do corte" className="size-3.5" />}
+                  <span className="ml-2 inline-flex items-center gap-1 text-muted-foreground">
+                    {weak && <TriangleAlert aria-hidden="true" className="size-3.5 text-warning-text" />}
                     {formatPercent(supplier.margin)}
+                    {weak && <span className="sr-only">, margem próxima do corte</span>}
                   </span>
                 </p>
               </div>

@@ -71,6 +71,7 @@ export const demoRepository: SolusRepository = {
     const revenue = { value: now.revenue, previous: before.revenue };
     const grossMargin = { value: margin(now.revenue, now.cost), previous: margin(before.revenue, before.cost) };
     const inv = inventory();
+    const open = opportunities().filter((o) => o.status !== 'done' && o.status !== 'dismissed');
     const overview: OverviewData = {
       period,
       briefing: briefing(revenue, grossMargin, period.label),
@@ -92,11 +93,18 @@ export const demoRepository: SolusRepository = {
         stalledCount: inv.stalledCount,
         skuCount: inv.products.length,
         healthyShare: inv.products.filter((p) => p.status === 'healthy').length / inv.products.length,
+        ruptureItems: inv.products
+          .filter((p) => p.status === 'rupture-risk')
+          .sort((a, b) => (a.coverageDays ?? 0) - (b.coverageDays ?? 0))
+          .map((p) => ({ productId: p.productId, name: p.name, coverageDays: p.coverageDays ?? 0, leadTimeDays: p.leadTimeDays })),
       },
-      topOpportunities: opportunities()
-        .filter((o) => o.status !== 'done' && o.status !== 'dismissed')
-        .sort((a, b) => rank(b) - rank(a))
-        .slice(0, 3),
+      opportunitySummary: {
+        open: open.length,
+        highPriority: open.filter((o) => o.priority === 'high').length,
+        monthlyImpact: open.filter((o) => o.impactKind === 'monthly').reduce((sum, o) => sum + o.impact, 0),
+        oneOffImpact: open.filter((o) => o.impactKind === 'one-off').reduce((sum, o) => sum + o.impact, 0),
+      },
+      topOpportunities: [...open].sort((a, b) => rank(b) - rank(a)).slice(0, 3),
       activity,
     };
     return overview;

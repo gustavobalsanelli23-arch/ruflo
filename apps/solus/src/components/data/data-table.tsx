@@ -1,6 +1,6 @@
 'use client';
 
-import { ArrowDown, ArrowUp, ArrowUpDown, ChevronLeft, ChevronRight, Search } from 'lucide-react';
+import { ArrowDown, ArrowUp, ArrowUpDown, ChevronLeft, ChevronRight, Search, X } from 'lucide-react';
 import { useDeferredValue, useMemo, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -29,6 +29,11 @@ export interface TableFilter<T> {
 
 type SortState = { id: string; dir: 'asc' | 'desc' } | null;
 
+/**
+ * The analytical table. Inside a Panel it bleeds to the panel edges so rows
+ * read edge to edge; numbers align right in tabular figures; sorting shows
+ * its arrow only where it applies; phones get a list of row summaries.
+ */
 export function DataTable<T>({
   rows,
   columns,
@@ -44,6 +49,10 @@ export function DataTable<T>({
   onRowSelect,
   selectedId,
   toolbar,
+  rowClassName,
+  bleed = true,
+  filterValue,
+  onFilterChange,
 }: {
   rows: T[];
   columns: Column<T>[];
@@ -59,10 +68,22 @@ export function DataTable<T>({
   onRowSelect?: (row: T) => void;
   selectedId?: string | null;
   toolbar?: React.ReactNode;
+  /** Discreet emphasis for rows that need attention (never colour alone: pair with a status cell). */
+  rowClassName?: (row: T) => string | undefined;
+  /** Extend rows to the edges of the surrounding Panel (its 20px padding). */
+  bleed?: boolean;
+  /** Controlled filter, for screens that keep it in the URL. */
+  filterValue?: string;
+  onFilterChange?: (id: string) => void;
 }) {
   const [query, setQuery] = useState('');
   const deferredQuery = useDeferredValue(query);
-  const [filter, setFilter] = useState(filters?.[0]?.id ?? 'all');
+  const [ownFilter, setOwnFilter] = useState(filters?.[0]?.id ?? 'all');
+  const filter = filterValue ?? ownFilter;
+  const setFilter = (id: string) => {
+    if (filterValue === undefined) setOwnFilter(id);
+    onFilterChange?.(id);
+  };
   const [sort, setSort] = useState<SortState>(initialSort);
   const [page, setPage] = useState(0);
 
@@ -104,7 +125,14 @@ export function DataTable<T>({
     });
   };
 
+  const clear = () => {
+    setQuery('');
+    setFilter(filters?.[0]?.id ?? 'all');
+    setPage(0);
+  };
+
   const countLabel = `${formatNumber(visible.length)} ${visible.length === 1 ? noun.one : noun.many}`;
+  const edge = bleed ? '-mx-5' : '';
 
   return (
     <div className="flex min-w-0 flex-col gap-3">
@@ -139,8 +167,18 @@ export function DataTable<T>({
                     setPage(0);
                   }}
                   placeholder={searchPlaceholder}
-                  className="h-9 bg-card pl-8"
+                  className="h-9 bg-card pr-8 pl-8 [&::-webkit-search-cancel-button]:hidden"
                 />
+                {query && (
+                  <button
+                    type="button"
+                    onClick={() => setQuery('')}
+                    aria-label="Limpar busca"
+                    className="absolute top-1/2 right-1.5 grid size-6 -translate-y-1/2 place-items-center rounded-md text-subtle-foreground outline-none transition-colors hover:bg-accent hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring/60"
+                  >
+                    <X aria-hidden="true" className="size-3.5" />
+                  </button>
+                )}
               </label>
             )}
             {toolbar}
@@ -159,14 +197,7 @@ export function DataTable<T>({
             title="Nada encontrado com esses filtros"
             description="Limpe a busca ou escolha outro filtro para ver os itens."
             action={
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => {
-                  setQuery('');
-                  setFilter(filters?.[0]?.id ?? 'all');
-                }}
-              >
+              <Button variant="outline" size="sm" onClick={clear}>
                 Limpar filtros
               </Button>
             }
@@ -175,26 +206,26 @@ export function DataTable<T>({
       ) : (
         <>
           {mobileRow && (
-            <ul className="flex flex-col divide-y rounded-lg border md:hidden">
+            <ul className={cn('flex flex-col divide-y border-y md:hidden', edge)}>
               {slice.map((row) => (
-                <li key={getRowId(row)}>
+                <li key={getRowId(row)} className={rowClassName?.(row)}>
                   {onRowSelect ? (
                     <button
                       type="button"
                       onClick={() => onRowSelect(row)}
-                      className="block w-full px-4 py-3 text-left outline-none transition-colors hover:bg-accent focus-visible:bg-accent"
+                      className="block w-full px-5 py-3 text-left outline-none transition-colors hover:bg-accent focus-visible:bg-accent"
                     >
                       {mobileRow(row)}
                     </button>
                   ) : (
-                    <div className="px-4 py-3">{mobileRow(row)}</div>
+                    <div className="px-5 py-3">{mobileRow(row)}</div>
                   )}
                 </li>
               ))}
             </ul>
           )}
-          <div className={cn('overflow-x-auto rounded-lg border', mobileRow && 'hidden md:block')}>
-            <Table>
+          <div className={cn('min-w-0 border-y', edge, mobileRow && 'hidden md:block')}>
+            <Table className="[&_td:first-child]:pl-5 [&_td:last-child]:pr-5 [&_th:first-child]:pl-5 [&_th:last-child]:pr-5">
               <caption className="sr-only">{caption}</caption>
               <TableHeader>
                 <TableRow className="hover:bg-transparent">
@@ -205,7 +236,7 @@ export function DataTable<T>({
                         key={column.id}
                         aria-sort={sorted === 'asc' ? 'ascending' : sorted === 'desc' ? 'descending' : undefined}
                         className={cn(
-                          'h-10 bg-muted/50 text-xs font-medium text-muted-foreground',
+                          'h-10 px-3 text-xs font-medium text-muted-foreground',
                           column.align === 'right' && 'text-right',
                           column.wide && 'hidden lg:table-cell',
                           column.className,
@@ -216,18 +247,21 @@ export function DataTable<T>({
                             type="button"
                             onClick={() => toggleSort(column.id)}
                             className={cn(
-                              '-mx-1.5 inline-flex items-center gap-1 rounded px-1.5 py-1 outline-none transition-colors hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring/60',
+                              'group/sort -mx-1.5 inline-flex items-center gap-1 rounded px-1.5 py-1 outline-none transition-colors hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring/60',
                               sorted && 'text-foreground',
                               column.align === 'right' && 'flex-row-reverse',
                             )}
                           >
                             {column.header}
                             {sorted === 'asc' ? (
-                              <ArrowUp aria-hidden="true" className="size-3.5" />
+                              <ArrowUp aria-hidden="true" className="size-3.5 text-brand" />
                             ) : sorted === 'desc' ? (
-                              <ArrowDown aria-hidden="true" className="size-3.5" />
+                              <ArrowDown aria-hidden="true" className="size-3.5 text-brand" />
                             ) : (
-                              <ArrowUpDown aria-hidden="true" className="size-3.5 opacity-40" />
+                              <ArrowUpDown
+                                aria-hidden="true"
+                                className="size-3.5 opacity-0 transition-opacity group-hover/sort:opacity-60 group-focus-visible/sort:opacity-60"
+                              />
                             )}
                           </button>
                         ) : (
@@ -246,13 +280,13 @@ export function DataTable<T>({
                       key={id}
                       data-state={selectedId === id ? 'selected' : undefined}
                       onClick={onRowSelect ? () => onRowSelect(row) : undefined}
-                      className={cn(onRowSelect && 'cursor-pointer')}
+                      className={cn('hover:bg-accent/60', onRowSelect && 'cursor-pointer', rowClassName?.(row))}
                     >
                       {columns.map((column) => (
                         <TableCell
                           key={column.id}
                           className={cn(
-                            'py-2.5 tabular',
+                            'px-3 py-3 tabular',
                             column.align === 'right' && 'text-right',
                             column.wide && 'hidden lg:table-cell',
                             column.className,
@@ -270,19 +304,30 @@ export function DataTable<T>({
         </>
       )}
 
-      {visible.length > pageSize && (
+      {visible.length > 0 && (
         <div className="flex items-center justify-between gap-3 text-sm text-muted-foreground">
           <span className="tabular">
-            {formatNumber(from)}–{formatNumber(to)} de {countLabel}
+            {visible.length > pageSize ? (
+              <>
+                {formatNumber(from)}–{formatNumber(to)} de {countLabel}
+              </>
+            ) : (
+              countLabel
+            )}
           </span>
-          <div className="flex items-center gap-1">
-            <Button variant="outline" size="icon-sm" onClick={() => setPage(current - 1)} disabled={current === 0} aria-label="Página anterior">
-              <ChevronLeft aria-hidden="true" />
-            </Button>
-            <Button variant="outline" size="icon-sm" onClick={() => setPage(current + 1)} disabled={current >= pages - 1} aria-label="Próxima página">
-              <ChevronRight aria-hidden="true" />
-            </Button>
-          </div>
+          {visible.length > pageSize && (
+            <nav aria-label="Paginação" className="flex items-center gap-1">
+              <Button variant="outline" size="icon-sm" onClick={() => setPage(current - 1)} disabled={current === 0} aria-label="Página anterior">
+                <ChevronLeft aria-hidden="true" />
+              </Button>
+              <span className="px-2 text-xs tabular" aria-live="polite">
+                Página {current + 1} de {pages}
+              </span>
+              <Button variant="outline" size="icon-sm" onClick={() => setPage(current + 1)} disabled={current >= pages - 1} aria-label="Próxima página">
+                <ChevronRight aria-hidden="true" />
+              </Button>
+            </nav>
+          )}
         </div>
       )}
     </div>

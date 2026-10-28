@@ -2,25 +2,27 @@
 
 import { Bar, BarChart, CartesianGrid, Cell, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import { ChartFrame } from '@/components/charts/chart-frame';
-import { AXIS_TICK, CURSOR_BAND, GRID_PROPS, SERIES, useChartAnimation } from '@/components/charts/chart-theme';
+import { AXIS_TICK, CURSOR_BAND, SERIES, useChartAnimation } from '@/components/charts/chart-theme';
 import type { CoverageBucket } from '@/lib/data/types';
 import { formatCurrency, pluralize } from '@/lib/format';
 
 const ATTENTION = new Set(['Mais de 120 dias', 'Sem venda']);
 
 /**
- * Stock value by days of coverage. Buckets are ordered (short → long), so they
- * share one hue; the two that mean "money standing still" switch to the
- * warning status colour and say so in the legend.
+ * Stock value by days of coverage, read top (runs out soon) to bottom
+ * (standing still). The buckets are ordered, so they share one hue; the two
+ * that mean money not moving switch to the warning colour and say so.
  */
 export function CoverageChart({ buckets }: { buckets: CoverageBucket[] }) {
   const animation = useChartAnimation();
+  const idle = buckets.filter((b) => ATTENTION.has(b.bucket)).reduce((sum, b) => sum + b.stockValue, 0);
   return (
     <ChartFrame
       legend={[
         { label: 'Valor a custo', color: SERIES.one, mark: 'bar' },
         { label: 'Capital parado', color: SERIES.warning, mark: 'bar' },
       ]}
+      summary={`${formatCurrency(idle, { whole: true })} estão em faixas sem giro: mais de 120 dias de cobertura ou sem venda.`}
       table={{
         caption: 'Valor de estoque e número de itens por faixa de cobertura',
         columns: [
@@ -31,18 +33,12 @@ export function CoverageChart({ buckets }: { buckets: CoverageBucket[] }) {
         rows: buckets.map((b) => ({ bucket: b.bucket, value: formatCurrency(b.stockValue, { whole: true }), count: String(b.skuCount) })),
       }}
     >
-      <div className="h-72">
+      <div className="h-64 xl:h-[26rem]">
         <ResponsiveContainer width="100%" height="100%">
-          <BarChart data={buckets} margin={{ top: 24, right: 4, bottom: 0, left: 0 }} barCategoryGap="30%">
-            <CartesianGrid {...GRID_PROPS} />
-            <XAxis dataKey="bucket" tick={AXIS_TICK} tickLine={false} axisLine={false} interval={0} tickMargin={8} />
-            <YAxis
-              tick={AXIS_TICK}
-              tickLine={false}
-              axisLine={false}
-              width={60}
-              tickFormatter={(v: number) => formatCurrency(v, { compact: true, whole: true })}
-            />
+          <BarChart data={buckets} layout="vertical" margin={{ top: 0, right: 72, bottom: 0, left: 0 }} barCategoryGap="26%">
+            <CartesianGrid stroke="var(--chart-grid)" horizontal={false} />
+            <XAxis type="number" hide />
+            <YAxis type="category" dataKey="bucket" tick={AXIS_TICK} tickLine={false} axisLine={false} width={104} />
             <Tooltip
               cursor={CURSOR_BAND}
               content={({ active, payload }) => {
@@ -59,13 +55,13 @@ export function CoverageChart({ buckets }: { buckets: CoverageBucket[] }) {
             />
             <Bar
               dataKey="stockValue"
-              radius={[4, 4, 0, 0]}
-              maxBarSize={24}
+              radius={[0, 4, 4, 0]}
+              maxBarSize={20}
               label={{
-                position: 'top',
+                position: 'right',
                 fill: 'var(--muted-foreground)',
                 fontSize: 11,
-                formatter: (v: unknown) => formatCurrency(Number(v), { compact: true, whole: true }),
+                formatter: (value: unknown) => formatCurrency(Number(value), { compact: true, whole: true }),
               }}
               {...animation}
             >
