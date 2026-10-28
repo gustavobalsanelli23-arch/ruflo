@@ -15,6 +15,13 @@ export interface Session {
   query<T = Record<string, unknown>>(sql: string, params?: unknown[]): Promise<T[]>;
   /** Runs a statement inside a savepoint and reports the outcome instead of throwing. */
   attempt<T = Record<string, unknown>>(sql: string, params?: unknown[]): Promise<Outcome<T>>;
+  /** Switches identity inside the same transaction (a user id, the secret key, or superuser). */
+  become(identity: string | 'service_role' | 'system'): Promise<void>;
+}
+
+function claimsFor(identity: string) {
+  if (identity === 'service_role') return { role: 'service_role' as ApiRole, claims: { role: 'service_role' } };
+  return { role: 'authenticated' as ApiRole, claims: { sub: identity, role: 'authenticated', aud: 'authenticated' } };
 }
 
 let pool: Pool | undefined;
@@ -46,6 +53,14 @@ async function run<T>(setup: { role: ApiRole; claims: Record<string, unknown> } 
         const { code, message } = error as { code?: string; message: string };
         return { ok: false, error: { code: code ?? 'unknown', message } };
       }
+    },
+    become: async (identity) => {
+      if (identity === 'system') {
+        await client.query(`select set_config('role', 'none', true), set_config('request.jwt.claims', '', true)`);
+        return;
+      }
+      const { role, claims } = claimsFor(identity);
+      await client.query(`select set_config('role', $1, true), set_config('request.jwt.claims', $2, true)`, [role, JSON.stringify(claims)]);
     },
   };
   try {

@@ -1,5 +1,9 @@
 -- SOLUS · Parte 04 · 5/6 — Camada de métricas
 --
+-- As funções desligam o JIT: as estimativas de custo de funções que devolvem
+-- conjuntos são altas e a compilação custava mais que a consulta (medido no
+-- teste de volume: 1,2 s de JIT para 0,2 s de execução).
+--
 -- Fonte única dos números: os painéis, o Intelligence Engine e os testes
 -- usam estas funções. Todas são SECURITY INVOKER: rodam com a sessão de quem
 -- chama, então o RLS das tabelas vale aqui também. Só entram dados de
@@ -41,6 +45,7 @@ returns table (
 )
 language sql
 stable
+rows 1
 set search_path = ''
 as $$
   select
@@ -76,6 +81,7 @@ returns table (
 language sql
 stable
 set search_path = ''
+set jit = off
 as $$
   select
     (select min(d.period_start) from public.data_imports d
@@ -120,6 +126,7 @@ returns table (
 language sql
 stable
 set search_path = ''
+set jit = off
 as $$
   with totals as (
     select
@@ -182,6 +189,7 @@ returns table (
 language sql
 stable
 set search_path = ''
+set jit = off
 as $$
   with agg as (
     select
@@ -251,6 +259,7 @@ returns table (
 language sql
 stable
 set search_path = ''
+set jit = off
 as $$
   with agg as (
     select
@@ -335,6 +344,7 @@ returns table (
 language sql
 stable
 set search_path = ''
+set jit = off
 as $$
   select
     x.category_id,
@@ -373,6 +383,7 @@ returns table (
 language sql
 stable
 set search_path = ''
+set jit = off
 as $$
   select
     x.supplier_id,
@@ -444,9 +455,13 @@ returns table (
 language sql
 stable
 set search_path = ''
+set jit = off
 as $$
   with params as (
     select * from public.analysis_parameters(p_organization_id)
+  ),
+  active as materialized (
+    select private.active_import_ids(p_organization_id) as id
   ),
   history as (
     select min(d.period_start) as first_sale
@@ -464,17 +479,20 @@ as $$
     from public.inventory_snapshots s
     where s.organization_id = p_organization_id
       and s.snapshot_date <= p_as_of
-      and s.import_id in (select private.active_import_ids(p_organization_id))
+      and s.import_id in (select a.id from active a)
     order by s.product_id, s.snapshot_date desc, s.created_at desc, s.id desc
   ),
+  -- Uma leitura do histórico: unidades na janela e a última venda (de
+  -- qualquer data até p_as_of) por produto.
   movement as (
     select i.product_id,
-      coalesce(sum(i.quantity) filter (where i.kind = 'sale'), 0)
-        - coalesce(sum(i.quantity) filter (where i.kind = 'return'), 0) as units
+      coalesce(sum(i.quantity) filter (where i.kind = 'sale' and i.sold_at >= b.window_start), 0)
+        - coalesce(sum(i.quantity) filter (where i.kind = 'return' and i.sold_at >= b.window_start), 0) as units,
+      max(i.sold_at) filter (where i.kind = 'sale') as last_sale_date
     from public.sale_items i, bounds b
     where i.organization_id = p_organization_id
-      and i.sold_at between b.window_start and p_as_of
-      and i.import_id in (select private.active_import_ids(p_organization_id))
+      and i.sold_at <= p_as_of
+      and i.import_id in (select a.id from active a)
     group by i.product_id
   ),
   base as (
@@ -496,7 +514,7 @@ as $$
       case when b.window_start <= p_as_of then p_as_of - b.window_start + 1 end as window_days,
       b.history_days,
       coalesce(m.units, 0) as units_window,
-      ls.last_sale_date,
+      m.last_sale_date,
       coalesce(p.lead_time_days, su.lead_time_days, pr.default_lead_time_days) as lead_time_days,
       pr.stalled_days,
       pr.high_turnover_days,
@@ -508,15 +526,6 @@ as $$
     left join movement m on m.product_id = sn.product_id
     cross join bounds b
     cross join params pr
-    left join lateral (
-      select max(i.sold_at) as last_sale_date
-      from public.sale_items i
-      where i.organization_id = p_organization_id
-        and i.product_id = sn.product_id
-        and i.kind = 'sale'
-        and i.sold_at <= p_as_of
-        and i.import_id in (select private.active_import_ids(p_organization_id))
-    ) ls on true
   ),
   measured as (
     select
@@ -589,6 +598,7 @@ returns table (
 language sql
 stable
 set search_path = ''
+set jit = off
 as $$
   with positions as (
     select * from public.inventory_position(p_organization_id, p_as_of)

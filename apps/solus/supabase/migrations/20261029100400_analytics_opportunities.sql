@@ -273,6 +273,8 @@ $$;
 
 revoke all on function private.opportunity_items(jsonb) from public, anon, authenticated;
 grant execute on function private.opportunity_items(jsonb) to service_role;
+-- sync_opportunities roda como service_role e confere o papel de quem disparou.
+grant execute on function private.org_role_rank(public.org_role) to service_role;
 
 revoke all on function
   public.sync_opportunities(uuid, uuid, text, uuid, text, date, date, jsonb, jsonb),

@@ -64,6 +64,7 @@ create function private.active_import_ids(p_organization_id uuid)
 returns setof uuid
 language sql
 stable
+rows 10
 set search_path = ''
 as $$
   select d.id
