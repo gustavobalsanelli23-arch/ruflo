@@ -310,8 +310,10 @@ begin
       record_count = inserted,
       skipped_rows = skipped,
       completed_at = now(),
-      period_start = coalesce(first_date, period_start),
-      period_end = coalesce(last_date, period_end)
+      -- Vendas e estoque: o período é o do que foi gravado (nulo se nada
+      -- foi gravado, p. ex. só duplicatas), nunca o do arquivo.
+      period_start = case when target.dataset in ('sales', 'inventory') then first_date else period_start end,
+      period_end = case when target.dataset in ('sales', 'inventory') then last_date else period_end end
   where id = target.id;
 
   final_status := next_status;

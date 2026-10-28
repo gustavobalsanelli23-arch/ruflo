@@ -290,7 +290,9 @@ export function ResultStep({ result, onRestart, onHistory }: { result: FinishedI
         {ok ? <CircleCheck aria-hidden="true" className="mt-0.5 size-6 text-positive-text" /> : <CircleAlert aria-hidden="true" className="mt-0.5 size-6 text-warning-text" />}
         <div>
           <p className="text-lg font-semibold text-foreground">{ok ? 'Importação concluída' : 'Importação concluída com linhas rejeitadas'}</p>
-          <p className="text-sm text-muted-foreground">Os painéis já usam os dados novos.</p>
+          <p className="text-sm text-muted-foreground">
+            {result.inserted > 0 ? 'Os painéis já usam os dados novos.' : 'Nada novo foi gravado: as linhas válidas já estavam nos dados.'}
+          </p>
         </div>
       </div>
       <Figures

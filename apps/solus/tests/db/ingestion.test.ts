@@ -194,6 +194,31 @@ describe('duplicatas', () => {
     });
   });
 
+  it('uma importação que não gravou nada não declara período: desfeita a original, os painéis ficam vazios', async () => {
+    await asUser(users.analystA, async (s) => {
+      const original = await runImport(s, { organizationId: orgs.a, dataset: 'sales', rows: FILE, policy: 'skip' });
+      const again = await runImport(s, { organizationId: orgs.a, dataset: 'sales', rows: FILE });
+      const [validated] = await s.query<{ batch_count: number }>('select batch_count from public.data_imports where id = $1', [again.importId]);
+      await commitAll(s, again.importId, 'keep', validated!.batch_count);
+      // "keep" grava as duas linhas sem documento: o período vem do que foi gravado
+      expect(await s.query('select period_start::text, period_end::text from public.data_imports where id = $1', [again.importId])).toEqual([
+        { period_start: '2026-02-01', period_end: '2026-02-01' },
+      ]);
+
+      const third = await runImport(s, { organizationId: orgs.a, dataset: 'sales', rows: FILE, contentSeed: 'outra cópia' });
+      const [third_] = await s.query<{ batch_count: number }>('select batch_count from public.data_imports where id = $1', [third.importId]);
+      expect(await commitAll(s, third.importId, 'skip', third_!.batch_count)).toMatchObject({ inserted_rows: 0 });
+      expect(await s.query('select status, period_start::text, period_end::text from public.data_imports where id = $1', [third.importId])).toEqual([
+        { status: 'completed', period_start: null, period_end: null },
+      ]);
+
+      await s.query('select public.revert_import($1)', [again.importId]);
+      await s.query('select public.revert_import($1)', [original.importId]);
+      expect(await countItems(s)).toBe(0);
+      expect(await s.query('select last_sale::text, sales_imports from public.analytics_coverage($1)', [orgs.a])).toEqual([{ last_sale: null, sales_imports: '0' }]);
+    });
+  });
+
   it('com "importar mesmo assim", entram só as linhas sem documento; as com documento continuam ignoradas', async () => {
     await asUser(users.analystA, async (s) => {
       await runImport(s, { organizationId: orgs.a, dataset: 'sales', rows: FILE, policy: 'skip' });

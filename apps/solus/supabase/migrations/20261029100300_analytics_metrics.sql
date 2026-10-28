@@ -65,7 +65,8 @@ as $$
 $$;
 
 -- O que existe de dados: base para o período padrão e os avisos de limitação.
--- Usa os metadados das importações (rápido mesmo com milhões de itens).
+-- Usa os metadados das importações (rápido mesmo com milhões de itens); o
+-- período de cada uma é o do que ela gravou (finalize_import), nulo se nada.
 create function public.analytics_coverage(p_organization_id uuid)
 returns table (
   first_sale date,
@@ -89,11 +90,13 @@ as $$
     (select max(d.period_end) from public.data_imports d
       where d.organization_id = p_organization_id and d.dataset = 'sales' and d.status in ('completed', 'with_errors')),
     (select count(*) from public.data_imports d
-      where d.organization_id = p_organization_id and d.dataset = 'sales' and d.status in ('completed', 'with_errors')),
+      where d.organization_id = p_organization_id and d.dataset = 'sales' and d.status in ('completed', 'with_errors')
+        and d.period_end is not null),
     (select max(d.period_end) from public.data_imports d
       where d.organization_id = p_organization_id and d.dataset = 'inventory' and d.status in ('completed', 'with_errors')),
     (select count(*) from public.data_imports d
-      where d.organization_id = p_organization_id and d.dataset = 'inventory' and d.status in ('completed', 'with_errors')),
+      where d.organization_id = p_organization_id and d.dataset = 'inventory' and d.status in ('completed', 'with_errors')
+        and d.period_end is not null),
     (select count(*) from public.products p where p.organization_id = p_organization_id),
     (select count(*) from public.products p where p.organization_id = p_organization_id and not p.catalog_complete),
     (select count(*) from public.products p where p.organization_id = p_organization_id and p.current_cost is not null),

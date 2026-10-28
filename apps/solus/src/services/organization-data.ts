@@ -77,17 +77,3 @@ export async function listPendingInvitations(supabase: SolusClient, organization
     createdAt: row.created_at,
   }));
 }
-
-/** Whether the organization has any processed business data yet. */
-export async function hasAnalyticsData(supabase: SolusClient, organizationId: string) {
-  const { count, error } = await supabase
-    .from('data_imports')
-    .select('id', { count: 'exact', head: true })
-    .eq('organization_id', organizationId)
-    .in('status', ['completed', 'with_errors']);
-  if (error) {
-    logServerError('importações: contar', error);
-    throw new Error('Não foi possível verificar os dados desta organização.');
-  }
-  return (count ?? 0) > 0;
-}

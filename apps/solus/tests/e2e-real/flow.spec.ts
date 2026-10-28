@@ -16,6 +16,8 @@ const owner = { name: 'Olga Teste', email: `solus-e2e-owner-${run}@${domain}`, p
 const analyst = { name: 'Ana Teste', email: `solus-e2e-analyst-${run}@${domain}`, password: `Senha-${run}-2` };
 const orgName = `Mercearia E2E ${run}`;
 const createdUsers: string[] = [];
+// The session test resets the owner's password; later tests sign in with this.
+let ownerPassword = owner.password;
 
 /** Creates the account through the app form, then confirms it with an admin-generated link. */
 async function signUpAndConfirm(page: Page, person: typeof owner) {
@@ -130,9 +132,75 @@ test('sessão: proteção de rotas, saída e recuperação de senha', async ({ p
   await expect(page.getByText('E-mail ou senha incorretos.')).toBeVisible();
   await signIn(page, { ...owner, password: newPassword });
   await expect(page).toHaveURL(/\/visao-geral$/);
+  ownerPassword = newPassword;
 
   // Session cookies are HttpOnly.
   const session = (await page.context().cookies()).filter((c) => c.name.startsWith('sb-'));
   expect(session.length).toBeGreaterThan(0);
   expect(session.every((c) => c.httpOnly && c.sameSite === 'Lax')).toBe(true);
+});
+
+/** Sales CSV dated two days ago (inside the default 30-day period), Brazilian number and date format. */
+function salesCsv() {
+  const day = new Date(Date.now() - 2 * 86_400_000);
+  const date = new Intl.DateTimeFormat('pt-BR', { timeZone: 'America/Sao_Paulo' }).format(day);
+  return Buffer.from(
+    [
+      'Data;Pedido;Código;Produto;Qtde;Vlr. Unitário;Desconto',
+      `${date};E2E-1;A-1;Azeite 500 ml;2;39,90;0`,
+      `${date};E2E-1;B-7;Café 250 g;1;18,50;1,50`,
+      `${date};E2E-2;A-1;Azeite 500 ml;1;39,90;`,
+    ].join('\r\n'),
+  );
+}
+
+async function importSales(page: Page) {
+  await page.goto('/dados');
+  await page.locator('input[type="file"]').setInputFiles({ name: 'vendas-e2e.csv', mimeType: 'text/csv', buffer: salesCsv() });
+  await page.getByRole('button', { name: 'Enviar e pré-visualizar' }).click();
+  await page.getByRole('button', { name: 'Mapear colunas' }).click();
+  await page.getByRole('button', { name: 'Validar no servidor' }).click();
+  await page.getByRole('button', { name: 'Revisar e confirmar' }).click({ timeout: 30_000 });
+}
+
+const figure = (page: Page, label: string) => page.locator('dt', { hasText: label }).locator('xpath=following-sibling::dd[1]');
+
+test('importação de vendas: do arquivo aos painéis, sem duplicar, e desfeita', async ({ page }) => {
+  await signIn(page, { ...owner, password: ownerPassword });
+  await expect(page.getByText('Primeiros passos')).toBeVisible();
+
+  // First import: three lines, two orders.
+  await importSales(page);
+  await expect(figure(page, 'Linhas a gravar')).toHaveText('3');
+  await page.getByRole('button', { name: 'Confirmar e gravar' }).click();
+  await expect(page.getByText('Importação concluída')).toBeVisible({ timeout: 60_000 });
+  await expect(figure(page, 'Registros gravados')).toHaveText('3');
+
+  // The overview now reads the metric layer: 2×39,90 + 18,50 − 1,50 + 39,90 = 136,60.
+  await page.goto('/visao-geral');
+  await expect(page.getByText(/Receita líquida, últimos 30 dias/)).toBeVisible();
+  await expect(page.getByText('R$ 136,60').first()).toBeVisible();
+
+  // Same file again: warned in the preview, every line recognised as already imported.
+  await page.goto('/dados');
+  await page.locator('input[type="file"]').setInputFiles({ name: 'vendas-e2e.csv', mimeType: 'text/csv', buffer: salesCsv() });
+  await page.getByRole('button', { name: 'Enviar e pré-visualizar' }).click();
+  await expect(page.getByText('Este mesmo arquivo já foi importado')).toBeVisible();
+  await page.getByRole('button', { name: 'Mapear colunas' }).click();
+  await page.getByRole('button', { name: 'Validar no servidor' }).click();
+  await page.getByRole('button', { name: 'Revisar e confirmar' }).click({ timeout: 30_000 });
+  await expect(page.getByText('3 linhas já estão nos dados e serão ignoradas')).toBeVisible();
+  await page.getByRole('button', { name: 'Confirmar e gravar' }).click();
+  await expect(figure(page, 'Registros gravados')).toHaveText('0', { timeout: 60_000 });
+  await expect(figure(page, 'Ignorados (duplicados)')).toHaveText('3');
+
+  // Undo the first import from the history: the overview goes back to empty.
+  await page.goto('/dados');
+  const completed = page.getByRole('row').filter({ hasText: 'vendas-e2e.csv' }).filter({ hasText: 'Concluída' });
+  await completed.last().getByRole('button', { name: 'Ações para vendas-e2e.csv' }).click();
+  await page.getByRole('menuitem', { name: 'Desfazer' }).click();
+  await page.getByRole('button', { name: 'Desfazer importação' }).click();
+  await expect(page.getByText('Importação desfeita')).toBeVisible({ timeout: 60_000 });
+  await page.goto('/visao-geral');
+  await expect(page.getByText('Primeiros passos')).toBeVisible();
 });
