@@ -67,13 +67,13 @@ export async function runAnalysisAction(): Promise<Result> {
 
 /** Analysis parameters (owner/admin). Percentages arrive as 0–100 and are stored as ratios. */
 export async function saveAnalysisSettingsAction(_previous: FormState, formData: FormData): Promise<FormState> {
-  const raw = Object.fromEntries([...formData.entries()].filter(([, value]) => typeof value === 'string'));
+  const raw = Object.fromEntries([...formData.entries()].filter((entry): entry is [string, string] => typeof entry[1] === 'string'));
   const parsed = analysisSettingsSchema.safeParse(raw);
   if (!parsed.success) {
-    return { status: 'error', message: 'Revise os campos destacados.', fieldErrors: fieldErrors(parsed.error) };
+    return { status: 'error', message: 'Revise os campos destacados.', fieldErrors: fieldErrors(parsed.error), values: raw };
   }
   const auth = await authorize('admin');
-  if (!auth.ok) return { status: 'error', code: auth.error.code, message: auth.error.message };
+  if (!auth.ok) return { status: 'error', code: auth.error.code, message: auth.error.message, values: raw };
 
   const settings = {
     ...parsed.data,
@@ -85,7 +85,7 @@ export async function saveAnalysisSettingsAction(_previous: FormState, formData:
   if (error) {
     const mapped = mapDatabaseError(error);
     if (mapped.code === 'unknown') logServerError('análises: parâmetros', error);
-    return { status: 'error', code: mapped.code, message: mapped.message };
+    return { status: 'error', code: mapped.code, message: mapped.message, values: raw };
   }
 
   const outcome = await runAnalysis({

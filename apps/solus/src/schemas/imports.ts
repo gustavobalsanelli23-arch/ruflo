@@ -53,13 +53,23 @@ export const issuesPageSchema = z.object({
   page: z.number().int().min(0).max(1000),
 });
 
-const percent = (min: number, max: number) => z.coerce.number({ error: 'Informe um número.' }).min(min, `Entre ${min}% e ${max}%.`).max(max, `Entre ${min}% e ${max}%.`);
+// "20,5" is how a percentage is typed in Brazil; an empty field is missing, not zero.
+const typedNumber = (value: unknown) => {
+  if (typeof value !== 'string') return value;
+  const text = value.trim();
+  return text === '' ? undefined : text.replace(',', '.');
+};
+const percent = (min: number, max: number) =>
+  z.preprocess(typedNumber, z.coerce.number({ error: 'Informe um número.' }).min(min, `Entre ${min}% e ${max}%.`).max(max, `Entre ${min}% e ${max}%.`));
 const days = (min: number, max: number) =>
-  z.coerce
-    .number({ error: 'Informe um número.' })
-    .int('Use um número inteiro de dias.')
-    .min(min, `Entre ${min} e ${max} dias.`)
-    .max(max, `Entre ${min} e ${max} dias.`);
+  z.preprocess(
+    typedNumber,
+    z.coerce
+      .number({ error: 'Informe um número.' })
+      .int('Use um número inteiro de dias.')
+      .min(min, `Entre ${min} e ${max} dias.`)
+      .max(max, `Entre ${min} e ${max} dias.`),
+  );
 
 /** Analysis parameters as typed in Settings (percentages as 0–100). */
 export const analysisSettingsSchema = z
