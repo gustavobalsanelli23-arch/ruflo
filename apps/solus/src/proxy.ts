@@ -45,7 +45,8 @@ export async function proxy(request: NextRequest) {
   const { pathname, search } = request.nextUrl;
   const isDev = process.env.NODE_ENV === 'development';
   const nonce = createNonce();
-  const csp = buildContentSecurityPolicy(nonce, isDev);
+  const supabaseUrl = getSupabaseConfig()?.url;
+  const csp = buildContentSecurityPolicy(nonce, isDev, supabaseUrl ? new URL(supabaseUrl).origin : null);
 
   const pending: PendingCookie[] = [];
   const extraHeaders: Record<string, string> = {};

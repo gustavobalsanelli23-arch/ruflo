@@ -195,6 +195,16 @@ describe('estoque', () => {
       // CMV da janela 136, anualizado sobre 27 dias, dividido pelo capital
       expect(n(summary!.annual_turnover)).toBeCloseTo((136 * 365) / 27 / 400, 8);
       expect(summary).toMatchObject({ products: '4', sold_without_position: '0' });
+      // faixas de cobertura (sem os itens zerados) e categorias
+      expect(summary!.by_coverage).toEqual([
+        { bucket: '61 a 120 dias', products: 2, value: 200 },
+        { bucket: 'Sem venda', products: 1, value: 200 },
+      ]);
+      expect(summary!.by_category).toEqual([
+        { category: 'Utilidades', products: 1, value: 200, dailyCost: 0, attention: 0 },
+        expect.objectContaining({ category: 'Frios', products: 1, value: 100, attention: 1 }),
+        expect.objectContaining({ category: 'Mercearia', products: 2, value: 100, attention: 1 }),
+      ]);
     });
   });
 

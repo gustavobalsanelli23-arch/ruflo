@@ -953,3 +953,38 @@ grant execute on function
   public.stage_import_batch(uuid, integer, jsonb, jsonb),
   public.finish_validation(uuid, integer)
 to authenticated;
+
+-- ---------------------------------------------------------------------------
+-- Resumo dos problemas de uma importação (tela de validação)
+-- ---------------------------------------------------------------------------
+
+-- Problemas agrupados por tipo, com as primeiras linhas afetadas. SECURITY
+-- INVOKER: o RLS de import_errors decide o que cada pessoa vê.
+create function public.import_issue_summary(p_import_id uuid)
+returns table (
+  severity public.issue_severity,
+  code text,
+  field text,
+  message text,
+  occurrences bigint,
+  sample_rows integer[]
+)
+language sql
+stable
+set search_path = ''
+as $$
+  select
+    e.severity,
+    e.code,
+    e.field,
+    min(e.message),
+    count(*),
+    (array_agg(e.row_number order by e.row_number) filter (where e.row_number is not null))[1:12]
+  from public.import_errors e
+  where e.import_id = p_import_id
+  group by e.severity, e.code, e.field
+  order by e.severity, count(*) desc, e.code
+$$;
+
+revoke all on function public.import_issue_summary(uuid) from public, anon;
+grant execute on function public.import_issue_summary(uuid) to authenticated;

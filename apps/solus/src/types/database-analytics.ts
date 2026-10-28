@@ -96,8 +96,23 @@ export type AnalysisRunRow = {
   created_at: string;
 };
 
+export type ImportBatchRow = {
+  import_id: string;
+  organization_id: string;
+  batch_index: number;
+  row_count: number;
+  rejected_count: number;
+  warning_count: number;
+  payload_sha256: string;
+  staged_at: string;
+  committed_at: string | null;
+  inserted_count: number | null;
+  skipped_count: number | null;
+};
+
 export type AnalyticsTables = {
   import_errors: ReadOnly<ImportErrorRow>;
+  import_batches: ReadOnly<ImportBatchRow>;
   opportunities: ReadOnly<OpportunityRow>;
   opportunity_events: {
     Row: OpportunityEventRow;
@@ -260,6 +275,8 @@ export type InventorySummaryRow = {
   annual_turnover: number | null;
   sold_without_position: number;
   by_status: Json;
+  by_coverage: Json;
+  by_category: Json;
 };
 
 export type AnalyticsFunctions = {
@@ -274,6 +291,7 @@ export type AnalyticsFunctions = {
   save_import_mapping: { Args: { p_import_id: string; p_mapping: Json; p_options: Json; p_sheet_name: string | null }; Returns: undefined };
   stage_import_batch: Rows<{ staged_rows: number; rejected_rows: number; warnings: number }>;
   finish_validation: { Args: { p_import_id: string; p_expected_batches: number }; Returns: Json };
+  import_issue_summary: Rows<{ severity: IssueSeverity; code: string; field: string | null; message: string; occurrences: number; sample_rows: number[] | null }>;
   start_import: { Args: { p_import_id: string; p_duplicate_policy: string }; Returns: undefined };
   commit_import_batch: Rows<{ inserted_rows: number; skipped_rows: number }>;
   finalize_import: Rows<{ final_status: ImportStatusV2; inserted_rows: number; skipped_rows: number; rejected_rows: number }>;

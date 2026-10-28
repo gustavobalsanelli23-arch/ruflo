@@ -580,8 +580,8 @@ as $$
   from covered x
 $$;
 
--- Resumo do estoque: totais, por classe e o giro agregado (CMV anualizado da
--- janela ÷ capital em estoque).
+-- Resumo do estoque: totais, por classe, por faixa de cobertura, por
+-- categoria e o giro agregado (CMV anualizado da janela ÷ capital em estoque).
 create function public.inventory_summary(p_organization_id uuid, p_as_of date)
 returns table (
   products bigint,
@@ -593,7 +593,9 @@ returns table (
   window_cogs numeric,
   annual_turnover numeric,
   sold_without_position bigint,
-  by_status jsonb
+  by_status jsonb,
+  by_coverage jsonb,
+  by_category jsonb
 )
 language sql
 stable
@@ -620,6 +622,33 @@ as $$
     select p.stock_status, count(*) as products, coalesce(sum(p.stock_value), 0) as value
     from positions p
     group by p.stock_status
+  ),
+  coverage_buckets as (
+    select b.position, b.label, count(*) as products, coalesce(sum(p.stock_value), 0) as value
+    from positions p
+    cross join lateral (
+      select * from (values
+        (1, 'Até 7 dias', p.coverage_days <= 7),
+        (2, '8 a 30 dias', p.coverage_days > 7 and p.coverage_days <= 30),
+        (3, '31 a 60 dias', p.coverage_days > 30 and p.coverage_days <= 60),
+        (4, '61 a 120 dias', p.coverage_days > 60 and p.coverage_days <= 120),
+        (5, 'Mais de 120 dias', p.coverage_days > 120),
+        (6, 'Sem venda', p.coverage_days is null)
+      ) as v(position, label, hit)
+      where v.hit
+    ) b
+    where p.on_hand > 0
+    group by b.position, b.label
+  ),
+  categories as (
+    select
+      coalesce(p.category_name, 'Sem categoria') as category,
+      count(*) as products,
+      coalesce(sum(p.stock_value), 0) as value,
+      coalesce(sum(p.avg_daily_units * p.unit_cost), 0) as daily_cost,
+      count(*) filter (where p.stock_status in ('rupture', 'rupture-risk', 'stalled', 'low-turnover')) as attention
+    from positions p
+    group by 1
   )
   select
     (select count(*) from positions),
@@ -641,7 +670,15 @@ as $$
         and i.import_id in (select private.active_import_ids(p_organization_id))
         and not exists (select 1 from positions p where p.product_id = i.product_id)
     ),
-    coalesce((select jsonb_agg(jsonb_build_object('status', s.stock_status, 'products', s.products, 'value', s.value)) from statuses s), '[]'::jsonb)
+    coalesce((select jsonb_agg(jsonb_build_object('status', s.stock_status, 'products', s.products, 'value', s.value)) from statuses s), '[]'::jsonb),
+    coalesce((
+      select jsonb_agg(jsonb_build_object('bucket', c.label, 'products', c.products, 'value', c.value) order by c.position)
+      from coverage_buckets c
+    ), '[]'::jsonb),
+    coalesce((
+      select jsonb_agg(jsonb_build_object('category', c.category, 'products', c.products, 'value', c.value, 'dailyCost', c.daily_cost, 'attention', c.attention) order by c.value desc, c.category)
+      from categories c
+    ), '[]'::jsonb)
   from window_bounds w, window_cost wc
 $$;
 

@@ -4,15 +4,19 @@
  * lets those scripts load the chunks they need. Styles allow inline
  * attributes because the charts and motion library set them at runtime; style
  * attributes cannot execute script.
+ *
+ * `uploadOrigin` is the Supabase project origin: the browser sends import
+ * files straight to Storage with a signed URL (the file never passes through
+ * the app server), so that origin, and only it, is allowed in connect-src.
  */
-export function buildContentSecurityPolicy(nonce: string, isDev: boolean) {
+export function buildContentSecurityPolicy(nonce: string, isDev: boolean, uploadOrigin: string | null = null) {
   const directives = [
     `default-src 'self'`,
     `script-src 'self' 'nonce-${nonce}' 'strict-dynamic'${isDev ? ` 'unsafe-eval'` : ''}`,
     `style-src 'self' 'unsafe-inline'`,
     `img-src 'self' blob: data:`,
     `font-src 'self'`,
-    `connect-src 'self'`,
+    `connect-src 'self'${uploadOrigin ? ` ${uploadOrigin}` : ''}`,
     `object-src 'none'`,
     `base-uri 'self'`,
     `form-action 'self'`,

@@ -9,9 +9,18 @@ import { cn } from '@/lib/utils';
  * numbers in place. It opens the overview, ahead of every chart, and is the
  * one typographic statement on the screen.
  */
-export function Briefing({ segments, dataThrough }: { segments: BriefingSegment[]; dataThrough: string }) {
+export function Briefing({
+  segments,
+  dataThrough,
+  source = 'analyst',
+}: {
+  segments: BriefingSegment[];
+  dataThrough: string;
+  /** 'analyst': the demo's written note; 'metrics': sentences assembled from the metric layer, no AI. */
+  source?: 'analyst' | 'metrics';
+}) {
   return (
-    <section aria-label="Nota do analista sobre o período">
+    <section aria-label={source === 'analyst' ? 'Nota do analista sobre o período' : 'Resumo do período'}>
       <p className="max-w-[72ch] text-lg leading-8 text-muted-foreground sm:text-xl sm:leading-9">
         {segments.map((segment, index) =>
           segment.kind === 'text' ? (
@@ -33,11 +42,14 @@ export function Briefing({ segments, dataThrough }: { segments: BriefingSegment[
       <p className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1.5 text-xs text-subtle-foreground">
         <span className="inline-flex items-center gap-1.5">
           <LogoMark className="size-4 text-brand" />
-          Nota do analista, escrita com os dados até <time dateTime={dataThrough}>{formatDate(dataThrough)}</time>
+          {source === 'analyst' ? 'Nota do analista, escrita com os dados até ' : 'Resumo calculado com os dados importados até '}
+          <time dateTime={dataThrough}>{formatDate(dataThrough)}</time>
         </span>
-        <TextLink href="/analista" className="text-xs">
-          Aprofundar no analista
-        </TextLink>
+        {source === 'analyst' && (
+          <TextLink href="/analista" className="text-xs">
+            Aprofundar no analista
+          </TextLink>
+        )}
       </p>
     </section>
   );

@@ -180,6 +180,19 @@ export async function getInventory(
   return { rows: positions, truncated: rows.length > limit };
 }
 
+/** Items out of stock or about to run out, most urgent first. */
+export async function getUrgentInventory(supabase: SolusClient, organizationId: string, asOf: string, limit = 20): Promise<InventoryPosition[]> {
+  const rows = unwrap(
+    'estoque urgente',
+    await supabase
+      .rpc('inventory_position', { p_organization_id: organizationId, p_as_of: asOf })
+      .in('stock_status', ['rupture', 'rupture-risk'])
+      .order('coverage_days', { ascending: true, nullsFirst: true })
+      .limit(limit),
+  );
+  return rows.map(toPosition);
+}
+
 export async function getAllInventory(supabase: SolusClient, organizationId: string, asOf: string): Promise<InventoryPosition[]> {
   const all: InventoryPosition[] = [];
   for (let offset = 0; ; offset += PAGE) {
@@ -202,14 +215,18 @@ export interface InventoryTotals {
   lastSnapshot: string | null;
   oldestSnapshot: string | null;
   windowDays: number | null;
+  windowCogs: number | null;
   annualTurnover: number | null;
   soldWithoutPosition: number;
   byStatus: { status: string; products: number; value: number }[];
+  byCoverage: { bucket: string; products: number; value: number }[];
+  byCategory: { category: string; products: number; value: number; dailyCost: number; attention: number }[];
 }
+
+const jsonList = <T>(value: unknown): T[] => (Array.isArray(value) ? (value as T[]) : []);
 
 export async function getInventoryTotals(supabase: SolusClient, organizationId: string, asOf: string): Promise<InventoryTotals> {
   const [row]: InventorySummaryRow[] = unwrap('resumo do estoque', await supabase.rpc('inventory_summary', { p_organization_id: organizationId, p_as_of: asOf }));
-  const byStatus = Array.isArray(row?.by_status) ? (row.by_status as { status: string; products: number; value: number }[]) : [];
   return {
     products: Number(row?.products ?? 0),
     stockValue: Number(row?.stock_value ?? 0),
@@ -217,8 +234,25 @@ export async function getInventoryTotals(supabase: SolusClient, organizationId: 
     lastSnapshot: row?.last_snapshot ?? null,
     oldestSnapshot: row?.oldest_snapshot ?? null,
     windowDays: row?.window_days ?? null,
+    windowCogs: row?.window_cogs === null || row?.window_cogs === undefined ? null : Number(row.window_cogs),
     annualTurnover: row?.annual_turnover === null || row?.annual_turnover === undefined ? null : Number(row.annual_turnover),
     soldWithoutPosition: Number(row?.sold_without_position ?? 0),
-    byStatus: byStatus.map((item) => ({ status: item.status, products: Number(item.products), value: Number(item.value) })),
+    byStatus: jsonList<{ status: string; products: number; value: number }>(row?.by_status).map((item) => ({
+      status: item.status,
+      products: Number(item.products),
+      value: Number(item.value),
+    })),
+    byCoverage: jsonList<{ bucket: string; products: number; value: number }>(row?.by_coverage).map((item) => ({
+      bucket: item.bucket,
+      products: Number(item.products),
+      value: Number(item.value),
+    })),
+    byCategory: jsonList<{ category: string; products: number; value: number; dailyCost: number; attention: number }>(row?.by_category).map((item) => ({
+      category: item.category,
+      products: Number(item.products),
+      value: Number(item.value),
+      dailyCost: Number(item.dailyCost),
+      attention: Number(item.attention),
+    })),
   };
 }

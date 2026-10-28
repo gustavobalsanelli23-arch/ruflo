@@ -14,7 +14,7 @@ import { Panel } from '@/components/data/panel';
 import { Segmented } from '@/components/data/segmented';
 import { Stat, StatStrip } from '@/components/data/stat';
 import { EmptyState } from '@/components/data/states';
-import { OPPORTUNITY_CATEGORY, OPPORTUNITY_STATUS, PRIORITY } from '@/components/data/status';
+import { OPPORTUNITY_CATEGORY, OPPORTUNITY_STATUS, PRIORITY, PRIORITY_WEIGHT } from '@/components/data/status';
 import type { Opportunity, OpportunityCategory, OpportunityStatus } from '@/lib/data/types';
 import { formatCurrency, pluralize } from '@/lib/format';
 import { useReturnFocus } from '@/lib/use-return-focus';
@@ -36,16 +36,22 @@ const VIEW_FILTER: Record<View, (status: OpportunityStatus) => boolean> = {
 };
 
 const STATUS_ORDER: OpportunityStatus[] = ['new', 'reviewing', 'in-progress', 'done', 'dismissed'];
-const PRIORITY_WEIGHT = { high: 3, medium: 2, low: 1 } as const;
+
+/** Profit first (monthly equivalent), then capital by its own size: they are never summed. */
+const byImpact = (a: Opportunity, b: Opportunity) =>
+  Number(a.impactKind === 'capital') - Number(b.impactKind === 'capital') ||
+  (a.impactKind === 'capital' ? b.impact - a.impact : monthlyEquivalent(b) - monthlyEquivalent(a));
 
 const SORTS: Record<Sort, { label: string; compare: (a: Opportunity, b: Opportunity) => number }> = {
   priority: {
     label: 'Prioridade',
-    compare: (a, b) => PRIORITY_WEIGHT[b.priority] - PRIORITY_WEIGHT[a.priority] || monthlyEquivalent(b) * b.confidence - monthlyEquivalent(a) * a.confidence,
+    compare: (a, b) => PRIORITY_WEIGHT[b.priority] - PRIORITY_WEIGHT[a.priority] || b.confidence - a.confidence || byImpact(a, b),
   },
-  impact: { label: 'Impacto estimado', compare: (a, b) => monthlyEquivalent(b) - monthlyEquivalent(a) },
+  impact: { label: 'Impacto estimado', compare: byImpact },
   confidence: { label: 'Confiança', compare: (a, b) => b.confidence - a.confidence },
 };
+
+export type StatusChange = (id: string, status: OpportunityStatus) => Promise<{ ok: true } | { ok: false; message: string }>;
 
 function TypeBreakdown({
   open,
@@ -59,11 +65,16 @@ function TypeBreakdown({
   const groups = (Object.keys(OPPORTUNITY_CATEGORY) as OpportunityCategory[])
     .map((type) => {
       const items = open.filter((op) => op.category === type);
-      return { type, count: items.length, value: items.reduce((sum, op) => sum + monthlyEquivalent(op), 0) };
+      const profit = items.filter((op) => op.impactKind !== 'capital');
+      // Grupos só de capital (estoque) mostram o capital; os demais, o lucro mensal equivalente.
+      const capitalOnly = profit.length === 0;
+      const value = capitalOnly ? items.reduce((sum, op) => sum + op.impact, 0) : profit.reduce((sum, op) => sum + monthlyEquivalent(op), 0);
+      return { type, count: items.length, value, capitalOnly };
     })
     .filter((group) => group.count > 0)
-    .sort((a, b) => b.value - a.value);
-  const max = Math.max(1, ...groups.map((g) => g.value));
+    .sort((a, b) => Number(a.capitalOnly) - Number(b.capitalOnly) || b.value - a.value);
+  const max = Math.max(1, ...groups.filter((g) => !g.capitalOnly).map((g) => g.value));
+  const maxCapital = Math.max(1, ...groups.filter((g) => g.capitalOnly).map((g) => g.value));
   return (
     <ul className="-mx-2 flex flex-col">
       {groups.map((group) => {
@@ -86,11 +97,14 @@ function TypeBreakdown({
                 </span>
                 <span className="shrink-0 tabular text-foreground">
                   {formatCurrency(group.value, { whole: true })}
-                  <span className="ml-1 text-xs text-subtle-foreground">/mês</span>
+                  <span className="ml-1 text-xs text-subtle-foreground">{group.capitalOnly ? 'em capital' : '/mês'}</span>
                 </span>
               </span>
               <span className="mt-1.5 block h-1.5 overflow-hidden rounded-full bg-neutral-soft" aria-hidden="true">
-                <span className={cn('block h-full rounded-full', pressed ? 'bg-brand' : 'bg-series-1')} style={{ width: `${(group.value / max) * 100}%` }} />
+                <span
+                  className={cn('block h-full rounded-full', pressed ? 'bg-brand' : group.capitalOnly ? 'bg-series-2' : 'bg-series-1')}
+                  style={{ width: `${(group.value / (group.capitalOnly ? maxCapital : max)) * 100}%` }}
+                />
               </span>
             </button>
           </li>
@@ -103,9 +117,14 @@ function TypeBreakdown({
 export function OpportunityCenter({
   opportunities,
   productNames,
+  onStatusChange,
+  canEdit = true,
 }: {
   opportunities: Opportunity[];
   productNames: Record<string, string>;
+  /** Persists a status change (real organizations). Without it, changes stay in memory (demo). */
+  onStatusChange?: StatusChange;
+  canEdit?: boolean;
 }) {
   const router = useRouter();
   const pathname = usePathname();
@@ -117,10 +136,8 @@ export function OpportunityCenter({
   const [pendingDismiss, setPendingDismiss] = useState<Opportunity | null>(null);
   const titleRef = useRef<HTMLHeadingElement>(null);
   const returnFocus = useReturnFocus();
-  // Demo only: status edits live in memory until the data layer exists.
-  const [statuses, setStatuses] = useState<Record<string, OpportunityStatus>>(() =>
-    Object.fromEntries(opportunities.map((op) => [op.id, op.status])),
-  );
+  // Optimistic status: the server answer (or the page refresh) confirms it.
+  const [statuses, setStatuses] = useState<Record<string, OpportunityStatus>>({});
 
   const statusOf = (op: Opportunity) => statuses[op.id] ?? op.status;
   const open = opportunities.filter((op) => VIEW_FILTER.open(statusOf(op)));
@@ -143,6 +160,8 @@ export function OpportunityCenter({
 
   const monthly = open.filter((op) => op.impactKind === 'monthly');
   const oneOff = open.filter((op) => op.impactKind === 'one-off');
+  const capital = open.filter((op) => op.impactKind === 'capital');
+  const profitOpen = open.filter((op) => op.impactKind !== 'capital');
   const done = opportunities.filter((op) => statusOf(op) === 'done');
   const sum = (list: Opportunity[]) => list.reduce((total, op) => total + op.impact, 0);
 
@@ -155,15 +174,26 @@ export function OpportunityCenter({
     router.replace(query ? `${pathname}?${query}` : pathname, { scroll: false });
   };
 
-  const changeStatus = (op: Opportunity, status: OpportunityStatus, confirmed = false) => {
+  const changeStatus = async (op: Opportunity, status: OpportunityStatus, confirmed = false) => {
     if (status === 'dismissed' && !confirmed) {
       setPendingDismiss(op);
       return;
     }
+    const before = statusOf(op);
     setStatuses((previous) => ({ ...previous, [op.id]: status }));
-    toast.success(`Status alterado para ${OPPORTUNITY_STATUS[status].label.toLowerCase()}`, {
-      description: 'Ambiente de demonstração: a alteração não é salva.',
-    });
+    if (!onStatusChange) {
+      toast.success(`Status alterado para ${OPPORTUNITY_STATUS[status].label.toLowerCase()}`, {
+        description: 'Ambiente de demonstração: a alteração não é salva.',
+      });
+      return;
+    }
+    const result = await onStatusChange(op.id, status);
+    if (result.ok) {
+      toast.success(`Status alterado para ${OPPORTUNITY_STATUS[status].label.toLowerCase()}`);
+    } else {
+      setStatuses((previous) => ({ ...previous, [op.id]: before }));
+      toast.error('O status não foi alterado', { description: result.message });
+    }
   };
 
   const clearFilters = () => {
@@ -173,7 +203,7 @@ export function OpportunityCenter({
 
   return (
     <div className="flex flex-col gap-6">
-      <StatStrip label="Resumo das oportunidades" className="md:grid-cols-4">
+      <StatStrip label="Resumo das oportunidades" className={capital.length > 0 ? 'md:grid-cols-3 xl:grid-cols-5' : 'md:grid-cols-4'}>
         <Stat
           label="Ganho mensal estimado"
           value={
@@ -189,6 +219,13 @@ export function OpportunityCenter({
           value={formatCurrency(sum(oneOff), { whole: true })}
           hint={`Caixa liberado ou vendas protegidas, em ${oneOff.length}`}
         />
+        {capital.length > 0 && (
+          <Stat
+            label="Capital a liberar"
+            value={formatCurrency(sum(capital), { whole: true })}
+            hint={`Estoque parado ou em excesso, em ${capital.length}. Não é lucro.`}
+          />
+        )}
         <Stat label="Em aberto" value={counts.open} hint={`${counts.new} novas, ${counts.progress} em análise ou andamento`} />
         <Stat
           label="Concluídas"
@@ -205,9 +242,11 @@ export function OpportunityCenter({
         <Panel
           className="xl:col-span-8"
           title="Mapa de prioridade"
-          description="Confiança da análise contra o ganho mensal equivalente (ganhos pontuais divididos por 12). Selecione um ponto para abrir a oportunidade."
+          description={`Confiança da análise contra o ganho mensal equivalente (ganhos pontuais divididos por 12). Selecione um ponto para abrir a oportunidade.${
+            capital.length > 0 ? ` As ${capital.length} de capital em estoque ficam fora do mapa: não são lucro.` : ''
+          }`}
         >
-          <PriorityMap items={open} selectedId={selectedId} onSelect={select} />
+          <PriorityMap items={profitOpen} selectedId={selectedId} onSelect={select} />
         </Panel>
         <Panel
           className="xl:col-span-4"
@@ -319,7 +358,9 @@ export function OpportunityCenter({
           </ol>
         )}
         <p className="text-xs text-subtle-foreground">
-          Impactos são estimativas calculadas com as premissas descritas em cada oportunidade, sobre dados de demonstração. Não são ganhos garantidos.
+          {onStatusChange
+            ? 'Impactos são estimativas calculadas com as fórmulas descritas em cada oportunidade, sobre os dados importados. Não são ganhos garantidos.'
+            : 'Impactos são estimativas calculadas com as premissas descritas em cada oportunidade, sobre dados de demonstração. Não são ganhos garantidos.'}
         </p>
       </section>
 
@@ -357,7 +398,7 @@ export function OpportunityCenter({
                   <label htmlFor="op-status" className="text-sm text-muted-foreground">
                     Status
                   </label>
-                  <Select value={statusOf(selected)} onValueChange={(value) => changeStatus(selected, value as OpportunityStatus)}>
+                  <Select value={statusOf(selected)} onValueChange={(value) => void changeStatus(selected, value as OpportunityStatus)} disabled={!canEdit}>
                     <SelectTrigger id="op-status" className="w-44 bg-card" aria-label="Status da oportunidade">
                       <SelectValue />
                     </SelectTrigger>
@@ -397,7 +438,7 @@ export function OpportunityCenter({
             <Button
               variant="destructive"
               onClick={() => {
-                if (pendingDismiss) changeStatus(pendingDismiss, 'dismissed', true);
+                if (pendingDismiss) void changeStatus(pendingDismiss, 'dismissed', true);
                 setPendingDismiss(null);
               }}
             >

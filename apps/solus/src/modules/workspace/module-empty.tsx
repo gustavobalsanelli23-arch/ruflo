@@ -10,11 +10,14 @@ import { Button } from '@/components/ui/button';
 
 type ModuleKey = 'profit' | 'inventory' | 'opportunities' | 'analyst';
 
-const MODULES: Record<ModuleKey, { icon: LucideIcon; title: string; body: string; shows: string[]; demo: string }> = {
+const IMPORT_NEXT = 'Importe as planilhas da empresa na área de dados: os números aparecem aqui assim que a importação terminar.';
+
+const MODULES: Record<ModuleKey, { icon: LucideIcon; title: string; body: string; next: string; shows: string[]; demo: string }> = {
   profit: {
     icon: Coins,
     title: 'Ainda não há vendas e custos para analisar',
     body: 'A lucratividade é calculada a partir das vendas e do custo de cada produto da sua empresa.',
+    next: IMPORT_NEXT,
     shows: ['Margem por produto, categoria e fornecedor', 'Itens vendidos abaixo do custo', 'Evolução da margem no período'],
     demo: '/demo/lucratividade',
   },
@@ -22,6 +25,7 @@ const MODULES: Record<ModuleKey, { icon: LucideIcon; title: string; body: string
     icon: Boxes,
     title: 'Ainda não há posição de estoque',
     body: 'A inteligência de estoque cruza a posição atual com o ritmo de vendas de cada item.',
+    next: 'Importe a posição de estoque (e as vendas, para medir o giro) na área de dados.',
     shows: ['Cobertura em dias por produto', 'Risco de ruptura e itens parados', 'Capital empatado por categoria'],
     demo: '/demo/estoque',
   },
@@ -29,6 +33,7 @@ const MODULES: Record<ModuleKey, { icon: LucideIcon; title: string; body: string
     icon: Radar,
     title: 'Nenhuma oportunidade por enquanto',
     body: 'Oportunidades são encontradas nos dados da sua empresa, cada uma com a evidência que a sustenta e o impacto estimado.',
+    next: 'A análise roda sozinha ao fim de cada importação. Sem evidência suficiente, nenhuma oportunidade é criada.',
     shows: ['Preços abaixo do custo e reajustes de fornecedor', 'Rupturas próximas e estoque parado', 'Fatos separados de estimativas'],
     demo: '/demo/oportunidades',
   },
@@ -36,6 +41,7 @@ const MODULES: Record<ModuleKey, { icon: LucideIcon; title: string; body: string
     icon: MessageSquareText,
     title: 'O analista precisa dos seus dados para responder',
     body: 'As respostas citam os números da sua empresa e separam fatos de hipóteses. Sem dados, não há o que afirmar com segurança.',
+    next: 'O analista com IA chega na próxima etapa da SOLUS. Os números que ele vai usar já estão nas telas de análise.',
     shows: ['Perguntas em linguagem natural sobre vendas, margem e estoque', 'Tabelas e fontes em cada resposta', 'Recomendações com o que fazer a seguir'],
     demo: '/demo/analista',
   },
@@ -52,9 +58,7 @@ export function ModuleEmpty({ module }: { module: ModuleKey }) {
             {spec.title}
           </h2>
           <p className="mt-2 text-base text-muted-foreground">{spec.body}</p>
-          <p className="mt-2 text-base text-muted-foreground">
-            A importação de planilhas e o processamento dos dados chegam na próxima etapa da SOLUS.
-          </p>
+          <p className="mt-2 text-base text-muted-foreground">{spec.next}</p>
           <div className="mt-6 flex flex-wrap gap-2">
             <Button asChild>
               <Link href="/dados">Ver a área de dados</Link>

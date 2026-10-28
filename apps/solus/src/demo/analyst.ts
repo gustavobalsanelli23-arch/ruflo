@@ -133,13 +133,13 @@ function profitLeaders(): AnswerBlock[] {
         name: p.name,
         revenue: formatCurrency(p.revenue, { whole: true }),
         profit: formatCurrency(p.grossProfit, { whole: true }),
-        margin: formatPercent(p.margin),
+        margin: formatPercent(p.margin ?? 0),
         share: formatPercent(p.grossProfit / total),
       })),
     },
     {
       kind: 'findings',
-      facts: top.map((p) => `${p.name}: margem de ${formatPercent(p.margin)} e ${p.unitsSold} unidades.`),
+      facts: top.map((p) => `${p.name}: margem de ${formatPercent(p.margin ?? 0)} e ${p.unitsSold} unidades.`),
       hypotheses: ['Itens de padaria podem estar puxando visitas que geram compras em outras categorias; isso exige dados de cesta para confirmar.'],
     },
     {
@@ -183,7 +183,7 @@ function idleCapital(): AnswerBlock[] {
         name: p.name,
         value: formatCurrency(p.stockValue, { whole: true }),
         coverage: p.coverageDays === null ? 'Sem venda' : formatDays(p.coverageDays),
-        last: p.daysSinceLastSale === 0 ? 'Hoje' : `há ${formatDays(p.daysSinceLastSale)}`,
+        last: p.daysSinceLastSale === 0 ? 'Hoje' : `há ${formatDays(p.daysSinceLastSale ?? 0)}`,
       })),
     },
     {

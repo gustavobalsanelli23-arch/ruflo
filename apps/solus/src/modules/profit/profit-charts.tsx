@@ -20,18 +20,20 @@ import { ChartFrame } from '@/components/charts/chart-frame';
 import { AXIS_TICK, CURSOR_BAND, CURSOR_LINE, GRID_PROPS, MONEY, SERIES, currencyAxis, percentAxis, useChartAnimation } from '@/components/charts/chart-theme';
 import { ChartTooltip } from '@/components/charts/chart-tooltip';
 import type { CategoryPerformance, MarginBand, MarginPoint, ProductProfit } from '@/lib/data/types';
-import { formatCurrency, formatMonth, formatPercent } from '@/lib/format';
+import { formatCurrency, formatMonth, formatPercent, formatRatio } from '@/lib/format';
 
 const BAND_COLOR: Record<MarginBand, string> = {
   healthy: SERIES.one,
   low: SERIES.warning,
   negative: SERIES.critical,
+  unknown: 'var(--muted-foreground)',
 };
 
 const BAND_LABEL: Record<MarginBand, string> = {
   healthy: 'Margem saudável',
   low: 'Margem baixa',
   negative: 'Margem negativa',
+  unknown: 'Sem custo',
 };
 
 function ScatterDot(props: { cx?: number; cy?: number; payload?: ProductProfit }) {
@@ -59,19 +61,25 @@ function ScatterDot(props: { cx?: number; cy?: number; payload?: ProductProfit }
   );
 }
 
-/** Revenue × margin per product: what really earns, what sells but leaks margin. */
+/**
+ * Revenue × margin per product: what really earns, what sells but leaks
+ * margin. Products without a known margin cannot be placed on the margin axis
+ * and are only counted in the summary.
+ */
 export function ProfitabilityMap({ products, threshold }: { products: ProductProfit[]; threshold: number }) {
   const animation = useChartAnimation();
-  const sold = products.filter((p) => p.revenue > 0);
+  const sold = products.filter((p): p is ProductProfit & { margin: number } => p.revenue > 0 && p.margin !== null);
+  const uncosted = products.filter((p) => p.revenue > 0 && p.margin === null).length;
   const y = percentAxis([...sold.map((p) => p.margin), 0, threshold], { includeZero: true });
   const x = currencyAxis(sold.map((p) => p.revenue));
   const attention = sold.filter((p) => p.band !== 'healthy');
+  const listed = attention.slice(0, 8).map((p) => p.name).join(', ');
   return (
     <ChartFrame
       legend={(['healthy', 'low', 'negative'] as const).map((band) => ({ label: BAND_LABEL[band], color: BAND_COLOR[band], mark: 'dot' }))}
-      summary={`${sold.length} produtos vendidos no período. ${attention.length} ficam abaixo do corte de ${formatPercent(threshold, 0)}: ${attention
-        .map((p) => p.name)
-        .join(', ')}.`}
+      summary={`${sold.length} produtos vendidos com custo conhecido no período. ${attention.length} ficam abaixo do corte de ${formatPercent(threshold, 0)}${
+        attention.length > 0 ? `: ${listed}${attention.length > 8 ? ' e outros' : ''}` : ''
+      }.${uncosted > 0 ? ` ${uncosted} sem custo ficam fora do mapa.` : ''}`}
       table={{
         caption: 'Receita e margem bruta por produto no período',
         columns: [
@@ -126,7 +134,7 @@ export function ProfitabilityMap({ products, threshold }: { products: ProductPro
                       <dt className="text-muted-foreground">Lucro bruto</dt>
                       <dd className="text-right font-semibold tabular text-foreground">{formatCurrency(p.grossProfit, { whole: true })}</dd>
                       <dt className="text-muted-foreground">Margem</dt>
-                      <dd className="text-right font-semibold tabular text-foreground">{formatPercent(p.margin)}</dd>
+                      <dd className="text-right font-semibold tabular text-foreground">{formatRatio(p.margin)}</dd>
                     </dl>
                   </div>
                 );
@@ -142,7 +150,7 @@ export function ProfitabilityMap({ products, threshold }: { products: ProductPro
 
 export function CategoryMargins({ categories, threshold }: { categories: CategoryPerformance[]; threshold: number }) {
   const animation = useChartAnimation();
-  const data = [...categories].sort((a, b) => b.margin - a.margin);
+  const data = categories.filter((c): c is CategoryPerformance & { margin: number } => c.margin !== null).sort((a, b) => b.margin - a.margin);
   const axis = percentAxis(data.map((c) => c.margin), { includeZero: true });
   const weakest = data.at(-1);
   return (
@@ -200,7 +208,7 @@ export function CategoryMargins({ categories, threshold }: { categories: Categor
 
 export function MarginTrend({ points }: { points: MarginPoint[] }) {
   const animation = useChartAnimation();
-  const axis = percentAxis(points.flatMap((p) => [p.margin, p.previousMargin]));
+  const axis = percentAxis(points.flatMap((p) => [p.margin, p.previousMargin]).filter((value): value is number => value !== null));
   const last = points.at(-1);
   return (
     <ChartFrame
@@ -208,7 +216,11 @@ export function MarginTrend({ points }: { points: MarginPoint[] }) {
         { label: 'Margem bruta', color: MONEY.profit },
         { label: 'Mesmo mês, ano anterior', color: 'var(--chart-axis)' },
       ]}
-      summary={last ? `Em ${formatMonth(last.date, true)}, margem de ${formatPercent(last.margin)} contra ${formatPercent(last.previousMargin)} um ano antes.` : undefined}
+      summary={
+        last
+          ? `Em ${formatMonth(last.date, true)}, margem de ${formatRatio(last.margin)}${last.previousMargin === null ? '' : ` contra ${formatPercent(last.previousMargin)} um ano antes`}.`
+          : undefined
+      }
       table={{
         caption: 'Margem bruta mensal nos últimos 12 meses e no ano anterior',
         columns: [
@@ -216,7 +228,7 @@ export function MarginTrend({ points }: { points: MarginPoint[] }) {
           { key: 'margin', label: 'Margem', align: 'right' },
           { key: 'previous', label: 'Ano anterior', align: 'right' },
         ],
-        rows: points.map((p) => ({ month: formatMonth(p.date, true), margin: formatPercent(p.margin), previous: formatPercent(p.previousMargin) })),
+        rows: points.map((p) => ({ month: formatMonth(p.date, true), margin: formatRatio(p.margin), previous: formatRatio(p.previousMargin) })),
       }}
     >
       <div className="h-72 xl:h-80">

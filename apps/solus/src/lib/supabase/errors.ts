@@ -66,6 +66,35 @@ const DB_MESSAGES: Record<string, MappedError> = {
   },
   email_not_confirmed: { code: 'forbidden', message: 'Confirme seu e-mail antes de aceitar o convite.' },
   profile_missing: { code: 'unknown', message: GENERIC_ERROR },
+  // Importações
+  import_not_found: { code: 'not_found', message: 'Importação não encontrada nesta organização.' },
+  invalid_import_state: { code: 'conflict', message: 'Esta importação mudou de etapa (talvez em outra aba). Atualize a página para ver a situação atual.' },
+  invalid_file_name: { code: 'validation', message: 'Nome de arquivo inválido.' },
+  invalid_dataset: { code: 'validation', message: 'Escolha o tipo de dado do arquivo.' },
+  unsupported_format: { code: 'validation', message: 'Formato não aceito. Envie uma planilha .xlsx ou um arquivo .csv.' },
+  empty_file: { code: 'validation', message: 'O arquivo está vazio.' },
+  file_too_large: { code: 'validation', message: 'O arquivo passa de 25 MB. Divida por período.' },
+  invalid_checksum: { code: 'validation', message: 'Não foi possível conferir o arquivo. Selecione-o de novo.' },
+  upload_missing: { code: 'conflict', message: 'O arquivo não chegou ao armazenamento. Envie de novo.' },
+  upload_mismatch: { code: 'conflict', message: 'O arquivo armazenado não confere com o selecionado. Envie de novo.' },
+  invalid_mapping: { code: 'validation', message: 'Mapeamento de colunas inválido. Revise as colunas escolhidas.' },
+  invalid_batch: { code: 'validation', message: 'Um lote de linhas foi recusado pelo banco. Recomece a validação.' },
+  batch_too_large: { code: 'validation', message: 'Lote grande demais. Recomece a validação.' },
+  batch_conflict: { code: 'conflict', message: 'Este lote já foi recebido com outro conteúdo. Recomece a validação.' },
+  batches_missing: { code: 'conflict', message: 'Nem todas as linhas chegaram ao servidor. Recomece a validação.' },
+  batches_pending: { code: 'conflict', message: 'Ainda há lotes a gravar. Continue a importação.' },
+  invalid_duplicate_policy: { code: 'validation', message: 'Escolha o que fazer com as linhas duplicadas.' },
+  import_in_progress: {
+    code: 'conflict',
+    message: 'Outra importação desta organização está sendo gravada. Conclua ou cancele essa antes de começar outra.',
+  },
+  import_not_revertable: { code: 'validation', message: 'Cadastros não são desfeitos: importe o arquivo corrigido para atualizar os dados.' },
+  invalid_settings: { code: 'validation', message: 'Valores fora da faixa permitida. Revise os parâmetros.' },
+  // Oportunidades
+  opportunity_not_found: { code: 'not_found', message: 'Oportunidade não encontrada nesta organização.' },
+  invalid_status: { code: 'validation', message: 'Escolha um status válido.' },
+  invalid_note: { code: 'validation', message: 'A observação pode ter até 500 caracteres.' },
+  invalid_opportunities: { code: 'unknown', message: GENERIC_ERROR },
 };
 
 /** Database (PostgREST) errors: `solus:<code>` from our functions, SQLSTATE otherwise. */

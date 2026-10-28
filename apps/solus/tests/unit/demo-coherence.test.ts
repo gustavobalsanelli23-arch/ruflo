@@ -30,7 +30,7 @@ describe('demo dataset coherence', () => {
     const [overview, profit] = await Promise.all([repository.getOverview('30d'), repository.getProfitAnalytics('30d')]);
     expect(profit.grossProfit.value).toBeCloseTo(overview.grossProfit.value, 2);
     expect(profit.products.reduce((sum, p) => sum + p.grossProfit, 0)).toBeCloseTo(profit.grossProfit.value, 2);
-    expect(profit.negativeMarginCount).toBe(profit.products.filter((p) => p.margin < 0).length);
+    expect(profit.negativeMarginCount).toBe(profit.products.filter((p) => (p.margin ?? 0) < 0).length);
   });
 
   it('overview diagnostics agree with the opportunity and inventory screens', async () => {

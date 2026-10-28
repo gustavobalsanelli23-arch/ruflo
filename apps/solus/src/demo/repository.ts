@@ -152,7 +152,7 @@ export const demoRepository: SolusRepository = {
   },
 };
 
-const PRIORITY_WEIGHT = { high: 3, medium: 2, low: 1 } as const;
+const PRIORITY_WEIGHT = { critical: 4, high: 3, medium: 2, low: 1 } as const;
 
 /** Ranks by priority, then by expected monthly value (one-off impacts spread over a year). */
 function rank(o: ReturnType<typeof opportunities>[number]): number {

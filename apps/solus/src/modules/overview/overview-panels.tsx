@@ -6,7 +6,7 @@ import { Panel } from '@/components/data/panel';
 import { OPPORTUNITY_CATEGORY, PriorityMark } from '@/components/data/status';
 import { TextLink } from '@/components/data/text-link';
 import type { ActivityItem, CategoryPerformance, InventorySnapshot, Opportunity, OpportunitySummary } from '@/lib/data/types';
-import { formatCurrency, formatDateTime, formatDays, formatPercent, pluralize, relativeChange } from '@/lib/format';
+import { formatCurrency, formatDateTime, formatDays, formatPercent, formatRatio, pluralize, relativeChange } from '@/lib/format';
 import { cn } from '@/lib/utils';
 import { impactShort } from '@/modules/opportunities/impact';
 
@@ -23,7 +23,7 @@ export function TopOpportunities({ items, summary }: { items: Opportunity[]; sum
       }
       className="h-full"
     >
-      <dl className="grid grid-cols-2 gap-4 border-b pb-4">
+      <dl className={cn('grid gap-4 border-b pb-4', summary.capitalImpact ? 'grid-cols-3' : 'grid-cols-2')}>
         <div>
           <dt className="text-xs text-muted-foreground">Ganho mensal estimado</dt>
           <dd className="mt-0.5 text-xl font-semibold tracking-[-0.02em] text-foreground">
@@ -37,6 +37,12 @@ export function TopOpportunities({ items, summary }: { items: Opportunity[]; sum
             {formatCurrency(summary.oneOffImpact, { whole: true })}
           </dd>
         </div>
+        {summary.capitalImpact ? (
+          <div>
+            <dt className="text-xs text-muted-foreground">Capital a liberar</dt>
+            <dd className="mt-0.5 text-xl font-semibold tracking-[-0.02em] text-foreground">{formatCurrency(summary.capitalImpact, { whole: true })}</dd>
+          </div>
+        ) : null}
       </dl>
       <ol className="-mx-2 mt-2 flex flex-col" aria-label={`${summary.open} oportunidades abertas, as 3 primeiras`}>
         {items.map((op, index) => {
@@ -165,7 +171,7 @@ export function CategoryBreakdown({ categories }: { categories: CategoryPerforma
           </thead>
           <tbody className="divide-y">
             {categories.map((category) => {
-              const low = category.margin < LOW_CATEGORY_MARGIN;
+              const low = category.margin !== null && category.margin < LOW_CATEGORY_MARGIN;
               return (
                 <tr key={category.categoryId} className="transition-colors hover:bg-accent/60">
                   <th scope="row" className="py-2.5 pl-5 text-left font-normal text-foreground">
@@ -184,10 +190,12 @@ export function CategoryBreakdown({ categories }: { categories: CategoryPerforma
                   <td className="px-3 text-right tabular">
                     <span className="inline-flex items-center gap-1 text-foreground">
                       {low && <TriangleAlert aria-hidden="true" className="size-3.5 text-warning-text" />}
-                      {formatPercent(category.margin)}
+                      {formatRatio(category.margin)}
                       {low && <span className="sr-only">, abaixo de {formatPercent(LOW_CATEGORY_MARGIN, 0)}</span>}
                     </span>
-                    <Delta size="xs" kind="points" value={category.margin - category.previousMargin} className="flex justify-end" />
+                    {category.margin !== null && category.previousMargin !== null && (
+                      <Delta size="xs" kind="points" value={category.margin - category.previousMargin} className="flex justify-end" />
+                    )}
                   </td>
                   <td className="hidden pr-5 pl-3 text-right sm:table-cell">
                     <Delta size="xs" value={relativeChange(category.revenue, category.previousRevenue)} />

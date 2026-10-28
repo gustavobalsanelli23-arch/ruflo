@@ -1,7 +1,7 @@
 import type { ProductStock } from '@/lib/data/types';
 import { formatCurrency, formatDays, formatPercent } from '@/lib/format';
 
-interface CategoryStock {
+export interface CategoryStock {
   name: string;
   value: number;
   share: number;
@@ -9,6 +9,8 @@ interface CategoryStock {
   attention: number;
   coverage: number | null;
 }
+
+const ATTENTION = new Set<ProductStock['status']>(['rupture', 'rupture-risk', 'stalled', 'low-turnover']);
 
 function byCategory(products: ProductStock[]): CategoryStock[] {
   const total = products.reduce((sum, p) => sum + p.stockValue, 0);
@@ -23,17 +25,21 @@ function byCategory(products: ProductStock[]): CategoryStock[] {
         value,
         share: total > 0 ? value / total : 0,
         items: items.length,
-        attention: items.filter((p) => p.status !== 'healthy').length,
+        attention: items.filter((p) => ATTENTION.has(p.status)).length,
         coverage: daily > 0 ? value / daily : null,
       };
     })
     .sort((a, b) => b.value - a.value);
 }
 
-/** Where the money on the shelf sits: value at cost per category, with how long it lasts. */
-export function StockByCategory({ products }: { products: ProductStock[] }) {
-  const rows = byCategory(products);
-  const max = Math.max(...rows.map((r) => r.value));
+/**
+ * Where the money on the shelf sits: value at cost per category, with how
+ * long it lasts. Real organizations pass `rows` already grouped by the
+ * database (every item counts, not only the ones listed on the page).
+ */
+export function StockByCategory({ products = [], rows: grouped }: { products?: ProductStock[]; rows?: CategoryStock[] }) {
+  const rows = grouped ?? byCategory(products);
+  const max = Math.max(1, ...rows.map((r) => r.value));
   return (
     <div className="-mx-5 overflow-x-auto">
       <table className="w-full text-sm">
