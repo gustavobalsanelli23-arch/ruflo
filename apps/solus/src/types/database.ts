@@ -8,7 +8,9 @@ export type Json = string | number | boolean | null | { [key: string]: Json | un
 
 export type OrgRole = 'owner' | 'admin' | 'analyst' | 'viewer';
 export type ImportDataset = 'sales' | 'products' | 'inventory' | 'suppliers';
-export type ImportStatus = 'pending' | 'processing' | 'completed' | 'with_errors' | 'failed';
+export type ImportStatus = 'pending' | 'validated' | 'processing' | 'completed' | 'with_errors' | 'failed' | 'canceled' | 'reverted';
+
+import type { AnalyticsFunctions, AnalyticsTables } from './database-analytics';
 
 export type Database = {
   public: {
@@ -183,6 +185,30 @@ export type Database = {
           created_by: string | null;
           created_at: string;
           updated_at: string;
+          storage_path: string | null;
+          file_format: 'csv' | 'xlsx' | null;
+          file_size: number | null;
+          file_sha256: string | null;
+          sheet_name: string | null;
+          mapping: Json;
+          options: Json;
+          summary: Json;
+          total_rows: number;
+          valid_rows: number;
+          warning_count: number;
+          duplicate_rows: number;
+          skipped_rows: number;
+          batch_count: number | null;
+          duplicate_policy: string | null;
+          period_start: string | null;
+          period_end: string | null;
+          file_verified_at: string | null;
+          validated_at: string | null;
+          started_at: string | null;
+          completed_at: string | null;
+          reverted_at: string | null;
+          reverted_by: string | null;
+          failure_reason: string | null;
         };
         Insert: {
           id?: string;
@@ -225,9 +251,9 @@ export type Database = {
           },
         ];
       };
-    };
+    } & AnalyticsTables;
     Views: { [_ in never]: never };
-    Functions: {
+    Functions: AnalyticsFunctions & {
       accept_invitation: {
         Args: { p_token: string };
         Returns: string;

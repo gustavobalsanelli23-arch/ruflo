@@ -1,6 +1,6 @@
 'use client';
 
-import { Clock, FileSpreadsheet } from 'lucide-react';
+import { CircleSlash, Clock, FileSpreadsheet, Undo2 } from 'lucide-react';
 import { DataTable, type Column } from '@/components/data/data-table';
 import { EmptyState } from '@/components/data/states';
 import { IMPORT_STATUS, StatusBadge, type StatusSpec } from '@/components/data/status';
@@ -26,11 +26,14 @@ const DATASET_LABEL: Record<ImportDataset, string> = {
 };
 
 const STATUS: Record<ImportStatus, StatusSpec> = {
-  pending: { label: 'Aguardando', variant: 'neutral', icon: Clock },
+  pending: { label: 'Em validação', variant: 'neutral', icon: Clock },
+  validated: { label: 'Aguardando confirmação', variant: 'brand', icon: Clock },
   processing: IMPORT_STATUS.processing,
   completed: IMPORT_STATUS.completed,
   with_errors: IMPORT_STATUS['with-errors'],
   failed: IMPORT_STATUS.failed,
+  canceled: { label: 'Cancelada', variant: 'neutral', icon: CircleSlash },
+  reverted: { label: 'Desfeita', variant: 'neutral', icon: Undo2 },
 };
 
 const COLUMNS: Column<ImportHistoryRow>[] = [
