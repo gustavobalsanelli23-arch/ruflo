@@ -187,8 +187,8 @@ describe('duplicatas', () => {
       expect(again.summary).toMatchObject({ exactDuplicates: 2, possibleDuplicates: 2, orderDuplicates: 0 });
 
       // ignorar: nada novo
-      const [{ batch_count: batches }] = await s.query<{ batch_count: number }>('select batch_count from public.data_imports where id = $1', [again.importId]);
-      const skipped = await commitAll(s, again.importId, 'skip', batches);
+      const [validated] = await s.query<{ batch_count: number }>('select batch_count from public.data_imports where id = $1', [again.importId]);
+      const skipped = await commitAll(s, again.importId, 'skip', validated!.batch_count);
       expect(skipped).toMatchObject({ inserted_rows: 0, skipped_rows: 4 });
       expect(await countItems(s)).toBe(4);
     });
