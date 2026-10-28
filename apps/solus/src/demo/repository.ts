@@ -1,7 +1,7 @@
 /**
  * DEMONSTRATION repository. Implements SolusRepository over fictitious data.
- * Replaced in Phase 02 by an implementation scoped to the signed-in
- * organization; screens keep calling the same methods.
+ * Served only under /demo. Real organizations get their own implementation
+ * with the analytics engine (Part 04); screens keep calling the same methods.
  */
 import type { SolusRepository } from '@/lib/data/repository';
 import type { BriefingSegment, Comparison, OverviewData, ProfitData } from '@/lib/data/types';

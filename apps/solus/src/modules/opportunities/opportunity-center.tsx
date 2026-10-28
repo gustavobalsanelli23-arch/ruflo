@@ -1,6 +1,6 @@
 'use client';
 
-import Link from 'next/link';
+import { AppLink as Link } from '@/components/shell/base-path';
 import { MessageSquareText, Radar, X } from 'lucide-react';
 import { AnimatePresence, motion } from 'motion/react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';

@@ -1,123 +1,112 @@
 import type { Metadata } from 'next';
-import { Delta } from '@/components/data/delta';
+import Link from 'next/link';
+import { ArrowUpRight, Circle, CircleCheck, CircleDot } from 'lucide-react';
 import { PageHeader } from '@/components/data/page-header';
 import { Panel } from '@/components/data/panel';
-import { PeriodFrame, PeriodScope, PeriodSelect } from '@/components/data/period-scope';
-import { Sparkline } from '@/components/data/sparkline';
-import { Stat, StatStrip } from '@/components/data/stat';
-import { TextLink } from '@/components/data/text-link';
-import { getRepository } from '@/lib/data';
-import { formatCurrency, formatNumber, formatPercent, relativeChange } from '@/lib/format';
-import { parsePeriod } from '@/lib/period';
-import { Briefing } from '@/modules/overview/briefing';
+import { Button } from '@/components/ui/button';
+import { can, ROLE_LABEL } from '@/lib/auth/permissions';
+import { pluralize } from '@/lib/format';
+import { createSupabaseServerClient } from '@/lib/supabase/server';
+import { cn } from '@/lib/utils';
 import { Greeting } from '@/modules/overview/greeting';
-import { MarginChart } from '@/modules/overview/margin-chart';
-import { CategoryBreakdown, InventoryHealth, RecentActivity, TopOpportunities } from '@/modules/overview/overview-panels';
-import { RevenueProfitChart } from '@/modules/overview/revenue-profit-chart';
+import { listMembers } from '@/services/organization-data';
+import { requireWorkspace } from '@/services/workspace';
 
 export const metadata: Metadata = { title: 'Visão executiva' };
 
-const BUCKET = { day: 'dia', week: 'semana', month: 'mês' } as const;
+type StepState = 'done' | 'current' | 'upcoming';
+
+const STATE = {
+  done: { icon: CircleCheck, label: 'Concluído', className: 'text-positive-text' },
+  current: { icon: CircleDot, label: 'Próximo passo', className: 'text-brand' },
+  upcoming: { icon: Circle, label: 'Em breve', className: 'text-subtle-foreground' },
+} as const;
 
 /**
- * Command centre, read top to bottom: the analyst's note, the period's
- * headline figures, how they moved, what needs attention, what happened.
+ * Before the organization has business data, the executive overview is a
+ * checklist built from real state (the organization and its members). It
+ * never shows figures the company does not have.
  */
-export default async function OverviewPage({
-  searchParams,
-}: {
-  searchParams: Promise<Record<string, string | string[] | undefined>>;
-}) {
-  const period = parsePeriod((await searchParams).periodo);
-  const repository = getRepository();
-  const [workspace, data] = await Promise.all([repository.getWorkspace(), repository.getOverview(period)]);
-  const firstName = workspace.user.name.split(' ')[0] ?? workspace.user.name;
-  const { organization } = workspace;
-  const trend = data.trend;
-  const compact = (value: number) => formatCurrency(value, { compact: true });
+export default async function OverviewPage() {
+  const { user, active } = await requireWorkspace();
+  const supabase = await createSupabaseServerClient();
+  const members = supabase ? await listMembers(supabase, active.organizationId) : [];
+  const firstName = user.fullName?.split(' ')[0] ?? user.displayName;
+  const canInvite = can(active.role, 'manageMembers');
+  const hasTeam = members.length > 1;
+
+  const steps: { title: string; detail: string; state: StepState; action?: { href: string; label: string } }[] = [
+    {
+      title: 'Criar a organização',
+      detail: `${active.name} está criada. Seu papel: ${ROLE_LABEL[active.role].toLowerCase()}.`,
+      state: 'done',
+    },
+    {
+      title: 'Convidar a equipe',
+      detail: hasTeam
+        ? `${pluralize(members.length, 'pessoa tem', 'pessoas têm')} acesso a esta organização.`
+        : canInvite
+          ? 'Convide quem acompanha os números, cada pessoa com o papel adequado.'
+          : 'Peça a um administrador para convidar outras pessoas.',
+      state: hasTeam ? 'done' : 'current',
+      action: canInvite ? { href: '/configuracoes?secao=membros', label: hasTeam ? 'Gerenciar membros' : 'Convidar pessoas' } : undefined,
+    },
+    {
+      title: 'Importar vendas, produtos e estoque',
+      detail: 'O envio de planilhas e o processamento dos dados chegam na próxima etapa.',
+      state: 'upcoming',
+    },
+    {
+      title: 'Acompanhar as análises',
+      detail: 'Visão executiva, lucratividade, estoque e oportunidades passam a usar os dados da sua empresa.',
+      state: 'upcoming',
+    },
+  ];
 
   return (
-    <PeriodScope period={period}>
-      <PageHeader
-        title={<Greeting name={firstName} />}
-        description={`${organization.name}, ${organization.segment.toLowerCase()} em ${organization.city}, ${organization.state}.`}
-        actions={<PeriodSelect />}
-      />
-
-      <PeriodFrame className="mt-6 flex flex-col gap-6">
-        <Briefing segments={data.briefing} dataThrough={workspace.dataThrough} />
-
-        <StatStrip label={`Indicadores, ${data.period.label.toLowerCase()}`} className="md:grid-cols-3 xl:grid-cols-[1.4fr_repeat(4,minmax(0,1fr))]">
-          <Stat
-            className="col-span-2 xl:col-span-1"
-            size="xl"
-            label={`Receita, ${data.period.label.toLowerCase()}`}
-            value={compact(data.revenue.value)}
-            delta={<Delta value={relativeChange(data.revenue.value, data.revenue.previous)} />}
-            hint={`contra ${compact(data.revenue.previous)}`}
-          />
-          <Stat
-            label="Lucro bruto"
-            value={compact(data.grossProfit.value)}
-            delta={<Delta size="xs" value={relativeChange(data.grossProfit.value, data.grossProfit.previous)} />}
-            hint={`contra ${compact(data.grossProfit.previous)}`}
-            trend={<Sparkline values={trend.map((p) => p.grossProfit)} />}
-          />
-          <Stat
-            label="Margem bruta"
-            value={formatPercent(data.grossMargin.value)}
-            delta={<Delta size="xs" kind="points" value={data.grossMargin.value - data.grossMargin.previous} />}
-            hint={`contra ${formatPercent(data.grossMargin.previous)}`}
-            trend={<Sparkline values={trend.map((p) => (p.revenue > 0 ? p.grossProfit / p.revenue : 0))} />}
-          />
-          <Stat
-            label="Ticket médio"
-            value={formatCurrency(data.averageTicket.value)}
-            delta={<Delta size="xs" value={relativeChange(data.averageTicket.value, data.averageTicket.previous)} />}
-            hint={`contra ${formatCurrency(data.averageTicket.previous)}`}
-            trend={<Sparkline values={trend.map((p) => (p.orders > 0 ? p.revenue / p.orders : 0))} />}
-          />
-          <Stat
-            label="Pedidos"
-            value={formatNumber(data.orders.value)}
-            delta={<Delta size="xs" value={relativeChange(data.orders.value, data.orders.previous)} />}
-            hint={`contra ${formatNumber(data.orders.previous)}`}
-            trend={<Sparkline values={trend.map((p) => p.orders)} />}
-          />
-        </StatStrip>
-
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
-          <Panel
-            className="lg:col-span-8"
-            title="Receita e lucro bruto"
-            description={`Cada barra é a receita de um ${BUCKET[data.period.granularity]}: a parte de baixo é o lucro bruto, a de cima é o custo das mercadorias.`}
-          >
-            <RevenueProfitChart period={data.period} trend={trend} />
-          </Panel>
-          <Panel
-            className="lg:col-span-4"
-            title="Margem bruta"
-            description={`Quanto sobra de cada real vendido, por ${BUCKET[data.period.granularity]}.`}
-            footer={<TextLink href="/lucratividade">Margem por produto e fornecedor</TextLink>}
-          >
-            <MarginChart period={data.period} trend={trend} previousMargin={data.grossMargin.previous} />
-          </Panel>
-        </div>
-
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-          <TopOpportunities items={data.topOpportunities} summary={data.opportunitySummary} />
-          <InventoryHealth inventory={data.inventory} />
-        </div>
-
-        <div className="grid grid-cols-1 gap-6 xl:grid-cols-12">
-          <div className="xl:col-span-8">
-            <CategoryBreakdown categories={data.categories} />
-          </div>
-          <div className="xl:col-span-4">
-            <RecentActivity items={data.activity.slice(0, 4)} />
-          </div>
-        </div>
-      </PeriodFrame>
-    </PeriodScope>
+    <>
+      <PageHeader title={<Greeting name={firstName} />} description={`Primeiros passos de ${active.name}.`} />
+      <div className="mt-8 grid grid-cols-1 gap-6 lg:grid-cols-12">
+        <Panel className="lg:col-span-8" title="Primeiros passos" description="Os indicadores aparecem aqui assim que houver dados da empresa.">
+          <ol className="flex flex-col">
+            {steps.map((step, index) => {
+              const spec = STATE[step.state];
+              return (
+                <li key={step.title} className={cn('flex gap-4 py-4', index > 0 && 'border-t')}>
+                  <spec.icon aria-hidden="true" className={cn('mt-0.5 size-5 shrink-0', spec.className)} strokeWidth={1.75} />
+                  <div className="min-w-0 flex-1">
+                    <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
+                      <h3 className={cn('text-base font-medium', step.state === 'upcoming' ? 'text-muted-foreground' : 'text-foreground')}>
+                        {step.title}
+                      </h3>
+                      <span className={cn('text-xs font-medium', spec.className)}>{spec.label}</span>
+                    </div>
+                    <p className="mt-1 text-sm text-muted-foreground">{step.detail}</p>
+                    {step.action && (
+                      <Button asChild size="sm" variant={step.state === 'current' ? 'default' : 'outline'} className="mt-3">
+                        <Link href={step.action.href}>{step.action.label}</Link>
+                      </Button>
+                    )}
+                  </div>
+                </li>
+              );
+            })}
+          </ol>
+        </Panel>
+        <Panel className="lg:col-span-4" title="Como fica com dados">
+          <p className="text-sm text-muted-foreground">
+            A demonstração mostra a visão executiva completa de uma empresa fictícia: receita, lucro, margem, estoque e as oportunidades encontradas
+            nos dados.
+          </p>
+          <Button asChild variant="outline" className="mt-4 w-full">
+            <Link href="/demo/visao-geral">
+              Abrir a demonstração
+              <ArrowUpRight aria-hidden="true" />
+            </Link>
+          </Button>
+          <p className="mt-2 text-xs text-subtle-foreground">Empresa e números fictícios, separados da sua organização.</p>
+        </Panel>
+      </div>
+    </>
   );
 }

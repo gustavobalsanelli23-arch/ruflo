@@ -1,6 +1,6 @@
 /**
  * DEMONSTRATION DATA — import history and a sample spreadsheet used to show
- * the mapping and validation steps. Nothing is parsed or stored in Phase 01.
+ * the mapping and validation steps in /demo. Nothing is parsed or stored.
  */
 import type { DataHubData } from '@/lib/data/types';
 

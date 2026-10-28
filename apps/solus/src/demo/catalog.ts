@@ -1,8 +1,7 @@
 /**
  * DEMONSTRATION DATA — fictitious organization, products and suppliers.
- * Exists only to render the interface in Phase 01. Never import this file
- * from a screen: go through getRepository() so the real data layer can
- * replace it.
+ * Rendered only under /demo, always labelled as fictitious. Screens read it
+ * through demoRepository; real organizations never see it.
  */
 
 export const DEMO_TODAY = '2026-10-26';

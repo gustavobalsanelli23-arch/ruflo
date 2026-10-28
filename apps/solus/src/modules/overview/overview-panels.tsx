@@ -1,4 +1,4 @@
-import Link from 'next/link';
+import { AppLink as Link } from '@/components/shell/base-path';
 import { Database, MessageSquareText, OctagonAlert, PackageX, Radar, TriangleAlert, UserPlus, type LucideIcon } from 'lucide-react';
 import { Delta } from '@/components/data/delta';
 import { Meter } from '@/components/data/meter';

@@ -1,10 +1,11 @@
 'use client';
 
-import Link from 'next/link';
 import { Menu, Search } from 'lucide-react';
 import { LogoMark } from '@/components/brand/logo';
 import { Button } from '@/components/ui/button';
 import { formatDate } from '@/lib/format';
+import { AppLink } from './base-path';
+import { OrgSwitcher } from './org-switcher';
 import { ThemeToggle } from './theme-toggle';
 import type { ShellContext } from './types';
 
@@ -23,16 +24,16 @@ export function Topbar({
         <Button variant="ghost" size="icon" className="-ml-2 lg:hidden" onClick={onOpenMenu} aria-label="Abrir navegação">
           <Menu aria-hidden="true" />
         </Button>
-        <Link
+        <AppLink
           href="/visao-geral"
-          className="flex items-center gap-2 rounded-md outline-none focus-visible:ring-2 focus-visible:ring-ring lg:hidden"
+          className="hidden items-center gap-2 rounded-md outline-none focus-visible:ring-2 focus-visible:ring-ring min-[400px]:flex lg:hidden"
           aria-label="SOLUS, ir para a visão executiva"
         >
           <LogoMark className="size-6 text-brand" />
           <span className="text-[12px] font-semibold tracking-[0.22em]" translate="no">
             SOLUS
           </span>
-        </Link>
+        </AppLink>
 
         <button
           type="button"
@@ -44,15 +45,19 @@ export function Topbar({
           <kbd className="rounded border border-border bg-card px-1.5 font-sans text-2xs text-subtle-foreground">⌘&nbsp;K</kbd>
         </button>
 
-        <div className="ml-auto flex items-center gap-1.5 sm:gap-3">
-          <p className="hidden text-xs text-subtle-foreground xl:block">
-            Dados até <time dateTime={context.dataThrough}>{formatDate(context.dataThrough)}</time>
-          </p>
-          {context.organization.isDemo && (
+        <div className="ml-auto flex min-w-0 items-center gap-1.5 sm:gap-3">
+          {context.dataThrough && (
+            <p className="hidden text-xs text-subtle-foreground xl:block">
+              Dados até <time dateTime={context.dataThrough}>{formatDate(context.dataThrough)}</time>
+            </p>
+          )}
+          {context.mode === 'demo' ? (
             <span className="hidden items-center gap-1.5 rounded-md bg-warning-soft px-2 py-1 text-xs font-medium text-warning-text sm:inline-flex">
               <span className="size-1.5 rounded-full bg-warning" aria-hidden="true" />
               Demonstração
             </span>
+          ) : (
+            <OrgSwitcher context={context} />
           )}
           <Button variant="ghost" size="icon" className="md:hidden" onClick={onOpenCommand} aria-label="Buscar">
             <Search aria-hidden="true" />

@@ -1,7 +1,7 @@
 import { expect, test } from './fixtures';
 
 test('oportunidade abre com fatos, estimativa e plano, e o descarte pede confirmação', async ({ page, consoleErrors }) => {
-  await page.goto('/oportunidades');
+  await page.goto('/demo/oportunidades');
   await page.getByRole('button', { name: /Renegociar o reajuste/ }).click();
   await expect(page).toHaveURL(/id=op-boa-vista/);
   const sheet = page.getByRole('dialog');
@@ -19,14 +19,14 @@ test('oportunidade abre com fatos, estimativa e plano, e o descarte pede confirm
 });
 
 test('o link direto abre a oportunidade e fechar limpa a URL', async ({ page }) => {
-  await page.goto('/oportunidades?id=op-azeite');
+  await page.goto('/demo/oportunidades?id=op-azeite');
   await expect(page.getByRole('dialog').getByText('Corrigir o preço do azeite português, vendido abaixo do custo')).toBeVisible();
   await page.keyboard.press('Escape');
-  await expect(page).toHaveURL(/\/oportunidades$/);
+  await expect(page).toHaveURL(/\/demo\/oportunidades$/);
 });
 
 test('filtrar oportunidades por tipo e mudar o status atualiza os cartões', async ({ page, consoleErrors }) => {
-  await page.goto('/oportunidades');
+  await page.goto('/demo/oportunidades');
   const list = page.getByRole('region', { name: 'Oportunidades' }).getByRole('list').first();
   await expect(list.getByRole('article')).toHaveCount(7);
   await page.getByRole('button', { name: /^Estoque/ }).click();
@@ -45,7 +45,7 @@ test('filtrar oportunidades por tipo e mudar o status atualiza os cartões', asy
 });
 
 test('a oportunidade leva à análise completa no analista', async ({ page }) => {
-  await page.goto('/oportunidades?id=op-boa-vista');
+  await page.goto('/demo/oportunidades?id=op-boa-vista');
   await page.getByRole('link', { name: 'Ver a análise completa no analista' }).click();
   await expect(page).toHaveURL(/pergunta=q-frios/);
   const answer = page.getByRole('article', { name: 'Resposta do analista' }).last();
@@ -53,7 +53,7 @@ test('a oportunidade leva à análise completa no analista', async ({ page }) =>
 });
 
 test('a importação percorre as seis etapas até o resultado', async ({ page, consoleErrors }) => {
-  await page.goto('/dados');
+  await page.goto('/demo/dados');
   await page.getByRole('button', { name: 'Usar o arquivo de exemplo' }).click();
   await page.getByRole('button', { name: 'Pré-visualizar arquivo' }).click();
   await expect(page.getByRole('region', { name: 'Tabela: primeiras linhas do arquivo' })).toBeVisible();
@@ -70,14 +70,14 @@ test('a importação percorre as seis etapas até o resultado', async ({ page, c
 });
 
 test('arquivo que não é planilha mostra o erro e como resolver', async ({ page }) => {
-  await page.goto('/dados');
+  await page.goto('/demo/dados');
   await page.locator('input[type=file]').setInputFiles({ name: 'notas.pdf', mimeType: 'application/pdf', buffer: Buffer.from('%PDF') });
   await expect(page.getByRole('alert').filter({ hasText: 'notas.pdf' })).toContainText('não é uma planilha aceita. Envie um arquivo .csv, .xlsx ou .xls.');
   await expect(page.getByRole('button', { name: 'Pré-visualizar arquivo' })).toBeDisabled();
 });
 
 test('o mapeamento bloqueia o avanço sem campo obrigatório', async ({ page }) => {
-  await page.goto('/dados');
+  await page.goto('/demo/dados');
   await page.getByRole('button', { name: 'Usar o arquivo de exemplo' }).click();
   await page.getByRole('button', { name: 'Pré-visualizar arquivo' }).click();
   await page.getByRole('button', { name: 'Mapear colunas' }).click();
@@ -88,14 +88,14 @@ test('o mapeamento bloqueia o avanço sem campo obrigatório', async ({ page }) 
 });
 
 test('o histórico explica uma importação que falhou', async ({ page }) => {
-  await page.goto('/dados');
+  await page.goto('/demo/dados');
   await page.getByRole('button', { name: /1, ver detalhes/ }).click();
   const dialog = page.getByRole('dialog', { name: 'A importação falhou' });
   await expect(dialog).toContainText('coluna de CNPJ');
 });
 
 test('o analista responde a uma sugestão com fatos, hipóteses, tabela e recomendação', async ({ page, consoleErrors }) => {
-  await page.goto('/analista');
+  await page.goto('/demo/analista');
   await page.getByRole('button', { name: 'Nova análise' }).first().click();
   await page.getByRole('button', { name: /Quais produtos mais contribuem para o lucro/ }).click();
   const answer = page.getByRole('article', { name: 'Resposta do analista' }).last();
@@ -111,14 +111,14 @@ test('o analista responde a uma sugestão com fatos, hipóteses, tabela e recome
 });
 
 test('pergunta livre recebe um aviso honesto de demonstração', async ({ page }) => {
-  await page.goto('/analista');
+  await page.goto('/demo/analista');
   await page.getByRole('textbox', { name: 'Pergunta para o analista' }).fill('Qual a melhor loja?');
   await page.keyboard.press('Enter');
   await expect(page.getByText(/Perguntas livres serão respondidas quando o modelo de IA for conectado/)).toBeVisible({ timeout: 10_000 });
 });
 
 test('o sinal de ruptura filtra a tabela de estoque pela URL', async ({ page, consoleErrors }) => {
-  await page.goto('/estoque');
+  await page.goto('/demo/estoque');
   await page.getByRole('region', { name: 'Risco de ruptura' }).getByRole('link', { name: 'Ver na tabela' }).click();
   await expect(page).toHaveURL(/filtro=ruptura/);
   await expect(page.getByRole('radio', { name: /Ruptura/ })).toHaveAttribute('aria-checked', 'true');
@@ -127,7 +127,7 @@ test('o sinal de ruptura filtra a tabela de estoque pela URL', async ({ page, co
 });
 
 test('convidar membro valida o e-mail', async ({ page, consoleErrors }) => {
-  await page.goto('/configuracoes?secao=membros');
+  await page.goto('/demo/configuracoes?secao=membros');
   await page.getByRole('button', { name: 'Convidar membro' }).click();
   const dialog = page.getByRole('dialog', { name: 'Convidar membro' });
   await dialog.getByLabel('E-mail').fill('sem-arroba');
@@ -140,7 +140,7 @@ test('convidar membro valida o e-mail', async ({ page, consoleErrors }) => {
 });
 
 test('excluir organização exige digitar o nome', async ({ page }) => {
-  await page.goto('/configuracoes?secao=geral');
+  await page.goto('/demo/configuracoes?secao=geral');
   await page.getByRole('button', { name: 'Excluir organização' }).click();
   const dialog = page.getByRole('dialog');
   const confirm = dialog.getByRole('button', { name: 'Excluir definitivamente' });

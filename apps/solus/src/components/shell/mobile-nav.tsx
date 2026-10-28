@@ -2,17 +2,20 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { LogIn, LogOut } from 'lucide-react';
 import { Logo } from '@/components/brand/logo';
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { MOBILE_TABS, NAV_GROUPS, NAV_ITEMS, type NavItem } from '@/config/navigation';
 import { cn } from '@/lib/utils';
+import { AppLink, useAppPathname } from './base-path';
 import type { ShellContext } from './types';
+import { useSignOut } from './use-sign-out';
 
 const active = (pathname: string, item: NavItem) => pathname === item.href || pathname.startsWith(`${item.href}/`);
 
 /** Phone bottom bar: the five daily destinations, thumb-reachable. */
 export function MobileTabBar() {
-  const pathname = usePathname();
+  const pathname = useAppPathname(usePathname());
   return (
     <nav
       aria-label="Atalhos"
@@ -23,7 +26,7 @@ export function MobileTabBar() {
           const isActive = active(pathname, item);
           return (
             <li key={item.id}>
-              <Link
+              <AppLink
                 href={item.href}
                 aria-current={isActive ? 'page' : undefined}
                 className={cn(
@@ -33,7 +36,7 @@ export function MobileTabBar() {
               >
                 <item.icon aria-hidden="true" className="size-5" />
                 {item.short}
-              </Link>
+              </AppLink>
             </li>
           );
         })}
@@ -53,7 +56,8 @@ export function MobileMenu({
   context: ShellContext;
   onCloseAutoFocus?: (event: Event) => void;
 }) {
-  const pathname = usePathname();
+  const pathname = useAppPathname(usePathname());
+  const { signOut, pending } = useSignOut();
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent
@@ -78,7 +82,7 @@ export function MobileMenu({
                   const isActive = active(pathname, item);
                   return (
                     <li key={item.id}>
-                      <Link
+                      <AppLink
                         href={item.href}
                         onClick={() => onOpenChange(false)}
                         aria-current={isActive ? 'page' : undefined}
@@ -94,7 +98,7 @@ export function MobileMenu({
                             {context.openOpportunities}
                           </span>
                         )}
-                      </Link>
+                      </AppLink>
                     </li>
                   );
                 })}
@@ -102,12 +106,35 @@ export function MobileMenu({
             </div>
           ))}
         </nav>
-        {context.organization.isDemo && (
-          <p className="border-t border-sidebar-border px-5 py-4 text-xs text-sidebar-muted">
-            <span className="mr-2 inline-block size-1.5 rounded-full bg-warning align-middle" aria-hidden="true" />
-            Ambiente de demonstração com dados fictícios.
-          </p>
-        )}
+        <div className="border-t border-sidebar-border px-5 py-4">
+          <p className="truncate text-sm font-medium text-sidebar-accent-foreground">{context.user.name}</p>
+          <p className="truncate text-xs text-sidebar-muted">{context.user.email}</p>
+          {context.mode === 'demo' ? (
+            <>
+              <p className="mt-3 text-xs text-sidebar-muted">
+                <span className="mr-2 inline-block size-1.5 rounded-full bg-warning align-middle" aria-hidden="true" />
+                Ambiente de demonstração com dados fictícios.
+              </p>
+              <Link
+                href={context.signedIn ? '/visao-geral' : '/entrar'}
+                className="mt-3 flex h-10 items-center gap-2.5 rounded-lg px-2.5 text-sm outline-none hover:bg-sidebar-accent focus-visible:ring-2 focus-visible:ring-sidebar-ring/70"
+              >
+                <LogIn aria-hidden="true" className="size-4 text-sidebar-muted" />
+                {context.signedIn ? 'Ir para a minha organização' : 'Sair da demonstração'}
+              </Link>
+            </>
+          ) : (
+            <button
+              type="button"
+              onClick={signOut}
+              disabled={pending}
+              className="mt-3 flex h-10 w-full items-center gap-2.5 rounded-lg px-2.5 text-sm outline-none hover:bg-sidebar-accent focus-visible:ring-2 focus-visible:ring-sidebar-ring/70 disabled:opacity-60"
+            >
+              <LogOut aria-hidden="true" className="size-4 text-sidebar-muted" />
+              {pending ? 'Saindo…' : 'Sair'}
+            </button>
+          )}
+        </div>
       </SheetContent>
     </Sheet>
   );

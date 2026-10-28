@@ -2,6 +2,7 @@
  * DEMONSTRATION DATA — fictitious organization, people and activity.
  * No real company, person or tax ID is represented here.
  */
+import { PERMISSION_MATRIX } from '@/lib/auth/permissions';
 import type { ActivityItem, Member, Organization, Permission, UserProfile } from '@/lib/data/types';
 
 export const organization: Organization = {
@@ -35,15 +36,8 @@ export const members: Member[] = [
   { id: 'usr-lucia', name: 'Lúcia Fontes', email: 'lucia@lumen.example', role: 'analyst', status: 'invited', lastActive: null },
 ];
 
-export const permissions: Permission[] = [
-  { id: 'view-dashboards', label: 'Ver painéis e análises', description: 'Visão executiva, lucratividade e estoque.', roles: ['owner', 'admin', 'analyst', 'viewer'] },
-  { id: 'use-analyst', label: 'Usar o analista de IA', description: 'Fazer perguntas sobre os dados da empresa.', roles: ['owner', 'admin', 'analyst'] },
-  { id: 'manage-opportunities', label: 'Gerenciar oportunidades', description: 'Alterar status e registrar resultados.', roles: ['owner', 'admin', 'analyst'] },
-  { id: 'import-data', label: 'Importar dados', description: 'Enviar planilhas e mapear colunas.', roles: ['owner', 'admin', 'analyst'] },
-  { id: 'export-data', label: 'Exportar dados', description: 'Baixar tabelas e relatórios.', roles: ['owner', 'admin'] },
-  { id: 'manage-members', label: 'Gerenciar membros', description: 'Convidar pessoas e alterar papéis.', roles: ['owner', 'admin'] },
-  { id: 'manage-organization', label: 'Configurar a organização', description: 'Dados cadastrais, retenção e exclusão.', roles: ['owner'] },
-];
+/** Same table as real organizations: the demo never advertises different rules. */
+export const permissions: Permission[] = PERMISSION_MATRIX;
 
 export const activity: ActivityItem[] = [
   { id: 'a1', kind: 'opportunity', title: 'Nova oportunidade de ruptura', detail: 'Café especial Mirante 250 g cobre menos de 3 dias.', at: '2026-10-26T07:10:00-03:00' },

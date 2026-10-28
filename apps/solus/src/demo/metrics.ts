@@ -1,6 +1,6 @@
 /**
  * DEMONSTRATION DATA — display aggregations over the generated demo history.
- * These are not the definitive analytical engine (Phase 03+); they only sum
+ * These are not the definitive analytical engine (Part 04); they only sum
  * demo rows so every screen shows numbers that agree with each other.
  */
 import type {

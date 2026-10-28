@@ -1,4 +1,4 @@
-import Link from 'next/link';
+import { AppLink as Link } from '@/components/shell/base-path';
 import { ArrowRight, CircleCheck, Hourglass, OctagonAlert, PackageX, type LucideIcon } from 'lucide-react';
 import type { ProductStock } from '@/lib/data/types';
 import { formatCurrency, formatDays, formatDecimal, pluralize } from '@/lib/format';

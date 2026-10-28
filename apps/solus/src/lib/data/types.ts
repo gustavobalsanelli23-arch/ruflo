@@ -1,7 +1,7 @@
 /**
  * Domain contracts consumed by the interface. The demo repository implements
- * them today; the real data layer (Supabase, Phase 02+) must return the same
- * shapes so no screen has to be rebuilt.
+ * them for /demo; the analytics engine over Supabase (Part 04) must return the
+ * same shapes so no screen has to be rebuilt.
  *
  * Money is expressed in BRL (reais, not cents). Ratios are 0–1.
  * Dates are ISO strings (YYYY-MM-DD) interpreted in UTC.

@@ -1,12 +1,12 @@
 import { describe, expect, it } from 'vitest';
-import { getRepository } from '@/lib/data';
+import { demoRepository } from '@/demo/repository';
 
 /**
  * The demo exists to evaluate the interface, so its numbers must agree with
  * each other across screens: totals are sums of the same product rows.
  */
 describe('demo dataset coherence', () => {
-  const repository = getRepository();
+  const repository = demoRepository;
 
   it('is flagged as a demonstration workspace', async () => {
     const workspace = await repository.getWorkspace();

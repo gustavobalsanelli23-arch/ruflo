@@ -24,7 +24,7 @@ import { cn } from '@/lib/utils';
 
 type BadgeVariant = 'neutral' | 'brand' | 'positive' | 'warning' | 'critical';
 
-interface StatusSpec {
+export interface StatusSpec {
   label: string;
   variant: BadgeVariant;
   icon: LucideIcon;

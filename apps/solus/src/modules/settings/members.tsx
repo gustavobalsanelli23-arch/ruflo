@@ -19,16 +19,9 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import type { Member, Permission, Role } from '@/lib/data/types';
+import { ROLE_LABEL, ROLES } from '@/lib/auth/permissions';
 import { formatDateTime } from '@/lib/format';
 
-export const ROLE_LABEL: Record<Role, string> = {
-  owner: 'Proprietário',
-  admin: 'Administrador',
-  analyst: 'Analista',
-  viewer: 'Leitor',
-};
-
-const ROLES: Role[] = ['owner', 'admin', 'analyst', 'viewer'];
 const ASSIGNABLE: Role[] = ['admin', 'analyst', 'viewer'];
 
 export function MembersSection({ initial }: { initial: Member[] }) {
@@ -66,7 +59,7 @@ export function MembersSection({ initial }: { initial: Member[] }) {
         </Button>
       </div>
       <div className="overflow-x-auto rounded-lg border">
-        <Table>
+        <Table scrollLabel="Tabela: membros da organização">
           <caption className="sr-only">Membros da organização</caption>
           <TableHeader>
             <TableRow className="hover:bg-transparent">
@@ -239,7 +232,7 @@ export function PermissionsSection({ permissions }: { permissions: Permission[] 
     <div className="flex flex-col gap-4">
       <p className="text-sm text-muted-foreground">Os papéis têm permissões fixas nesta fase. A autorização é verificada no servidor a cada ação.</p>
       <div className="overflow-x-auto rounded-lg border">
-        <Table>
+        <Table scrollLabel="Tabela: permissões por papel">
           <caption className="sr-only">Permissões por papel</caption>
           <TableHeader>
             <TableRow className="hover:bg-transparent">
