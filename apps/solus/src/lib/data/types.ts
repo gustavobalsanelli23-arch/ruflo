@@ -323,6 +323,8 @@ export interface ImportRecord {
   uploadedAt: string;
   uploadedBy: string;
   progress?: number;
+  /** What went wrong and how to fix it, for imports with errors or that failed. */
+  issues?: string[];
 }
 
 export interface ColumnMapping {
@@ -345,6 +347,11 @@ export interface DataHubData {
   targetFields: { id: string; label: string; required: boolean }[];
   sample: {
     fileName: string;
+    sizeBytes: number;
+    delimiter: string;
+    encoding: string;
+    firstDate: string;
+    lastDate: string;
     columns: string[];
     rows: string[][];
     totalRows: number;
