@@ -26,6 +26,8 @@ export type Capability =
   | 'view'
   | 'analyze'
   | 'import'
+  | 'manageImports'
+  | 'configureAnalysis'
   | 'export'
   | 'manageMembers'
   | 'manageAdmins'
@@ -35,7 +37,13 @@ export type Capability =
 const CAPABILITIES: Record<Capability, { minimum: Role; label: string; description: string }> = {
   view: { minimum: 'viewer', label: 'Ver painéis e análises', description: 'Visão executiva, lucratividade, estoque e oportunidades.' },
   analyze: { minimum: 'analyst', label: 'Usar o analista e tratar oportunidades', description: 'Fazer perguntas sobre os dados e mudar o status das oportunidades.' },
-  import: { minimum: 'analyst', label: 'Importar dados', description: 'Enviar planilhas e mapear colunas.' },
+  import: { minimum: 'analyst', label: 'Importar dados', description: 'Enviar planilhas, validar, gravar e desfazer as próprias importações.' },
+  manageImports: {
+    minimum: 'admin',
+    label: 'Gerenciar todas as importações',
+    description: 'Continuar, cancelar e desfazer importações de qualquer pessoa e removê-las do histórico.',
+  },
+  configureAnalysis: { minimum: 'admin', label: 'Ajustar os parâmetros de análise', description: 'Margem mínima, limites de estoque e de queda que definem as oportunidades.' },
   export: { minimum: 'admin', label: 'Exportar dados', description: 'Baixar tabelas e relatórios.' },
   manageMembers: { minimum: 'admin', label: 'Gerenciar analistas e leitores', description: 'Convidar, remover e alterar o papel de analistas e leitores.' },
   manageAdmins: { minimum: 'owner', label: 'Gerenciar administradores e proprietários', description: 'Convidar administradores e conceder ou retirar a propriedade.' },

@@ -82,6 +82,8 @@ describe('papéis e permissões (espelho das regras do banco)', () => {
     const roles = Object.fromEntries(PERMISSION_MATRIX.map((p) => [p.id, p.roles]));
     expect(roles.view).toEqual(['owner', 'admin', 'analyst', 'viewer']);
     expect(roles.import).toEqual(['owner', 'admin', 'analyst']);
+    expect(roles.manageImports).toEqual(['owner', 'admin']);
+    expect(roles.configureAnalysis).toEqual(['owner', 'admin']);
     expect(roles.manageMembers).toEqual(['owner', 'admin']);
     expect(roles.manageAdmins).toEqual(['owner']);
     expect(roles.deleteOrganization).toEqual(['owner']);

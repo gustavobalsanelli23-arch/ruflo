@@ -2,11 +2,11 @@
 
 Inteligência de negócios para o varejo: lucro, estoque e oportunidades a partir dos dados de cada empresa. *See beyond the numbers.*
 
-Estado atual (Parte 03): interface completa, autenticação real com Supabase Auth, organizações multi-tenant isoladas por RLS e papéis de acesso. Os módulos analíticos mostram estados vazios até existirem dados reais da empresa; o motor analítico e a IA chegam nas próximas etapas. Uma demonstração com dados fictícios fica em `/demo`, sempre identificada.
+Estado atual (Parte 04): autenticação real com Supabase Auth, organizações multi-tenant isoladas por RLS e papéis de acesso; importação de planilhas (CSV e XLSX) com validação, detecção de duplicatas e histórico; métricas financeiras e de estoque calculadas no banco; motor determinístico de oportunidades com evidências. Visão geral, Lucratividade, Estoque, Oportunidades e Dados usam os dados reais de cada organização. O Analista de IA ainda não está conectado (Parte 05). Uma demonstração com dados fictícios fica em `/demo`, sempre identificada e separada dos dados reais.
 
 ## Stack
 
-Next.js 16 (App Router, `proxy.ts`), React 19, TypeScript strict, Tailwind 4, Supabase (PostgreSQL, Auth), `@supabase/ssr`, Zod, Vitest, Playwright.
+Next.js 16 (App Router, `proxy.ts`), React 19, TypeScript strict, Tailwind 4, Supabase (PostgreSQL, Auth, Storage), `@supabase/ssr`, Zod, PapaParse e read-excel-file (leitura de planilhas no navegador), Vitest, Playwright.
 
 ## Como rodar localmente
 
@@ -35,7 +35,7 @@ Todas lidas só no servidor; nenhuma vai para o navegador. Detalhes em [.env.exa
 |---|---|---|
 | `SUPABASE_URL` | sim | URL do projeto |
 | `SUPABASE_PUBLISHABLE_KEY` | sim | chave publicável (ou `SUPABASE_ANON_KEY` legada) |
-| `SUPABASE_SECRET_KEY` | sim em produção | chave secreta (ou `SUPABASE_SERVICE_ROLE_KEY`), usada só no limite de tentativas |
+| `SUPABASE_SECRET_KEY` | sim em produção | chave secreta (ou `SUPABASE_SERVICE_ROLE_KEY`), usada só no servidor: limite de tentativas e gravação das oportunidades. Sem ela, as importações funcionam, mas as oportunidades não são recalculadas |
 | `SITE_URL` | recomendada | origem dos links enviados por e-mail |
 
 ## Scripts
@@ -46,7 +46,7 @@ Todas lidas só no servidor; nenhuma vai para o navegador. Detalhes em [.env.exa
 | `npm run build` / `npm start` | build e servidor de produção |
 | `npm run typecheck` / `npm run lint` | TypeScript e ESLint |
 | `npm test` | testes unitários e de componentes (Vitest) |
-| `npm run test:db` | RLS e funções do banco num PostgreSQL real (`SOLUS_TEST_DATABASE_URL`) |
+| `npm run test:db` | RLS, importação, métricas, oportunidades e volume num PostgreSQL real (`SOLUS_TEST_DATABASE_URL`) |
 | `npm run test:e2e` | build + E2E (Playwright) em dois servidores locais |
 | `npm run test:e2e:real` | E2E contra um projeto Supabase de teste (credenciais em env) |
 
@@ -59,10 +59,13 @@ src/
     (app)/         área da organização (exige sessão e organização ativa)
     demo/          demonstração com dados fictícios
   components/      design system, shell (sidebar, topbar, seletor de organização)
-  modules/         telas por domínio (auth, organizations, settings, overview…)
-  services/        acesso a dados no servidor (sessão, workspace, organização, rate limit)
+  modules/         telas por domínio (auth, organizations, settings, overview, data-hub, opportunities…)
+  services/        acesso a dados no servidor (sessão, workspace, organização, importações, métricas, motor)
   schemas/         validação com Zod
   lib/             env, Supabase (clientes, cookies, erros), permissões, segurança
+    ingest/        leitura, mapeamento, normalização e validação de planilhas (navegador e servidor)
+    intelligence/  motor de oportunidades (regras determinísticas)
+    analytics/     montagem dos painéis a partir das métricas
   types/           tipos do banco
   proxy.ts         sessão, proteção de rotas, CSP com nonce
 supabase/
@@ -71,10 +74,20 @@ supabase/
   config.toml      Supabase CLI local
 tests/
   unit/            Vitest (regras, ações, componentes)
-  db/              RLS em PostgreSQL real
+  db/              RLS, importação, métricas e volume em PostgreSQL real
   e2e/             Playwright
   e2e-real/        Playwright contra Supabase de teste
 ```
+
+## Limitações atuais
+
+- Lucro **bruto** apenas: impostos, frete, comissões e despesas não estão nos arquivos e não são descontados.
+- Estoque por posições importadas (fotografias), não por movimentações.
+- Sem `.xls` (Excel 97-2003) nem planilhas protegidas por senha.
+- Sem integração direta com ERPs ou PDVs: os dados entram por planilha.
+- Sem previsão de demanda ou sazonalidade; o motor é por regras e não aprende sozinho.
+- O Analista de IA ainda não usa os dados reais (Parte 05).
+- Envio ao Storage, Auth e o E2E da importação ainda não foram executados contra um projeto Supabase real (ver [testes](docs/testes.md)).
 
 ## Documentação
 
@@ -83,4 +96,7 @@ tests/
 - [Segurança e RLS](docs/seguranca-rls.md)
 - [Papéis e permissões](docs/papeis-e-permissoes.md)
 - [Fluxo de autenticação](docs/autenticacao.md)
+- [Importação de dados](docs/importacao-de-dados.md): formatos, mapeamento, normalização, validação, duplicatas, histórico
+- [Métricas e estoque](docs/metricas-e-estoque.md): fórmulas, decisões de cálculo, parâmetros
+- [Intelligence Engine](docs/intelligence-engine.md): regras, confiança, impacto, prioridade, status
 - [Testes](docs/testes.md)

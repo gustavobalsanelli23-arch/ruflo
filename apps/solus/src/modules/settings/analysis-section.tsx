@@ -115,7 +115,7 @@ const GROUPS: { title: string; description: string; fields: FieldSpec[] }[] = [
 ];
 
 export function AnalysisSection({ settings, role }: { settings: AnalysisSettings; role: Role }) {
-  const canEdit = can(role, 'manageMembers');
+  const canEdit = can(role, 'configureAnalysis');
   const { state, formAction, pending, errors, onSubmit, clearError, formRef } = useValidatedAction(
     analysisSettingsSchema,
     saveAnalysisSettingsAction,

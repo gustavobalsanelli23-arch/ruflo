@@ -26,7 +26,7 @@ export default async function DataPage({ searchParams }: { searchParams: Promise
         <TenantDataHub
           history={history}
           canImport={can(active.role, 'import')}
-          canAdmin={can(active.role, 'manageMembers')}
+          canAdmin={can(active.role, 'manageImports')}
           userId={user.id}
           resumeId={resume.success && history.some((item) => item.id === resume.data) ? resume.data : null}
         />

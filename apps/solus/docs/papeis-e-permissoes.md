@@ -6,7 +6,9 @@ Cada pessoa tem um papel **por organização**: a mesma pessoa pode ser owner nu
 |---|:-:|:-:|:-:|:-:|
 | Ver painéis, análises, membros e importações | ✓ | ✓ | ✓ | ✓ |
 | Usar o analista e tratar oportunidades | ✓ | ✓ | ✓ | — |
-| Importar dados (`data_imports`) | ✓ | ✓ | ✓ | — |
+| Importar dados; continuar, cancelar e desfazer as próprias importações | ✓ | ✓ | ✓ | — |
+| Continuar, cancelar e desfazer importações de qualquer pessoa; removê-las do histórico | ✓ | ✓ | — | — |
+| Ajustar os parâmetros de análise | ✓ | ✓ | — | — |
 | Exportar dados | ✓ | ✓ | — | — |
 | Editar o nome da organização | ✓ | ✓ | — | — |
 | Convidar, remover e alterar analistas e leitores | ✓ | ✓ | — | — |
