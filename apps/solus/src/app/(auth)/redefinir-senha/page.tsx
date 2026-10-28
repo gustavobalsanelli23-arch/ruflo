@@ -13,7 +13,7 @@ export default async function ResetPasswordPage() {
   const user = await getSessionUser();
   if (!user) redirect('/recuperar-senha?motivo=link-expirado');
 
-  if (!(await hasRecoveryGrant())) {
+  if (!(await hasRecoveryGrant(user.id))) {
     return (
       <>
         <AuthHeading title="Criar nova senha" />

@@ -21,7 +21,7 @@ const state = vi.hoisted(() => ({
   configured: true,
   limit: 'allowed' as 'allowed' | 'limited' | 'unavailable',
   user: null as { id: string; email: string } | null,
-  recoveryGrant: false,
+  recoveryGrant: null as string | null,
 }));
 const limits = vi.fn();
 const cookieStore = { set: vi.fn(), delete: vi.fn(), get: vi.fn() };
@@ -45,7 +45,7 @@ vi.mock('@/services/session', () => ({ getSessionUser: async () => state.user })
 vi.mock('@/services/recovery', () => ({
   RECOVERY_COOKIE: 'solus-recuperacao',
   RECOVERY_WINDOW_SECONDS: 900,
-  hasRecoveryGrant: async () => state.recoveryGrant,
+  hasRecoveryGrant: async (userId: string) => state.recoveryGrant === userId,
 }));
 vi.mock('next/headers', () => ({ cookies: async () => cookieStore, headers: async () => new Headers() }));
 vi.mock('next/navigation', () => ({
@@ -84,7 +84,7 @@ beforeEach(() => {
   vi.clearAllMocks();
   vi.unstubAllEnvs();
   vi.stubEnv('SITE_URL', 'https://app.solus.example');
-  Object.assign(state, { configured: true, limit: 'allowed', user: null, recoveryGrant: false });
+  Object.assign(state, { configured: true, limit: 'allowed', user: null, recoveryGrant: null });
   for (const fn of Object.values(auth)) fn.mockResolvedValue({ data: {}, error: null });
 });
 
@@ -177,11 +177,12 @@ describe('recuperação e redefinição de senha', () => {
     });
   });
 
-  it('o link de recuperação abre uma janela curta, em cookie HttpOnly, para criar a senha', async () => {
+  it('o link de recuperação abre uma janela curta, em cookie HttpOnly, presa à conta verificada', async () => {
+    auth.verifyOtp.mockResolvedValue({ data: { user: { id: 'u1' }, session: {} }, error: null });
     const url = await redirectOf(confirmEmailLinkAction(IDLE, form({ token_hash: 'abcdef123456', type: 'recovery' })));
     expect(auth.verifyOtp).toHaveBeenCalledWith({ type: 'recovery', token_hash: 'abcdef123456' });
     expect(url).toBe('/redefinir-senha');
-    expect(cookieStore.set).toHaveBeenCalledWith('solus-recuperacao', '1', expect.objectContaining({ httpOnly: true, maxAge: 900, sameSite: 'lax' }));
+    expect(cookieStore.set).toHaveBeenCalledWith('solus-recuperacao', 'u1', expect.objectContaining({ httpOnly: true, maxAge: 900, sameSite: 'lax' }));
   });
 
   it('token malformado nem chega ao Supabase', async () => {
@@ -197,9 +198,17 @@ describe('recuperação e redefinição de senha', () => {
     expect(auth.updateUser).not.toHaveBeenCalled();
   });
 
+  it('uma janela obtida para outra conta não serve para esta', async () => {
+    state.user = { id: 'vitima', email: 'vitima@empresa.com.br' };
+    state.recoveryGrant = 'atacante';
+    const result = await resetPasswordAction(IDLE, form({ password: 'novaSenha1', confirmation: 'novaSenha1' }));
+    expect(result.status).toBe('error');
+    expect(auth.updateUser).not.toHaveBeenCalled();
+  });
+
   it('com a janela, troca a senha, encerra todas as sessões e pede novo login', async () => {
     state.user = { id: 'u1', email: 'ana@empresa.com.br' };
-    state.recoveryGrant = true;
+    state.recoveryGrant = 'u1';
     const url = await redirectOf(resetPasswordAction(IDLE, form({ password: 'novaSenha1', confirmation: 'novaSenha1' })));
     expect(auth.updateUser).toHaveBeenCalledWith({ password: 'novaSenha1' });
     expect(auth.signOut).toHaveBeenCalledWith({ scope: 'global' });
@@ -221,6 +230,7 @@ describe('sair', () => {
     const url = await redirectOf(signOutAction());
     expect(auth.signOut).toHaveBeenCalledWith({ scope: 'local' });
     expect(cookieStore.delete).toHaveBeenCalledWith('solus-org');
+    expect(cookieStore.delete).toHaveBeenCalledWith('solus-recuperacao');
     expect(url).toBe('/entrar?motivo=saiu');
   });
 });

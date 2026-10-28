@@ -10,7 +10,7 @@ Supabase Auth (e-mail e senha) via `@supabase/ssr`. Todas as chamadas ao Supabas
 | `/cadastro` | nome, e-mail e senha → "confirme seu e-mail", com reenvio limitado a 1 por minuto |
 | `/recuperar-senha` | pede o link de recuperação; mesma resposta para qualquer e-mail |
 | `/auth/confirm` | recebe os links do e-mail (`token_hash` + `type`, ou `code` do fluxo PKCE) e confirma com um botão |
-| `/redefinir-senha` | nova senha; só funciona até 15 min depois de abrir o link de recuperação |
+| `/redefinir-senha` | nova senha; só funciona até 15 min depois de abrir o link de recuperação, e só para a conta daquele link |
 | `/organizacoes/nova` | criação da organização (primeiro acesso ou outra empresa) |
 | `/convite/[token]` | prévia e aceite de convite |
 

@@ -185,10 +185,15 @@ export async function confirmEmailLinkAction(_previous: FormState, formData: For
   const isRecovery = (type.success && type.data === 'recovery') || text(formData, 'fluxo') === 'recuperacao';
 
   let error: { code?: string; status?: number } | null = null;
+  let userId: string | undefined;
   if (tokenHash && type.success && /^[A-Za-z0-9_-]{8,256}$/.test(tokenHash)) {
-    ({ error } = await supabase.auth.verifyOtp({ type: type.data, token_hash: tokenHash }));
+    const result = await supabase.auth.verifyOtp({ type: type.data, token_hash: tokenHash });
+    error = result.error;
+    userId = result.data.user?.id;
   } else if (code && /^[A-Za-z0-9_-]{8,256}$/.test(code)) {
-    ({ error } = await supabase.auth.exchangeCodeForSession(code));
+    const result = await supabase.auth.exchangeCodeForSession(code);
+    error = result.error;
+    userId = result.data.user?.id;
   } else {
     return { status: 'error', message: 'Link incompleto. Abra o link mais recente enviado para o seu e-mail.' };
   }
@@ -203,8 +208,8 @@ export async function confirmEmailLinkAction(_previous: FormState, formData: For
     };
   }
 
-  if (isRecovery) {
-    (await cookies()).set(RECOVERY_COOKIE, '1', {
+  if (isRecovery && userId) {
+    (await cookies()).set(RECOVERY_COOKIE, userId, {
       path: '/',
       httpOnly: true,
       sameSite: 'lax',
@@ -225,7 +230,7 @@ export async function resetPasswordAction(_previous: FormState, formData: FormDa
   const supabase = await createSupabaseServerClient();
   const user = await getSessionUser();
   if (!supabase || !user) redirect('/recuperar-senha?motivo=link-expirado');
-  if (!(await hasRecoveryGrant())) {
+  if (!(await hasRecoveryGrant(user.id))) {
     return { status: 'error', message: 'Abra de novo o link de recuperação enviado para o seu e-mail.' };
   }
 
@@ -288,7 +293,9 @@ export async function signOutAction() {
     const { error } = await supabase.auth.signOut({ scope: 'local' });
     if (error) logServerError('auth: sair', error);
   }
-  (await cookies()).delete(ACTIVE_ORG_COOKIE);
+  const store = await cookies();
+  store.delete(ACTIVE_ORG_COOKIE);
+  store.delete(RECOVERY_COOKIE);
   redirect(loginPath({ reason: 'saiu' }));
 }
 

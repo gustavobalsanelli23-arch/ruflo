@@ -4,6 +4,7 @@ import { Menu, Search } from 'lucide-react';
 import { LogoMark } from '@/components/brand/logo';
 import { Button } from '@/components/ui/button';
 import { formatDate } from '@/lib/format';
+import { cn } from '@/lib/utils';
 import { AppLink } from './base-path';
 import { OrgSwitcher } from './org-switcher';
 import { ThemeToggle } from './theme-toggle';
@@ -26,7 +27,11 @@ export function Topbar({
         </Button>
         <AppLink
           href="/visao-geral"
-          className="hidden items-center gap-2 rounded-md outline-none focus-visible:ring-2 focus-visible:ring-ring min-[400px]:flex lg:hidden"
+          className={cn(
+            'items-center gap-2 rounded-md outline-none focus-visible:ring-2 focus-visible:ring-ring lg:hidden',
+            // The organization switcher needs the room on narrow phones.
+            context.mode === 'tenant' ? 'hidden min-[400px]:flex' : 'flex',
+          )}
           aria-label="SOLUS, ir para a visão executiva"
         >
           <LogoMark className="size-6 text-brand" />

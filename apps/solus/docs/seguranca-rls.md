@@ -48,7 +48,7 @@ RLS decide *quem* toca uma linha; o gatilho decide *qual mudança* é válida:
 | Força bruta e abuso | limite no Postgres, compartilhado entre instâncias: entrar (30 por IP e 10 por e-mail a cada 15 min), cadastro, reenvio e recuperação (por IP e por e-mail, por hora), criação de organização (5/h) e convites (30/h); além dos limites do próprio Supabase Auth |
 | Enumeração de contas | cadastro e recuperação respondem igual exista ou não a conta; login com mensagem genérica |
 | Sessão | cookies HttpOnly, `Secure` em produção e `SameSite=Lax`; JWT verificado com `getClaims()` em cada requisição; renovação no proxy; saída local ou de todas as sessões; troca de senha encerra as outras sessões; redefinição encerra todas |
-| Redefinir senha com sessão roubada | exige ter aberto o link de recuperação nos últimos 15 min (cookie HttpOnly); nas configurações, exige a senha atual |
+| Redefinir senha com sessão roubada | exige ter aberto o link de recuperação **desta conta** nos últimos 15 min (cookie HttpOnly com o id do usuário verificado, apagado ao sair); nas configurações, exige a senha atual |
 | Open redirect | `next` aceita só caminhos internos (`safeNextPath`) |
 | Host header injection em e-mails | links usam `SITE_URL` ou o domínio da Vercel, nunca o `Host` da requisição |
 | Vazamento de segredos | chave secreta só em `src/lib/supabase/admin.ts` (`server-only`); nenhuma variável `NEXT_PUBLIC_`; build verificado sem referências ao Supabase no JavaScript do navegador |
