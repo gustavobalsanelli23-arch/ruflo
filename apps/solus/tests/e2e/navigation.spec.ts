@@ -86,3 +86,28 @@ test('a visão em tabela mostra os mesmos dados do gráfico', async ({ page }) =
   await expect(page.getByRole('table').first()).toBeVisible();
   await expect(page.getByRole('columnheader', { name: 'Média de 7 dias' })).toBeVisible();
 });
+
+test('o menu lateral recolhe e lembra a escolha', async ({ page, consoleErrors }) => {
+  await page.goto('/visao-geral');
+  const aside = page.getByRole('complementary', { name: 'Navegação lateral' });
+  const width = async () => (await aside.boundingBox())?.width ?? 0;
+  await expect.poll(width).toBeGreaterThan(200);
+  await page.getByRole('button', { name: 'Recolher menu lateral' }).click();
+  await expect.poll(width).toBeLessThan(80);
+  await page.reload();
+  await expect.poll(width).toBeLessThan(80);
+  await page.getByRole('button', { name: 'Expandir menu lateral' }).click();
+  await expect.poll(width).toBeGreaterThan(200);
+  expect(consoleErrors).toEqual([]);
+});
+
+test('uma oportunidade abre e fecha só com o teclado', async ({ page }) => {
+  await page.goto('/oportunidades');
+  await page.getByRole('button', { name: /Corrigir o preço do azeite/ }).focus();
+  await page.keyboard.press('Enter');
+  await expect(page.getByRole('dialog')).toBeVisible();
+  await expect(page.getByRole('heading', { level: 2, name: /Corrigir o preço do azeite/ })).toBeFocused();
+  await page.keyboard.press('Escape');
+  await expect(page.getByRole('dialog')).toBeHidden();
+  await expect(page.getByRole('button', { name: /Corrigir o preço do azeite/ })).toBeFocused();
+});

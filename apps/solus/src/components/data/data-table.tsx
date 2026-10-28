@@ -225,7 +225,7 @@ export function DataTable<T>({
             </ul>
           )}
           <div className={cn('min-w-0 border-y', edge, mobileRow && 'hidden md:block')}>
-            <Table className="[&_td:first-child]:pl-5 [&_td:last-child]:pr-5 [&_th:first-child]:pl-5 [&_th:last-child]:pr-5">
+            <Table scrollLabel={`Tabela: ${caption}`} className="[&_td:first-child]:pl-5 [&_td:last-child]:pr-5 [&_th:first-child]:pl-5 [&_th:last-child]:pr-5">
               <caption className="sr-only">{caption}</caption>
               <TableHeader>
                 <TableRow className="hover:bg-transparent">

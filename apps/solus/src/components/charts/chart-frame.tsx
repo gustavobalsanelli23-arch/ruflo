@@ -83,7 +83,7 @@ export function ChartFrame({
         <div className="min-w-0">{children}</div>
       ) : (
         <div className="max-h-80 overflow-auto rounded-lg border">
-          <Table className="[&_td:first-child]:pl-3 [&_td:last-child]:pr-3 [&_th:first-child]:pl-3 [&_th:last-child]:pr-3">
+          <Table scrollLabel={`Tabela: ${table.caption}`} className="[&_td:first-child]:pl-3 [&_td:last-child]:pr-3 [&_th:first-child]:pl-3 [&_th:last-child]:pr-3">
             <caption className="sr-only">{table.caption}</caption>
             <TableHeader className="sticky top-0 z-10 bg-card">
               <TableRow className="hover:bg-transparent">

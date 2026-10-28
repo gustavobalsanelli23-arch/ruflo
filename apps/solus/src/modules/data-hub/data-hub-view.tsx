@@ -10,6 +10,7 @@ import { Panel } from '@/components/data/panel';
 import { IMPORT_STATUS, StatusBadge } from '@/components/data/status';
 import type { DataHubData, ImportRecord } from '@/lib/data/types';
 import { formatDateTime, formatNumber, formatPercent } from '@/lib/format';
+import { useReturnFocus } from '@/lib/use-return-focus';
 import { ImportWizard } from './import-wizard';
 
 function columns(onDetails: (record: ImportRecord) => void): Column<ImportRecord>[] {
@@ -80,7 +81,12 @@ function columns(onDetails: (record: ImportRecord) => void): Column<ImportRecord
 
 export function DataHubView({ data }: { data: DataHubData }) {
   const [imports, setImports] = useState<ImportRecord[]>(data.imports);
-  const [details, setDetails] = useState<ImportRecord | null>(null);
+  const [details, setDetailsState] = useState<ImportRecord | null>(null);
+  const returnFocus = useReturnFocus();
+  const setDetails = (record: ImportRecord) => {
+    returnFocus.capture();
+    setDetailsState(record);
+  };
   const processing = imports.some((r) => r.status === 'processing');
 
   // Demo only: advance "processing" rows so the status lifecycle is visible.
@@ -170,8 +176,8 @@ export function DataHubView({ data }: { data: DataHubData }) {
         </Panel>
       </section>
 
-      <Dialog open={details !== null} onOpenChange={(open) => !open && setDetails(null)}>
-        <DialogContent>
+      <Dialog open={details !== null} onOpenChange={(open) => !open && setDetailsState(null)}>
+        <DialogContent onCloseAutoFocus={returnFocus.onCloseAutoFocus}>
           <DialogHeader>
             <DialogTitle>{details?.status === 'failed' ? 'A importação falhou' : 'Importação com erros'}</DialogTitle>
             <DialogDescription>

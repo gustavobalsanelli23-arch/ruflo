@@ -3,7 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { useTheme } from 'next-themes';
 import { useCallback, useEffect } from 'react';
-import { MessageSquareText, Radar } from 'lucide-react';
+import { MessageSquareText, OctagonAlert, PanelLeft, Radar, Upload } from 'lucide-react';
 import {
   Command,
   CommandDialog,
@@ -12,10 +12,10 @@ import {
   CommandInput,
   CommandItem,
   CommandList,
-  CommandSeparator,
   CommandShortcut,
 } from '@/components/ui/command';
 import { NAV_ITEMS } from '@/config/navigation';
+import { useSidebarCollapsed } from './sidebar-state';
 import { THEMES } from './theme-toggle';
 import type { ShellContext } from './types';
 
@@ -30,6 +30,7 @@ export function CommandMenu({
 }) {
   const router = useRouter();
   const { setTheme } = useTheme();
+  const [collapsed, toggleSidebar] = useSidebarCollapsed();
 
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
@@ -65,7 +66,21 @@ export function CommandMenu({
               </CommandItem>
             ))}
           </CommandGroup>
-          <CommandSeparator />
+          <CommandGroup heading="Ações">
+            <CommandItem value="importar planilha dados" onSelect={() => run(() => router.push('/dados'))}>
+              <Upload aria-hidden="true" />
+              <span>Importar planilha</span>
+            </CommandItem>
+            <CommandItem value="itens em risco de ruptura estoque" onSelect={() => run(() => router.push('/estoque?filtro=ruptura#itens'))}>
+              <OctagonAlert aria-hidden="true" />
+              <span>Ver itens em risco de ruptura</span>
+            </CommandItem>
+            <CommandItem value="menu lateral recolher expandir" onSelect={() => run(toggleSidebar)}>
+              <PanelLeft aria-hidden="true" />
+              <span>{collapsed ? 'Expandir o menu lateral' : 'Recolher o menu lateral'}</span>
+              <CommandShortcut className="hidden tracking-normal sm:block">Telas largas</CommandShortcut>
+            </CommandItem>
+          </CommandGroup>
           <CommandGroup heading="Oportunidades prioritárias">
             {context.quickOpportunities.map((op) => (
               <CommandItem key={op.id} value={op.title} onSelect={() => run(() => router.push(`/oportunidades?id=${op.id}`))}>
@@ -74,7 +89,6 @@ export function CommandMenu({
               </CommandItem>
             ))}
           </CommandGroup>
-          <CommandSeparator />
           <CommandGroup heading="Perguntar ao analista">
             {context.quickQuestions.map((q) => (
               <CommandItem key={q.id} value={q.question} onSelect={() => run(() => router.push(`/analista?pergunta=${q.id}`))}>
@@ -83,7 +97,6 @@ export function CommandMenu({
               </CommandItem>
             ))}
           </CommandGroup>
-          <CommandSeparator />
           <CommandGroup heading="Tema">
             {THEMES.map((theme) => (
               <CommandItem key={theme.id} value={`tema ${theme.label} ${theme.hint}`} onSelect={() => run(() => setTheme(theme.id))}>

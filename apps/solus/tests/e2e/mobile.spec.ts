@@ -24,3 +24,21 @@ test('no celular, tabelas viram lista e o período usa um seletor', async ({ pag
   await expect(page.getByRole('combobox', { name: 'Período de análise' })).toBeVisible();
   await expect(page.getByText('Pão de fermentação natural').first()).toBeVisible();
 });
+
+test('no celular, nenhum módulo rola na horizontal', async ({ page }) => {
+  for (const path of ['/visao-geral', '/lucratividade', '/estoque', '/oportunidades', '/analista', '/dados', '/configuracoes']) {
+    await page.goto(path);
+    await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
+    const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
+    expect(overflow, path).toBeLessThanOrEqual(0);
+  }
+});
+
+test('no celular, a importação mostra a etapa atual', async ({ page }) => {
+  await page.goto('/dados');
+  await expect(page.locator('p', { hasText: 'Etapa 1 de 6: Arquivo' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Etapa 1 de 6: Arquivo' })).toBeAttached();
+  await page.getByRole('button', { name: 'Usar o arquivo de exemplo' }).click();
+  await page.getByRole('button', { name: 'Pré-visualizar arquivo' }).click();
+  await expect(page.locator('p', { hasText: 'Etapa 2 de 6: Pré-visualização' })).toBeVisible();
+});

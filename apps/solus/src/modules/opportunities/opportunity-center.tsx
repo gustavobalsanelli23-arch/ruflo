@@ -17,6 +17,7 @@ import { EmptyState } from '@/components/data/states';
 import { OPPORTUNITY_CATEGORY, OPPORTUNITY_STATUS, PRIORITY } from '@/components/data/status';
 import type { Opportunity, OpportunityCategory, OpportunityStatus } from '@/lib/data/types';
 import { formatCurrency, pluralize } from '@/lib/format';
+import { useReturnFocus } from '@/lib/use-return-focus';
 import { cn } from '@/lib/utils';
 import { monthlyEquivalent } from './impact';
 import { OpportunityCard } from './opportunity-card';
@@ -115,6 +116,7 @@ export function OpportunityCenter({
   const [sort, setSort] = useState<Sort>('priority');
   const [pendingDismiss, setPendingDismiss] = useState<Opportunity | null>(null);
   const titleRef = useRef<HTMLHeadingElement>(null);
+  const returnFocus = useReturnFocus();
   // Demo only: status edits live in memory until the data layer exists.
   const [statuses, setStatuses] = useState<Record<string, OpportunityStatus>>(() =>
     Object.fromEntries(opportunities.map((op) => [op.id, op.status])),
@@ -145,6 +147,7 @@ export function OpportunityCenter({
   const sum = (list: Opportunity[]) => list.reduce((total, op) => total + op.impact, 0);
 
   const select = (id: string | null) => {
+    if (id) returnFocus.capture();
     const next = new URLSearchParams(params.toString());
     if (id) next.set('id', id);
     else next.delete('id');
@@ -328,6 +331,7 @@ export function OpportunityCenter({
             event.preventDefault();
             titleRef.current?.focus();
           }}
+          onCloseAutoFocus={returnFocus.onCloseAutoFocus}
         >
           {selected && (
             <>

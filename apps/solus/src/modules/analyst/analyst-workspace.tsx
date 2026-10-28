@@ -14,6 +14,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import type { AnalystData, AnalystMessage, AnalystThread, AnswerBlock } from '@/lib/data/types';
 import { formatDateTime } from '@/lib/format';
+import { useReturnFocus } from '@/lib/use-return-focus';
 import { cn } from '@/lib/utils';
 import { AnswerBlocks, answerToText } from './answer-blocks';
 
@@ -207,17 +208,20 @@ export function AnalystWorkspace({ data }: { data: AnalystData }) {
   const composerRef = useRef<HTMLTextAreaElement>(null);
   const asked = useRef(false);
   const scrollOnNext = useRef(false);
+  const returnFocus = useReturnFocus();
 
   const active = threads.find((thread) => thread.id === activeId) ?? null;
   const messageCount = active?.messages.length ?? 0;
 
-  const ask = (question: string) => {
+  /** `fresh` starts a new conversation even when one is open (deep links always do). */
+  const ask = (question: string, options: { fresh?: boolean } = {}) => {
     const text = question.trim();
     if (!text || thinking !== null) return;
     const now = new Date().toISOString();
     const userMessage: AnalystMessage = { id: `u-${now}`, role: 'user', at: now, text };
-    let threadId = activeId;
-    if (!active) {
+    const current = options.fresh ? null : active;
+    let threadId = current?.id ?? null;
+    if (!current) {
       threadId = `t-${now}`;
       setThreads((previous) => [{ id: threadId as string, title: text, updatedAt: now, messages: [userMessage] }, ...previous]);
       setActiveId(threadId);
@@ -252,8 +256,7 @@ export function AnalystWorkspace({ data }: { data: AnalystData }) {
     const suggestion = data.suggestions.find((s) => s.id === id);
     if (!suggestion || asked.current) return;
     asked.current = true;
-    setActiveId(null);
-    const timer = window.setTimeout(() => ask(suggestion.question), 0);
+    const timer = window.setTimeout(() => ask(suggestion.question, { fresh: true }), 0);
     return () => window.clearTimeout(timer);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [params]);
@@ -298,7 +301,14 @@ export function AnalystWorkspace({ data }: { data: AnalystData }) {
 
       <div className="flex min-h-[calc(100dvh-14rem)] min-w-0 flex-col">
         <div className="mb-4 flex items-center gap-2 lg:hidden">
-          <Button variant="outline" size="sm" onClick={() => setHistoryOpen(true)}>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => {
+              returnFocus.capture();
+              setHistoryOpen(true);
+            }}
+          >
             <History aria-hidden="true" />
             Conversas
           </Button>
@@ -328,7 +338,7 @@ export function AnalystWorkspace({ data }: { data: AnalystData }) {
                     >
                       <span className="text-xs text-subtle-foreground">{suggestion.theme}</span>
                       <span className="mt-1 text-base leading-6 font-medium text-foreground">{suggestion.question}</span>
-                      <span className="mt-3 inline-flex items-center gap-1 text-xs font-medium text-brand opacity-80 transition-opacity group-hover:opacity-100">
+                      <span className="mt-3 inline-flex items-center gap-1 text-xs font-medium text-brand underline-offset-4 group-hover:underline">
                         <SendHorizontal aria-hidden="true" className="size-3.5" />
                         Perguntar
                       </span>
@@ -399,7 +409,7 @@ export function AnalystWorkspace({ data }: { data: AnalystData }) {
       </div>
 
       <Sheet open={historyOpen} onOpenChange={setHistoryOpen}>
-        <SheetContent side="left" className="w-[min(86vw,320px)] overflow-y-auto overscroll-contain p-4">
+        <SheetContent side="left" className="w-[min(86vw,320px)] overflow-y-auto overscroll-contain p-4" onCloseAutoFocus={returnFocus.onCloseAutoFocus}>
           <SheetHeader className="p-0 pb-3">
             <SheetTitle>Conversas</SheetTitle>
           </SheetHeader>

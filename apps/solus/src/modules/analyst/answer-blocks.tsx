@@ -86,8 +86,13 @@ function AnswerChart({ block }: { block: ChartBlock }) {
 function AnswerTable({ block }: { block: TableBlock }) {
   return (
     <div>
-      <div className="overflow-x-auto rounded-lg border">
-        <table className="w-full text-sm">
+      <div
+        tabIndex={0}
+        role="region"
+        aria-label={`Tabela: ${block.title}`}
+        className="overflow-x-auto rounded-lg border outline-none focus-visible:ring-2 focus-visible:ring-ring/60"
+      >
+        <table className="w-full min-w-[34rem] text-sm">
           <caption className="sr-only">{block.title}</caption>
           <thead>
             <tr className="border-b bg-muted/40 text-xs text-muted-foreground">
@@ -126,7 +131,7 @@ function AnswerTable({ block }: { block: TableBlock }) {
 }
 
 function SectionTitle({ children }: { children: React.ReactNode }) {
-  return <h4 className="mb-2.5 text-xs font-medium text-muted-foreground">{children}</h4>;
+  return <h3 className="mb-2.5 text-xs font-medium text-muted-foreground">{children}</h3>;
 }
 
 /**
@@ -190,10 +195,10 @@ export function AnswerBlocks({ blocks, onFollowUp }: { blocks: AnswerBlock[]; on
             return (
               <div key={index} className="grid grid-cols-1 gap-3 lg:grid-cols-2">
                 <section aria-label="Fatos" className="rounded-lg border p-4">
-                  <h4 className="flex items-center gap-2 text-sm font-semibold text-foreground">
+                  <h3 className="flex items-center gap-2 text-sm font-semibold text-foreground">
                     <BadgeCheck aria-hidden="true" className="size-4 text-positive-text" />
                     Fatos verificados nos dados
-                  </h4>
+                  </h3>
                   <ul className="mt-2.5 flex flex-col gap-2 text-sm leading-6 text-muted-foreground">
                     {block.facts.map((fact) => (
                       <li key={fact} className="flex gap-2">
@@ -204,10 +209,10 @@ export function AnswerBlocks({ blocks, onFollowUp }: { blocks: AnswerBlock[]; on
                   </ul>
                 </section>
                 <section aria-label="Hipóteses" className="rounded-lg border border-dashed border-warning/40 p-4">
-                  <h4 className="flex items-center gap-2 text-sm font-semibold text-foreground">
+                  <h3 className="flex items-center gap-2 text-sm font-semibold text-foreground">
                     <FlaskConical aria-hidden="true" className="size-4 text-warning-text" />
                     Hipóteses a validar
-                  </h4>
+                  </h3>
                   <ul className="mt-2.5 flex flex-col gap-2 text-sm leading-6 text-muted-foreground">
                     {block.hypotheses.map((hypothesis) => (
                       <li key={hypothesis} className="flex gap-2">
@@ -222,10 +227,10 @@ export function AnswerBlocks({ blocks, onFollowUp }: { blocks: AnswerBlock[]; on
           case 'recommendation':
             return (
               <section key={index} aria-labelledby={`recomendacao-${index}`} className="rounded-lg border bg-brand-soft/40 p-4">
-                <h4 id={`recomendacao-${index}`} className="flex items-center gap-2 text-sm font-semibold text-foreground">
+                <h3 id={`recomendacao-${index}`} className="flex items-center gap-2 text-sm font-semibold text-foreground">
                   <ListChecks aria-hidden="true" className="size-4 text-brand" />
                   O que fazer
-                </h4>
+                </h3>
                 <ol className="mt-2.5 flex flex-col gap-2">
                   {block.items.map((item, step) => (
                     <li key={item} className="flex gap-3 text-sm leading-6 text-foreground">

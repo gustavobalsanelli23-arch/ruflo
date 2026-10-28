@@ -86,16 +86,16 @@ export default async function OverviewPage({
           />
         </StatStrip>
 
-        <div className="grid grid-cols-1 gap-6 xl:grid-cols-12">
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
           <Panel
-            className="xl:col-span-8"
+            className="lg:col-span-8"
             title="Receita e lucro bruto"
             description={`Cada barra é a receita de um ${BUCKET[data.period.granularity]}: a parte de baixo é o lucro bruto, a de cima é o custo das mercadorias.`}
           >
             <RevenueProfitChart period={data.period} trend={trend} />
           </Panel>
           <Panel
-            className="xl:col-span-4"
+            className="lg:col-span-4"
             title="Margem bruta"
             description={`Quanto sobra de cada real vendido, por ${BUCKET[data.period.granularity]}.`}
             footer={<TextLink href="/lucratividade">Margem por produto e fornecedor</TextLink>}

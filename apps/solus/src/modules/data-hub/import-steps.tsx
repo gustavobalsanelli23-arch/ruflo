@@ -35,7 +35,7 @@ function formatSize(bytes: number): string {
 export function Stepper({ current }: { current: number }) {
   return (
     <div>
-      <p className="mb-2 text-sm font-medium text-foreground md:hidden">
+      <p aria-hidden="true" className="mb-2 text-sm font-medium text-foreground md:hidden">
         Etapa {current + 1} de {STEPS.length}: {STEPS[current]}
       </p>
       <ol className="grid grid-cols-6 gap-1.5 md:gap-2" aria-label="Etapas da importação">
@@ -235,8 +235,8 @@ export function PreviewStep({ sample, fileName, onBack, onNext }: { sample: Samp
           </div>
         ))}
       </dl>
-      <div className="overflow-x-auto rounded-lg border">
-        <Table>
+      <div className="rounded-lg border">
+        <Table scrollLabel="Tabela: primeiras linhas do arquivo">
           <caption className="sr-only">Primeiras linhas do arquivo, com os valores que chamaram atenção marcados</caption>
           <TableHeader>
             <TableRow className="hover:bg-transparent">
@@ -317,8 +317,8 @@ export function MappingStep({
         A SOLUS sugeriu um campo para cada coluna de <span className="font-medium text-foreground">{sample.fileName}</span>. Revise as de menor
         confiança; campos com * são obrigatórios.
       </p>
-      <div className="overflow-x-auto rounded-lg border">
-        <Table>
+      <div className="rounded-lg border">
+        <Table scrollLabel="Tabela: mapeamento das colunas">
           <caption className="sr-only">Mapeamento das colunas do arquivo para os campos da SOLUS</caption>
           <TableHeader>
             <TableRow className="hover:bg-transparent">
