@@ -83,7 +83,7 @@ export function StatusBadge({ spec, className }: { spec: StatusSpec; className?:
 }
 
 /** Priority as a three-step signal plus its word, readable without colour. */
-export function PriorityMark({ priority, className }: { priority: Priority; className?: string }) {
+export function PriorityMark({ priority, short = false, className }: { priority: Priority; short?: boolean; className?: string }) {
   const spec = PRIORITY[priority];
   return (
     <span className={cn('inline-flex items-center gap-1.5 text-xs font-medium', spec.className, className)}>
@@ -96,7 +96,7 @@ export function PriorityMark({ priority, className }: { priority: Priority; clas
           />
         ))}
       </span>
-      Prioridade {spec.label.toLowerCase()}
+      {short ? spec.label : `Prioridade ${spec.label.toLowerCase()}`}
     </span>
   );
 }

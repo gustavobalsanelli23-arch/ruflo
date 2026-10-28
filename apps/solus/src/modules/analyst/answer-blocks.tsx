@@ -1,25 +1,25 @@
 'use client';
 
-import { CheckCircle2, Database, FlaskConical, CornerDownRight } from 'lucide-react';
+import { BadgeCheck, CornerDownRight, Database, FlaskConical, ListChecks } from 'lucide-react';
 import { Bar, BarChart, CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import { ChartFrame } from '@/components/charts/chart-frame';
-import { AXIS_TICK, CURSOR_BAND, CURSOR_LINE, GRID_PROPS, SERIES, useChartAnimation } from '@/components/charts/chart-theme';
+import { AXIS_TICK, CURSOR_BAND, CURSOR_LINE, GRID_PROPS, MONEY, percentAxis, useChartAnimation } from '@/components/charts/chart-theme';
 import { ChartTooltip } from '@/components/charts/chart-tooltip';
 import type { AnswerBlock } from '@/lib/data/types';
 import { formatCurrency, formatPercent } from '@/lib/format';
 import { cn } from '@/lib/utils';
 
 type ChartBlock = Extract<AnswerBlock, { kind: 'chart' }>;
+type TableBlock = Extract<AnswerBlock, { kind: 'table' }>;
 
 function AnswerChart({ block }: { block: ChartBlock }) {
   const animation = useChartAnimation();
   const format = (v: number) => (block.unit === 'percent' ? formatPercent(v) : formatCurrency(v, { whole: true }));
   const horizontal = block.unit === 'currency';
-  const values = block.points.map((p) => p.value);
-  const pad = (Math.max(...values) - Math.min(...values)) * 0.25 || 0.01;
+  const axis = percentAxis(block.points.map((p) => p.value));
   return (
     <ChartFrame
-      legend={[{ label: block.title, color: SERIES.one, mark: horizontal ? 'bar' : 'line' }]}
+      legend={[{ label: block.title, color: MONEY.profit, mark: horizontal ? 'bar' : 'line' }]}
       table={{
         caption: block.title,
         columns: [
@@ -29,22 +29,27 @@ function AnswerChart({ block }: { block: ChartBlock }) {
         rows: block.points.map((p) => ({ label: p.label, value: format(p.value) })),
       }}
     >
-      <div className={horizontal ? 'h-56' : 'h-48'}>
+      <div className={horizontal ? 'h-56' : 'h-52'}>
         <ResponsiveContainer width="100%" height="100%">
           {horizontal ? (
-            <BarChart data={block.points} layout="vertical" margin={{ top: 0, right: 64, bottom: 0, left: 0 }} barCategoryGap="30%">
+            <BarChart data={block.points} layout="vertical" margin={{ top: 0, right: 72, bottom: 0, left: 0 }} barCategoryGap="30%">
               <CartesianGrid stroke="var(--chart-grid)" horizontal={false} />
               <XAxis type="number" hide />
-              <YAxis type="category" dataKey="label" tick={AXIS_TICK} tickLine={false} axisLine={false} width={168} />
+              <YAxis type="category" dataKey="label" tick={AXIS_TICK} tickLine={false} axisLine={false} width={176} />
               <Tooltip
                 cursor={CURSOR_BAND}
                 content={(props) => (
-                  <ChartTooltip active={props.active} payload={props.payload} label={props.label} series={[{ key: 'value', label: block.title, color: SERIES.one, format, mark: 'bar' }]} />
+                  <ChartTooltip
+                    active={props.active}
+                    payload={props.payload}
+                    label={props.label}
+                    series={[{ key: 'value', label: block.title, color: MONEY.profit, format, mark: 'bar' }]}
+                  />
                 )}
               />
               <Bar
                 dataKey="value"
-                fill={SERIES.one}
+                fill={MONEY.profit}
                 radius={[0, 4, 4, 0]}
                 maxBarSize={18}
                 label={{ position: 'right', fill: 'var(--muted-foreground)', fontSize: 11, formatter: (v: unknown) => format(Number(v)) }}
@@ -52,25 +57,24 @@ function AnswerChart({ block }: { block: ChartBlock }) {
               />
             </BarChart>
           ) : (
-            <LineChart data={block.points} margin={{ top: 8, right: 8, bottom: 0, left: 0 }}>
+            <LineChart data={block.points} margin={{ top: 8, right: 12, bottom: 0, left: 0 }}>
               <CartesianGrid {...GRID_PROPS} />
-              <XAxis dataKey="label" tick={AXIS_TICK} tickLine={false} axisLine={false} />
-              <YAxis
-                tick={AXIS_TICK}
-                tickLine={false}
-                axisLine={false}
-                width={48}
-                domain={[Math.min(...values) - pad, Math.max(...values) + pad]}
-                tickFormatter={(v: number) => (block.unit === 'percent' ? formatPercent(v, 0) : formatCurrency(v, { compact: true, whole: true }))}
-                tickCount={4}
-              />
+              <XAxis dataKey="label" tick={AXIS_TICK} tickLine={false} axisLine={false} tickMargin={8} />
+              <YAxis tick={AXIS_TICK} tickLine={false} axisLine={false} width={48} {...axis} />
               <Tooltip
                 cursor={CURSOR_LINE}
                 content={(props) => (
-                  <ChartTooltip active={props.active} payload={props.payload} label={props.label} series={[{ key: 'value', label: block.title, color: SERIES.one, format }]} />
+                  <ChartTooltip active={props.active} payload={props.payload} label={props.label} series={[{ key: 'value', label: block.title, color: MONEY.profit, format }]} />
                 )}
               />
-              <Line type="monotone" dataKey="value" stroke={SERIES.one} strokeWidth={2} dot={{ r: 3, strokeWidth: 2, stroke: 'var(--card)', fill: SERIES.one }} {...animation} />
+              <Line
+                type="monotone"
+                dataKey="value"
+                stroke={MONEY.profit}
+                strokeWidth={2}
+                dot={{ r: 3, strokeWidth: 2, stroke: 'var(--card)', fill: MONEY.profit }}
+                {...animation}
+              />
             </LineChart>
           )}
         </ResponsiveContainer>
@@ -79,25 +83,76 @@ function AnswerChart({ block }: { block: ChartBlock }) {
   );
 }
 
+function AnswerTable({ block }: { block: TableBlock }) {
+  return (
+    <div>
+      <div className="overflow-x-auto rounded-lg border">
+        <table className="w-full text-sm">
+          <caption className="sr-only">{block.title}</caption>
+          <thead>
+            <tr className="border-b bg-muted/40 text-xs text-muted-foreground">
+              {block.columns.map((column) => (
+                <th key={column.key} scope="col" className={cn('h-9 px-3 font-medium whitespace-nowrap first:pl-4 last:pr-4', column.align === 'right' ? 'text-right' : 'text-left')}>
+                  {column.label}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody className="divide-y">
+            {block.rows.map((row, index) => (
+              <tr key={index}>
+                {block.columns.map((column, columnIndex) =>
+                  columnIndex === 0 ? (
+                    <th key={column.key} scope="row" className="py-2.5 pr-3 pl-4 text-left font-normal text-foreground">
+                      {row[column.key]}
+                    </th>
+                  ) : (
+                    <td
+                      key={column.key}
+                      className={cn('px-3 py-2.5 whitespace-nowrap tabular text-muted-foreground last:pr-4', column.align === 'right' ? 'text-right' : 'text-left')}
+                    >
+                      {row[column.key]}
+                    </td>
+                  ),
+                )}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      {block.note && <p className="mt-2 text-xs text-subtle-foreground">{block.note}</p>}
+    </div>
+  );
+}
+
+function SectionTitle({ children }: { children: React.ReactNode }) {
+  return <h4 className="mb-2.5 text-xs font-medium text-muted-foreground">{children}</h4>;
+}
+
+/**
+ * An answer reads like a short report: the answer first, the numbers, the
+ * evidence (chart or table), facts kept apart from hypotheses, what to do,
+ * the data it used and where to go next.
+ */
 export function AnswerBlocks({ blocks, onFollowUp }: { blocks: AnswerBlock[]; onFollowUp?: (text: string) => void }) {
   return (
-    <div className="flex flex-col gap-5">
+    <div className="flex flex-col gap-6">
       {blocks.map((block, index) => {
         switch (block.kind) {
           case 'summary':
             return (
-              <p key={index} className="max-w-[70ch] text-base leading-7 text-foreground sm:text-lg sm:leading-8">
+              <p key={index} className="max-w-[68ch] text-base leading-7 text-foreground sm:text-lg sm:leading-8">
                 {block.text}
               </p>
             );
           case 'metrics':
             return (
-              <dl key={index} className="grid grid-cols-1 gap-px overflow-hidden rounded-lg border bg-border sm:grid-cols-3 *:bg-card *:px-4 *:py-3">
+              <dl key={index} className="grid grid-cols-3 gap-px overflow-hidden rounded-lg border bg-border *:bg-card *:px-3 *:py-3 sm:*:px-4">
                 {block.items.map((item) => (
-                  <div key={item.label}>
+                  <div key={item.label} className="min-w-0">
                     <dt className="text-xs text-muted-foreground">{item.label}</dt>
-                    <dd className="mt-0.5 flex items-baseline gap-2">
-                      <span className="text-lg font-semibold tracking-[-0.01em] text-foreground">{item.value}</span>
+                    <dd className="mt-0.5 flex flex-wrap items-baseline gap-x-2">
+                      <span className="text-base font-semibold tracking-[-0.01em] text-foreground sm:text-lg">{item.value}</span>
                       {item.delta && (
                         <span
                           className={cn(
@@ -117,16 +172,26 @@ export function AnswerBlocks({ blocks, onFollowUp }: { blocks: AnswerBlock[]; on
             );
           case 'chart':
             return (
-              <div key={index} className="rounded-lg border p-4">
-                <AnswerChart block={block} />
-              </div>
+              <section key={index} aria-label={block.title}>
+                <SectionTitle>Evidência</SectionTitle>
+                <div className="rounded-lg border p-4">
+                  <AnswerChart block={block} />
+                </div>
+              </section>
+            );
+          case 'table':
+            return (
+              <section key={index} aria-label={block.title}>
+                <SectionTitle>{block.title}</SectionTitle>
+                <AnswerTable block={block} />
+              </section>
             );
           case 'findings':
             return (
               <div key={index} className="grid grid-cols-1 gap-3 lg:grid-cols-2">
                 <section aria-label="Fatos" className="rounded-lg border p-4">
                   <h4 className="flex items-center gap-2 text-sm font-semibold text-foreground">
-                    <CheckCircle2 aria-hidden="true" className="size-4 text-positive-text" />
+                    <BadgeCheck aria-hidden="true" className="size-4 text-positive-text" />
                     Fatos verificados nos dados
                   </h4>
                   <ul className="mt-2.5 flex flex-col gap-2 text-sm leading-6 text-muted-foreground">
@@ -154,11 +219,30 @@ export function AnswerBlocks({ blocks, onFollowUp }: { blocks: AnswerBlock[]; on
                 </section>
               </div>
             );
+          case 'recommendation':
+            return (
+              <section key={index} aria-labelledby={`recomendacao-${index}`} className="rounded-lg border bg-brand-soft/40 p-4">
+                <h4 id={`recomendacao-${index}`} className="flex items-center gap-2 text-sm font-semibold text-foreground">
+                  <ListChecks aria-hidden="true" className="size-4 text-brand" />
+                  O que fazer
+                </h4>
+                <ol className="mt-2.5 flex flex-col gap-2">
+                  {block.items.map((item, step) => (
+                    <li key={item} className="flex gap-3 text-sm leading-6 text-foreground">
+                      <span className="mt-0.5 grid size-5 shrink-0 place-items-center rounded-md bg-brand-soft text-2xs font-semibold text-brand tabular">
+                        {step + 1}
+                      </span>
+                      {item}
+                    </li>
+                  ))}
+                </ol>
+              </section>
+            );
           case 'sources':
             return (
-              <div key={index}>
-                <p className="text-xs font-medium text-muted-foreground">Dados utilizados</p>
-                <ul className="mt-2 flex flex-wrap gap-2">
+              <section key={index} aria-label="Dados utilizados">
+                <SectionTitle>Dados utilizados</SectionTitle>
+                <ul className="flex flex-wrap gap-2">
                   {block.items.map((source) => (
                     <li key={source.name} className="inline-flex items-center gap-2 rounded-md border bg-muted/40 px-2.5 py-1.5 text-xs">
                       <Database aria-hidden="true" className="size-3.5 text-subtle-foreground" />
@@ -167,23 +251,26 @@ export function AnswerBlocks({ blocks, onFollowUp }: { blocks: AnswerBlock[]; on
                     </li>
                   ))}
                 </ul>
-              </div>
+              </section>
             );
           case 'next':
             return (
-              <div key={index} className="flex flex-wrap gap-2">
-                {block.items.map((item) => (
-                  <button
-                    key={item}
-                    type="button"
-                    onClick={() => onFollowUp?.(item)}
-                    className="inline-flex items-center gap-1.5 rounded-md border px-2.5 py-1.5 text-sm text-muted-foreground outline-none transition-colors hover:border-border-strong hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring/60"
-                  >
-                    <CornerDownRight aria-hidden="true" className="size-3.5" />
-                    {item}
-                  </button>
-                ))}
-              </div>
+              <section key={index} aria-label="Continue a análise">
+                <SectionTitle>Continue a análise</SectionTitle>
+                <div className="flex flex-wrap gap-2">
+                  {block.items.map((item) => (
+                    <button
+                      key={item}
+                      type="button"
+                      onClick={() => onFollowUp?.(item)}
+                      className="inline-flex items-center gap-1.5 rounded-md border px-2.5 py-1.5 text-left text-sm text-muted-foreground outline-none transition-colors hover:border-border-strong hover:bg-accent hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring/60"
+                    >
+                      <CornerDownRight aria-hidden="true" className="size-3.5 shrink-0" />
+                      {item}
+                    </button>
+                  ))}
+                </div>
+              </section>
             );
           default:
             return null;
@@ -191,4 +278,19 @@ export function AnswerBlocks({ blocks, onFollowUp }: { blocks: AnswerBlock[]; on
       })}
     </div>
   );
+}
+
+/** Plain-text version of an answer, for copying into a message or a report. */
+export function answerToText(blocks: AnswerBlock[]): string {
+  const lines: string[] = [];
+  for (const block of blocks) {
+    if (block.kind === 'summary') lines.push(block.text, '');
+    if (block.kind === 'metrics') lines.push(...block.items.map((i) => `${i.label}: ${i.value}${i.delta ? ` (${i.delta})` : ''}`), '');
+    if (block.kind === 'findings') {
+      lines.push('Fatos:', ...block.facts.map((f) => `- ${f}`), 'Hipóteses:', ...block.hypotheses.map((h) => `- ${h}`), '');
+    }
+    if (block.kind === 'recommendation') lines.push('O que fazer:', ...block.items.map((item, i) => `${i + 1}. ${item}`), '');
+    if (block.kind === 'sources') lines.push(`Dados: ${block.items.map((s) => `${s.name} (${s.detail})`).join('; ')}`);
+  }
+  return lines.join('\n').trim();
 }

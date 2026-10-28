@@ -1,7 +1,7 @@
 /**
  * DEMONSTRATION DATA — opportunities derived from the demo dataset.
  * Impacts are computed from the same rows the other screens use, with the
- * assumptions written into each explanation. The real detection engine
+ * assumptions listed in each one. The real detection engine
  * arrives in a later phase.
  */
 import type { Opportunity } from '@/lib/data/types';
@@ -48,8 +48,14 @@ function boaVistaIncrease(): Opportunity {
     status: 'new',
     detectedAt: '2026-10-21',
     summary: `Custos de 5 itens subiram 9% em 15 ago sem repasse ao preço. A margem de frios caiu ${formatDecimal(Math.abs(drop) * 100)} pontos percentuais.`,
-    explanation:
-      'Desde 15 de agosto, todas as notas da Laticínios Boa Vista vêm com custo unitário 9% maior. Os preços de venda não mudaram, então a diferença sai inteira da margem. O impacto considera o volume dos últimos 30 dias.',
+    finding:
+      'Desde 15 de agosto, todas as notas da Laticínios Boa Vista chegam com custo unitário 9% maior nos 5 itens do fornecedor. Os preços de venda desses itens não mudaram.',
+    whyItMatters: `A diferença sai inteira da margem: frios e laticínios perderam ${formatDecimal(Math.abs(drop) * 100)} pontos percentuais. É um custo recorrente, que se repete todo mês enquanto o reajuste valer.`,
+    assumptions: [
+      'Volume de venda igual ao dos últimos 30 dias.',
+      'O valor é o custo extra pago por mês. Uma renegociação parcial recupera só parte dele.',
+    ],
+    relatedQuestionId: 'q-frios',
     recommendation: [
       'Pedir ao fornecedor a justificativa do reajuste e propor 4% com contrato de volume.',
       'Cotar canastra e parmesão com um segundo fornecedor para ter referência de preço.',
@@ -84,8 +90,13 @@ function oliveOilBelowCost(): Opportunity {
     status: 'reviewing',
     detectedAt: '2026-10-19',
     summary: `Custo de ${formatCurrency(cost)} contra preço de ${formatCurrency(product.price)}. Cada unidade vendida dá prejuízo.`,
-    explanation:
-      'O custo do Azeite extravirgem português 500 ml passou de R$ 38,00 para R$ 52,40 em 4 de agosto e o preço de prateleira ficou em R$ 49,90. O impacto compara a perda atual com o preço sugerido, assumindo queda de 20% no volume.',
+    finding: `O custo do Azeite extravirgem português 500 ml passou de R$ 38,00 para ${formatCurrency(cost)} em 4 de agosto. O preço de prateleira continua em ${formatCurrency(product.price)}.`,
+    whyItMatters: `Cada unidade vendida dá prejuízo de ${formatCurrency(cost - product.price)}. É o único item da loja vendido abaixo do custo, e saíram ${t.units} unidades nos últimos 30 dias.`,
+    assumptions: [
+      `Novo preço de ${formatCurrency(target)}.`,
+      'Queda de 20% no volume depois do reajuste.',
+      'Custo de compra estável no patamar atual.',
+    ],
     recommendation: [
       `Reajustar para ${formatCurrency(target)}, o que leva a margem a ${formatPercent(margin(target, cost))}.`,
       'Comunicar o novo preço com a origem do produto na gôndola para sustentar o valor percebido.',
@@ -95,7 +106,6 @@ function oliveOilBelowCost(): Opportunity {
       { label: 'Margem atual', value: formatPercent(margin(product.price, cost)), detail: 'Desde 4 ago' },
       { label: 'Unidades em 30 dias', value: String(t.units) },
       { label: 'Perda acumulada no mês', value: formatCurrency(Math.abs(lossToday), { whole: true }) },
-      { label: 'Preço sugerido', value: formatCurrency(target) },
     ],
     series: {
       label: 'Margem bruta do azeite',
@@ -131,8 +141,14 @@ function lowMarginBeverages(): Opportunity {
     status: 'new',
     detectedAt: '2026-10-22',
     summary: 'Refrigerantes, energético e itens de limpeza giram bem, mas deixam menos de R$ 1,50 por unidade.',
-    explanation:
-      'São produtos de alto giro usados como referência de preço pelo cliente. O cálculo leva cada item a 18% de margem e assume queda de 8% no volume. Vale testar primeiro nos itens com menos concorrência direta.',
+    finding: `${low.length} itens de alto giro ficam abaixo de ${formatPercent(LOW_MARGIN_THRESHOLD, 0)} de margem e deixam menos de R$ 1,50 por unidade vendida.`,
+    whyItMatters:
+      'São produtos de compra frequente, usados pelo cliente como referência de preço. Pequenos ajustes rendem bastante pelo volume, mas pedem cuidado para não afastar a clientela.',
+    assumptions: [
+      'Cada item sobe para 18% de margem.',
+      'Queda de 8% no volume depois do ajuste.',
+      'Ajuste começa pelos itens com menos concorrência direta.',
+    ],
     recommendation: [
       'Subir o preço em etapas de até R$ 0,50 e medir o volume semanal.',
       'Manter refrigerante cola como item de entrada, se a comparação com concorrentes exigir.',
@@ -162,8 +178,14 @@ function stalledWines(): Opportunity {
     status: 'in-progress',
     detectedAt: '2026-10-02',
     summary: `${stalled.length} rótulos sem nenhuma venda há mais de ${formatDays(idle)}.`,
-    explanation:
-      'O Douro e o rosé Provence pararam de vender em julho, depois que a vitrine de importados foi reorganizada. O valor considera o estoque a custo; é caixa que volta ao negócio, não lucro.',
+    finding: `${stalled.length} rótulos de vinho importado estão sem nenhuma venda há mais de ${formatDays(idle)}. Somam ${formatCurrency(value, { whole: true })} em estoque, a preço de custo.`,
+    whyItMatters:
+      'É dinheiro parado que pode voltar ao caixa antes do pico de fim de ano. As vendas pararam depois que a vitrine de importados foi reorganizada, em julho, o que sugere um problema de exposição e não de procura.',
+    assumptions: [
+      'O valor é o estoque a custo: é caixa que volta ao negócio, não lucro.',
+      'Venda sem desconto agressivo, com kits e reposicionamento na vitrine.',
+    ],
+    relatedQuestionId: 'q-capital',
     recommendation: [
       'Montar kits de fim de ano com queijos curados, que estão em alta.',
       'Voltar os rótulos para a vitrine principal com sugestão de harmonização.',
@@ -195,8 +217,13 @@ function coffeeRupture(): Opportunity {
     status: 'new',
     detectedAt: DEMO_TODAY,
     summary: `Estoque cobre ${formatDays(coverage)}; o fornecedor entrega em ${formatDays(product.leadTimeDays)}.`,
-    explanation:
-      'É o item de maior receita de cafés e cresce 18% ao ano. No ritmo atual, a prateleira esvazia antes da próxima entrega. O impacto estima o lucro bruto perdido nos dias sem produto.',
+    finding: `O Café especial Mirante 250 g tem ${product.onHand} unidades em estoque e vende ${formatDecimal(stock?.dailyUnits ?? 0)} por dia. O fornecedor entrega em ${formatDays(product.leadTimeDays)}.`,
+    whyItMatters:
+      'É o café de maior receita da loja e cresce 18% ao ano. No ritmo atual, a prateleira esvazia antes da próxima entrega, bem no fim de semana.',
+    assumptions: [
+      'Venda diária igual à média dos últimos 30 dias.',
+      'O valor é o lucro bruto que deixa de entrar nos dias sem produto, supondo que o cliente não troque por outro café.',
+    ],
     recommendation: [
       'Fazer o pedido hoje para não perder vendas no fim de semana.',
       'Subir o ponto de pedido de 20 para 70 unidades.',
@@ -206,7 +233,7 @@ function coffeeRupture(): Opportunity {
       { label: 'Em estoque', value: `${product.onHand} un.` },
       { label: 'Venda média', value: `${formatDecimal(stock?.dailyUnits ?? 0)} un./dia` },
       { label: 'Prazo do fornecedor', value: formatDays(product.leadTimeDays) },
-      { label: 'Dias sem produto', value: formatDays(gap) },
+      { label: 'Dias sem produto', value: formatDays(gap), detail: 'No ritmo atual', basis: 'estimate' },
     ],
     products: [product.id],
   };
@@ -229,8 +256,12 @@ function curedCheeseMix(): Opportunity {
     status: 'new',
     detectedAt: '2026-10-24',
     summary: `Canastra e parmesão cresceram ${formatPercent(growth, 0)} em um ano, com margem acima de 35%.`,
-    explanation:
-      'A procura cresce mais rápido que o espaço de exposição. A estimativa supõe 15% a mais de volume com o dobro de frentes na geladeira; é uma hipótese a validar com um teste de 4 semanas.',
+    finding: `Canastra e parmesão cresceram ${formatPercent(growth, 0)} em um ano e mantêm margem acima de 35%.`,
+    whyItMatters: 'A procura cresce mais rápido que o espaço de exposição na geladeira principal, onde os dois dividem frentes com itens de baixo giro.',
+    assumptions: [
+      '15% a mais de volume com o dobro de frentes na geladeira. É uma hipótese, não uma medição.',
+      'Validação com um teste de 4 semanas antes de mudar a exposição de vez.',
+    ],
     recommendation: [
       'Dobrar as frentes de canastra e parmesão por 4 semanas e comparar com o mesmo período anterior.',
       'Liberar o espaço reduzindo frentes de itens com baixo giro da mesma geladeira.',
@@ -238,7 +269,7 @@ function curedCheeseMix(): Opportunity {
     evidence: [
       { label: 'Crescimento em 12 meses', value: formatPercent(growth, 0) },
       { label: 'Lucro bruto em 30 dias', value: formatCurrency(profit30, { whole: true }) },
-      { label: 'Ganho de volume suposto', value: '15%', detail: 'Hipótese, não medido' },
+      { label: 'Ganho de volume suposto', value: '15%', detail: 'Hipótese, não medido', basis: 'estimate' },
     ],
     products: ids,
   };
@@ -261,8 +292,9 @@ function slowMovers(): Opportunity {
     status: 'reviewing',
     detectedAt: '2026-10-12',
     summary: `${slow.map((s) => s.name).join(' e ')} têm estoque para mais de 4 meses de venda.`,
-    explanation:
-      'O valor é o estoque acima de 60 dias de cobertura. Não exige promoção: basta pular ou reduzir os próximos pedidos até a cobertura voltar ao alvo.',
+    finding: `${slow.map((s) => s.name).join(' e ')} têm estoque para mais de 4 meses de venda.`,
+    whyItMatters: 'O excesso prende caixa sem necessidade. Não exige promoção: basta pular ou reduzir os próximos pedidos até a cobertura voltar ao alvo.',
+    assumptions: ['O valor é o estoque acima de 60 dias de cobertura, a preço de custo.', 'Ritmo de venda igual ao dos últimos 30 dias.'],
     recommendation: [
       'Suspender os próximos pedidos desses itens.',
       'Definir cobertura máxima de 60 dias para destilados e não perecíveis de baixo giro.',
@@ -288,8 +320,9 @@ function breadReorderDone(): Opportunity {
     status: 'done',
     detectedAt: '2026-09-08',
     summary: 'O pão acabava antes das 11h aos sábados. A produção subiu 40% nesse dia.',
-    explanation:
-      'Concluída em setembro. O valor é o lucro bruto adicional estimado com a produção maior aos sábados.',
+    finding: 'O pão de fermentação natural acabava antes das 11h aos sábados.',
+    whyItMatters: 'Concluída em setembro: a produção de sábado subiu 40% e não houve mais faltas nas últimas 6 semanas.',
+    assumptions: ['Lucro bruto adicional estimado com a produção maior aos sábados.'],
     recommendation: ['Manter a produção ajustada e revisar após o fim de ano.'],
     evidence: [{ label: 'Faltas aos sábados', value: '0', detail: 'Últimas 6 semanas' }],
     products: ['p33'],

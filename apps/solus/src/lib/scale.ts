@@ -60,7 +60,7 @@ export function niceScale(
   const candidates = [target - 1, target, target + 1].filter((n) => n >= 2).map((n) => build(lo, hi, n));
   const waste = (scale: NiceScale) => (scale.max - scale.min - (hi - lo)) / (scale.max - scale.min);
   return candidates
-    .filter((scale) => scale.ticks.length >= 3 && scale.ticks.length <= 7)
+    .filter((scale) => scale.ticks.length >= 3 && scale.ticks.length <= 6)
     .reduce((best, scale) => (waste(scale) < waste(best) - 1e-9 ? scale : best), candidates[1] ?? candidates[0]!);
 }
 

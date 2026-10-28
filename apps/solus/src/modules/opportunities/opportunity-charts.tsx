@@ -14,16 +14,14 @@ import {
   YAxis,
 } from 'recharts';
 import { ChartFrame } from '@/components/charts/chart-frame';
-import { AXIS_TICK, CURSOR_LINE, GRID_PROPS, SERIES, useChartAnimation } from '@/components/charts/chart-theme';
+import { AXIS_TICK, CURSOR_LINE, GRID_PROPS, SERIES, currencyAxis, percentAxis, useChartAnimation } from '@/components/charts/chart-theme';
 import { ChartTooltip } from '@/components/charts/chart-tooltip';
 import type { EvidenceSeries, Opportunity } from '@/lib/data/types';
 import { formatCurrency, formatMonth, formatPercent } from '@/lib/format';
+import { monthlyEquivalent } from './impact';
 
 export const CONFIDENCE_CUT = 0.7;
 export const IMPACT_CUT = 1000;
-
-/** One-off gains are spread over 12 months so both kinds share one axis. */
-export const monthlyEquivalent = (op: Opportunity) => (op.impactKind === 'monthly' ? op.impact : op.impact / 12);
 
 interface MapPoint {
   id: string;
@@ -71,10 +69,13 @@ export function PriorityMap({
     confidence: op.confidence,
     monthly: monthlyEquivalent(op),
   }));
-  const maxY = Math.max(3000, ...data.map((d) => d.monthly)) * 1.15;
+  const y = currencyAxis([...data.map((d) => d.monthly * 1.12), IMPACT_CUT * 2]);
+  const maxY = y.domain[1];
   const quadrant = { fill: 'var(--chart-axis)', fontSize: 11 };
   return (
     <ChartFrame
+      legend={[{ label: 'Oportunidade aberta; o número é a posição na fila de prioridade', color: SERIES.one, mark: 'dot' }]}
+      summary={`${data.length} oportunidades abertas. ${data.filter((d) => d.confidence >= CONFIDENCE_CUT && d.monthly >= IMPACT_CUT).length} estão no quadrante fazer agora: confiança acima de ${formatPercent(CONFIDENCE_CUT, 0)} e mais de ${formatCurrency(IMPACT_CUT, { whole: true })} por mês.`}
       table={{
         caption: 'Oportunidades por confiança e valor mensal equivalente',
         columns: [
@@ -91,14 +92,14 @@ export function PriorityMap({
         })),
       }}
     >
-      <div className="h-72">
+      <div className="h-80">
         <ResponsiveContainer width="100%" height="100%">
           <ScatterChart margin={{ top: 12, right: 16, bottom: 4, left: 0 }}>
             <CartesianGrid stroke="var(--chart-grid)" />
             <ReferenceArea x1={CONFIDENCE_CUT} x2={1} y1={IMPACT_CUT} y2={maxY} fill="var(--brand-soft)" fillOpacity={1} ifOverflow="hidden" label={{ value: 'Fazer agora', position: 'insideTopRight', ...quadrant }} />
             <ReferenceArea x1={0.3} x2={CONFIDENCE_CUT} y1={IMPACT_CUT} y2={maxY} fillOpacity={0} label={{ value: 'Validar antes', position: 'insideTopLeft', ...quadrant }} />
-            <ReferenceArea x1={CONFIDENCE_CUT} x2={1} y1={0} y2={IMPACT_CUT} fillOpacity={0} label={{ value: 'Ganhos certos e menores', position: 'insideBottomRight', ...quadrant }} />
-            <ReferenceArea x1={0.3} x2={CONFIDENCE_CUT} y1={0} y2={IMPACT_CUT} fillOpacity={0} label={{ value: 'Monitorar', position: 'insideBottomLeft', ...quadrant }} />
+            <ReferenceArea x1={CONFIDENCE_CUT} x2={1} y1={0} y2={IMPACT_CUT} fillOpacity={0} label={{ value: 'Ganhos menores', position: 'insideTopRight', ...quadrant }} />
+            <ReferenceArea x1={0.3} x2={CONFIDENCE_CUT} y1={0} y2={IMPACT_CUT} fillOpacity={0} label={{ value: 'Monitorar', position: 'insideTopLeft', ...quadrant }} />
             <ReferenceLine x={CONFIDENCE_CUT} stroke="var(--border-strong)" />
             <ReferenceLine y={IMPACT_CUT} stroke="var(--border-strong)" />
             <XAxis
@@ -113,16 +114,7 @@ export function PriorityMap({
               label={{ value: 'Confiança', position: 'insideBottomRight', offset: -2, fill: 'var(--chart-axis)', fontSize: 11 }}
               height={40}
             />
-            <YAxis
-              type="number"
-              dataKey="monthly"
-              domain={[0, maxY]}
-              tick={AXIS_TICK}
-              tickLine={false}
-              axisLine={false}
-              width={64}
-              tickFormatter={(v: number) => formatCurrency(v, { compact: true, whole: true })}
-            />
+            <YAxis type="number" dataKey="monthly" tick={AXIS_TICK} tickLine={false} axisLine={false} width={64} {...y} />
             <Tooltip
               cursor={false}
               content={({ active, payload }) => {
@@ -159,7 +151,7 @@ export function EvidenceChart({ series }: { series: EvidenceSeries }) {
   const format = (v: number) =>
     series.unit === 'percent' ? formatPercent(v) : series.unit === 'currency' ? formatCurrency(v, { whole: true }) : String(Math.round(v));
   const values = series.points.map((p) => p.value);
-  const pad = (Math.max(...values) - Math.min(...values)) * 0.2 || 0.01;
+  const axis = series.unit === 'percent' ? percentAxis(values) : currencyAxis(values, { includeZero: false });
   return (
     <ChartFrame
       legend={[{ label: series.label, color: SERIES.one }]}
@@ -172,20 +164,12 @@ export function EvidenceChart({ series }: { series: EvidenceSeries }) {
         rows: series.points.map((p) => ({ month: formatMonth(p.date, true), value: format(p.value) })),
       }}
     >
-      <div className="h-44">
+      <div className="h-48">
         <ResponsiveContainer width="100%" height="100%">
           <LineChart data={series.points} margin={{ top: 8, right: 8, bottom: 0, left: 0 }}>
             <CartesianGrid {...GRID_PROPS} />
             <XAxis dataKey="date" tick={AXIS_TICK} tickLine={false} axisLine={false} tickFormatter={(v: string) => formatMonth(v)} minTickGap={16} />
-            <YAxis
-              tick={AXIS_TICK}
-              tickLine={false}
-              axisLine={false}
-              width={52}
-              domain={[Math.min(...values) - pad, Math.max(...values) + pad]}
-              tickFormatter={(v: number) => (series.unit === 'percent' ? formatPercent(v, 0) : format(v))}
-              tickCount={4}
-            />
+            <YAxis tick={AXIS_TICK} tickLine={false} axisLine={false} width={52} {...axis} />
             <Tooltip
               cursor={CURSOR_LINE}
               content={(props) => (
