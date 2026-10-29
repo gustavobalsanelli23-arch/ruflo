@@ -11,10 +11,10 @@ import type {
 } from './types';
 
 /**
- * The single seam between screens and data. Pages call these methods; they
- * never import fixtures directly. Phase 02 swaps the implementation returned
- * by getRepository() for one backed by Supabase (scoped to the signed-in
- * organization), keeping this interface intact.
+ * The contract the analytical screens render from. demoRepository implements
+ * it with fictitious data for /demo. The analytics engine (Part 04) will add
+ * an implementation scoped to the signed-in organization, so the screens can
+ * be reused without changes.
  */
 export interface SolusRepository {
   getWorkspace(): Promise<Workspace>;

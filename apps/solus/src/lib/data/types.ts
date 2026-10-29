@@ -1,7 +1,7 @@
 /**
  * Domain contracts consumed by the interface. The demo repository implements
- * them today; the real data layer (Supabase, Phase 02+) must return the same
- * shapes so no screen has to be rebuilt.
+ * them for /demo; the analytics engine over Supabase (Part 04) must return the
+ * same shapes so no screen has to be rebuilt.
  *
  * Money is expressed in BRL (reais, not cents). Ratios are 0–1.
  * Dates are ISO strings (YYYY-MM-DD) interpreted in UTC.
@@ -75,8 +75,8 @@ export interface CategoryPerformance {
   revenue: number;
   previousRevenue: number;
   grossProfit: number;
-  margin: number;
-  previousMargin: number;
+  margin: number | null;
+  previousMargin: number | null;
   share: number;
 }
 
@@ -98,6 +98,8 @@ export interface OpportunitySummary {
   highPriority: number;
   monthlyImpact: number;
   oneOffImpact: number;
+  /** Money tied up in stock; never added to the profit figures. */
+  capitalImpact?: number;
 }
 
 export type BriefingSegment =
@@ -131,7 +133,8 @@ export interface OverviewData {
 
 /* ---------- Profit Analytics ---------- */
 
-export type MarginBand = 'negative' | 'low' | 'healthy';
+/** 'unknown': no reliable cost, so no margin (never shown as zero). */
+export type MarginBand = 'negative' | 'low' | 'healthy' | 'unknown';
 
 export interface ProductProfit {
   productId: string;
@@ -143,8 +146,8 @@ export interface ProductProfit {
   revenue: number;
   previousRevenue: number;
   grossProfit: number;
-  margin: number;
-  previousMargin: number;
+  margin: number | null;
+  previousMargin: number | null;
   band: MarginBand;
 }
 
@@ -153,14 +156,15 @@ export interface SupplierProfit {
   name: string;
   revenue: number;
   grossProfit: number;
-  margin: number;
+  margin: number | null;
   productCount: number;
 }
 
 export interface MarginPoint {
   date: string;
-  margin: number;
-  previousMargin: number;
+  /** null when the month has no revenue with known cost. */
+  margin: number | null;
+  previousMargin: number | null;
 }
 
 export interface ProfitData {
@@ -179,7 +183,20 @@ export interface ProfitData {
 
 /* ---------- Inventory Intelligence ---------- */
 
-export type StockStatus = 'rupture-risk' | 'healthy' | 'low-turnover' | 'stalled';
+/**
+ * Demo classes ('healthy') plus the ones computed by public.inventory_position
+ * for real organizations.
+ */
+export type StockStatus =
+  | 'rupture'
+  | 'rupture-risk'
+  | 'healthy'
+  | 'high-turnover'
+  | 'medium-turnover'
+  | 'low-turnover'
+  | 'stalled'
+  | 'no-stock'
+  | 'insufficient-data';
 
 export interface ProductStock {
   productId: string;
@@ -187,12 +204,14 @@ export interface ProductStock {
   name: string;
   category: string;
   onHand: number;
+  /** At cost; 0 with `costKnown: false` when the item has no cost. */
   stockValue: number;
+  costKnown?: boolean;
   dailyUnits: number;
   coverageDays: number | null;
-  turnover: number;
+  turnover: number | null;
   leadTimeDays: number;
-  daysSinceLastSale: number;
+  daysSinceLastSale: number | null;
   /** Replenished daily (bakery, produce): high turnover is expected, not a signal. */
   perishable: boolean;
   status: StockStatus;
@@ -219,8 +238,8 @@ export interface InventoryData {
 
 /* ---------- Opportunity Center ---------- */
 
-export type OpportunityCategory = 'pricing' | 'inventory' | 'purchasing' | 'mix' | 'rupture';
-export type Priority = 'high' | 'medium' | 'low';
+export type OpportunityCategory = 'pricing' | 'inventory' | 'purchasing' | 'mix' | 'rupture' | 'performance';
+export type Priority = 'critical' | 'high' | 'medium' | 'low';
 export type OpportunityStatus = 'new' | 'reviewing' | 'in-progress' | 'done' | 'dismissed';
 
 export interface Evidence {
@@ -242,7 +261,8 @@ export interface Opportunity {
   title: string;
   category: OpportunityCategory;
   impact: number;
-  impactKind: 'monthly' | 'one-off';
+  /** 'capital' is money tied up in stock: never added to profit. */
+  impactKind: 'monthly' | 'one-off' | 'capital';
   priority: Priority;
   confidence: number;
   status: OpportunityStatus;
@@ -261,6 +281,19 @@ export interface Opportunity {
   products: string[];
   /** Suggested analyst question that explores this opportunity, when one exists. */
   relatedQuestionId?: string;
+  /** Possible explanations, kept apart from the facts (real organizations). */
+  hypotheses?: string[];
+  /** Detections and status changes, oldest first (real organizations). */
+  history?: OpportunityEvent[];
+  /** False when the latest analysis no longer detected the condition. */
+  active?: boolean;
+}
+
+export interface OpportunityEvent {
+  at: string;
+  label: string;
+  actor: string | null;
+  note: string | null;
 }
 
 /* ---------- AI Analyst ---------- */
@@ -268,7 +301,14 @@ export interface Opportunity {
 export type AnswerBlock =
   | { kind: 'summary'; text: string }
   | { kind: 'metrics'; items: { label: string; value: string; delta?: string; tone?: Tone }[] }
-  | { kind: 'chart'; title: string; unit: 'currency' | 'percent'; points: { label: string; value: number }[] }
+  | {
+      kind: 'chart';
+      title: string;
+      unit: 'currency' | 'percent';
+      points: { label: string; value: number }[];
+      /** Bars for a ranking, a line for a series over time. Default: bars for currency, line for percent. */
+      layout?: 'bars' | 'line';
+    }
   | {
       kind: 'table';
       title: string;
@@ -279,7 +319,9 @@ export type AnswerBlock =
   | { kind: 'findings'; facts: string[]; hypotheses: string[] }
   | { kind: 'recommendation'; items: string[] }
   | { kind: 'sources'; items: { name: string; detail: string }[] }
-  | { kind: 'next'; items: string[] };
+  | { kind: 'next'; items: string[] }
+  /** Limitations of the data, or parts of an answer withheld because a number could not be checked. */
+  | { kind: 'notice'; tone: 'info' | 'warning'; title: string; items: string[] };
 
 export interface AnalystMessage {
   id: string;

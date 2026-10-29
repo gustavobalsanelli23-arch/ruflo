@@ -331,6 +331,20 @@
   }
 }
 
+/* Auth screens: the eclipse slides from annular to crescent, once. */
+@keyframes eclipse-reveal {
+  from {
+    transform: translate(19.8px, -19.8px);
+  }
+  to {
+    transform: translate(0, 0);
+  }
+}
+
+.eclipse-occluder {
+  animation: eclipse-reveal 1.8s var(--ease-out-quint) 0.15s both;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   ::before,

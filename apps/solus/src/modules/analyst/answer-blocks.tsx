@@ -1,6 +1,6 @@
 'use client';
 
-import { BadgeCheck, CornerDownRight, Database, FlaskConical, ListChecks } from 'lucide-react';
+import { BadgeCheck, CornerDownRight, Database, FlaskConical, Info, ListChecks, TriangleAlert } from 'lucide-react';
 import { Bar, BarChart, CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import { ChartFrame } from '@/components/charts/chart-frame';
 import { AXIS_TICK, CURSOR_BAND, CURSOR_LINE, GRID_PROPS, MONEY, percentAxis, useChartAnimation } from '@/components/charts/chart-theme';
@@ -15,15 +15,15 @@ type TableBlock = Extract<AnswerBlock, { kind: 'table' }>;
 function AnswerChart({ block }: { block: ChartBlock }) {
   const animation = useChartAnimation();
   const format = (v: number) => (block.unit === 'percent' ? formatPercent(v) : formatCurrency(v, { whole: true }));
-  const horizontal = block.unit === 'currency';
-  const axis = percentAxis(block.points.map((p) => p.value));
+  const horizontal = (block.layout ?? (block.unit === 'currency' ? 'bars' : 'line')) === 'bars';
+  const axis = block.unit === 'percent' ? percentAxis(block.points.map((p) => p.value)) : { tickFormatter: (v: number) => formatCurrency(v, { compact: true }) };
   return (
     <ChartFrame
       legend={[{ label: block.title, color: MONEY.profit, mark: horizontal ? 'bar' : 'line' }]}
       table={{
         caption: block.title,
         columns: [
-          { key: 'label', label: horizontal ? 'Item' : 'Mês' },
+          { key: 'label', label: horizontal ? 'Item' : 'Período' },
           { key: 'value', label: 'Valor', align: 'right' },
         ],
         rows: block.points.map((p) => ({ label: p.label, value: format(p.value) })),
@@ -249,7 +249,7 @@ export function AnswerBlocks({ blocks, onFollowUp }: { blocks: AnswerBlock[]; on
                 <SectionTitle>Dados utilizados</SectionTitle>
                 <ul className="flex flex-wrap gap-2">
                   {block.items.map((source) => (
-                    <li key={source.name} className="inline-flex items-center gap-2 rounded-md border bg-muted/40 px-2.5 py-1.5 text-xs">
+                    <li key={`${source.name}-${source.detail}`} className="inline-flex items-center gap-2 rounded-md border bg-muted/40 px-2.5 py-1.5 text-xs">
                       <Database aria-hidden="true" className="size-3.5 text-subtle-foreground" />
                       <span className="font-medium text-foreground">{source.name}</span>
                       <span className="text-muted-foreground">{source.detail}</span>
@@ -277,6 +277,28 @@ export function AnswerBlocks({ blocks, onFollowUp }: { blocks: AnswerBlock[]; on
                 </div>
               </section>
             );
+          case 'notice':
+            return (
+              <section
+                key={index}
+                aria-label={block.title}
+                className={cn('rounded-lg border p-4', block.tone === 'warning' ? 'border-warning/40 bg-warning-soft/40' : 'bg-muted/30')}
+              >
+                <h3 className="flex items-center gap-2 text-sm font-medium text-foreground">
+                  {block.tone === 'warning' ? (
+                    <TriangleAlert aria-hidden="true" className="size-4 text-warning-text" />
+                  ) : (
+                    <Info aria-hidden="true" className="size-4 text-subtle-foreground" />
+                  )}
+                  {block.title}
+                </h3>
+                <ul className="mt-2 flex list-disc flex-col gap-1 pl-5 text-sm text-muted-foreground">
+                  {block.items.map((item) => (
+                    <li key={item}>{item}</li>
+                  ))}
+                </ul>
+              </section>
+            );
           default:
             return null;
         }
@@ -295,6 +317,7 @@ export function answerToText(blocks: AnswerBlock[]): string {
       lines.push('Fatos:', ...block.facts.map((f) => `- ${f}`), 'Hipóteses:', ...block.hypotheses.map((h) => `- ${h}`), '');
     }
     if (block.kind === 'recommendation') lines.push('O que fazer:', ...block.items.map((item, i) => `${i + 1}. ${item}`), '');
+    if (block.kind === 'notice') lines.push(`${block.title}:`, ...block.items.map((item) => `- ${item}`), '');
     if (block.kind === 'sources') lines.push(`Dados: ${block.items.map((s) => `${s.name} (${s.detail})`).join('; ')}`);
   }
   return lines.join('\n').trim();

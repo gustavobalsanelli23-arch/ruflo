@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next';
 import { GeistMono } from 'geist/font/mono';
 import { GeistSans } from 'geist/font/sans';
+import { headers } from 'next/headers';
 import { Providers } from '@/components/providers';
 import { SIDEBAR_BOOT_SCRIPT } from '@/components/shell/sidebar-boot';
 import './globals.css';
@@ -18,14 +19,16 @@ export const viewport: Viewport = {
   ],
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  // Per-request CSP nonce from src/proxy.ts; inline scripts run only with it.
+  const nonce = (await headers()).get('x-nonce') ?? undefined;
   return (
     <html lang="pt-BR" className={`${GeistSans.variable} ${GeistMono.variable}`} suppressHydrationWarning>
       <head>
-        <script dangerouslySetInnerHTML={{ __html: SIDEBAR_BOOT_SCRIPT }} />
+        <script nonce={nonce} dangerouslySetInnerHTML={{ __html: SIDEBAR_BOOT_SCRIPT }} />
       </head>
       <body>
-        <Providers>{children}</Providers>
+        <Providers nonce={nonce}>{children}</Providers>
       </body>
     </html>
   );

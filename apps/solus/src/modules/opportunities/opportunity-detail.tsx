@@ -1,9 +1,9 @@
 'use client';
 
-import { BadgeCheck, Calculator, CircleAlert, FlaskConical, ListChecks, ScanSearch, type LucideIcon } from 'lucide-react';
+import { BadgeCheck, Calculator, CircleAlert, FlaskConical, History, Lightbulb, ListChecks, ScanSearch, type LucideIcon } from 'lucide-react';
 import { OPPORTUNITY_CATEGORY, OPPORTUNITY_STATUS, PRIORITY, PriorityMark, StatusBadge } from '@/components/data/status';
 import type { Evidence, Opportunity, OpportunityStatus } from '@/lib/data/types';
-import { formatDate } from '@/lib/format';
+import { formatDate, formatDateTime } from '@/lib/format';
 import { cn } from '@/lib/utils';
 import { ConfidenceMeter, confidenceLevel, type ConfidenceLevel } from './confidence';
 import { impactShort } from './impact';
@@ -71,6 +71,14 @@ function EvidenceGrid({ items, dashed = false }: { items: Evidence[]; dashed?: b
   );
 }
 
+const IMPACT_UNIT: Record<Opportunity['impactKind'], string> = { monthly: 'por mês', 'one-off': 'ganho pontual', capital: 'em capital, não é lucro' };
+
+const IMPACT_SENTENCE: Record<Opportunity['impactKind'], string> = {
+  monthly: 'por mês, se as premissas abaixo se confirmarem. Não é um ganho garantido.',
+  'one-off': 'uma única vez, se as premissas abaixo se confirmarem. Não é um ganho garantido.',
+  capital: 'em capital imobilizado. É dinheiro que pode voltar ao caixa, não lucro: liberá-lo pode exigir desconto.',
+};
+
 /** The headline row of the detail: estimated value, priority and confidence. */
 export function OpportunityFacts({ opportunity }: { opportunity: Opportunity }) {
   const impact = impactShort(opportunity);
@@ -79,7 +87,7 @@ export function OpportunityFacts({ opportunity }: { opportunity: Opportunity }) 
       <div>
         <dt className="text-xs text-muted-foreground">Impacto estimado</dt>
         <dd className="mt-0.5 text-base font-semibold whitespace-nowrap tabular text-foreground sm:text-lg">{impact.value}</dd>
-        <dd className="text-xs text-subtle-foreground">{opportunity.impactKind === 'monthly' ? 'por mês' : 'ganho pontual'}</dd>
+        <dd className="text-xs text-subtle-foreground">{IMPACT_UNIT[opportunity.impactKind]}</dd>
       </div>
       <div>
         <dt className="text-xs text-muted-foreground">Prioridade</dt>
@@ -147,16 +155,14 @@ export function OpportunityDetail({
       <Section id="op-impact" icon={Calculator} title="Impacto estimado" tag={<BasisTag basis="estimate" />}>
         <div className="rounded-lg border border-dashed border-warning/40 p-4">
           <p className="text-sm leading-6 text-foreground">
-            <span className="text-lg font-semibold tabular">{impact.value}</span>{' '}
-            {opportunity.impactKind === 'monthly' ? 'por mês' : 'uma única vez'}, se as premissas abaixo se confirmarem. Não é um ganho
-            garantido.
+            <span className="text-lg font-semibold tabular">{impact.value}</span> {IMPACT_SENTENCE[opportunity.impactKind]}
           </p>
           {estimates.length > 0 && (
             <div className="mt-3">
               <EvidenceGrid items={estimates} dashed />
             </div>
           )}
-          <h4 className="mt-4 text-xs font-medium text-muted-foreground">Premissas da estimativa</h4>
+          <h4 className="mt-4 text-xs font-medium text-muted-foreground">{opportunity.history ? 'Como foi calculado' : 'Premissas da estimativa'}</h4>
           <ul className="mt-1.5 flex flex-col gap-1.5 text-sm leading-6 text-muted-foreground">
             {opportunity.assumptions.map((assumption) => (
               <li key={assumption} className="flex gap-2">
@@ -168,12 +174,38 @@ export function OpportunityDetail({
         </div>
       </Section>
 
+      {opportunity.hypotheses && opportunity.hypotheses.length > 0 && (
+        <Section
+          id="op-hypotheses"
+          icon={Lightbulb}
+          title="Possíveis explicações"
+          tag={
+            <span className="rounded-md bg-neutral-soft px-1.5 py-0.5 text-2xs font-medium text-muted-foreground">Hipóteses, não confirmadas pelos dados</span>
+          }
+        >
+          <ul className="flex flex-col gap-1.5 text-sm leading-6 text-muted-foreground">
+            {opportunity.hypotheses.map((hypothesis) => (
+              <li key={hypothesis} className="flex gap-2">
+                <span aria-hidden="true" className="mt-2.5 size-1 shrink-0 rounded-full bg-border-strong" />
+                {hypothesis}
+              </li>
+            ))}
+          </ul>
+        </Section>
+      )}
+
       <Section id="op-why" icon={CircleAlert} title="Por que merece atenção">
         <p className="text-sm leading-6 text-foreground">{opportunity.whyItMatters}</p>
         <p className="mt-2 text-xs text-subtle-foreground">
           Prioridade {PRIORITY[opportunity.priority].label.toLowerCase()}. Confiança {level}: {CONFIDENCE_NOTE[level]}
         </p>
       </Section>
+
+      {opportunity.active === false && (
+        <p className="rounded-lg border border-dashed px-4 py-3 text-sm text-muted-foreground">
+          A análise mais recente não encontrou mais esta condição nos dados. O status continua como você deixou.
+        </p>
+      )}
 
       <Section id="op-plan" icon={ListChecks} title="Ação recomendada">
         <ol className="flex flex-col gap-2.5">
@@ -187,6 +219,23 @@ export function OpportunityDetail({
           ))}
         </ol>
       </Section>
+
+      {opportunity.history && opportunity.history.length > 0 && (
+        <Section id="op-history" icon={History} title="Histórico">
+          <ol className="flex flex-col gap-3 border-l pl-4">
+            {opportunity.history.map((event, index) => (
+              <li key={`${event.at}-${index}`} className="text-sm">
+                <p className="text-foreground">{event.label}</p>
+                <p className="text-xs text-subtle-foreground">
+                  <time dateTime={event.at}>{formatDateTime(event.at)}</time>
+                  {event.actor ? `, por ${event.actor}` : ', pelo sistema'}
+                </p>
+                {event.note && <p className="mt-1 text-sm text-muted-foreground">“{event.note}”</p>}
+              </li>
+            ))}
+          </ol>
+        </Section>
+      )}
     </div>
   );
 }

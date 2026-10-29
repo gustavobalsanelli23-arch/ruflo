@@ -2,8 +2,11 @@
 
 import { useState } from 'react';
 import { useReturnFocus } from '@/lib/use-return-focus';
+import { BasePathProvider } from './base-path';
 import { CommandMenu } from './command-menu';
+import { DemoBanner } from './demo-banner';
 import { MobileMenu, MobileTabBar } from './mobile-nav';
+import { SessionWatch } from './session-watch';
 import { Sidebar } from './sidebar';
 import { Topbar } from './topbar';
 import type { ShellContext } from './types';
@@ -14,19 +17,25 @@ export function AppShell({ context, children }: { context: ShellContext; childre
   const menuFocus = useReturnFocus();
 
   return (
-    <>
+    <BasePathProvider value={context.basePath}>
       <a
         href="#conteudo"
         className="fixed top-2 left-2 z-[60] -translate-y-16 rounded-md bg-primary px-3 py-2 text-sm font-medium text-primary-foreground transition-transform focus:translate-y-0"
       >
         Pular para o conteúdo
       </a>
+      {context.mode === 'tenant' && <SessionWatch />}
       <Sidebar context={context} />
       <div className="flex min-h-dvh flex-col transition-[padding] duration-200 ease-(--ease-out-quint) lg:pl-[72px] expanded:pl-[248px]">
-        <Topbar context={context} onOpenCommand={() => setCommandOpen(true)} onOpenMenu={() => {
+        <Topbar
+          context={context}
+          onOpenCommand={() => setCommandOpen(true)}
+          onOpenMenu={() => {
             menuFocus.capture();
             setMenuOpen(true);
-          }} />
+          }}
+        />
+        {context.mode === 'demo' && <DemoBanner signedIn={context.signedIn} />}
         <main id="conteudo" tabIndex={-1} className="flex-1 outline-none">
           <div className="mx-auto w-full max-w-[1480px] px-4 pt-6 pb-28 sm:px-6 lg:px-8 lg:pt-8 lg:pb-16">{children}</div>
         </main>
@@ -34,6 +43,6 @@ export function AppShell({ context, children }: { context: ShellContext; childre
       <MobileTabBar />
       <MobileMenu open={menuOpen} onOpenChange={setMenuOpen} context={context} onCloseAutoFocus={menuFocus.onCloseAutoFocus} />
       <CommandMenu open={commandOpen} onOpenChange={setCommandOpen} context={context} />
-    </>
+    </BasePathProvider>
   );
 }

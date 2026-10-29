@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { motion } from 'motion/react';
-import { ChevronsUpDown, LogOut, PanelLeftClose, PanelLeftOpen, Settings, UserRound } from 'lucide-react';
+import { ChevronsUpDown, LogIn, LogOut, PanelLeftClose, PanelLeftOpen, Settings, UserRound } from 'lucide-react';
 import { Logo } from '@/components/brand/logo';
 import {
   DropdownMenu,
@@ -17,7 +17,9 @@ import {
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { NAV_GROUPS, NAV_ITEMS, type NavItem } from '@/config/navigation';
 import { cn } from '@/lib/utils';
+import { AppLink, useAppPathname } from './base-path';
 import { useSidebarCollapsed } from './sidebar-state';
+import { useSignOut } from './use-sign-out';
 import type { ShellContext } from './types';
 
 function isActive(pathname: string, item: NavItem) {
@@ -39,7 +41,7 @@ function CompactTip({ label, collapsed, children }: { label: string; collapsed: 
 function NavLink({ item, active, count, collapsed }: { item: NavItem; active: boolean; count?: number; collapsed: boolean }) {
   return (
     <CompactTip label={item.label} collapsed={collapsed}>
-      <Link
+      <AppLink
         href={item.href}
         aria-current={active ? 'page' : undefined}
         className={cn(
@@ -80,13 +82,13 @@ function NavLink({ item, active, count, collapsed }: { item: NavItem; active: bo
             <span className="sr-only"> abertas</span>
           </span>
         )}
-      </Link>
+      </AppLink>
     </CompactTip>
   );
 }
 
 export function Sidebar({ context }: { context: ShellContext }) {
-  const pathname = usePathname();
+  const pathname = useAppPathname(usePathname());
   const [collapsed, toggle] = useSidebarCollapsed();
   return (
     <aside
@@ -94,14 +96,14 @@ export function Sidebar({ context }: { context: ShellContext }) {
       className="fixed inset-y-0 left-0 z-40 hidden w-[72px] flex-col border-r border-sidebar-border bg-sidebar backdrop-blur-xl backdrop-saturate-150 transition-[width] duration-200 ease-(--ease-out-quint) lg:flex expanded:w-[248px]"
     >
       <div className="flex h-14 shrink-0 items-center justify-center px-0 expanded:justify-start expanded:px-5">
-        <Link
+        <AppLink
           href="/visao-geral"
           className="rounded-md outline-none focus-visible:ring-2 focus-visible:ring-sidebar-ring/70"
           aria-label="SOLUS, ir para a visão executiva"
         >
           <Logo className="hidden expanded:inline-flex" />
           <Logo compact className="inline-flex expanded:hidden" />
-        </Link>
+        </AppLink>
       </div>
 
       <nav aria-label="Principal" className="flex-1 overflow-x-hidden overflow-y-auto px-3 pt-3 pb-4">
@@ -155,6 +157,8 @@ export function Sidebar({ context }: { context: ShellContext }) {
 }
 
 function UserMenu({ context }: { context: ShellContext }) {
+  const { signOut, pending } = useSignOut();
+  const demo = context.mode === 'demo';
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -175,27 +179,34 @@ function UserMenu({ context }: { context: ShellContext }) {
       </DropdownMenuTrigger>
       <DropdownMenuContent side="top" align="start" className="w-60">
         <DropdownMenuLabel className="font-normal">
-          <span className="block text-sm font-medium text-foreground">{context.user.name}</span>
-          <span className="block text-xs text-muted-foreground">{context.user.email}</span>
+          <span className="block truncate text-sm font-medium text-foreground">{context.user.name}</span>
+          <span className="block truncate text-xs text-muted-foreground">{context.user.email}</span>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
           <DropdownMenuItem asChild>
-            <Link href="/configuracoes?secao=perfil">
+            <AppLink href="/configuracoes?secao=perfil">
               <UserRound aria-hidden="true" /> Meu perfil
-            </Link>
+            </AppLink>
           </DropdownMenuItem>
           <DropdownMenuItem asChild>
-            <Link href="/configuracoes">
+            <AppLink href="/configuracoes">
               <Settings aria-hidden="true" /> Configurações
-            </Link>
+            </AppLink>
           </DropdownMenuItem>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
-        <DropdownMenuItem disabled>
-          <LogOut aria-hidden="true" /> Sair
-          <span className="ml-auto text-2xs text-muted-foreground">com login real</span>
-        </DropdownMenuItem>
+        {demo ? (
+          <DropdownMenuItem asChild>
+            <Link href={context.signedIn ? '/visao-geral' : '/entrar'}>
+              <LogIn aria-hidden="true" /> {context.signedIn ? 'Ir para a minha organização' : 'Sair da demonstração'}
+            </Link>
+          </DropdownMenuItem>
+        ) : (
+          <DropdownMenuItem disabled={pending} onSelect={signOut}>
+            <LogOut aria-hidden="true" /> {pending ? 'Saindo…' : 'Sair'}
+          </DropdownMenuItem>
+        )}
       </DropdownMenuContent>
     </DropdownMenu>
   );

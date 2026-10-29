@@ -1,11 +1,11 @@
 import { TriangleAlert } from 'lucide-react';
 import { Panel } from '@/components/data/panel';
 import type { SupplierProfit } from '@/lib/data/types';
-import { formatCurrency, formatPercent, pluralize } from '@/lib/format';
+import { formatCurrency, formatPercent, formatRatio, pluralize } from '@/lib/format';
 
 /** Gross profit per supplier as bars (magnitude), margin as the second read. */
 export function SupplierPanel({ suppliers, threshold }: { suppliers: SupplierProfit[]; threshold: number }) {
-  const max = Math.max(...suppliers.map((s) => s.grossProfit));
+  const max = Math.max(1, ...suppliers.map((s) => s.grossProfit));
   return (
     <Panel
       title="Rentabilidade por fornecedor"
@@ -20,7 +20,7 @@ export function SupplierPanel({ suppliers, threshold }: { suppliers: SupplierPro
     >
       <ul className="flex flex-col gap-3.5">
         {suppliers.map((supplier) => {
-          const weak = supplier.margin < threshold + 0.1;
+          const weak = supplier.margin !== null && supplier.margin < threshold + 0.1;
           return (
             <li key={supplier.supplierId}>
               <div className="flex items-baseline justify-between gap-3">
@@ -32,13 +32,13 @@ export function SupplierPanel({ suppliers, threshold }: { suppliers: SupplierPro
                   <span className="font-semibold text-foreground">{formatCurrency(supplier.grossProfit, { compact: true, whole: true })}</span>
                   <span className="ml-2 inline-flex items-center gap-1 text-muted-foreground">
                     {weak && <TriangleAlert aria-hidden="true" className="size-3.5 text-warning-text" />}
-                    {formatPercent(supplier.margin)}
+                    {formatRatio(supplier.margin)}
                     {weak && <span className="sr-only">, margem próxima do corte</span>}
                   </span>
                 </p>
               </div>
               <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-neutral-soft" aria-hidden="true">
-                <div className="h-full rounded-full bg-series-1" style={{ width: `${(supplier.grossProfit / max) * 100}%` }} />
+                <div className="h-full rounded-full bg-series-1" style={{ width: `${(Math.max(supplier.grossProfit, 0) / max) * 100}%` }} />
               </div>
             </li>
           );

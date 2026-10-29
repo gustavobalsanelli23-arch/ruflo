@@ -68,3 +68,25 @@ export function endOfMonth(iso: string, cap?: string): string {
   const end = toISODate(Date.UTC(date.getUTCFullYear(), date.getUTCMonth() + 1, 0));
   return cap && end > cap ? cap : end;
 }
+
+/** Consecutive day, week (7 days from `start`) or calendar-month buckets covering [start, end]. */
+export function buckets(start: string, end: string, granularity: Granularity): { start: string; end: string }[] {
+  const result: { start: string; end: string }[] = [];
+  if (granularity === 'day') {
+    for (let d = start; d <= end; d = addDays(d, 1)) result.push({ start: d, end: d });
+  } else if (granularity === 'week') {
+    for (let d = start; d <= end; d = addDays(d, 7)) {
+      const e = addDays(d, 6);
+      result.push({ start: d, end: e > end ? end : e });
+    }
+  } else {
+    let cursor = start;
+    while (cursor <= end) {
+      const date = new Date(fromISODate(cursor));
+      const monthEnd = toISODate(Date.UTC(date.getUTCFullYear(), date.getUTCMonth() + 1, 0));
+      result.push({ start: cursor, end: monthEnd > end ? end : monthEnd });
+      cursor = addDays(monthEnd, 1);
+    }
+  }
+  return result;
+}

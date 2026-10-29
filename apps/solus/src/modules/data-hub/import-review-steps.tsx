@@ -1,6 +1,6 @@
 'use client';
 
-import Link from 'next/link';
+import { AppLink as Link } from '@/components/shell/base-path';
 import { ArrowRight, Check, CircleAlert, Loader2, TriangleAlert } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { Badge } from '@/components/ui/badge';

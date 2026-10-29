@@ -1,6 +1,6 @@
 /**
  * DEMONSTRATION DATA — display aggregations over the generated demo history.
- * These are not the definitive analytical engine (Phase 03+); they only sum
+ * These are not the definitive analytical engine (Part 04); they only sum
  * demo rows so every screen shows numbers that agree with each other.
  */
 import type {
@@ -15,7 +15,7 @@ import type {
   SupplierProfit,
   TrendPoint,
 } from '@/lib/data/types';
-import { addDays, daysBetween, fromISODate, toISODate } from '@/lib/period';
+import { addDays, buckets, daysBetween } from '@/lib/period';
 import { DEMO_TODAY, categories, categoryName, costOn, products, supplierName, suppliers } from './catalog';
 import { lastSaleDate, ordersFor, productTotals, salesHistory, storeTotals } from './sales';
 
@@ -24,27 +24,6 @@ export const STALLED_AFTER_DAYS = 60;
 export const LOW_TURNOVER_COVERAGE = 120;
 
 export const margin = (revenue: number, cost: number) => (revenue > 0 ? (revenue - cost) / revenue : 0);
-
-function buckets(start: string, end: string, granularity: Period['granularity']): { start: string; end: string }[] {
-  const result: { start: string; end: string }[] = [];
-  if (granularity === 'day') {
-    for (let d = start; d <= end; d = addDays(d, 1)) result.push({ start: d, end: d });
-  } else if (granularity === 'week') {
-    for (let d = start; d <= end; d = addDays(d, 7)) {
-      const e = addDays(d, 6);
-      result.push({ start: d, end: e > end ? end : e });
-    }
-  } else {
-    let cursor = start;
-    while (cursor <= end) {
-      const date = new Date(fromISODate(cursor));
-      const monthEnd = toISODate(Date.UTC(date.getUTCFullYear(), date.getUTCMonth() + 1, 0));
-      result.push({ start: cursor, end: monthEnd > end ? end : monthEnd });
-      cursor = addDays(monthEnd, 1);
-    }
-  }
-  return result;
-}
 
 /** Daily store totals, computed once and reused by every series. */
 let dailyCache: { revenue: number[]; cost: number[]; units: number[] } | null = null;

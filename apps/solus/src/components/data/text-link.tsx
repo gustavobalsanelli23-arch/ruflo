@@ -1,4 +1,4 @@
-import Link from 'next/link';
+import { AppLink as Link } from '@/components/shell/base-path';
 import { ArrowRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
 

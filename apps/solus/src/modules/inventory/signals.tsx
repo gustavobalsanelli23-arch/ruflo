@@ -1,4 +1,4 @@
-import Link from 'next/link';
+import { AppLink as Link } from '@/components/shell/base-path';
 import { ArrowRight, CircleCheck, Hourglass, OctagonAlert, PackageX, type LucideIcon } from 'lucide-react';
 import type { ProductStock } from '@/lib/data/types';
 import { formatCurrency, formatDays, formatDecimal, pluralize } from '@/lib/format';
@@ -67,11 +67,27 @@ function Signal({
   );
 }
 
-export function InventorySignals({ items }: { items: ProductStock[] }) {
-  const rupture = items.filter((s) => s.status === 'rupture-risk').sort((a, b) => (a.coverageDays ?? 0) - (b.coverageDays ?? 0));
+const FAST = new Set<ProductStock['status']>(['healthy', 'high-turnover', 'medium-turnover']);
+
+export function InventorySignals({
+  items,
+  stalledDays = 60,
+  lowTurnoverDays = 120,
+}: {
+  items: ProductStock[];
+  /** Limits shown in the captions (the organization's analysis parameters). */
+  stalledDays?: number;
+  lowTurnoverDays?: number;
+}) {
+  const rupture = items
+    .filter((s) => s.status === 'rupture-risk' || s.status === 'rupture')
+    .sort((a, b) => (a.coverageDays ?? 0) - (b.coverageDays ?? 0));
   const stalled = items.filter((s) => s.status === 'stalled');
   const slow = items.filter((s) => s.status === 'low-turnover');
-  const fastest = [...items].filter((s) => s.status === 'healthy' && !s.perishable).sort((a, b) => b.turnover - a.turnover).slice(0, 3);
+  const fastest = items
+    .filter((s): s is ProductStock & { turnover: number } => FAST.has(s.status) && !s.perishable && s.turnover !== null)
+    .sort((a, b) => b.turnover - a.turnover)
+    .slice(0, 3);
   const sum = (list: ProductStock[]) => list.reduce((total, s) => total + s.stockValue, 0);
 
   return (
@@ -84,7 +100,7 @@ export function InventorySignals({ items }: { items: ProductStock[] }) {
         caption="O estoque acaba antes da próxima entrega."
         items={rupture.map((s) => ({
           name: s.name,
-          detail: `cobre ${formatDays(s.coverageDays ?? 0)}, entrega em ${formatDays(s.leadTimeDays)}`,
+          detail: s.status === 'rupture' ? `sem estoque, entrega em ${formatDays(s.leadTimeDays)}` : `cobre ${formatDays(s.coverageDays ?? 0)}, entrega em ${formatDays(s.leadTimeDays)}`,
         }))}
         filter={{ id: 'ruptura', label: 'Ver na tabela' }}
       />
@@ -93,8 +109,11 @@ export function InventorySignals({ items }: { items: ProductStock[] }) {
         icon={PackageX}
         title="Produtos parados"
         figure={formatCurrency(sum(stalled), { whole: true })}
-        caption={`${pluralize(stalled.length, 'item', 'itens')} sem nenhuma venda há mais de 60 dias.`}
-        items={stalled.map((s) => ({ name: s.name, detail: `última venda há ${formatDays(s.daysSinceLastSale)}` }))}
+        caption={`${pluralize(stalled.length, 'item', 'itens')} sem nenhuma venda há ${formatDays(stalledDays)} ou mais.`}
+        items={stalled.map((s) => ({
+          name: s.name,
+          detail: s.daysSinceLastSale === null ? 'sem venda no histórico importado' : `última venda há ${formatDays(s.daysSinceLastSale)}`,
+        }))}
         filter={{ id: 'parados', label: 'Ver na tabela' }}
       />
       <Signal
@@ -102,7 +121,7 @@ export function InventorySignals({ items }: { items: ProductStock[] }) {
         icon={Hourglass}
         title="Baixo giro"
         figure={formatCurrency(sum(slow), { whole: true })}
-        caption={`${pluralize(slow.length, 'item', 'itens')} com estoque para mais de 4 meses.`}
+        caption={`${pluralize(slow.length, 'item', 'itens')} com estoque para mais de ${formatDays(lowTurnoverDays)}.`}
         items={slow.map((s) => ({ name: s.name, detail: `cobre ${formatDays(s.coverageDays ?? 0)}` }))}
         filter={{ id: 'baixo-giro', label: 'Ver na tabela' }}
       />

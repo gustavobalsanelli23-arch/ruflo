@@ -4,7 +4,7 @@ import { DataTable, type Column } from '@/components/data/data-table';
 import { Delta } from '@/components/data/delta';
 import { MARGIN_BAND, StatusBadge } from '@/components/data/status';
 import type { ProductProfit } from '@/lib/data/types';
-import { formatCurrency, formatNumber, formatPercent, relativeChange } from '@/lib/format';
+import { formatCurrency, formatNumber, formatPercent, formatRatio, relativeChange } from '@/lib/format';
 
 /** Margin changes under a tenth of a point are noise in a table of 44 rows. */
 const MEANINGFUL_POINTS = 0.001;
@@ -44,8 +44,8 @@ const columns: Column<ProductProfit>[] = [
     id: 'cost',
     header: 'Custo',
     align: 'right',
-    sortValue: (p) => p.revenue - p.grossProfit,
-    cell: (p) => <span className="text-muted-foreground">{money(p.revenue - p.grossProfit)}</span>,
+    sortValue: (p) => (p.band === 'unknown' ? -1 : p.revenue - p.grossProfit),
+    cell: (p) => <span className="text-muted-foreground">{p.band === 'unknown' ? 'sem custo' : money(p.revenue - p.grossProfit)}</span>,
   },
   {
     id: 'profit',
@@ -58,18 +58,18 @@ const columns: Column<ProductProfit>[] = [
     id: 'margin',
     header: 'Margem',
     align: 'right',
-    sortValue: (p) => p.margin,
+    sortValue: (p) => p.margin ?? -Infinity,
     cell: (p) => {
-      const change = p.margin - p.previousMargin;
+      const change = p.margin !== null && p.previousMargin !== null ? p.margin - p.previousMargin : 0;
       return (
         <span className="inline-flex flex-col items-end gap-0.5">
-          <span className="text-foreground">{formatPercent(p.margin)}</span>
+          <span className="text-foreground">{formatRatio(p.margin)}</span>
           {Math.abs(change) >= MEANINGFUL_POINTS && <Delta size="xs" kind="points" value={change} />}
         </span>
       );
     },
   },
-  { id: 'band', header: 'Situação', sortValue: (p) => p.margin, cell: (p) => <StatusBadge spec={MARGIN_BAND[p.band]} /> },
+  { id: 'band', header: 'Situação', sortValue: (p) => p.margin ?? -Infinity, cell: (p) => <StatusBadge spec={MARGIN_BAND[p.band]} /> },
 ];
 
 export function ProductsTable({ products, threshold }: { products: ProductProfit[]; threshold: number }) {
@@ -86,7 +86,7 @@ export function ProductsTable({ products, threshold }: { products: ProductProfit
       rowClassName={(p) => (p.band === 'negative' ? 'bg-critical-soft/60 hover:bg-critical-soft' : undefined)}
       filters={[
         { id: 'all', label: 'Todos', predicate: () => true },
-        { id: 'attention', label: 'Margem em alerta', predicate: (p) => p.band !== 'healthy' },
+        { id: 'attention', label: 'Margem em alerta', predicate: (p) => p.band === 'low' || p.band === 'negative' },
         { id: 'low', label: `Baixa (0 a ${formatPercent(threshold, 0)})`, predicate: (p) => p.band === 'low' },
         { id: 'negative', label: 'Negativa', predicate: (p) => p.band === 'negative' },
       ]}
@@ -99,7 +99,7 @@ export function ProductsTable({ products, threshold }: { products: ProductProfit
             </p>
           </div>
           <div className="shrink-0 text-right">
-            <p className="text-sm font-semibold tabular">{formatPercent(p.margin)}</p>
+            <p className="text-sm font-semibold tabular">{formatRatio(p.margin)}</p>
             <StatusBadge spec={MARGIN_BAND[p.band]} className="mt-1" />
           </div>
         </div>

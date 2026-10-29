@@ -26,20 +26,20 @@ export interface PickedFile {
   sample: boolean;
 }
 
-function formatSize(bytes: number): string {
+export function formatSize(bytes: number): string {
   if (bytes >= 1_000_000) return `${new Intl.NumberFormat('pt-BR', { maximumFractionDigits: 1 }).format(bytes / 1_000_000)} MB`;
   return `${formatNumber(Math.max(1, Math.round(bytes / 1000)))} KB`;
 }
 
-/** Six labelled steps on wide screens; "Etapa 2 de 6" with a segmented bar on phones. */
-export function Stepper({ current }: { current: number }) {
+/** Labelled steps on wide screens; "Etapa 2 de 6" with a segmented bar on phones. */
+export function Stepper({ current, steps = STEPS }: { current: number; steps?: readonly string[] }) {
   return (
     <div>
       <p aria-hidden="true" className="mb-2 text-sm font-medium text-foreground md:hidden">
-        Etapa {current + 1} de {STEPS.length}: {STEPS[current]}
+        Etapa {current + 1} de {steps.length}: {steps[current]}
       </p>
-      <ol className="grid grid-cols-6 gap-1.5 md:gap-2" aria-label="Etapas da importação">
-        {STEPS.map((step, index) => {
+      <ol className="grid gap-1.5 md:gap-2" style={{ gridTemplateColumns: `repeat(${steps.length}, minmax(0, 1fr))` }} aria-label="Etapas da importação">
+        {steps.map((step, index) => {
           const done = index < current;
           const active = index === current;
           return (

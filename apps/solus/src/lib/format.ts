@@ -52,6 +52,11 @@ export function formatPercent(ratio: number, digits: 0 | 1 = 1): string {
   return (digits === 0 ? percent0 : percent1).format(ratio);
 }
 
+/** A ratio that may be unavailable (no cost, no revenue): shown as a dash, never as zero. */
+export function formatRatio(ratio: number | null, digits: 0 | 1 = 1): string {
+  return ratio === null ? '—' : formatPercent(ratio, digits);
+}
+
 /** Relative change between two values as a ratio, or null when the base is zero. */
 export function relativeChange(value: number, previous: number): number | null {
   if (previous === 0) return null;

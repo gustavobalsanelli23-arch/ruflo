@@ -166,7 +166,7 @@ function lowMarginBeverages(): Opportunity {
 function stalledWines(): Opportunity {
   const stalled = productStock().filter((s) => s.status === 'stalled');
   const value = stalled.reduce((sum, s) => sum + s.stockValue, 0);
-  const idle = Math.min(...stalled.map((s) => s.daysSinceLastSale));
+  const idle = Math.min(...stalled.map((s) => s.daysSinceLastSale ?? 0));
   return {
     id: 'op-vinhos-parados',
     title: `Liberar ${formatCurrency(value, { compact: true, whole: true })} parados em vinhos importados`,
@@ -194,7 +194,7 @@ function stalledWines(): Opportunity {
     evidence: stalled.map((s) => ({
       label: s.name,
       value: formatCurrency(s.stockValue, { whole: true }),
-      detail: `${s.onHand} un., sem venda há ${formatDays(s.daysSinceLastSale)}`,
+      detail: `${s.onHand} un., sem venda há ${formatDays(s.daysSinceLastSale ?? 0)}`,
     })),
     products: stalled.map((s) => s.productId),
   };
