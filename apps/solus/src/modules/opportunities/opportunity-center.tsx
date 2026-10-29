@@ -119,12 +119,15 @@ export function OpportunityCenter({
   productNames,
   onStatusChange,
   canEdit = true,
+  explainWithAi = false,
 }: {
   opportunities: Opportunity[];
   productNames: Record<string, string>;
   /** Persists a status change (real organizations). Without it, changes stay in memory (demo). */
   onStatusChange?: StatusChange;
   canEdit?: boolean;
+  /** The AI analyst is available: the detail offers to explain the opportunity. */
+  explainWithAi?: boolean;
 }) {
   const router = useRouter();
   const pathname = usePathname();
@@ -412,9 +415,17 @@ export function OpportunityCenter({
                   </Select>
                 </div>
                 <Button asChild variant="outline">
-                  <Link href={selected.relatedQuestionId ? `/analista?pergunta=${selected.relatedQuestionId}` : '/analista'}>
+                  <Link
+                    href={
+                      explainWithAi
+                        ? `/analista?oportunidade=${encodeURIComponent(selected.id)}`
+                        : selected.relatedQuestionId
+                          ? `/analista?pergunta=${selected.relatedQuestionId}`
+                          : '/analista'
+                    }
+                  >
                     <MessageSquareText aria-hidden="true" />
-                    {selected.relatedQuestionId ? 'Ver a análise completa no analista' : 'Perguntar ao analista'}
+                    {explainWithAi ? 'Explicar com o analista' : selected.relatedQuestionId ? 'Ver a análise completa no analista' : 'Perguntar ao analista'}
                   </Link>
                 </Button>
               </div>

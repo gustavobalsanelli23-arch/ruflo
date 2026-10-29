@@ -1,207 +1,90 @@
 'use client';
 
-import { Check, Copy, Database, History, Loader2, Plus, SendHorizontal, ThumbsDown, ThumbsUp } from 'lucide-react';
+import { History, Loader2, Plus, SendHorizontal } from 'lucide-react';
 import { useReducedMotion } from 'motion/react';
 import { useSearchParams } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
-import { LogoMark } from '@/components/brand/logo';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
-import { Skeleton } from '@/components/ui/skeleton';
 import { Textarea } from '@/components/ui/textarea';
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import type { AnalystData, AnalystMessage, AnalystThread, AnswerBlock } from '@/lib/data/types';
 import { formatDateTime } from '@/lib/format';
 import { useReturnFocus } from '@/lib/use-return-focus';
-import { cn } from '@/lib/utils';
-import { AnswerBlocks, answerToText } from './answer-blocks';
+import { loadThreadAction } from './actions';
+import { AnswerHeader, ThreadList, Thinking, type Feedback, type ScopeInfo } from './analyst-parts';
+import { AnswerBlocks } from './answer-blocks';
+import { DemoUnlock } from './demo-unlock';
+import { historyOf, noticeBlocks, streamAnswer } from './live';
 
-const THINKING_STEPS = ['Lendo vendas por item', 'Comparando com o período anterior', 'Separando fatos de hipóteses'];
-const DATA_SCOPE = [
-  { name: 'Vendas por item', detail: '730 dias' },
-  { name: 'Posição de estoque', detail: 'Diária' },
-  { name: 'Custos de compra', detail: 'Notas fiscais' },
-  { name: 'Cadastro de produtos', detail: '44 itens' },
-];
+/**
+ * The analyst. Three modes:
+ *   scripted   demo without AI: suggested questions get prepared answers
+ *   live/demo  AI over the fictitious dataset (unlocked with an access code)
+ *   live/tenant AI over the organization's data; conversations are saved
+ */
+export type AnalystMode = { kind: 'scripted'; unlockable?: boolean } | { kind: 'live'; scope: 'tenant' | 'demo' };
 
-type Feedback = 'up' | 'down';
+const SCRIPTED_STEPS = ['Lendo vendas por item', 'Comparando com o período anterior', 'Separando fatos de hipóteses'];
 
-function demoNotice(data: AnalystData): AnswerBlock[] {
+const SCOPES: Record<'scripted' | 'demo' | 'tenant', ScopeInfo> = {
+  scripted: {
+    items: [
+      { name: 'Vendas por item', detail: '730 dias' },
+      { name: 'Posição de estoque', detail: 'Diária' },
+      { name: 'Custos de compra', detail: 'Notas fiscais' },
+      { name: 'Cadastro de produtos', detail: '44 itens' },
+    ],
+    note: 'Demonstração: respostas roteirizadas sobre dados fictícios. Nenhum modelo de IA é chamado.',
+  },
+  demo: {
+    items: [
+      { name: 'Métricas de vendas', detail: '730 dias' },
+      { name: 'Posição de estoque', detail: 'Atual' },
+      { name: 'Oportunidades', detail: 'Abertas' },
+    ],
+    note: 'Demonstração com IA (Claude, da Anthropic) sobre dados fictícios. Cada número da resposta é conferido com os dados consultados.',
+  },
+  tenant: {
+    items: [
+      { name: 'Métricas de vendas', detail: 'Importações concluídas' },
+      { name: 'Posição de estoque', detail: 'Última importada' },
+      { name: 'Oportunidades', detail: 'Central' },
+    ],
+    note: 'As perguntas e os dados consultados para respondê-las são enviados à Anthropic (Claude) para gerar a resposta. Cada número é conferido com os dados; nada é calculado pela IA.',
+  },
+};
+
+function demoNotice(data: AnalystData, unlockable: boolean): AnswerBlock[] {
   return [
     {
       kind: 'summary',
-      text: 'Nesta demonstração, o analista responde às perguntas sugeridas com análises roteirizadas sobre os dados fictícios. Perguntas livres serão respondidas quando o modelo de IA for conectado, em uma fase posterior.',
+      text: unlockable
+        ? 'Sem a IA ativada, o analista desta demonstração responde só às perguntas sugeridas, com análises roteirizadas. Ative a IA com o código de acesso para fazer perguntas livres.'
+        : 'Nesta demonstração, o analista responde às perguntas sugeridas com análises roteirizadas sobre os dados fictícios.',
     },
     { kind: 'next', items: data.suggestions.map((s) => s.question) },
   ];
 }
 
-function ThreadList({
-  threads,
-  activeId,
-  onSelect,
-  onNew,
+export function AnalystWorkspace({
+  data,
+  mode = { kind: 'scripted' },
+  opportunity = null,
 }: {
-  threads: AnalystThread[];
-  activeId: string | null;
-  onSelect: (id: string) => void;
-  onNew: () => void;
+  data: AnalystData;
+  mode?: AnalystMode;
+  /** Opportunity to explain right away (deep link from the Opportunity Center). */
+  opportunity?: { id: string; title: string } | null;
 }) {
-  return (
-    <div className="flex flex-col gap-5">
-      <Button variant="outline" className="justify-start" onClick={onNew}>
-        <Plus aria-hidden="true" />
-        Nova análise
-      </Button>
-      <nav aria-label="Conversas anteriores">
-        <p className="mb-1.5 px-2 text-xs text-subtle-foreground">Recentes</p>
-        <ul className="flex flex-col gap-0.5">
-          {threads.map((thread) => (
-            <li key={thread.id}>
-              <button
-                type="button"
-                onClick={() => onSelect(thread.id)}
-                aria-current={thread.id === activeId ? 'true' : undefined}
-                className={cn(
-                  'w-full rounded-lg px-2.5 py-2 text-left outline-none transition-colors hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/60',
-                  thread.id === activeId && 'bg-accent',
-                )}
-              >
-                <span className={cn('block truncate text-sm', thread.id === activeId ? 'font-medium text-foreground' : 'text-foreground/90')}>{thread.title}</span>
-                <span className="block text-xs text-subtle-foreground">{formatDateTime(thread.updatedAt)}</span>
-              </button>
-            </li>
-          ))}
-        </ul>
-      </nav>
-      <section aria-labelledby="escopo-dados" className="rounded-lg border p-3">
-        <h2 id="escopo-dados" className="text-xs font-medium text-muted-foreground">
-          Dados que o analista consulta
-        </h2>
-        <ul className="mt-2 flex flex-col gap-1.5 text-xs">
-          {DATA_SCOPE.map((scope) => (
-            <li key={scope.name} className="flex items-center gap-2">
-              <Database aria-hidden="true" className="size-3.5 shrink-0 text-subtle-foreground" />
-              <span className="text-foreground">{scope.name}</span>
-              <span className="ml-auto text-subtle-foreground">{scope.detail}</span>
-            </li>
-          ))}
-        </ul>
-        <p className="mt-3 border-t pt-2.5 text-2xs leading-4 text-subtle-foreground">
-          Demonstração: respostas roteirizadas sobre dados fictícios. Nenhum modelo de IA é chamado.
-        </p>
-      </section>
-    </div>
-  );
-}
-
-function IconAction({ label, pressed, onClick, children }: { label: string; pressed?: boolean; onClick: () => void; children: React.ReactNode }) {
-  return (
-    <Tooltip>
-      <TooltipTrigger asChild>
-        <Button
-          variant="ghost"
-          size="icon-sm"
-          aria-label={label}
-          aria-pressed={pressed}
-          onClick={onClick}
-          className={cn('text-muted-foreground hover:text-foreground', pressed && 'bg-accent text-foreground')}
-        >
-          {children}
-        </Button>
-      </TooltipTrigger>
-      <TooltipContent>{label}</TooltipContent>
-    </Tooltip>
-  );
-}
-
-function AnswerHeader({
-  message,
-  feedback,
-  onFeedback,
-}: {
-  message: AnalystMessage;
-  feedback: Feedback | undefined;
-  onFeedback: (value: Feedback) => void;
-}) {
-  const [copied, setCopied] = useState(false);
-  const copy = async () => {
-    try {
-      await navigator.clipboard.writeText(answerToText(message.blocks ?? []));
-      setCopied(true);
-      toast.success('Resposta copiada', { description: 'Texto com a resposta, os números, os fatos e as recomendações.' });
-      window.setTimeout(() => setCopied(false), 1600);
-    } catch {
-      toast.error('Não foi possível copiar', { description: 'O navegador bloqueou a área de transferência. Selecione o texto e copie manualmente.' });
-    }
-  };
-  return (
-    <div className="mb-4 flex flex-wrap items-center gap-x-2.5 gap-y-2">
-      <LogoMark className="size-6 text-brand" />
-      <span className="text-sm font-medium text-foreground">Analista SOLUS</span>
-      <Badge variant="warning">Resposta de demonstração</Badge>
-      <time dateTime={message.at} className="text-xs text-subtle-foreground">
-        {formatDateTime(message.at)}
-      </time>
-      <div className="ml-auto flex items-center gap-0.5">
-        <IconAction label={copied ? 'Copiada' : 'Copiar resposta'} onClick={copy}>
-          {copied ? <Check aria-hidden="true" className="text-positive-text" /> : <Copy aria-hidden="true" />}
-        </IconAction>
-        <IconAction label="Resposta útil" pressed={feedback === 'up'} onClick={() => onFeedback('up')}>
-          <ThumbsUp aria-hidden="true" />
-        </IconAction>
-        <IconAction label="Resposta não ajudou" pressed={feedback === 'down'} onClick={() => onFeedback('down')}>
-          <ThumbsDown aria-hidden="true" />
-        </IconAction>
-      </div>
-    </div>
-  );
-}
-
-function Thinking({ step }: { step: number }) {
-  return (
-    <div role="status" aria-label="Analisando a pergunta" className="flex flex-col gap-4">
-      <div className="flex items-center gap-2.5">
-        <LogoMark className="size-6 animate-pulse text-brand motion-reduce:animate-none" />
-        <span className="text-sm font-medium text-foreground">Analisando…</span>
-      </div>
-      <ol className="flex flex-col gap-1.5 text-sm">
-        {THINKING_STEPS.map((label, index) => (
-          <li key={label} className={cn('flex items-center gap-2', index > step ? 'text-subtle-foreground' : 'text-muted-foreground')}>
-            {index < step ? (
-              <Check aria-hidden="true" className="size-3.5 text-positive-text" />
-            ) : index === step ? (
-              <Loader2 aria-hidden="true" className="size-3.5 animate-spin text-brand" />
-            ) : (
-              <span aria-hidden="true" className="size-3.5" />
-            )}
-            {label}…
-          </li>
-        ))}
-      </ol>
-      <div aria-hidden="true" className="flex flex-col gap-2.5">
-        <Skeleton className="h-4 w-[92%]" />
-        <Skeleton className="h-4 w-[78%]" />
-        <div className="mt-2 grid grid-cols-3 gap-3">
-          <Skeleton className="h-16 rounded-lg" />
-          <Skeleton className="h-16 rounded-lg" />
-          <Skeleton className="h-16 rounded-lg" />
-        </div>
-        <Skeleton className="mt-1 h-40 rounded-lg" />
-      </div>
-    </div>
-  );
-}
-
-export function AnalystWorkspace({ data }: { data: AnalystData }) {
   const params = useSearchParams();
   const reduce = useReducedMotion();
+  const live = mode.kind === 'live' ? mode : null;
   const [threads, setThreads] = useState<AnalystThread[]>(data.threads);
-  const [activeId, setActiveId] = useState<string | null>(data.threads[0]?.id ?? null);
+  const [activeId, setActiveId] = useState<string | null>(live ? null : (data.threads[0]?.id ?? null));
   const [draft, setDraft] = useState('');
-  const [thinking, setThinking] = useState<number | null>(null);
+  const [steps, setSteps] = useState<string[] | null>(null);
+  const [current, setCurrent] = useState(0);
   const [historyOpen, setHistoryOpen] = useState(false);
   const [feedback, setFeedback] = useState<Record<string, Feedback>>({});
   const lastMessageRef = useRef<HTMLDivElement>(null);
@@ -212,59 +95,129 @@ export function AnalystWorkspace({ data }: { data: AnalystData }) {
 
   const active = threads.find((thread) => thread.id === activeId) ?? null;
   const messageCount = active?.messages.length ?? 0;
+  const busy = steps !== null;
+  const scope = SCOPES[live ? live.scope : 'scripted'];
+  const badge = live
+    ? live.scope === 'demo'
+      ? ({ label: 'IA sobre dados fictícios', variant: 'warning' } as const)
+      : ({ label: 'Gerada por IA, números conferidos', variant: 'neutral' } as const)
+    : ({ label: 'Resposta de demonstração', variant: 'warning' } as const);
 
-  /** `fresh` starts a new conversation even when one is open (deep links always do). */
-  const ask = (question: string, options: { fresh?: boolean } = {}) => {
-    const text = question.trim();
-    if (!text || thinking !== null) return;
+  const appendTo = (threadId: string, message: AnalystMessage) =>
+    setThreads((previous) => previous.map((t) => (t.id === threadId ? { ...t, messages: [...t.messages, message], updatedAt: message.at } : t)));
+
+  /** Adds the question to the open conversation (or a new one) and returns its id. */
+  const startQuestion = (text: string, fresh: boolean) => {
     const now = new Date().toISOString();
     const userMessage: AnalystMessage = { id: `u-${now}`, role: 'user', at: now, text };
-    const current = options.fresh ? null : active;
-    let threadId = current?.id ?? null;
+    const current = fresh ? null : active;
+    const threadId = current?.id ?? `local-${now}`;
     if (!current) {
-      threadId = `t-${now}`;
-      setThreads((previous) => [{ id: threadId as string, title: text, updatedAt: now, messages: [userMessage] }, ...previous]);
+      setThreads((previous) => [{ id: threadId, title: text.slice(0, 120), updatedAt: now, messages: [userMessage] }, ...previous]);
       setActiveId(threadId);
     } else {
-      setThreads((previous) => previous.map((t) => (t.id === threadId ? { ...t, messages: [...t.messages, userMessage], updatedAt: now } : t)));
+      appendTo(threadId, userMessage);
     }
     setDraft('');
-    setThinking(0);
     scrollOnNext.current = true;
+    return { threadId, thread: current };
+  };
+
+  const askScripted = (text: string, fresh: boolean) => {
+    const { threadId } = startQuestion(text, fresh);
+    setSteps(SCRIPTED_STEPS);
+    setCurrent(0);
     const scripted = data.suggestions.find((s) => s.question === text);
     const blocks = scripted ? data.scriptedAnswers[scripted.id] : undefined;
     const stepMs = reduce ? 150 : 520;
-    THINKING_STEPS.forEach((_, index) => window.setTimeout(() => setThinking(index), index * stepMs));
+    SCRIPTED_STEPS.forEach((_, index) => window.setTimeout(() => setCurrent(index), index * stepMs));
     window.setTimeout(() => {
       const at = new Date().toISOString();
-      const reply: AnalystMessage = { id: `a-${at}`, role: 'analyst', at, blocks: blocks ?? demoNotice(data) };
-      setThreads((previous) => previous.map((t) => (t.id === threadId ? { ...t, messages: [...t.messages, reply] } : t)));
-      setThinking(null);
-    }, THINKING_STEPS.length * stepMs);
+      appendTo(threadId, { id: `a-${at}`, role: 'analyst', at, blocks: blocks ?? demoNotice(data, mode.kind === 'scripted' && Boolean(mode.unlockable)) });
+      setSteps(null);
+    }, SCRIPTED_STEPS.length * stepMs);
+  };
+
+  const askLive = async (text: string, fresh: boolean, opportunityId: string | null) => {
+    if (!live) return;
+    const { threadId: localId, thread } = startQuestion(text, fresh);
+    let threadId = localId;
+    setSteps(['Lendo a pergunta']);
+    setCurrent(0);
+    const body =
+      live.scope === 'tenant'
+        ? { mode: 'chat', question: text, threadId: thread && !thread.id.startsWith('local-') ? thread.id : null, opportunityId }
+        : { mode: 'chat', question: text, history: historyOf(thread), opportunityId };
+    let answered = false;
+    let count = 1;
+    await streamAnswer(live.scope === 'tenant' ? '/api/analista' : '/api/demo/analista', body, (event) => {
+      if (event.type === 'thread' && event.id !== threadId) {
+        // The updaters run later, so they get fixed copies of both ids.
+        const previousId = threadId;
+        const serverId = event.id;
+        setThreads((previous) => previous.map((t) => (t.id === previousId ? { ...t, id: serverId } : t)));
+        setActiveId((id) => (id === previousId ? serverId : id));
+        threadId = serverId;
+      } else if (event.type === 'step') {
+        setSteps((previous) => [...(previous ?? []), event.label]);
+        setCurrent(count++);
+      } else if (event.type === 'answer' || event.type === 'error') {
+        if (answered) return;
+        answered = true;
+        const at = event.type === 'answer' ? event.at : new Date().toISOString();
+        appendTo(threadId, { id: `a-${at}`, role: 'analyst', at, blocks: event.type === 'answer' ? event.blocks : noticeBlocks(event.message) });
+      }
+    });
+    setSteps(null);
+  };
+
+  const ask = (question: string, options: { fresh?: boolean; opportunityId?: string } = {}) => {
+    const text = question.trim();
+    if (!text || busy) return;
+    if (live) void askLive(text, Boolean(options.fresh), options.opportunityId ?? null);
+    else askScripted(text, Boolean(options.fresh));
   };
 
   // A new question or answer scrolls to its start, so reading begins at the top of what changed.
   useEffect(() => {
     if (!scrollOnNext.current) return;
     lastMessageRef.current?.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'start' });
-    if (thinking === null) scrollOnNext.current = false;
-  }, [messageCount, thinking, reduce]);
+    if (!busy) scrollOnNext.current = false;
+  }, [messageCount, busy, reduce]);
 
-  // Deep link from the command menu or an opportunity: /analista?pergunta=<suggestion id>.
+  // Deep links: /analista?pergunta=<suggestion id> (any mode) and ?oportunidade=<id> (live).
   useEffect(() => {
-    const id = params.get('pergunta');
-    const suggestion = data.suggestions.find((s) => s.id === id);
-    if (!suggestion || asked.current) return;
+    if (asked.current) return;
+    const suggestion = data.suggestions.find((s) => s.id === params.get('pergunta'));
+    if (opportunity && live) {
+      asked.current = true;
+      const timer = window.setTimeout(() => ask(`Explique a oportunidade: ${opportunity.title}`, { fresh: true, opportunityId: opportunity.id }), 0);
+      return () => window.clearTimeout(timer);
+    }
+    if (!suggestion) return;
     asked.current = true;
     const timer = window.setTimeout(() => ask(suggestion.question, { fresh: true }), 0);
     return () => window.clearTimeout(timer);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [params]);
+  }, [params, opportunity]);
 
   const startNew = () => {
     setActiveId(null);
     setHistoryOpen(false);
     window.setTimeout(() => composerRef.current?.focus(), 0);
+  };
+
+  const select = async (id: string) => {
+    setActiveId(id);
+    setHistoryOpen(false);
+    const thread = threads.find((t) => t.id === id);
+    if (live?.scope !== 'tenant' || !thread || thread.messages.length > 0) return;
+    const result = await loadThreadAction(id);
+    if (!result.ok) {
+      toast.error('Não foi possível abrir a conversa', { description: result.message });
+      return;
+    }
+    setThreads((previous) => previous.map((t) => (t.id === id ? { ...t, messages: result.messages } : t)));
   };
 
   const rate = (messageId: string, value: Feedback) => {
@@ -275,23 +228,11 @@ export function AnalystWorkspace({ data }: { data: AnalystData }) {
       return next;
     });
     if (feedback[messageId] !== value) {
-      toast.success(value === 'up' ? 'Obrigado pelo retorno' : 'Retorno registrado', {
-        description: 'Ambiente de demonstração: a avaliação não é salva.',
-      });
+      toast.success(value === 'up' ? 'Obrigado pelo retorno' : 'Retorno registrado', { description: 'Ambiente de demonstração: a avaliação não é salva.' });
     }
   };
 
-  const list = (
-    <ThreadList
-      threads={threads}
-      activeId={activeId}
-      onSelect={(id) => {
-        setActiveId(id);
-        setHistoryOpen(false);
-      }}
-      onNew={startNew}
-    />
-  );
+  const list = <ThreadList threads={threads} activeId={activeId} onSelect={(id) => void select(id)} onNew={startNew} scope={scope} />;
 
   return (
     <div className="grid grid-cols-1 gap-8 lg:grid-cols-[248px_minmax(0,1fr)]">
@@ -328,6 +269,7 @@ export function AnalystWorkspace({ data }: { data: AnalystData }) {
                 Pergunte sobre vendas, margem, estoque ou fornecedores. Cada resposta traz os números, separa fatos de hipóteses, recomenda o que fazer e
                 cita os dados usados.
               </p>
+              {mode.kind === 'scripted' && mode.unlockable && <DemoUnlock />}
               <ul className="mt-6 grid grid-cols-1 gap-3 md:grid-cols-2">
                 {data.suggestions.map((suggestion) => (
                   <li key={suggestion.id}>
@@ -361,12 +303,17 @@ export function AnalystWorkspace({ data }: { data: AnalystData }) {
                 </div>
               ) : (
                 <article key={message.id} ref={isLast ? lastMessageRef : undefined} aria-label="Resposta do analista" className="scroll-mt-24">
-                  <AnswerHeader message={message} feedback={feedback[message.id]} onFeedback={(value) => rate(message.id, value)} />
-                  <AnswerBlocks blocks={message.blocks ?? []} onFollowUp={ask} />
+                  <AnswerHeader
+                    message={message}
+                    badge={badge}
+                    feedback={feedback[message.id]}
+                    onFeedback={live ? undefined : (value) => rate(message.id, value)}
+                  />
+                  <AnswerBlocks blocks={message.blocks ?? []} onFollowUp={(text) => ask(text)} />
                 </article>
               );
             })}
-            {thinking !== null && <Thinking step={thinking} />}
+            {steps && <Thinking steps={steps} current={current} />}
           </div>
         </div>
 
@@ -386,6 +333,7 @@ export function AnalystWorkspace({ data }: { data: AnalystData }) {
               id="pergunta"
               name="pergunta"
               autoComplete="off"
+              maxLength={2000}
               value={draft}
               onChange={(event) => setDraft(event.target.value)}
               onKeyDown={(event) => {
@@ -398,12 +346,13 @@ export function AnalystWorkspace({ data }: { data: AnalystData }) {
               placeholder="Pergunte sobre vendas, margem ou estoque…"
               className="max-h-40 min-h-10 resize-none border-0 bg-transparent shadow-none [field-sizing:content] focus-visible:ring-0 dark:bg-transparent"
             />
-            <Button type="submit" size="icon" aria-label="Enviar pergunta" disabled={!draft.trim() || thinking !== null}>
-              {thinking !== null ? <Loader2 aria-hidden="true" className="animate-spin" /> : <SendHorizontal aria-hidden="true" />}
+            <Button type="submit" size="icon" aria-label="Enviar pergunta" disabled={!draft.trim() || busy}>
+              {busy ? <Loader2 aria-hidden="true" className="animate-spin" /> : <SendHorizontal aria-hidden="true" />}
             </Button>
           </div>
           <p className="hidden px-2 pt-1 pb-0.5 text-2xs text-subtle-foreground sm:block">
-            Enter envia, Shift + Enter quebra a linha. Respostas desta demonstração são roteirizadas.
+            Enter envia, Shift + Enter quebra a linha.{' '}
+            {live ? 'Respostas geradas por IA; os números vêm dos dados e são conferidos.' : 'Respostas desta demonstração são roteirizadas.'}
           </p>
         </form>
       </div>

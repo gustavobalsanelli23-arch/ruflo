@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { Suspense } from 'react';
 import { PageHeader } from '@/components/data/page-header';
+import { getAiConfig } from '@/lib/ai/config';
 import { can } from '@/lib/auth/permissions';
 import { formatDateTime } from '@/lib/format';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
@@ -55,7 +56,12 @@ export default async function OpportunitiesPage() {
       </div>
       <div className="mt-6">
         <Suspense>
-          <LiveOpportunityCenter opportunities={opportunities.items} productNames={opportunities.names} canEdit={canAnalyze} />
+          <LiveOpportunityCenter
+            opportunities={opportunities.items}
+            productNames={opportunities.names}
+            canEdit={canAnalyze}
+            explainWithAi={canAnalyze && getAiConfig() !== null}
+          />
         </Suspense>
       </div>
     </>

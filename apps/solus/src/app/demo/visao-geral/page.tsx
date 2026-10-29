@@ -9,7 +9,9 @@ import { TextLink } from '@/components/data/text-link';
 import { demoRepository } from '@/demo/repository';
 import { formatCurrency, formatNumber, formatPercent, relativeChange } from '@/lib/format';
 import { parsePeriod } from '@/lib/period';
+import { AiSummary } from '@/modules/overview/ai-summary';
 import { Briefing } from '@/modules/overview/briefing';
+import { demoAiEnabled, demoAiUnlocked } from '@/services/demo-ai';
 import { Greeting } from '@/modules/overview/greeting';
 import { MarginChart } from '@/modules/overview/margin-chart';
 import { CategoryBreakdown, InventoryHealth, RecentActivity, TopOpportunities } from '@/modules/overview/overview-panels';
@@ -30,7 +32,11 @@ export default async function OverviewPage({
 }) {
   const period = parsePeriod((await searchParams).periodo);
   const repository = demoRepository;
-  const [workspace, data] = await Promise.all([repository.getWorkspace(), repository.getOverview(period)]);
+  const [workspace, data, aiUnlocked] = await Promise.all([
+    repository.getWorkspace(),
+    repository.getOverview(period),
+    demoAiEnabled() ? demoAiUnlocked() : Promise.resolve(false),
+  ]);
   const firstName = workspace.user.name.split(' ')[0] ?? workspace.user.name;
   const { organization } = workspace;
   const trend = data.trend;
@@ -46,6 +52,8 @@ export default async function OverviewPage({
 
       <PeriodFrame className="mt-6 flex flex-col gap-6">
         <Briefing segments={data.briefing} dataThrough={workspace.dataThrough} />
+
+        {aiUnlocked && <AiSummary key={period} endpoint="/api/demo/analista" period={period} initial={null} canGenerate />}
 
         <StatStrip label={`Indicadores, ${data.period.label.toLowerCase()}`} className="md:grid-cols-3 xl:grid-cols-[1.4fr_repeat(4,minmax(0,1fr))]">
           <Stat

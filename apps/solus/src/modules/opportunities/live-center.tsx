@@ -14,10 +14,12 @@ export function LiveOpportunityCenter({
   opportunities,
   productNames,
   canEdit,
+  explainWithAi,
 }: {
   opportunities: Opportunity[];
   productNames: Record<string, string>;
   canEdit: boolean;
+  explainWithAi: boolean;
 }) {
   const router = useRouter();
   const change = async (id: string, status: OpportunityStatus) => {
@@ -26,7 +28,7 @@ export function LiveOpportunityCenter({
     router.refresh();
     return { ok: true as const };
   };
-  return <OpportunityCenter opportunities={opportunities} productNames={productNames} onStatusChange={change} canEdit={canEdit} />;
+  return <OpportunityCenter opportunities={opportunities} productNames={productNames} onStatusChange={change} canEdit={canEdit} explainWithAi={explainWithAi} />;
 }
 
 /** Runs the Intelligence Engine again (analyst or above). */

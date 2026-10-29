@@ -16,8 +16,12 @@ describe('estrutura de segurança do banco', () => {
       ),
     );
     expect(tables.map((t) => t.name)).toEqual([
+      'ai_requests',
+      'ai_summaries',
       'analysis_runs',
       'analysis_settings',
+      'analyst_messages',
+      'analyst_threads',
       'categories',
       'data_imports',
       'import_batches',

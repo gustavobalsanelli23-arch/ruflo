@@ -41,7 +41,7 @@ const MODULES: Record<ModuleKey, { icon: LucideIcon; title: string; body: string
     icon: MessageSquareText,
     title: 'O analista precisa dos seus dados para responder',
     body: 'As respostas citam os números da sua empresa e separam fatos de hipóteses. Sem dados, não há o que afirmar com segurança.',
-    next: 'O analista com IA chega na próxima etapa da SOLUS. Os números que ele vai usar já estão nas telas de análise.',
+    next: 'Importe as planilhas na área de dados: o analista responde com os números da sua empresa assim que a primeira importação terminar.',
     shows: ['Perguntas em linguagem natural sobre vendas, margem e estoque', 'Tabelas e fontes em cada resposta', 'Recomendações com o que fazer a seguir'],
     demo: '/demo/analista',
   },

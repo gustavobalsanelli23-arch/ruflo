@@ -10,6 +10,7 @@ export type OrgRole = 'owner' | 'admin' | 'analyst' | 'viewer';
 export type ImportDataset = 'sales' | 'products' | 'inventory' | 'suppliers';
 export type ImportStatus = 'pending' | 'validated' | 'processing' | 'completed' | 'with_errors' | 'failed' | 'canceled' | 'reverted';
 
+import type { AiFunctions, AiTables } from './database-ai';
 import type { AnalyticsFunctions, AnalyticsTables } from './database-analytics';
 
 export type Database = {
@@ -251,9 +252,11 @@ export type Database = {
           },
         ];
       };
-    } & AnalyticsTables;
+    } & AnalyticsTables &
+      AiTables;
     Views: { [_ in never]: never };
-    Functions: AnalyticsFunctions & {
+    Functions: AnalyticsFunctions &
+      AiFunctions & {
       accept_invitation: {
         Args: { p_token: string };
         Returns: string;

@@ -10,10 +10,13 @@ import { Stat, StatStrip } from '@/components/data/stat';
 import { EmptyState } from '@/components/data/states';
 import { TextLink } from '@/components/data/text-link';
 import { Button } from '@/components/ui/button';
+import { getAiConfig } from '@/lib/ai/config';
 import { buildBriefing } from '@/lib/analytics/briefing';
+import { can } from '@/lib/auth/permissions';
 import { formatCurrency, formatNumber, formatPercent, formatRatio, relativeChange } from '@/lib/format';
 import { parsePeriod } from '@/lib/period';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
+import { AiSummary } from '@/modules/overview/ai-summary';
 import { Briefing } from '@/modules/overview/briefing';
 import { Greeting } from '@/modules/overview/greeting';
 import { MarginChart } from '@/modules/overview/margin-chart';
@@ -21,7 +24,9 @@ import { Onboarding } from '@/modules/overview/onboarding';
 import { CategoryBreakdown, InventoryHealth, RecentActivity, TopOpportunities } from '@/modules/overview/overview-panels';
 import { RevenueProfitChart } from '@/modules/overview/revenue-profit-chart';
 import { DataNotes } from '@/modules/workspace/data-notes';
+import { getSummary, summarySignature } from '@/services/ai';
 import { loadBase, loadOverview } from '@/services/dashboards';
+import { lastAnalysisRun } from '@/services/opportunities';
 import { requireWorkspace } from '@/services/workspace';
 
 export const metadata: Metadata = { title: 'Visão executiva' };
@@ -40,7 +45,17 @@ export default async function OverviewPage({ searchParams }: { searchParams: Pro
   if (!supabase || !base) return <Onboarding workspace={workspace} />;
 
   const key = parsePeriod((await searchParams).periodo);
-  const data = await loadOverview(supabase, workspace.active.organizationId, base, key);
+  const organizationId = workspace.active.organizationId;
+  const aiOn = getAiConfig() !== null;
+  const [data, stored, run] = await Promise.all([
+    loadOverview(supabase, organizationId, base, key),
+    getSummary(supabase, organizationId, key),
+    aiOn ? lastAnalysisRun(supabase, organizationId) : Promise.resolve(null),
+  ]);
+  const canSummarize = aiOn && can(workspace.active.role, 'analyze');
+  const summary = stored
+    ? { blocks: stored.blocks, createdAt: stored.createdAt, stale: stored.signature !== summarySignature(base.coverage, key, run?.id ?? null) }
+    : null;
   const { current, previous, period } = data;
   const firstName = workspace.user.fullName?.split(' ')[0] ?? workspace.user.displayName;
   const compact = (value: number) => formatCurrency(value, { compact: true });
@@ -68,6 +83,8 @@ export default async function OverviewPage({ searchParams }: { searchParams: Pro
             urgentOpportunities: data.opportunities.summary.highPriority,
           })}
         />
+
+        {(canSummarize || summary) && <AiSummary key={key} endpoint="/api/analista" period={key} initial={summary} canGenerate={canSummarize} />}
 
         <StatStrip label={`Indicadores, ${period.label.toLowerCase()}`} className="md:grid-cols-3 xl:grid-cols-[1.4fr_repeat(4,minmax(0,1fr))]">
           <Stat
