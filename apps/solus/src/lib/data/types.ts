@@ -301,7 +301,14 @@ export interface OpportunityEvent {
 export type AnswerBlock =
   | { kind: 'summary'; text: string }
   | { kind: 'metrics'; items: { label: string; value: string; delta?: string; tone?: Tone }[] }
-  | { kind: 'chart'; title: string; unit: 'currency' | 'percent'; points: { label: string; value: number }[] }
+  | {
+      kind: 'chart';
+      title: string;
+      unit: 'currency' | 'percent';
+      points: { label: string; value: number }[];
+      /** Bars for a ranking, a line for a series over time. Default: bars for currency, line for percent. */
+      layout?: 'bars' | 'line';
+    }
   | {
       kind: 'table';
       title: string;
@@ -312,7 +319,9 @@ export type AnswerBlock =
   | { kind: 'findings'; facts: string[]; hypotheses: string[] }
   | { kind: 'recommendation'; items: string[] }
   | { kind: 'sources'; items: { name: string; detail: string }[] }
-  | { kind: 'next'; items: string[] };
+  | { kind: 'next'; items: string[] }
+  /** Limitations of the data, or parts of an answer withheld because a number could not be checked. */
+  | { kind: 'notice'; tone: 'info' | 'warning'; title: string; items: string[] };
 
 export interface AnalystMessage {
   id: string;
