@@ -114,7 +114,8 @@ test('pergunta livre recebe um aviso honesto de demonstração', async ({ page }
   await page.goto('/demo/analista');
   await page.getByRole('textbox', { name: 'Pergunta para o analista' }).fill('Qual a melhor loja?');
   await page.keyboard.press('Enter');
-  await expect(page.getByText(/Perguntas livres serão respondidas quando o modelo de IA for conectado/)).toBeVisible({ timeout: 10_000 });
+  await expect(page.getByText(/responde às perguntas sugeridas com análises roteirizadas sobre os dados fictícios/)).toBeVisible({ timeout: 10_000 });
+  await expect(page.getByText('Resposta de demonstração').last()).toBeVisible();
 });
 
 test('o sinal de ruptura filtra a tabela de estoque pela URL', async ({ page, consoleErrors }) => {

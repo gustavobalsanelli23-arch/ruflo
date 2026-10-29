@@ -6,6 +6,10 @@ Cada pessoa tem um papel **por organização**: a mesma pessoa pode ser owner nu
 |---|:-:|:-:|:-:|:-:|
 | Ver painéis, análises, membros e importações | ✓ | ✓ | ✓ | ✓ |
 | Usar o analista e tratar oportunidades | ✓ | ✓ | ✓ | — |
+| Ler as próprias conversas com o analista (as de outras pessoas, nunca) | ✓ | ✓ | ✓ | — |
+| Gerar o resumo da IA na Visão geral | ✓ | ✓ | ✓ | — |
+| Ler o resumo da IA da Visão geral | ✓ | ✓ | ✓ | ✓ |
+| Ver o uso de IA de toda a organização (no banco; ainda sem tela) | ✓ | ✓ | — | — |
 | Importar dados; continuar, cancelar e desfazer as próprias importações | ✓ | ✓ | ✓ | — |
 | Continuar, cancelar e desfazer importações de qualquer pessoa; removê-las do histórico | ✓ | ✓ | — | — |
 | Ajustar os parâmetros de análise | ✓ | ✓ | — | — |

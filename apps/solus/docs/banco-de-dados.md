@@ -15,6 +15,7 @@ PostgreSQL do Supabase. Todo o esquema vem de `supabase/migrations/`, aplicado e
 | `20261029100250_analytics_commit.sql` | gravação e reversão: `start_import`, `commit_import_batch`, `finalize_import`, `cancel_import`, `revert_import`, `save_analysis_settings` |
 | `20261029100300_analytics_metrics.sql` | métricas: `analytics_*`, `inventory_position`, `inventory_summary`, `analysis_parameters` (ver [métricas](metricas-e-estoque.md)) |
 | `20261029100400_analytics_opportunities.sql` | `sync_opportunities` (só `service_role`) e `set_opportunity_status` (ver [motor](intelligence-engine.md)) |
+| `20261030100000_ai_analyst.sql` | analista de IA: conversas, mensagens, registro de uso com limites, resumos da Visão geral; RLS; `begin_ai_request`, `finish_ai_request`, `save_ai_summary` (ver [analista](ia-analista.md)) |
 
 Os tipos TypeScript ficam em `src/types/database.ts`. Ao mudar o esquema, atualize-os no mesmo commit (com o CLI: `supabase gen types typescript --linked > src/types/database.ts`).
 
@@ -113,6 +114,17 @@ Todas as tabelas têm `organization_id` e chaves estrangeiras compostas (`organi
 
 Índices principais: `sale_items (organization_id, sold_at)`, `(organization_id, product_id, sold_at)`, `(organization_id, fingerprint)`, `(import_id)`; posições por produto e data; problemas por importação, gravidade e linha; oportunidades por organização, status e prioridade.
 
+### Analista de IA
+
+| Tabela | Conteúdo |
+|---|---|
+| `analyst_threads` | conversas: organização, pessoa (`auth.uid()` por padrão), título, oportunidade de origem (chave composta, `set null` se ela sumir), datas |
+| `analyst_messages` | perguntas e respostas: papel (`user`/`analyst`), pergunta, blocos da resposta (`jsonb`, até 200 kB), texto, status, motivo da falha, ferramentas usadas, resultado da conferência; chave composta com a conversa (cascata) |
+| `ai_requests` | cada chamada à IA: pessoa, tipo (`chat`/`summary`), status, modelo, número de chamadas e tokens (entrada, saída, cache) |
+| `ai_summaries` | resumo da Visão geral por organização e período (`7d`, `30d`, `90d`, `12m`, `ytd`), com a assinatura dos dados usados para saber quando ficou desatualizado |
+
+Um gatilho (`private.touch_analyst_thread`) atualiza a data da conversa a cada mensagem nova.
+
 ### Storage: bucket `imports`
 Privado, até 25 MB, só `text/csv` e XLSX (arquivos `.txt` e `.tsv` são enviados como `text/csv`). Um diretório por organização. Políticas em `storage.objects`: enviar só no caminho de uma importação `pending` da própria pessoa; ler a partir de analyst; apagar owner/admin; sem atualização (o original nunca é sobrescrito).
 
@@ -137,6 +149,9 @@ Contadores de tentativas por janela fixa, compartilhados entre instâncias. Fica
 | `public.set_opportunity_status(id, status, note)` | authenticated (analyst+ conferido dentro) | muda o status e registra o evento |
 | `public.sync_opportunities(…)` | **apenas service_role** | grava o resultado do motor ([motor](intelligence-engine.md)) |
 | `private.active_import_ids(org)` | authenticated, service_role | importações cujos dados valem para os painéis |
+| `public.begin_ai_request(org, kind)` | authenticated (analyst+ conferido dentro) | aplica os limites (30/h por pessoa, 300/dia por organização) e abre o registro de uso |
+| `public.finish_ai_request(id, status, model, …tokens)` | authenticated (só o próprio registro `started`) | fecha o registro com status, modelo e tokens |
+| `public.save_ai_summary(org, period, signature, content, model)` | authenticated (analyst+ conferido dentro) | grava ou substitui o resumo do período |
 
 ## Gatilhos
 
@@ -146,3 +161,4 @@ Contadores de tentativas por janela fixa, compartilhados entre instâncias. Fica
 | `on_auth_user_email_changed` | `auth.users` | atualiza o e-mail do perfil |
 | `organization_members_guard` | `organization_members` | aplica as regras de papéis e impede organização sem owner |
 | `*_touch` | todas com `updated_at` | atualiza `updated_at` |
+| `analyst_messages_touch_thread` | `analyst_messages` | atualiza a data da conversa |

@@ -18,10 +18,14 @@ RLS ativo em todas as tabelas do schema `public` (há um teste que falha se algu
 | `analysis_settings` | membros | negado (só `save_analysis_settings`, owner/admin) | negado | negado |
 | `analysis_runs`, `opportunities` | membros | negado (só `sync_opportunities`, `service_role`) | negado (status só por `set_opportunity_status`, analyst+) | negado |
 | `opportunity_events` | membros | negado (gravado pelas funções) | negado | negado |
+| `analyst_threads` | só a própria pessoa (analyst+) | a própria pessoa, analyst+, colunas `organization_id`, `title`, `opportunity_id` | a própria pessoa, só `title` | a própria pessoa |
+| `analyst_messages` | só nas conversas da própria pessoa | a própria pessoa, numa conversa dela e da mesma organização | negado | negado (cascata da conversa) |
+| `ai_requests` | a própria pessoa; owner/admin veem a organização | negado (só `begin_ai_request`) | negado (só `finish_ai_request`) | negado |
+| `ai_summaries` | membros | negado (só `save_ai_summary`, analyst+) | negado (idem) | negado |
 | `private.import_rows` | fora da API | — | — | — |
 | `storage.objects` (bucket `imports`) | analyst ou superior da organização do caminho | só no caminho de uma importação `pending` da própria pessoa, ainda sem arquivo | negado (nunca sobrescreve) | owner/admin |
 
-Nomes das políticas: `supabase/migrations/20261028170100_tenancy_rls.sql` e `20261029100100_analytics_schema.sql`.
+Nomes das políticas: `supabase/migrations/20261028170100_tenancy_rls.sql`, `20261029100100_analytics_schema.sql` e `20261030100000_ai_analyst.sql`.
 
 ### Escritas analíticas só por funções
 
@@ -48,6 +52,16 @@ RLS decide *quem* toca uma linha; o gatilho decide *qual mudança* é válida:
 - qualquer membro pode sair;
 - a organização nunca fica sem owner. A verificação trava a linha da organização, então dois owners não conseguem se rebaixar ao mesmo tempo;
 - `organization_id` e `user_id` de um vínculo são imutáveis.
+
+### Analista de IA
+
+- As rotas `POST /api/analista`, `/api/demo/analista` e `/api/demo/acesso` conferem que o `Origin` é o próprio host (rotas não têm a proteção automática das Server Actions contra CSRF), validam o corpo com Zod e respondem `no-store`.
+- A rota confere sessão, papel analyst e organização ativa; `begin_ai_request` confere de novo no banco e aplica os limites (30 por hora por pessoa, 300 por dia por organização, com trava por organização). O uso só é gravado por `begin_ai_request`/`finish_ai_request`, e `finish_ai_request` só fecha um registro `started` da própria pessoa.
+- As ferramentas do modelo são só de leitura e usam as funções de métricas com a sessão da pessoa (`SECURITY INVOKER`): o RLS impede ler outra organização mesmo que o modelo peça. A pergunta sobre uma oportunidade é montada no servidor a partir da oportunidade lida com RLS.
+- A chave `ANTHROPIC_API_KEY` é lida só no servidor (`server-only`). A IA da demonstração fica desligada sem `SOLUS_DEMO_AI=on` e um código de acesso; o cookie de desbloqueio é `HttpOnly` e a comparação do código é em tempo constante.
+- Riscos aceitos: textos vindos de planilhas importadas chegam ao modelo (injeção de instruções); o modelo não tem ferramentas de escrita nem de outras organizações, e os números passam pela conferência, então o pior caso é uma resposta enganosa em texto. Sem `SUPABASE_SECRET_KEY`, os limites da demonstração ficam na memória de cada instância. O cookie da demonstração é o hash do código: quem o obtém pode tentar adivinhar o código fora do ar, por isso o código precisa ter 8+ caracteres e deve ser longo e aleatório.
+
+Detalhes: [analista de IA](ia-analista.md).
 
 ## Decisões sobre funções auxiliares
 

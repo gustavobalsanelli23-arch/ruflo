@@ -111,7 +111,7 @@ Cada execução devolve a lista do que **não** pôde ser avaliado, exibida na C
 - Não prevê demanda nem sazonalidade (a queda de vendas sugere sazonalidade como hipótese, sem afirmar).
 - Não usa preços de concorrentes, impostos, frete ou despesas: o impacto é sempre sobre o **lucro bruto**.
 - Não aprende nem se ajusta sozinho. Mudanças de regra mudam a versão do motor.
-- Não envia nada a modelos de IA. A integração com IA é da Parte 05.
+- O motor não envia nada a modelos de IA. O [analista de IA](ia-analista.md) só lê as oportunidades já gravadas para explicá-las; não cria, altera nem prioriza oportunidades.
 
 ## Testes
 

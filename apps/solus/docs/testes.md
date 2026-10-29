@@ -2,7 +2,7 @@
 
 | Suíte | Comando | Onde roda | O que prova |
 |---|---|---|---|
-| Unitários e componentes | `npm test` | Vitest + jsdom | regras de redirecionamento, validação Zod, permissões, mapeamento de erros; leitura, normalização e validação de planilhas; motor de oportunidades; Server Actions (com Supabase simulado); assistente de importação com um CSV real; telas por papel |
+| Unitários e componentes | `npm test` | Vitest + jsdom | regras de redirecionamento, validação Zod, permissões, mapeamento de erros; leitura, normalização e validação de planilhas; motor de oportunidades; Server Actions (com Supabase simulado); assistente de importação com um CSV real; telas por papel; analista de IA (conferência de números, laço de ferramentas, rotas e telas ao vivo, com um modelo roteirizado no lugar da API) |
 | Banco | `npm run test:db` | **PostgreSQL real** | isolamento entre organizações e matriz de papéis; importação (lotes, idempotência, duplicatas, cancelar, desfazer); métricas calculadas à mão; oportunidades; Storage; volume |
 | E2E | `npm run test:e2e` | Playwright, build de produção | proteção de rotas, CSP e cabeçalhos, formulários (com e sem JavaScript), sessões forjadas, demonstração |
 | E2E real | `npm run test:e2e:real` | Playwright + **projeto Supabase de teste** | cadastro, confirmação, login, organização, convite, papéis, recuperação, saída; importação de vendas do arquivo aos painéis, reimportação sem duplicar e desfazer |
@@ -33,6 +33,7 @@ Arquivos em `tests/db/`:
 | `opportunities.test.ts` | gravação sem duplicar, ciclo de status (nova, resolvida pelo sistema, detectada de novo, descartada) e eventos |
 | `pipeline.test.ts` | CSV em Windows-1252 com números e datas brasileiros → biblioteca de importação → RPCs → métricas → motor → gravação |
 | `volume.test.ts` | 200 mil itens de venda e 2 mil produtos: tempo das métricas e da ingestão |
+| `ai.test.ts` | conversas visíveis só para quem as criou (nem owner lê), leitor bloqueado, chaves compostas entre organizações, data da conversa e cascata, registro de uso só pelas funções, limites por pessoa e por organização, resumos (quem grava, quem lê, período válido) |
 
 Tempos medidos no `volume.test.ts` (PostgreSQL 16 local, 200 mil itens; o teste falha acima do limite entre parênteses):
 
