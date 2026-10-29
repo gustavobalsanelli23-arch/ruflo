@@ -101,6 +101,7 @@ Ainda não implementado: depende de decisão de produto (obrigatório ou opciona
 ## Riscos conhecidos
 
 - Sem projeto Supabase conectado, os fluxos de Auth reais, o envio ao Storage e o E2E da importação não foram executados (ver [testes](testes.md)). As políticas do Storage foram testadas no PostgreSQL com o esquema `storage` reproduzido, não no serviço de Storage real.
+- A conferência do conteúdo do arquivo guardado (SHA-256 e assinatura do formato) é feita pelo servidor da aplicação antes de chamar `confirm_import_upload`; o banco confere só a existência e o tamanho do objeto. Um analista que chame a API do Supabase diretamente com a própria sessão pode pular essa conferência. O efeito é limitado à importação dele: as linhas são revalidadas pelo banco em `stage_import_batch`, o arquivo original nunca é processado no servidor nem servido a outras pessoas, e o bucket continua restrito a CSV/XLSX e 25 MB. O que se perde é apenas a garantia de que o original guardado é o arquivo de onde vieram as linhas.
 - A URL assinada de envio é criada com a sessão da pessoa e vale por 2 horas (padrão do Supabase); quem a obtiver nesse intervalo pode enviar um arquivo para aquele caminho, mas o servidor recusa a importação se o conteúdo não for o declarado.
 - Convites por link: quem tiver o link e a conta do e-mail convidado entra. O link vale 7 dias e funciona uma vez.
 - O limite por IP usa o IP visto pelo servidor; atrás de NAT corporativo, várias pessoas dividem o mesmo contador (os limites são generosos por isso).
