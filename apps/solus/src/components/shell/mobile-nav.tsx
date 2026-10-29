@@ -5,7 +5,7 @@ import { usePathname } from 'next/navigation';
 import { LogIn, LogOut } from 'lucide-react';
 import { Logo } from '@/components/brand/logo';
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@/components/ui/sheet';
-import { MOBILE_TABS, NAV_GROUPS, NAV_ITEMS, type NavItem } from '@/config/navigation';
+import { mobileTabs, NAV_ITEMS, navGroups, type NavItem } from '@/config/navigation';
 import { cn } from '@/lib/utils';
 import { AppLink, useAppPathname } from './base-path';
 import type { ShellContext } from './types';
@@ -14,7 +14,7 @@ import { useSignOut } from './use-sign-out';
 const active = (pathname: string, item: NavItem) => pathname === item.href || pathname.startsWith(`${item.href}/`);
 
 /** Phone bottom bar: the five daily destinations, thumb-reachable. */
-export function MobileTabBar() {
+export function MobileTabBar({ analyst }: { analyst: boolean }) {
   const pathname = useAppPathname(usePathname());
   return (
     <nav
@@ -22,7 +22,7 @@ export function MobileTabBar() {
       className="glass fixed inset-x-0 bottom-0 z-30 border-t pb-[env(safe-area-inset-bottom)] lg:hidden"
     >
       <ul className="mx-auto grid max-w-lg grid-cols-5">
-        {MOBILE_TABS.map((item) => {
+        {mobileTabs(analyst).map((item) => {
           const isActive = active(pathname, item);
           return (
             <li key={item.id}>
@@ -74,7 +74,7 @@ export function MobileMenu({
           <SheetDescription className="text-xs text-sidebar-muted">{context.organization.name}</SheetDescription>
         </SheetHeader>
         <nav aria-label="Principal" className="flex-1 overflow-y-auto px-3 py-4">
-          {[...NAV_GROUPS, { id: 'account', label: 'Conta', items: [NAV_ITEMS.settings] }].map((group) => (
+          {[...navGroups(context.analyst), { id: 'account', label: 'Conta', items: [NAV_ITEMS.settings] }].map((group) => (
             <div key={group.id} className="mb-5">
               <p className="mb-1.5 px-2.5 text-2xs font-medium text-sidebar-muted">{group.label}</p>
               <ul className="flex flex-col gap-0.5">

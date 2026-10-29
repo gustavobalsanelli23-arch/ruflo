@@ -5,7 +5,6 @@ const MODULES = [
   { path: '/demo/lucratividade', heading: 'Lucratividade', nav: 'Lucratividade' },
   { path: '/demo/estoque', heading: 'Estoque', nav: 'Estoque' },
   { path: '/demo/oportunidades', heading: 'Oportunidades', nav: 'Oportunidades' },
-  { path: '/demo/analista', heading: 'Analista', nav: 'Analista' },
   { path: '/demo/dados', heading: 'Dados', nav: 'Dados' },
   { path: '/demo/configuracoes', heading: 'Configurações', nav: 'Configurações' },
 ];
@@ -22,6 +21,23 @@ test.describe('módulos', () => {
       expect(consoleErrors).toEqual([]);
     });
   }
+
+  test('sem a IA configurada, o analista não aparece em nenhum lugar', async ({ page }) => {
+    await page.goto('/demo/visao-geral');
+    await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
+    await expect(page.getByRole('link', { name: /analista/i })).toHaveCount(0);
+    await page.goto('/demo/oportunidades?id=op-boa-vista');
+    await expect(page.getByRole('dialog').getByRole('heading', { name: 'Ação recomendada' })).toBeVisible();
+    await expect(page.getByRole('link', { name: /analista/i })).toHaveCount(0);
+    await page.keyboard.press('Escape');
+    await expect(page.getByRole('navigation', { name: 'Principal' }).getByRole('link', { name: /^Analista/ })).toHaveCount(0);
+    await page.keyboard.press('Control+k');
+    await expect(page.getByRole('dialog').getByPlaceholder('Ir para um módulo ou oportunidade…')).toBeVisible();
+    await expect(page.getByRole('option', { name: /Analista|Perguntar/ })).toHaveCount(0);
+    // A página existe só com a IA; sem ela, quem abre o endereço vê a página de não encontrada.
+    await page.goto('/demo/analista');
+    await expect(page.getByRole('heading', { level: 1 })).toHaveText('Esta página não existe');
+  });
 
   test('a raiz leva quem não entrou para a tela de entrar', async ({ page }) => {
     await page.goto('/');

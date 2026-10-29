@@ -40,7 +40,7 @@ export function AppShell({ context, children }: { context: ShellContext; childre
           <div className="mx-auto w-full max-w-[1480px] px-4 pt-6 pb-28 sm:px-6 lg:px-8 lg:pt-8 lg:pb-16">{children}</div>
         </main>
       </div>
-      <MobileTabBar />
+      <MobileTabBar analyst={context.analyst} />
       <MobileMenu open={menuOpen} onOpenChange={setMenuOpen} context={context} onCloseAutoFocus={menuFocus.onCloseAutoFocus} />
       <CommandMenu open={commandOpen} onOpenChange={setCommandOpen} context={context} />
     </BasePathProvider>

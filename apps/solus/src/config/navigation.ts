@@ -111,6 +111,19 @@ export const MOBILE_TABS: NavItem[] = [
   NAV_ITEMS.analyst,
 ];
 
+/*
+ * The analyst only exists where the AI is configured (ShellContext.analyst).
+ * Without it, it leaves every menu and the phone bar gets Dados in its place.
+ */
+const withoutAnalyst = (items: NavItem[]) => items.filter((entry) => entry.id !== 'analyst');
+
+export const navGroups = (analyst: boolean): NavGroup[] =>
+  analyst ? NAV_GROUPS : NAV_GROUPS.map((group) => ({ ...group, items: withoutAnalyst(group.items) }));
+
+export const mobileTabs = (analyst: boolean): NavItem[] => (analyst ? MOBILE_TABS : [...withoutAnalyst(MOBILE_TABS), NAV_ITEMS.data]);
+
+export const navItems = (analyst: boolean): NavItem[] => (analyst ? Object.values(NAV_ITEMS) : withoutAnalyst(Object.values(NAV_ITEMS)));
+
 export function moduleForPath(pathname: string): NavItem | undefined {
   return Object.values(NAV_ITEMS).find((entry) => pathname === entry.href || pathname.startsWith(`${entry.href}/`));
 }

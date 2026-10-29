@@ -14,7 +14,7 @@ import {
   CommandList,
   CommandShortcut,
 } from '@/components/ui/command';
-import { NAV_ITEMS } from '@/config/navigation';
+import { navItems } from '@/config/navigation';
 import { useAppHref } from './base-path';
 import { useSidebarCollapsed } from './sidebar-state';
 import { THEMES } from './theme-toggle';
@@ -58,11 +58,11 @@ export function CommandMenu({
   return (
     <CommandDialog open={open} onOpenChange={onOpenChange} className="sm:max-w-xl">
       <Command>
-        <CommandInput placeholder="Ir para um módulo, oportunidade ou pergunta…" />
+        <CommandInput placeholder={context.analyst ? 'Ir para um módulo, oportunidade ou pergunta…' : 'Ir para um módulo ou oportunidade…'} />
         <CommandList className="max-h-[min(60vh,420px)]">
           <CommandEmpty>Nenhum resultado. Tente outro termo.</CommandEmpty>
           <CommandGroup heading="Ir para">
-            {Object.values(NAV_ITEMS).map((item) => (
+            {navItems(context.analyst).map((item) => (
               <CommandItem key={item.id} value={`${item.label} ${item.module}`} onSelect={() => run(() => go(item.href))}>
                 <item.icon aria-hidden="true" />
                 <span>{item.label}</span>
@@ -108,7 +108,7 @@ export function CommandMenu({
               ))}
             </CommandGroup>
           )}
-          {context.quickQuestions.length > 0 && (
+          {context.analyst && context.quickQuestions.length > 0 && (
             <CommandGroup heading="Perguntar ao analista">
               {context.quickQuestions.map((q) => (
                 <CommandItem key={q.id} value={q.question} onSelect={() => run(() => go(`/analista?pergunta=${q.id}`))}>

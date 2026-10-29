@@ -51,7 +51,7 @@ export default async function OverviewPage({
       />
 
       <PeriodFrame className="mt-6 flex flex-col gap-6">
-        <Briefing segments={data.briefing} dataThrough={workspace.dataThrough} />
+        <Briefing segments={data.briefing} dataThrough={workspace.dataThrough} analystLink={demoAiEnabled()} />
 
         {aiUnlocked && <AiSummary key={period} endpoint="/api/demo/analista" period={period} initial={null} canGenerate />}
 

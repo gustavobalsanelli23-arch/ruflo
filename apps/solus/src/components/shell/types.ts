@@ -23,6 +23,8 @@ export interface ShellContext {
   openOpportunities: number;
   quickOpportunities: { id: string; title: string }[];
   quickQuestions: { id: string; question: string }[];
+  /** Whether the AI analyst is available here (AI configured); off, it leaves the navigation. */
+  analyst: boolean;
   /** Demo only: whether the visitor also has a session. */
   signedIn: boolean;
 }

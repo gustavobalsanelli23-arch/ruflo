@@ -54,10 +54,11 @@ Cenários da Parte 03: membro de A acessando A; membro de A tentando ler, altera
 
 ## E2E
 
-`npm run test:e2e` faz o build e sobe dois servidores com o mesmo build:
+`npm run test:e2e` faz o build e sobe três servidores com o mesmo build:
 
 - `:3200`, sem Supabase: demonstração, redirecionamentos, aviso de "não configurado", cabeçalhos;
-- `:3201`, com um endereço de Supabase onde nada responde: validação, erros, cookies de sessão corrompidos e forjados, convite guardado antes do login.
+- `:3201`, com um endereço de Supabase onde nada responde: validação, erros, cookies de sessão corrompidos e forjados, convite guardado antes do login;
+- `:3202`, com a IA da demonstração ligada e uma chave de mentira que nunca é chamada: o analista roteirizado, seus atalhos e o desbloqueio (`analyst.spec.ts`).
 
 ## E2E real
 

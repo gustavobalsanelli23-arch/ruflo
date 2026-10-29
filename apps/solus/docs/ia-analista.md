@@ -4,6 +4,8 @@ O analista responde perguntas sobre os dados da organização, explica oportunid
 
 ## Onde aparece
 
+O analista só existe onde a IA está configurada. Sem `ANTHROPIC_API_KEY`, ele sai do menu lateral, da barra do celular (que passa a mostrar Dados), da busca (Ctrl+K), do detalhe das oportunidades e da Visão geral, e `/analista` mostra a página de não encontrada. Na demonstração, o mesmo vale enquanto a IA da demonstração estiver desligada (`SOLUS_DEMO_AI` e `SOLUS_DEMO_AI_CODE`). As rotas de API continuam respondendo "não configurado".
+
 | Recurso | Tela | Quem usa |
 |---|---|---|
 | Conversa com o analista | `/analista` | analyst, admin, owner (leitores veem um aviso) |

@@ -84,7 +84,7 @@ export default async function OverviewPage({ searchParams }: { searchParams: Pro
           })}
         />
 
-        {(canSummarize || summary) && <AiSummary key={key} endpoint="/api/analista" period={key} initial={summary} canGenerate={canSummarize} />}
+        {aiOn && (canSummarize || summary) && <AiSummary key={key} endpoint="/api/analista" period={key} initial={summary} canGenerate={canSummarize} />}
 
         <StatStrip label={`Indicadores, ${period.label.toLowerCase()}`} className="md:grid-cols-3 xl:grid-cols-[1.4fr_repeat(4,minmax(0,1fr))]">
           <Stat

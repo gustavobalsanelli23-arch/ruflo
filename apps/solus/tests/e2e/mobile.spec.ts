@@ -26,7 +26,7 @@ test('no celular, tabelas viram lista e o período usa um seletor', async ({ pag
 });
 
 test('no celular, nenhum módulo rola na horizontal', async ({ page }) => {
-  for (const path of ['/demo/visao-geral', '/demo/lucratividade', '/demo/estoque', '/demo/oportunidades', '/demo/analista', '/demo/dados', '/demo/configuracoes']) {
+  for (const path of ['/demo/visao-geral', '/demo/lucratividade', '/demo/estoque', '/demo/oportunidades', '/demo/dados', '/demo/configuracoes']) {
     await page.goto(path);
     await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
     const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
