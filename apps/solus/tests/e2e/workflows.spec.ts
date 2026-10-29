@@ -44,14 +44,6 @@ test('filtrar oportunidades por tipo e mudar o status atualiza os cartões', asy
   expect(consoleErrors).toEqual([]);
 });
 
-test('a oportunidade leva à análise completa no analista', async ({ page }) => {
-  await page.goto('/demo/oportunidades?id=op-boa-vista');
-  await page.getByRole('link', { name: 'Ver a análise completa no analista' }).click();
-  await expect(page).toHaveURL(/pergunta=q-frios/);
-  const answer = page.getByRole('article', { name: 'Resposta do analista' }).last();
-  await expect(answer.getByRole('heading', { name: 'O que fazer' })).toBeVisible({ timeout: 10_000 });
-});
-
 test('a importação percorre as seis etapas até o resultado', async ({ page, consoleErrors }) => {
   await page.goto('/demo/dados');
   await page.getByRole('button', { name: 'Usar o arquivo de exemplo' }).click();
@@ -92,30 +84,6 @@ test('o histórico explica uma importação que falhou', async ({ page }) => {
   await page.getByRole('button', { name: /1, ver detalhes/ }).click();
   const dialog = page.getByRole('dialog', { name: 'A importação falhou' });
   await expect(dialog).toContainText('coluna de CNPJ');
-});
-
-test('o analista responde a uma sugestão com fatos, hipóteses, tabela e recomendação', async ({ page, consoleErrors }) => {
-  await page.goto('/demo/analista');
-  await page.getByRole('button', { name: 'Nova análise' }).first().click();
-  await page.getByRole('button', { name: /Quais produtos mais contribuem para o lucro/ }).click();
-  const answer = page.getByRole('article', { name: 'Resposta do analista' }).last();
-  await expect(answer.getByRole('heading', { name: 'Fatos verificados nos dados' })).toBeVisible({ timeout: 10_000 });
-  await expect(answer.getByRole('heading', { name: 'Hipóteses a validar' })).toBeVisible();
-  await expect(answer.getByRole('heading', { name: 'O que fazer' })).toBeVisible();
-  await expect(answer.getByRole('region', { name: /^Tabela: Os 5 produtos/ })).toBeVisible();
-  await expect(answer.getByText('Dados utilizados')).toBeVisible();
-  const useful = answer.getByRole('button', { name: 'Resposta útil' });
-  await useful.click();
-  await expect(useful).toHaveAttribute('aria-pressed', 'true');
-  expect(consoleErrors).toEqual([]);
-});
-
-test('pergunta livre recebe um aviso honesto de demonstração', async ({ page }) => {
-  await page.goto('/demo/analista');
-  await page.getByRole('textbox', { name: 'Pergunta para o analista' }).fill('Qual a melhor loja?');
-  await page.keyboard.press('Enter');
-  await expect(page.getByText(/responde às perguntas sugeridas com análises roteirizadas sobre os dados fictícios/)).toBeVisible({ timeout: 10_000 });
-  await expect(page.getByText('Resposta de demonstração').last()).toBeVisible();
 });
 
 test('o sinal de ruptura filtra a tabela de estoque pela URL', async ({ page, consoleErrors }) => {

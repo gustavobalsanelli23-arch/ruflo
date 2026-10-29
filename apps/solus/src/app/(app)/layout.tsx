@@ -1,5 +1,6 @@
 import { AppShell } from '@/components/shell/app-shell';
 import type { ShellContext } from '@/components/shell/types';
+import { getAiConfig } from '@/lib/ai/config';
 import { logServerError } from '@/lib/log';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { getCoverage } from '@/services/analytics';
@@ -24,8 +25,8 @@ export default async function WorkspaceLayout({ children }: { children: React.Re
     dataThrough: shellData.dataThrough,
     openOpportunities: shellData.openOpportunities,
     quickOpportunities: shellData.quickOpportunities,
-    // The analyst's questions arrive with the AI integration (Part 05).
     quickQuestions: [],
+    analyst: getAiConfig() !== null,
     signedIn: true,
   };
 

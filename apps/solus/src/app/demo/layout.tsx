@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { AppShell } from '@/components/shell/app-shell';
 import type { ShellContext } from '@/components/shell/types';
 import { demoRepository } from '@/demo/repository';
+import { demoAiEnabled } from '@/services/demo-ai';
 import { getSessionUser } from '@/services/session';
 
 export const metadata: Metadata = {
@@ -31,6 +32,7 @@ export default async function DemoLayout({ children }: { children: React.ReactNo
       .slice(0, 4)
       .map((o) => ({ id: o.id, title: o.title })),
     quickQuestions: analyst.suggestions.map((s) => ({ id: s.id, question: s.question })),
+    analyst: demoAiEnabled(),
     signedIn: session !== null,
   };
 

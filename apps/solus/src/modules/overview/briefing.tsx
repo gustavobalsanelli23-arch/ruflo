@@ -13,11 +13,14 @@ export function Briefing({
   segments,
   dataThrough,
   source = 'analyst',
+  analystLink = false,
 }: {
   segments: BriefingSegment[];
   dataThrough: string;
   /** 'analyst': the demo's written note; 'metrics': sentences assembled from the metric layer, no AI. */
   source?: 'analyst' | 'metrics';
+  /** Shows "Aprofundar no analista" (only where the analyst exists). */
+  analystLink?: boolean;
 }) {
   return (
     <section aria-label={source === 'analyst' ? 'Nota do analista sobre o período' : 'Resumo do período'}>
@@ -45,7 +48,7 @@ export function Briefing({
           {source === 'analyst' ? 'Nota do analista, escrita com os dados até ' : 'Resumo calculado com os dados importados até '}
           <time dateTime={dataThrough}>{formatDate(dataThrough)}</time>
         </span>
-        {source === 'analyst' && (
+        {source === 'analyst' && analystLink && (
           <TextLink href="/analista" className="text-xs">
             Aprofundar no analista
           </TextLink>

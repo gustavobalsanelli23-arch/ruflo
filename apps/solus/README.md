@@ -2,7 +2,7 @@
 
 Inteligência de negócios para o varejo: lucro, estoque e oportunidades a partir dos dados de cada empresa. *See beyond the numbers.*
 
-Estado atual (Parte 05): autenticação real com Supabase Auth, organizações multi-tenant isoladas por RLS e papéis de acesso; importação de planilhas (CSV e XLSX) com validação, detecção de duplicatas e histórico; métricas financeiras e de estoque calculadas no banco; motor determinístico de oportunidades com evidências; analista de IA (Claude) que consulta essas métricas por ferramentas, tem cada número da resposta conferido com os dados, explica oportunidades e escreve o resumo da Visão geral. Visão geral, Lucratividade, Estoque, Oportunidades, Analista e Dados usam os dados reais de cada organização. Uma demonstração com dados fictícios fica em `/demo`, sempre identificada e separada dos dados reais.
+Estado atual (Parte 05): autenticação real com Supabase Auth, organizações multi-tenant isoladas por RLS e papéis de acesso; importação de planilhas (CSV e XLSX) com validação, detecção de duplicatas e histórico; métricas financeiras e de estoque calculadas no banco; motor determinístico de oportunidades com evidências; analista de IA (Claude) que consulta essas métricas por ferramentas, tem cada número da resposta conferido com os dados, explica oportunidades e escreve o resumo da Visão geral; ele só aparece quando a IA está configurada (`ANTHROPIC_API_KEY`). Visão geral, Lucratividade, Estoque, Oportunidades e Dados usam os dados reais de cada organização. Uma demonstração com dados fictícios fica em `/demo`, sempre identificada e separada dos dados reais.
 
 ## Stack
 
@@ -37,7 +37,7 @@ Todas lidas só no servidor; nenhuma vai para o navegador. Detalhes em [.env.exa
 | `SUPABASE_PUBLISHABLE_KEY` | sim | chave publicável (ou `SUPABASE_ANON_KEY` legada) |
 | `SUPABASE_SECRET_KEY` | sim em produção | chave secreta (ou `SUPABASE_SERVICE_ROLE_KEY`), usada só no servidor: limite de tentativas e gravação das oportunidades. Sem ela, as importações funcionam, mas as oportunidades não são recalculadas |
 | `SITE_URL` | recomendada | origem dos links enviados por e-mail |
-| `ANTHROPIC_API_KEY` | para ligar o analista | chave da API do Claude. Sem ela, o analista e o resumo da IA aparecem como "não configurado" |
+| `ANTHROPIC_API_KEY` | para ligar o analista | chave da API do Claude. Sem ela, o analista some da navegação e das telas |
 | `SOLUS_AI_MODEL` / `SOLUS_AI_EFFORT` | não | modelo (padrão `claude-opus-5-5`) e esforço (`low`, `medium`, `high`; padrão `medium`) |
 | `SOLUS_DEMO_AI` / `SOLUS_DEMO_AI_CODE` | não | `on` + código de 8+ caracteres liberam a IA na demonstração, só para quem tiver o código ([detalhes](docs/ia-analista.md#demonstração)) |
 

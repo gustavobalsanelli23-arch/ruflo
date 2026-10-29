@@ -60,7 +60,7 @@ export default async function OpportunitiesPage() {
             opportunities={opportunities.items}
             productNames={opportunities.names}
             canEdit={canAnalyze}
-            explainWithAi={canAnalyze && getAiConfig() !== null}
+            analyst={canAnalyze && getAiConfig() !== null ? 'live' : 'off'}
           />
         </Suspense>
       </div>

@@ -15,7 +15,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import { NAV_GROUPS, NAV_ITEMS, type NavItem } from '@/config/navigation';
+import { NAV_ITEMS, navGroups, type NavItem } from '@/config/navigation';
 import { cn } from '@/lib/utils';
 import { AppLink, useAppPathname } from './base-path';
 import { useSidebarCollapsed } from './sidebar-state';
@@ -107,7 +107,7 @@ export function Sidebar({ context }: { context: ShellContext }) {
       </div>
 
       <nav aria-label="Principal" className="flex-1 overflow-x-hidden overflow-y-auto px-3 pt-3 pb-4">
-        {NAV_GROUPS.map((group, index) => (
+        {navGroups(context.analyst).map((group, index) => (
           <div key={group.id} className={cn(index > 0 && 'mt-6')}>
             <p className="mb-1.5 hidden px-2.5 text-2xs font-medium text-sidebar-muted expanded:block">{group.label}</p>
             {index > 0 && <div className="mx-auto mb-3 h-px w-6 bg-sidebar-border expanded:hidden" aria-hidden="true" />}

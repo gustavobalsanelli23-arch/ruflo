@@ -119,7 +119,7 @@ export function OpportunityCenter({
   productNames,
   onStatusChange,
   canEdit = true,
-  explainWithAi = false,
+  analyst = 'off',
 }: {
   opportunities: Opportunity[];
   productNames: Record<string, string>;
@@ -127,7 +127,8 @@ export function OpportunityCenter({
   onStatusChange?: StatusChange;
   canEdit?: boolean;
   /** The AI analyst is available: the detail offers to explain the opportunity. */
-  explainWithAi?: boolean;
+  /** 'off': no analyst here; 'scripted': demo answers; 'live': the AI explains this opportunity. */
+  analyst?: 'off' | 'scripted' | 'live';
 }) {
   const router = useRouter();
   const pathname = usePathname();
@@ -414,20 +415,22 @@ export function OpportunityCenter({
                     </SelectContent>
                   </Select>
                 </div>
-                <Button asChild variant="outline">
-                  <Link
-                    href={
-                      explainWithAi
-                        ? `/analista?oportunidade=${encodeURIComponent(selected.id)}`
-                        : selected.relatedQuestionId
-                          ? `/analista?pergunta=${selected.relatedQuestionId}`
-                          : '/analista'
-                    }
-                  >
-                    <MessageSquareText aria-hidden="true" />
-                    {explainWithAi ? 'Explicar com o analista' : selected.relatedQuestionId ? 'Ver a análise completa no analista' : 'Perguntar ao analista'}
-                  </Link>
-                </Button>
+                {analyst !== 'off' && (
+                  <Button asChild variant="outline">
+                    <Link
+                      href={
+                        analyst === 'live'
+                          ? `/analista?oportunidade=${encodeURIComponent(selected.id)}`
+                          : selected.relatedQuestionId
+                            ? `/analista?pergunta=${selected.relatedQuestionId}`
+                            : '/analista'
+                      }
+                    >
+                      <MessageSquareText aria-hidden="true" />
+                      {analyst === 'live' ? 'Explicar com o analista' : selected.relatedQuestionId ? 'Ver a análise completa no analista' : 'Perguntar ao analista'}
+                    </Link>
+                  </Button>
+                )}
               </div>
             </>
           )}

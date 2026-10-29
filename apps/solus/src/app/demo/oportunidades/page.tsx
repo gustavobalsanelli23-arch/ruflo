@@ -11,7 +11,7 @@ export default async function OpportunitiesPage() {
   const repository = demoRepository;
   const [opportunities, profit] = await Promise.all([repository.getOpportunities(), repository.getProfitAnalytics('30d')]);
   const productNames = Object.fromEntries(profit.products.map((p) => [p.productId, p.name]));
-  const explainWithAi = demoAiEnabled() && (await demoAiUnlocked());
+  const analyst = !demoAiEnabled() ? 'off' : (await demoAiUnlocked()) ? 'live' : 'scripted';
 
   return (
     <>
@@ -21,7 +21,7 @@ export default async function OpportunitiesPage() {
       />
       <div className="mt-8">
         <Suspense>
-          <OpportunityCenter opportunities={opportunities} productNames={productNames} explainWithAi={explainWithAi} />
+          <OpportunityCenter opportunities={opportunities} productNames={productNames} analyst={analyst} />
         </Suspense>
       </div>
     </>

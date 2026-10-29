@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { notFound } from 'next/navigation';
 import { Suspense } from 'react';
 import { PageHeader } from '@/components/data/page-header';
 import { opportunities } from '@/demo/opportunities';
@@ -8,10 +9,11 @@ import { demoAiEnabled, demoAiUnlocked } from '@/services/demo-ai';
 
 export const metadata: Metadata = { title: 'Analista' };
 
+/** Only exists when the demo AI is configured (SOLUS_DEMO_AI=on with an access code); otherwise a 404. */
 export default async function AnalystPage({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
+  if (!demoAiEnabled()) notFound();
   const data = await demoRepository.getAnalyst();
-  const enabled = demoAiEnabled();
-  const live = enabled && (await demoAiUnlocked());
+  const live = await demoAiUnlocked();
   const requested = (await searchParams).oportunidade;
   const found = live && typeof requested === 'string' ? opportunities().find((item) => item.id === requested) : undefined;
   return (
@@ -24,7 +26,7 @@ export default async function AnalystPage({ searchParams }: { searchParams: Prom
         <Suspense>
           <AnalystWorkspace
             data={live ? { ...data, threads: [] } : data}
-            mode={live ? { kind: 'live', scope: 'demo' } : { kind: 'scripted', unlockable: enabled }}
+            mode={live ? { kind: 'live', scope: 'demo' } : { kind: 'scripted', unlockable: true }}
             opportunity={found ? { id: found.id, title: found.title } : null}
           />
         </Suspense>

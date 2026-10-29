@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { notFound } from 'next/navigation';
 import { Suspense } from 'react';
 import { z } from 'zod';
 import { PageHeader } from '@/components/data/page-header';
@@ -22,8 +23,10 @@ const SUGGESTIONS: AnalystData['suggestions'] = [
   { id: 'oportunidades', theme: 'Oportunidades', question: 'Quais oportunidades abertas devo atacar primeiro?' },
 ];
 
+/** Only exists where the AI is configured (ANTHROPIC_API_KEY); otherwise the route is a 404 and the analyst leaves the navigation. */
 export default async function AnalystPage({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
   const { active } = await requireWorkspace();
+  if (!getAiConfig()) notFound();
   const header = (
     <PageHeader title="Analista" description="Perguntas sobre os dados da empresa, respondidas com números, fontes e a distinção entre fato e hipótese." />
   );
@@ -38,13 +41,6 @@ export default async function AnalystPage({ searchParams }: { searchParams: Prom
     return wrap(
       <Notice title="O analista é usado por analistas, administradores e proprietários">
         Seu papel nesta organização é de leitura. Os números que o analista usa estão na Visão geral, em Lucratividade, em Estoque e na Central de Oportunidades.
-      </Notice>,
-    );
-  }
-  if (!getAiConfig()) {
-    return wrap(
-      <Notice tone="warning" title="O analista de IA ainda não está ativo neste servidor">
-        Falta configurar a chave da API da Anthropic (ANTHROPIC_API_KEY) no servidor. Os números da empresa continuam nas telas de análise.
       </Notice>,
     );
   }
