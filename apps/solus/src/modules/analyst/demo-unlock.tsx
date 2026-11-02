@@ -39,7 +39,7 @@ export function DemoUnlock() {
         <KeyRound aria-hidden="true" className="size-4 text-brand" />
         Ativar a IA nesta demonstração
       </label>
-      <p className="text-xs text-muted-foreground">Com o código de acesso, o analista responde a perguntas livres sobre os dados fictícios usando o Claude, da Anthropic.</p>
+      <p className="text-xs text-muted-foreground">Com o código de acesso, o analista responde a perguntas livres sobre os dados fictícios usando IA.</p>
       <div className="flex gap-2">
         <Input
           id="codigo-ia"
