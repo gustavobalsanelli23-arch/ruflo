@@ -43,7 +43,7 @@ const SCOPES: Record<'scripted' | 'demo' | 'tenant', ScopeInfo> = {
       { name: 'Posição de estoque', detail: 'Atual' },
       { name: 'Oportunidades', detail: 'Abertas' },
     ],
-    note: 'Demonstração com IA (Claude, da Anthropic) sobre dados fictícios. Cada número da resposta é conferido com os dados consultados.',
+    note: 'Demonstração com IA sobre dados fictícios. Cada número da resposta é conferido com os dados consultados.',
   },
   tenant: {
     items: [
@@ -51,7 +51,7 @@ const SCOPES: Record<'scripted' | 'demo' | 'tenant', ScopeInfo> = {
       { name: 'Posição de estoque', detail: 'Última importada' },
       { name: 'Oportunidades', detail: 'Central' },
     ],
-    note: 'As perguntas e os dados consultados para respondê-las são enviados à Anthropic (Claude) para gerar a resposta. Cada número é conferido com os dados; nada é calculado pela IA.',
+    note: 'As perguntas e os dados consultados para respondê-las são enviados ao provedor de IA configurado para gerar a resposta. Cada número é conferido com os dados; nada é calculado pela IA.',
   },
 };
 
