@@ -2,7 +2,7 @@
 import type Anthropic from '@anthropic-ai/sdk';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { MessagesClient } from '@/lib/ai/engine';
-import { createFallbackClient, restFor, type ProviderSlot } from '@/lib/ai/fallback-client';
+import { createFallbackClient, failureReason, restFor, type ProviderSlot } from '@/lib/ai/fallback-client';
 import { createOpenAICompatClient, OpenAICompatConnectionError, OpenAICompatError, parseRetryAfter } from '@/lib/ai/openai-client';
 import { getAiConfig, getAiProvider, getProviderSlots } from '@/lib/ai/config';
 
@@ -56,7 +56,7 @@ describe('rodízio', () => {
     const client = createFallbackClient([a.slot, b.slot], { now: () => clock, onFailure: (event) => failures.push(event) });
 
     expect((await client.beta.messages.create(params)).model).toBe('b-modelo');
-    expect(failures).toEqual([{ provider: 'a', status: 429, restMs: 60_000, next: 'b' }]);
+    expect(failures).toEqual([{ provider: 'a', status: 429, reason: 'limite', restMs: 60_000, next: 'b' }]);
 
     // durante o descanso, nem tenta o primeiro
     clock = 30_000;
@@ -137,6 +137,23 @@ describe('rodízio', () => {
     expect(restFor(new OpenAICompatError(503, 'fora'))).toBe(30_000);
     expect(restFor(new OpenAICompatConnectionError('rede'))).toBe(30_000);
     expect(restFor(new OpenAICompatError(413, 'grande'))).toBe(0);
+  });
+
+  it('informa o motivo da falha sem expor o que parece chave', async () => {
+    const key = `gsk_${'a'.repeat(52)}`;
+    const a = provider('a', [new OpenAICompatError(401, `Invalid API key: ${key}`)]);
+    const b = provider('b', ['ok']);
+    const reasons: (string | null)[] = [];
+    const client = createFallbackClient([a.slot, b.slot], { onFailure: (event) => reasons.push(event.reason) });
+    await client.beta.messages.create(params);
+    expect(reasons).toEqual(['Invalid API key: [oculto]']);
+  });
+
+  it('o motivo fica curto, em uma linha, e só existe para erros do provedor', () => {
+    expect(failureReason(new OpenAICompatError(400, `tool\n  ${'falhou '.repeat(100)}`))).toHaveLength(200);
+    expect(failureReason(new OpenAICompatError(400, 'a\n  b'))).toBe('a b');
+    expect(failureReason(new OpenAICompatConnectionError('Falha de conexão com o provedor de IA.'))).toBe('Falha de conexão com o provedor de IA.');
+    expect(failureReason(new Error('segredo interno'))).toBeNull();
   });
 
   it('lê o Retry-After em segundos ou data', () => {
