@@ -84,7 +84,7 @@ Com o provedor `openai`, é possível cadastrar até 9 provedores, em ordem de p
 
 - Quando o descanso acaba, o preferido volta a ser usado.
 - Se todos estiverem descansando, tenta primeiro o que acorda antes. Se todos falharem, a pessoa vê a mensagem de excesso de solicitações (quando algum respondeu 429) ou a do último erro.
-- Cada troca vai para o log do servidor como `[solus] ia: provedor falhou`, com o nome do provedor, o status, o descanso e o próximo, sem chave nem conteúdo. O modelo que de fato respondeu fica em `ai_requests.model`.
+- Cada troca vai para o log do servidor como `[solus] ia: provedor falhou`, com o nome do provedor, o status, o motivo informado pelo provedor, o descanso e o próximo. O motivo é cortado em 200 caracteres e sequências longas que parecem chave são ocultadas; a mensagem é escrita pelo provedor, então pode citar trechos do pedido recusado. O modelo que de fato respondeu fica em `ai_requests.model`.
 - Com um só provedor, o adaptador insiste nele (até 2 novas tentativas e 45 s por chamada). Com vários, não repete: passa logo para o próximo, com 25 s por chamada.
 - O descanso fica na memória de cada instância do servidor. Uma instância nova começa com todos disponíveis, e no pior caso tenta de novo um que ainda está no limite (que responde 429 na hora).
 
@@ -113,6 +113,8 @@ SOLUS_AI_3_MODEL=<modelo terminado em :free>
 ```
 
 Erros: o adaptador trata o caso do OpenRouter que responde 200 com `{ error }`. Para a pessoa, 401, 402 e 403 aparecem como problema de configuração, e 429 como excesso de solicitações.
+
+**Modelos desligados.** Um 404 no log costuma indicar um modelo que o provedor desligou. Antes de cadastrar um modelo, confira também a página de modelos descontinuados do provedor (na Groq, `console.groq.com/docs/deprecations`): a lista de modelos pode continuar citando um modelo já desligado, como aconteceu com o `llama-3.3-70b-versatile`.
 
 **Qualidade e privacidade.** O analista depende de chamar ferramentas corretamente e copiar números exatos; modelos menores tendem a precisar mais da correção e a ter mais trechos retirados. Como uma mesma resposta pode passar por modelos diferentes, prefira colocar no rodízio só modelos que responderam bem nos testes. Teste cada provedor antes de abrir para clientes: um provedor que recusa o formato das ferramentas (400 em toda chamada) não descansa, então atrasa todas as respostas até ser tirado da lista. Planos gratuitos podem guardar e usar o que é enviado: com dados reais de clientes, leia os termos de cada provedor antes.
 

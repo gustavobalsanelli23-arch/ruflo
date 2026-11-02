@@ -29,7 +29,7 @@ export interface ProviderSlot {
 export interface FallbackOptions {
   now?: () => number;
   /** Called when a provider fails and the call moves on (or gives up). */
-  onFailure?: (event: { provider: string; status: number | null; restMs: number; next: string | null }) => void;
+  onFailure?: (event: { provider: string; status: number | null; reason: string | null; restMs: number; next: string | null }) => void;
 }
 
 const MINUTE = 60_000;
@@ -52,6 +52,16 @@ export function restFor(error: unknown): number {
   // 400, 413, 422: este pedido não serviu para este provedor (contexto grande, chamada de
   // ferramenta malformada…); o próximo tenta, sem castigar este.
   return 0;
+}
+
+const MAX_REASON_LENGTH = 200;
+/** Long unbroken runs look like credentials: providers may echo part of a rejected key. */
+const SECRET_LIKE = /[A-Za-z0-9_-]{32,}/g;
+
+/** The provider's own explanation, safe for the server log; null for unknown errors. */
+export function failureReason(error: unknown): string | null {
+  if (!(error instanceof OpenAICompatError || error instanceof OpenAICompatConnectionError)) return null;
+  return error.message.replace(SECRET_LIKE, '[oculto]').replace(/\s+/g, ' ').trim().slice(0, MAX_REASON_LENGTH) || null;
 }
 
 /** Error to show when every provider failed: "limit reached" wins, since it explains the most. */
@@ -98,6 +108,7 @@ export function createFallbackClient(slots: ProviderSlot[], options: FallbackOpt
               options.onFailure?.({
                 provider: slot.name,
                 status: error instanceof OpenAICompatError ? error.status : null,
+                reason: failureReason(error),
                 restMs: rest,
                 next: next === undefined ? null : slots[next]!.name,
               });

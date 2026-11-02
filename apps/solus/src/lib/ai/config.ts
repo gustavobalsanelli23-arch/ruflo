@@ -147,8 +147,8 @@ function buildOpenAIClient(slots: SlotConfig[]): MessagesClient {
     }),
   }));
   return createFallbackClient(providers, {
-    onFailure: ({ provider, status, restMs, next }) => {
-      console.warn('[solus] ia: provedor falhou', { provider, status, restSeconds: Math.round(restMs / 1000), next });
+    onFailure: ({ provider, status, reason, restMs, next }) => {
+      console.warn('[solus] ia: provedor falhou', { provider, status, reason, restSeconds: Math.round(restMs / 1000), next });
     },
   });
 }
