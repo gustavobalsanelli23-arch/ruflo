@@ -154,6 +154,9 @@ describe('estoque e oportunidades', () => {
   });
 
   it('ferramenta desconhecida e campos a mais são recusados', async () => {
+    const omitted = await runDataTool('resumo_periodo', { periodo: PERIOD.periodo }, 'R1', source, context);
+    expect(omitted).toEqual(await runDataTool('resumo_periodo', { periodo: PERIOD.periodo, inicio: null, fim: null }, 'R1', source, context));
+    expect(omitted).not.toHaveProperty('error');
     expect(await runDataTool('apagar_tudo', {}, 'R1', source, context)).toEqual({ error: 'Ferramenta desconhecida: apagar_tudo.' });
     expect(await runDataTool('resumo_periodo', { ...PERIOD, sql: 'select 1' }, 'R1', source, context)).toEqual({ error: expect.stringContaining('Parâmetros inválidos') });
   });
