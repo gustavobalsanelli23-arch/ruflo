@@ -37,8 +37,10 @@ Todas lidas só no servidor; nenhuma vai para o navegador. Detalhes em [.env.exa
 | `SUPABASE_PUBLISHABLE_KEY` | sim | chave publicável (ou `SUPABASE_ANON_KEY` legada) |
 | `SUPABASE_SECRET_KEY` | sim em produção | chave secreta (ou `SUPABASE_SERVICE_ROLE_KEY`), usada só no servidor: limite de tentativas e gravação das oportunidades. Sem ela, as importações funcionam, mas as oportunidades não são recalculadas |
 | `SITE_URL` | recomendada | origem dos links enviados por e-mail |
-| `ANTHROPIC_API_KEY` | para ligar o analista | chave da API do Claude. Sem ela, o analista some da navegação e das telas |
-| `SOLUS_AI_MODEL` / `SOLUS_AI_EFFORT` | não | modelo (padrão `claude-opus-5-5`) e esforço (`low`, `medium`, `high`; padrão `medium`) |
+| `ANTHROPIC_API_KEY` **ou** `SOLUS_AI_API_KEY` | para ligar o analista | chave da API do Claude, ou de um provedor compatível com OpenAI (DeepSeek, OpenRouter…). Sem nenhuma, o analista some da navegação e das telas |
+| `SOLUS_AI_PROVIDER` | não | `anthropic` ou `openai`; vazio escolhe pela chave presente ([detalhes](docs/ia-analista.md#provedores)) |
+| `SOLUS_AI_BASE_URL` / `SOLUS_AI_MAX_TOKENS` / `SOLUS_AI_STRICT_TOOLS` | não | só no provedor `openai`: URL da API (padrão `https://api.deepseek.com`), limite de saída (padrão 8000) e esquemas estritos (`on`) |
+| `SOLUS_AI_MODEL` / `SOLUS_AI_EFFORT` | não | modelo (padrão `claude-opus-5-5` ou `deepseek-chat`) e esforço, só no Claude (`low`, `medium`, `high`; padrão `medium`) |
 | `SOLUS_DEMO_AI` / `SOLUS_DEMO_AI_CODE` | não | `on` + código de 8+ caracteres liberam a IA na demonstração, só para quem tiver o código ([detalhes](docs/ia-analista.md#demonstração)) |
 
 ## Scripts

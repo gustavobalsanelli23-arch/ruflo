@@ -1,10 +1,10 @@
 # Analista de IA
 
-O analista responde perguntas sobre os dados da organização, explica oportunidades e escreve o resumo executivo da Visão geral. Ele usa a API do Claude (Anthropic) e **não calcula números**: todo valor vem da mesma camada de métricas dos painéis (funções SQL com o RLS de quem pergunta), e o texto final é conferido contra esses resultados antes de chegar à tela.
+O analista responde perguntas sobre os dados da organização, explica oportunidades e escreve o resumo executivo da Visão geral. Ele usa a API do Claude (Anthropic) ou qualquer API compatível com OpenAI, como DeepSeek e OpenRouter (ver [Provedores](#provedores)), e **não calcula números**: todo valor vem da mesma camada de métricas dos painéis (funções SQL com o RLS de quem pergunta), e o texto final é conferido contra esses resultados antes de chegar à tela.
 
 ## Onde aparece
 
-O analista só existe onde a IA está configurada. Sem `ANTHROPIC_API_KEY`, ele sai do menu lateral, da barra do celular (que passa a mostrar Dados), da busca (Ctrl+K), do detalhe das oportunidades e da Visão geral, e `/analista` mostra a página de não encontrada. Na demonstração, o mesmo vale enquanto a IA da demonstração estiver desligada (`SOLUS_DEMO_AI` e `SOLUS_DEMO_AI_CODE`). As rotas de API continuam respondendo "não configurado".
+O analista só existe onde a IA está configurada. Sem `ANTHROPIC_API_KEY` nem `SOLUS_AI_API_KEY`, ele sai do menu lateral, da barra do celular (que passa a mostrar Dados), da busca (Ctrl+K), do detalhe das oportunidades e da Visão geral, e `/analista` mostra a página de não encontrada. Na demonstração, o mesmo vale enquanto a IA da demonstração estiver desligada (`SOLUS_DEMO_AI` e `SOLUS_DEMO_AI_CODE`). As rotas de API continuam respondendo "não configurado".
 
 | Recurso | Tela | Quem usa |
 |---|---|---|
@@ -55,6 +55,29 @@ O prompt de sistema (`src/lib/ai/prompt.ts`) proíbe calcular, exige datas copia
 | Tentativas | o SDK repete até 2 vezes em 429 e 5xx; tempo limite de 45 s por chamada |
 | Recusa | `stop_reason: 'refusal'` vira uma resposta "não posso ajudar com isso" e não é cobrada como erro |
 
+## Provedores
+
+| `SOLUS_AI_PROVIDER` | Chave | Cliente |
+|---|---|---|
+| `anthropic` | `ANTHROPIC_API_KEY` | SDK oficial da Anthropic, com os parâmetros acima |
+| `openai` | `SOLUS_AI_API_KEY` | `src/lib/ai/openai-client.ts`: `POST {SOLUS_AI_BASE_URL}/chat/completions` com `fetch` |
+| vazio | a que existir | `anthropic` se houver `ANTHROPIC_API_KEY`, senão `openai` |
+
+O adaptador compatível com OpenAI implementa a mesma interface (`MessagesClient`) que o motor usa com o Claude. O pedido montado no formato da Anthropic é traduzido (sistema, mensagens, `tool_use` → `tool_calls`, `tool_result` → mensagens `tool`) e a resposta volta ao formato da Anthropic. Por isso o laço, as ferramentas, a conferência de números e os limites são os mesmos nos dois provedores.
+
+O que não existe em Chat Completions fica de fora: pensamento adaptativo, `effort`, fallback no servidor e marcação de cache (provedores como DeepSeek fazem cache automático, e os tokens lidos do cache são registrados). Notas de sistema no meio da conversa, como o aviso de prazo, viram mensagens de usuário marcadas como "[Instrução do sistema]".
+
+| Variável (só `openai`) | Padrão | Descrição |
+|---|---|---|
+| `SOLUS_AI_BASE_URL` | `https://api.deepseek.com` | URL até a versão (OpenRouter: `https://openrouter.ai/api/v1`). Só `https`, exceto `http://localhost` |
+| `SOLUS_AI_MODEL` | `deepseek-chat` | id do modelo no provedor; aceita `/` e `:` (`deepseek/<modelo>:free`) |
+| `SOLUS_AI_MAX_TOKENS` | `8000` | limite de saída por chamada (256 a 64000); muitos provedores recusam valores acima do limite do modelo |
+| `SOLUS_AI_STRICT_TOOLS` | desligado | `on` manda `strict: true` nas funções. Sem isso, o formato das chamadas não é garantido pela API, mas a validação com Zod e a chance de correção continuam valendo |
+
+Erros: o adaptador repete até 2 vezes em 408, 409, 429, 5xx e falhas de conexão, com 45 s por chamada, e trata o caso do OpenRouter que responde 200 com `{ error }`. 401, 402 (sem saldo) e 403 aparecem como problema de configuração; 429 como excesso de solicitações.
+
+**Qualidade e privacidade.** O analista depende de chamar ferramentas corretamente e copiar números exatos; modelos menores tendem a precisar mais da correção e a ter mais trechos retirados. Teste com a chave antes de abrir para clientes. Modelos gratuitos (como os `:free` do OpenRouter) podem guardar e usar o que é enviado: use só na demonstração, que tem apenas dados fictícios.
+
 ## Limites de uso
 
 | Onde | Limite | Aplicado em |
@@ -71,7 +94,7 @@ Cada chamada fica registrada em `ai_requests` (pessoa, tipo, status, modelo, nú
 
 Em cada pergunta são enviados à API do Claude: a pergunta, até 6 trocas anteriores da mesma conversa, o nome da organização, as datas da primeira e da última venda e da última posição de estoque, e os **resultados das consultas** (totais agregados, nomes e SKUs de produtos, categorias, fornecedores, posições de estoque, oportunidades). Não são enviados dados de clientes finais, e-mails nem dados de contas.
 
-O tratamento desses dados segue os termos comerciais da API da Anthropic, contratados por quem fornece a `ANTHROPIC_API_KEY`. Avise os clientes antes de ligar o analista em produção.
+O tratamento desses dados segue os termos da API do provedor configurado (Anthropic, DeepSeek, OpenRouter…), contratados por quem fornece a chave. Com o provedor `openai`, os mesmos dados vão para o endereço de `SOLUS_AI_BASE_URL`. Avise os clientes antes de ligar o analista em produção.
 
 No banco ficam as perguntas, as respostas montadas e o registro de uso. As conversas são apagadas junto com a organização (cascata); ainda não há tela para a pessoa apagar uma conversa.
 
@@ -81,7 +104,7 @@ A demonstração é pública, então a IA lá fica **desligada** a menos que:
 
 - `SOLUS_DEMO_AI=on`, e
 - `SOLUS_DEMO_AI_CODE` tenha 8 ou mais caracteres, e
-- `ANTHROPIC_API_KEY` esteja configurada.
+- `ANTHROPIC_API_KEY` ou `SOLUS_AI_API_KEY` esteja configurada.
 
 O visitante digita o código uma vez; o navegador guarda um cookie `HttpOnly` (`solus-demo-ia`, 7 dias) com o hash do código. Trocar o código invalida todos os cookies. Sem o código, a demonstração continua com as respostas roteirizadas de sempre, marcadas como "Resposta de demonstração". Com a IA ligada, as respostas usam **apenas** os dados fictícios (`src/demo/ai-source.ts`), levam o selo "IA sobre dados fictícios" e nada é salvo no servidor: a conversa fica no navegador e é reenviada a cada pergunta.
 
@@ -91,9 +114,12 @@ Todas lidas só no servidor (`src/lib/ai/config.ts`, `server-only`); nenhuma vai
 
 | Variável | Obrigatória | Descrição |
 |---|---|---|
-| `ANTHROPIC_API_KEY` | para ligar a IA | chave da API do Claude. Sem ela, `/analista` mostra "não configurado" e o botão de resumo some |
-| `SOLUS_AI_MODEL` | não | modelo (padrão `claude-opus-5-5`) |
-| `SOLUS_AI_EFFORT` | não | `low`, `medium` (padrão) ou `high` |
+| `SOLUS_AI_PROVIDER` | não | `anthropic` ou `openai`; vazio escolhe pela chave presente |
+| `ANTHROPIC_API_KEY` | para ligar a IA com o Claude | chave da API do Claude |
+| `SOLUS_AI_API_KEY` | para ligar a IA com provedor compatível com OpenAI | chave do provedor. Sem nenhuma das duas chaves, `/analista` mostra "não configurado" e o botão de resumo some |
+| `SOLUS_AI_BASE_URL`, `SOLUS_AI_MAX_TOKENS`, `SOLUS_AI_STRICT_TOOLS` | não | só no provedor `openai` (ver [Provedores](#provedores)) |
+| `SOLUS_AI_MODEL` | não | modelo (padrão `claude-opus-5-5` ou `deepseek-chat`) |
+| `SOLUS_AI_EFFORT` | não | só no Claude: `low`, `medium` (padrão) ou `high` |
 | `SOLUS_DEMO_AI` | não | `on` permite a IA na demonstração |
 | `SOLUS_DEMO_AI_CODE` | com `SOLUS_DEMO_AI=on` | código de acesso da demonstração, 8+ caracteres |
 
@@ -117,6 +143,7 @@ Nenhum teste chama a API real: o modelo é substituído por um cliente roteiriza
 | `tests/unit/ai-grounding.test.ts` | números, moedas, porcentagens, p.p., datas por extenso, arredondamento, textos dos dados |
 | `tests/unit/ai-engine.test.ts` | laço de ferramentas, entradas inválidas, prazo, limite de passos, correção e retirada de trechos, recusa, uso de tokens |
 | `tests/unit/ai-queries.test.ts` | consultas sobre a fonte de dados (períodos, comparação, ordenação, estoque, oportunidades) |
+| `tests/unit/ai-openai-client.test.ts` | tradução de pedido e resposta, cache, recusa, argumentos inválidos, erros HTTP, 200 com `{ error }`, tentativas, cancelamento, escolha do provedor e o laço completo do analista passando pelo adaptador |
 | `tests/unit/ai-routes.test.ts` | origem, configuração, papel, corpo inválido, limites, gravação, histórico, oportunidade montada no servidor, resumo, falhas, bloqueio e desbloqueio da demonstração |
 | `tests/unit/analyst-live.test.tsx` | tela ao vivo com resposta em NDJSON: passos, resposta, conversa contínua, histórico da demonstração, erros, conexão interrompida, conversas salvas, resumo da Visão geral |
 | `tests/db/ai.test.ts` | isolamento das conversas, leitor bloqueado, chaves compostas, limites por pessoa e por organização, registro de uso, resumos |
