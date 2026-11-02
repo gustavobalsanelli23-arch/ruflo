@@ -2,6 +2,7 @@ import 'server-only';
 import Anthropic from '@anthropic-ai/sdk';
 import { getAiClient } from '@/lib/ai/config';
 import { runAnalyst, type EngineConfig, type RunInput, type RunResult } from '@/lib/ai/engine';
+import { OpenAICompatConnectionError, OpenAICompatError } from '@/lib/ai/openai-client';
 import type { AnalystDataSource } from '@/lib/ai/types';
 import type { AnswerBlock } from '@/lib/data/types';
 import { logServerError } from '@/lib/log';
@@ -26,6 +27,12 @@ export function friendlyFailure(error: unknown): string {
   }
   if (error instanceof Anthropic.APIConnectionError) return 'O serviço de IA não respondeu a tempo. Tente de novo.';
   if (error instanceof Anthropic.InternalServerError) return 'O serviço de IA está instável no momento. Tente de novo em instantes.';
+  if (error instanceof OpenAICompatConnectionError) return 'O serviço de IA não respondeu a tempo. Tente de novo.';
+  if (error instanceof OpenAICompatError) {
+    if (error.status === 429) return 'O serviço de IA está com muitas solicitações. Tente de novo em instantes.';
+    if (error.status === 401 || error.status === 402 || error.status === 403) return 'O analista de IA está indisponível por um problema de configuração do servidor.';
+    if (error.status >= 500) return 'O serviço de IA está instável no momento. Tente de novo em instantes.';
+  }
   return 'O analista não conseguiu responder agora. Tente de novo.';
 }
 

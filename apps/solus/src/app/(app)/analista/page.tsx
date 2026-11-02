@@ -23,7 +23,7 @@ const SUGGESTIONS: AnalystData['suggestions'] = [
   { id: 'oportunidades', theme: 'Oportunidades', question: 'Quais oportunidades abertas devo atacar primeiro?' },
 ];
 
-/** Only exists where the AI is configured (ANTHROPIC_API_KEY); otherwise the route is a 404 and the analyst leaves the navigation. */
+/** Only exists where the AI is configured (ANTHROPIC_API_KEY or an OpenAI-compatible provider); otherwise the route is a 404 and the analyst leaves the navigation. */
 export default async function AnalystPage({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
   const { active } = await requireWorkspace();
   if (!getAiConfig()) notFound();
