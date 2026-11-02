@@ -33,7 +33,7 @@ const bodySchema = z.discriminatedUnion('mode', [chatSchema, summarySchema]);
 export async function POST(request: Request) {
   if (!sameOrigin(request)) return jsonError(403, 'Origem não permitida.');
   const config = getAiConfig();
-  if (!config) return jsonError(503, 'O analista de IA ainda não foi configurado neste servidor (ANTHROPIC_API_KEY ou SOLUS_AI_API_KEY).');
+  if (!config) return jsonError(503, 'O analista de IA ainda não foi configurado neste servidor (ANTHROPIC_API_KEY ou SOLUS_AI_1_API_KEY).');
   const auth = await authorize('analyst');
   if (!auth.ok) return jsonError(auth.error.code === 'unauthenticated' ? 401 : 403, auth.error.message);
 

@@ -40,10 +40,21 @@ export class OpenAICompatError extends Error {
   constructor(
     readonly status: number,
     message: string,
+    /** How long the provider asked to wait (Retry-After), when it said. */
+    readonly retryAfterMs: number | null = null,
   ) {
     super(message);
     this.name = 'OpenAICompatError';
   }
+}
+
+/** Retry-After in seconds or as an HTTP date; null when absent or invalid. Capped at 24 h. */
+export function parseRetryAfter(value: string | null, now: number = Date.now()): number | null {
+  if (!value?.trim()) return null;
+  const seconds = Number(value);
+  const ms = Number.isFinite(seconds) ? seconds * 1000 : Date.parse(value) - now;
+  if (!Number.isFinite(ms) || ms < 0) return null;
+  return Math.min(ms, 24 * 60 * 60 * 1000);
 }
 
 /** The provider did not answer (network failure or timeout). */
@@ -241,7 +252,9 @@ export function createOpenAICompatClient(options: OpenAICompatOptions): Messages
     } catch {
       body = null;
     }
-    if (!response.ok) throw new OpenAICompatError(response.status, errorMessage(body, `HTTP ${response.status}`));
+    if (!response.ok) {
+      throw new OpenAICompatError(response.status, errorMessage(body, `HTTP ${response.status}`), parseRetryAfter(response.headers.get('retry-after')));
+    }
     // Alguns provedores (OpenRouter) devolvem 200 com { error } quando o modelo de destino falha.
     if (!body || body.error) {
       const code = body && typeof body.error === 'object' ? Number(body.error.code) : NaN;
