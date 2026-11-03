@@ -146,14 +146,14 @@ export const TOOL_DEFINITIONS: Anthropic.Beta.BetaTool[] = [
 
 /* ---------- validação das entradas ---------- */
 
-const iso = z.string().regex(/^\d{4}-\d{2}-\d{2}$/).nullable();
+const iso = z.string().regex(/^\d{4}-\d{2}-\d{2}$/).nullable().default(null);
 const period = { periodo: z.enum(['7d', '30d', '90d', '12m', 'ytd', 'personalizado']), inicio: iso, fim: iso };
-const filter = z.string().trim().max(80).nullable();
+const filter = z.string().trim().max(80).nullable().default(null);
 const limit = z.number().int().min(1).max(20);
 
 const INPUTS = {
   resumo_periodo: z.object(period).strict(),
-  evolucao: z.object({ ...period, granularidade: z.enum(['dia', 'semana', 'mes']).nullable() }).strict(),
+  evolucao: z.object({ ...period, granularidade: z.enum(['dia', 'semana', 'mes']).nullable().default(null) }).strict(),
   produtos: z
     .object({
       ...period,
@@ -175,7 +175,7 @@ const INPUTS = {
       limite: limit,
     })
     .strict(),
-  oportunidades: z.object({ situacao: z.enum(['abertas', 'todas']), id: z.string().max(80).nullable() }).strict(),
+  oportunidades: z.object({ situacao: z.enum(['abertas', 'todas']), id: z.string().max(80).nullable().default(null) }).strict(),
 } as const;
 
 export type DataToolName = keyof typeof INPUTS;

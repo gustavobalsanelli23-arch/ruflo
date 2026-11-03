@@ -89,11 +89,12 @@ describe('pedido', () => {
   it('ferramentas viram funções, com strict só quando pedido', () => {
     const loose = toChatTools(baseParams([]), false);
     expect(loose).toHaveLength(TOOL_DEFINITIONS.length);
+    const original = (TOOL_DEFINITIONS[0] as { input_schema: { properties: unknown } }).input_schema;
     expect(loose[0]).toEqual({
       type: 'function',
-      function: { name: 'resumo_periodo', description: TOOL_DEFINITIONS[0]!.description, parameters: (TOOL_DEFINITIONS[0] as { input_schema: unknown }).input_schema },
+      function: { name: 'resumo_periodo', description: TOOL_DEFINITIONS[0]!.description, parameters: { ...original, required: ['periodo'] } },
     });
-    expect(toChatTools(baseParams([]), true)[0]!.function).toMatchObject({ strict: true });
+    expect(toChatTools(baseParams([]), true)[0]!.function).toMatchObject({ strict: true, parameters: original });
   });
 
   it('envia o corpo certo, sem parâmetros exclusivos da Anthropic', async () => {

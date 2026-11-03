@@ -151,13 +151,27 @@ export function toChatMessages(params: Params): ChatMessage[] {
   return out;
 }
 
+type JsonSchema = { properties?: Record<string, { anyOf?: { type?: string }[] }>; required?: string[] };
+
+/**
+ * Providers such as Groq reject a whole call when the model leaves out a
+ * required argument. A nullable argument can safely be left out, since the
+ * tool reads a missing one as null, so it stops being required.
+ */
+function withOptionalNullables(schema: unknown): unknown {
+  const { properties, required } = schema as JsonSchema;
+  if (!properties || !required) return schema;
+  const acceptsNull = (name: string) => properties[name]?.anyOf?.some((option) => option.type === 'null') ?? false;
+  return { ...(schema as object), required: required.filter((name) => !acceptsNull(name)) };
+}
+
 export function toChatTools(params: Params, strict: boolean) {
   return ((params.tools ?? []) as { name: string; description?: string; input_schema: unknown }[]).map((tool) => ({
     type: 'function' as const,
     function: {
       name: tool.name,
       ...(tool.description ? { description: tool.description } : {}),
-      parameters: tool.input_schema,
+      parameters: strict ? tool.input_schema : withOptionalNullables(tool.input_schema),
       ...(strict ? { strict: true } : {}),
     },
   }));
