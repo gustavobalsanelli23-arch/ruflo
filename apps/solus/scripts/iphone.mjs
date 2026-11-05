@@ -250,7 +250,16 @@ async function daemon(opts) {
       const slug = (name || 'tela').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
       const file = path.join(SHOTS_DIR, `${stamp}-${slug}.png`);
       await page.screenshot({ path: file, fullPage: !!o.full, scale: o.hd ? 'device' : 'css', animations: 'disabled' });
-      return file;
+      // Linux WebKit reports backdrop-filter support but never paints it, so
+      // glass layers look see-through here while Safari on the iPhone blurs them.
+      const glass = await page.evaluate(() => [...document.querySelectorAll('body *')].some((el) => {
+        const s = getComputedStyle(el);
+        const f = s.backdropFilter || s.webkitBackdropFilter;
+        return f && f !== 'none' && el.getBoundingClientRect().width > 0;
+      }));
+      return glass
+        ? `${file}\naviso: há camadas de vidro (backdrop-filter) na tela; este WebKit não desenha o desfoque, então o que está atrás aparece nítido. No iPhone real fica borrado.`
+        : file;
     },
     async tap([target]) {
       const { el, note } = await first(target);
@@ -296,9 +305,11 @@ async function daemon(opts) {
         const label = (el) => (el.getAttribute('aria-label') || el.textContent || el.getAttribute('placeholder') || el.getAttribute('name') || el.tagName).trim().slice(0, 40);
         const zoomInputs = [...document.querySelectorAll('input:not([type=checkbox]):not([type=radio]):not([type=hidden]):not([type=file]), textarea, select')]
           .filter((el) => visible(el) && parseFloat(getComputedStyle(el).fontSize) < 16).map(label);
+        // A field inside an input group is tapped through the whole group box.
+        const hitBox = (el) => (el.closest('[data-slot=input-group]') ?? el).getBoundingClientRect();
         const smallTargets = [...document.querySelectorAll('a[href], button, [role=button], input, select, textarea')]
-          .filter((el) => { if (!visible(el)) return false; const r = el.getBoundingClientRect(); return r.width < 24 || r.height < 24; })
-          .map((el) => { const r = el.getBoundingClientRect(); return `${label(el)} (${Math.round(r.width)}x${Math.round(r.height)})`; });
+          .filter((el) => { if (!visible(el)) return false; const r = hitBox(el); return r.width < 24 || r.height < 24; })
+          .map((el) => { const r = hitBox(el); return `${label(el)} (${Math.round(r.width)}x${Math.round(r.height)})`; });
         return {
           overflowX: document.documentElement.scrollWidth - document.documentElement.clientWidth,
           h1: [...document.querySelectorAll('h1')].filter(visible).map((h) => h.textContent.trim()),

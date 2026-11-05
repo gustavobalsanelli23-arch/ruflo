@@ -13,7 +13,7 @@ export function ConfidenceMeter({ value, withWord = false, className }: { value:
   const level = confidenceLevel(value);
   const tone = level === 'alta' ? 'positive' : level === 'moderada' ? 'brand' : 'warning';
   return (
-    <span className={cn('flex items-center gap-2', className)}>
+    <span className={cn('flex flex-wrap items-center gap-x-2 gap-y-1', className)}>
       <Meter value={value} tone={tone} label={`Confiança ${level}, ${formatPercent(value, 0)}`} className="w-12 shrink-0" />
       <span className="text-xs whitespace-nowrap text-muted-foreground tabular">
         {formatPercent(value, 0)}

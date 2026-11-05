@@ -51,8 +51,13 @@ aparecerem, use a linha de comando acima: ela faz o mesmo.
 
 ## Particularidades do Safari no iPhone (já vistas neste projeto)
 
-- Campo com fonte < 16px faz o Safari dar **zoom ao focar**; o `check` aponta. Pendente: a busca do
-  menu de comandos (`src/components/ui/command.tsx`, `text-sm` = 13px).
+- Campo com fonte < 16px faz o Safari dar **zoom ao focar**; o `check` aponta. Neste tema `text-base`
+  vale 14px: use `text-[16px] md:text-sm`, como em `input.tsx` e `command.tsx`.
+- Alvos de toque: links de texto ganham área com padding + margem negativa iguais (layout intacto) e
+  `relative` para a área extra ficar acima do conteúdo seguinte (`text-link.tsx`).
+- O WebKit de Linux **não desenha `backdrop-filter`**: painéis de vidro (`glass`, `glass-pop`) parecem
+  transparentes no screenshot, com o fundo nítido. No iPhone real o fundo fica borrado; o `shot` avisa.
+  Para conferir o visual desses painéis, capture também no Chromium com o perfil do iPhone.
 - O Safari aplica `upgrade-insecure-requests` até em `localhost`; a CSP o omite em loopback
   (`src/lib/security/headers.ts`). Sem isso, `next start` local quebra todos os scripts no Safari.
 - No `next dev`, cada rota compila na primeira visita (alguns segundos); `tap` em link espera a navegação.

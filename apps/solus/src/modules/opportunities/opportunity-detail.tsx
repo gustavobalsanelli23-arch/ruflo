@@ -83,8 +83,8 @@ const IMPACT_SENTENCE: Record<Opportunity['impactKind'], string> = {
 export function OpportunityFacts({ opportunity }: { opportunity: Opportunity }) {
   const impact = impactShort(opportunity);
   return (
-    <dl className="grid grid-cols-3 gap-px overflow-hidden rounded-lg border bg-border *:bg-card *:px-3 *:py-2.5 sm:*:px-4">
-      <div>
+    <dl className="grid grid-cols-2 gap-px overflow-hidden rounded-lg border bg-border *:bg-card *:px-3 *:py-2.5 sm:grid-cols-3 sm:*:px-4">
+      <div className="col-span-2 sm:col-span-1">
         <dt className="text-xs text-muted-foreground">Impacto estimado</dt>
         <dd className="mt-0.5 text-base font-semibold whitespace-nowrap tabular text-foreground sm:text-lg">{impact.value}</dd>
         <dd className="text-xs text-subtle-foreground">{IMPACT_UNIT[opportunity.impactKind]}</dd>

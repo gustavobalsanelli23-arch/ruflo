@@ -57,7 +57,7 @@ function Signal({
       {filter && (
         <Link
           href={`/estoque?filtro=${filter.id}#itens`}
-          className="group/link mt-3 inline-flex w-fit items-center gap-1 rounded text-sm font-medium text-brand outline-none underline-offset-4 hover:underline focus-visible:ring-2 focus-visible:ring-ring/60"
+          className="group/link mt-1.5 -mb-1.5 inline-flex w-fit items-center gap-1 rounded py-1.5 text-sm font-medium text-brand outline-none underline-offset-4 hover:underline focus-visible:ring-2 focus-visible:ring-ring/60"
         >
           {filter.label}
           <ArrowRight aria-hidden="true" className="size-3.5 transition-transform group-hover/link:translate-x-0.5" />
