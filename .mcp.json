@@ -19,6 +19,23 @@
       "env": {
         "FIRECRAWL_API_KEY": "${FIRECRAWL_API_KEY}"
       }
+    },
+    "iphone": {
+      "type": "stdio",
+      "command": "npx",
+      "args": [
+        "-y",
+        "@playwright/mcp@0.0.84",
+        "--browser",
+        "webkit",
+        "--device",
+        "iPhone 17 Pro",
+        "--headless",
+        "--isolated",
+        "--output-dir",
+        "apps/solus/.iphone/mcp"
+      ],
+      "env": {}
     }
   }
 }

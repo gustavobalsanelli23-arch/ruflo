@@ -54,6 +54,8 @@ Todas lidas só no servidor; nenhuma vai para o navegador. Detalhes em [.env.exa
 | `npm test` | testes unitários e de componentes (Vitest) |
 | `npm run test:db` | RLS, importação, métricas, oportunidades, IA e volume num PostgreSQL real (`SOLUS_TEST_DATABASE_URL`) |
 | `npm run test:e2e` | build + E2E (Playwright) em dois servidores locais |
+| `npm run test:e2e:iphone` | build + a suíte de celular no WebKit (Safari) em iPhone 17 Pro e iPhone SE |
+| `npm run iphone -- <comando>` | iPhone (WebKit) aberto entre comandos: navegar, tocar, digitar, screenshot, logs (`npm run iphone -- help`; fluxo em [CLAUDE.md](CLAUDE.md)) |
 | `npm run test:e2e:real` | E2E contra um projeto Supabase de teste (credenciais em env) |
 
 ## Estrutura

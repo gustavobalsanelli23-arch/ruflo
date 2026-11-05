@@ -8,8 +8,14 @@
  * `uploadOrigin` is the Supabase project origin: the browser sends import
  * files straight to Storage with a signed URL (the file never passes through
  * the app server), so that origin, and only it, is allowed in connect-src.
+ *
+ * `loopback` is true when the request came to this machine (`next start` on
+ * localhost, as in the E2E suite or the iOS Simulator). Safari, unlike Chrome
+ * and Firefox, applies upgrade-insecure-requests to localhost too, sending
+ * every script and stylesheet to https://localhost, where nothing answers. A
+ * deployed site is never on loopback, so it always keeps the directive.
  */
-export function buildContentSecurityPolicy(nonce: string, isDev: boolean, uploadOrigin: string | null = null) {
+export function buildContentSecurityPolicy(nonce: string, isDev: boolean, uploadOrigin: string | null = null, loopback = false) {
   const directives = [
     `default-src 'self'`,
     `script-src 'self' 'nonce-${nonce}' 'strict-dynamic'${isDev ? ` 'unsafe-eval'` : ''}`,
@@ -24,8 +30,13 @@ export function buildContentSecurityPolicy(nonce: string, isDev: boolean, upload
     `manifest-src 'self'`,
     `worker-src 'self' blob:`,
   ];
-  if (!isDev) directives.push('upgrade-insecure-requests');
+  if (!isDev && !loopback) directives.push('upgrade-insecure-requests');
   return directives.join('; ');
+}
+
+/** Hostname as `URL.hostname` gives it (IPv6 in brackets). */
+export function isLoopbackHost(hostname: string) {
+  return hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '[::1]' || hostname === '::1';
 }
 
 /** Headers applied to every response (see next.config.ts). */

@@ -4,6 +4,7 @@ out/
 coverage/
 test-results/
 playwright-report/
+.iphone/
 next-env.d.ts
 *.tsbuildinfo
 .env
