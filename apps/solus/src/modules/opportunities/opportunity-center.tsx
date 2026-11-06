@@ -370,7 +370,7 @@ export function OpportunityCenter({
 
       <Sheet open={selected !== null} onOpenChange={(isOpen) => !isOpen && select(null)}>
         <SheetContent
-          className="w-full gap-0 p-0 data-[side=right]:sm:max-w-2xl"
+          className="gap-0 p-0 data-[side=right]:w-full data-[side=right]:sm:max-w-2xl"
           aria-describedby="op-summary"
           onOpenAutoFocus={(event) => {
             event.preventDefault();

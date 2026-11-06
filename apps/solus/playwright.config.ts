@@ -32,6 +32,10 @@ export default defineConfig({
       testIgnore: [/mobile\.spec\.ts/, /auth-forms\.spec\.ts/, /analyst\.spec\.ts/],
     },
     { name: 'mobile', use: { ...devices['Pixel 7'] }, testMatch: /mobile\.spec\.ts/ },
+    // Safari on the iPhone: the same suite on WebKit (Safari's engine), on a
+    // current iPhone and on the smallest screen still in use.
+    { name: 'iphone', use: { ...devices['iPhone 17 Pro'] }, testMatch: /mobile\.spec\.ts/ },
+    { name: 'iphone-se', use: { ...devices['iPhone SE (3rd gen)'] }, testMatch: /mobile\.spec\.ts/ },
     {
       name: 'auth',
       use: { ...devices['Desktop Chrome'], viewport: { width: 1280, height: 800 }, baseURL: `http://localhost:${AUTH_PORT}` },

@@ -163,7 +163,7 @@ export function DataHubView({ data }: { data: DataHubData }) {
                     <button
                       type="button"
                       onClick={() => setDetails(r)}
-                      className="mt-1 text-xs font-medium text-critical-text underline-offset-4 outline-none hover:underline focus-visible:underline"
+                      className="-mt-0.5 -mb-1.5 py-1.5 text-xs font-medium text-critical-text underline-offset-4 outline-none hover:underline focus-visible:underline"
                     >
                       Ver o que deu errado
                     </button>

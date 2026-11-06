@@ -281,7 +281,8 @@
   "enabledMcpjsonServers": [
     "claude-flow",
     "shadcn",
-    "firecrawl"
+    "firecrawl",
+    "iphone"
   ],
   "extraKnownMarketplaces": {
     "claude-plugins-official": {
