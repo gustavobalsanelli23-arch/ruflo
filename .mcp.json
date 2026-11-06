@@ -33,7 +33,7 @@
         "--headless",
         "--isolated",
         "--output-dir",
-        "apps/solus/.iphone/mcp"
+        "${TMPDIR:-/tmp}/visualizar-mcp"
       ],
       "env": {}
     }
