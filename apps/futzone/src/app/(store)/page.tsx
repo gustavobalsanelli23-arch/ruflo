@@ -1,5 +1,6 @@
 import { Hero, heroLockers } from '@/components/home/Hero';
 import { HomeSections } from '@/components/home/HomeSections';
+import { PromoBanner } from '@/components/home/PromoBanner';
 
 export default function HomePage() {
   // A fileira do hero é resolvida no servidor (a foto do primeiro armário é o LCP);
@@ -7,6 +8,7 @@ export default function HomePage() {
   const lockers = heroLockers();
   return (
     <>
+      <PromoBanner />
       <Hero lockers={lockers} />
       <HomeSections heroIds={lockers.map((p) => p.id)} />
     </>
