@@ -21,6 +21,16 @@ export const DEFAULT_PRICE_RULES: PriceRules = {
   retro: 15000,
 };
 
+/** Preços de antes da Black Friday: aparecem riscados ("de … por R$ 150,00"). */
+export const REGULAR_PRICE_RULES: PriceRules = {
+  torcedor: 16990,
+  infantil: 16990,
+  conjunto: 16990,
+  jogador: 18990,
+  especial: 18990,
+  retro: 20990,
+};
+
 export const PRICE_KEY_LABEL: Record<PriceKey, string> = {
   torcedor: 'Torcedor (clubes, seleções, femininas)',
   infantil: 'Infantil',
@@ -57,6 +67,12 @@ export function priceKeyFor(s: PriceSubject): PriceKey {
 
 export function rulePrice(s: PriceSubject, rules: PriceRules = DEFAULT_PRICE_RULES): Cents {
   return rules[priceKeyFor(s)];
+}
+
+/** Preço anterior (riscado) do tipo, quando é maior que o preço da tabela atual. */
+export function regularPrice(s: PriceSubject, rules: PriceRules = DEFAULT_PRICE_RULES): Cents | undefined {
+  const key = priceKeyFor(s);
+  return REGULAR_PRICE_RULES[key] > rules[key] ? REGULAR_PRICE_RULES[key] : undefined;
 }
 
 /** Aceita só valores inteiros positivos em centavos; o resto volta ao padrão. */

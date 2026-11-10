@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { DEFAULT_PRICE_RULES, priceKeyFor, rulePrice, sanitizePriceRules } from '@/lib/pricing';
+import { DEFAULT_PRICE_RULES, priceKeyFor, REGULAR_PRICE_RULES, regularPrice, rulePrice, sanitizePriceRules } from '@/lib/pricing';
 import { seedProducts } from '@/data/products';
 
 describe('tabela de preços', () => {
@@ -25,6 +25,16 @@ describe('tabela de preços', () => {
 
   it('o catálogo inicial só tem os preços novos', () => {
     expect(new Set(seedProducts.map((p) => p.price))).toEqual(new Set([15000]));
+  });
+
+  it('Black Friday: o preço antigo do tipo aparece riscado', () => {
+    for (const p of seedProducts) {
+      const key = priceKeyFor({ name: p.name, category: p.category, kids: p.gender === 'infantil' });
+      expect(p.compareAtPrice, p.name).toBe(REGULAR_PRICE_RULES[key]);
+    }
+    expect(regularPrice({ name: 'Camisa Retrô Flamengo 1995', category: 'retro', kids: false })).toBe(20990);
+    // Sem desconto, não há preço riscado.
+    expect(regularPrice({ name: 'Camisa Retrô Flamengo 1995', category: 'retro', kids: false }, { ...DEFAULT_PRICE_RULES, retro: 20990 })).toBeUndefined();
   });
 
   it('tabela gravada no formato antigo volta aos valores novos', () => {

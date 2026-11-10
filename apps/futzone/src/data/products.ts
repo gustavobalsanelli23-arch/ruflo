@@ -3,7 +3,7 @@ import { ADULT_SIZES, ALL_SIZES, KIDS_SIZES } from '@/types/catalog';
 import catalog from './catalogo-futzone.json';
 import { categories } from './categories';
 import { teams } from './teams';
-import { rulePrice } from '@/lib/pricing';
+import { regularPrice, rulePrice } from '@/lib/pricing';
 
 /**
  * Catálogo FutZone — gerado a partir do catálogo do fornecedor (catalogopro).
@@ -71,6 +71,7 @@ export function buildProduct(
   const sizes = gridFor(e.kids, e.availableSizes);
   const categoryName = categories.find((c) => c.id === e.category)?.name ?? e.category;
   const cap = opts.cap ?? DEFAULT_SIZE_CAP;
+  const subject = { name: e.name, category: e.category, kids: e.kids, teamCountry: team.country };
   return {
     id: `fz-${e.sourceId}`,
     slug: e.slug,
@@ -81,7 +82,8 @@ export function buildProduct(
     gender: e.kids ? 'infantil' : e.category === 'femininas' ? 'feminino' : 'masculino',
     description: `${e.name}. Produto do catálogo FutZone.`,
     details: [`Time: ${team.name}`, ...(e.season ? [`Temporada: ${e.season}`] : []), `Categoria: ${categoryName}`],
-    price: opts.price ?? rulePrice({ name: e.name, category: e.category, kids: e.kids, teamCountry: team.country }),
+    price: opts.price ?? rulePrice(subject),
+    ...(opts.price === undefined && regularPrice(subject) ? { compareAtPrice: regularPrice(subject) } : {}),
     sizes,
     stock: Object.fromEntries(sizes.map((s) => [s, available.has(s) ? cap : 0])),
     images:

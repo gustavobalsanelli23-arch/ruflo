@@ -3,7 +3,7 @@ import type { PoolClient } from 'pg';
 import type { Product } from '@/types/catalog';
 import { seedProducts, DEFAULT_SIZE_CAP } from '@/data/products';
 import { teams } from '@/data/teams';
-import { DEFAULT_PRICE_RULES, rulePrice } from '@/lib/pricing';
+import { DEFAULT_PRICE_RULES, regularPrice, rulePrice } from '@/lib/pricing';
 import { getPool, withTransaction } from './client';
 import { SCHEMA_SQL, SCHEMA_VERSION } from './schema';
 
@@ -33,6 +33,7 @@ export async function migrateDatabase(): Promise<void> {
     if (!done.rowCount) await seed(db);
     await applyPriceTable(db, PRICE_TABLE_V2, 'Nova tabela de preços');
     await applyPriceTable(db, PRICE_TABLE_BLACK_FRIDAY, 'Black Friday');
+    await applyBlackFridayCompareAt(db);
   });
 }
 
@@ -100,6 +101,38 @@ async function applyPriceTable(db: PoolClient, flagKey: string, label: string): 
   // Propostas de preço da tabela antiga ficam sem efeito.
   await db.query(`UPDATE sync_changes SET state = 'rejected', decided_at = now() WHERE state = 'pending' AND kind = 'preco'`);
   await db.query('INSERT INTO app_kv (key, value) VALUES ($1, $2)', [flagKey, JSON.stringify({ at: new Date().toISOString(), updated: changes.length })]);
+}
+
+const BLACK_FRIDAY_COMPARE_AT = 'black_friday_compare_at';
+
+/**
+ * Black Friday: o preço antigo do tipo vira o "preço anterior" (riscado) dos
+ * produtos com preço pela tabela. Roda uma vez só; não mexe em produto com preço
+ * ou preço anterior editado à mão.
+ */
+async function applyBlackFridayCompareAt(db: PoolClient): Promise<void> {
+  const flag = await db.query('SELECT 1 FROM app_kv WHERE key = $1', [BLACK_FRIDAY_COMPARE_AT]);
+  if (flag.rowCount) return;
+
+  const r = await db.query<{ id: string; data: Product }>(
+    `SELECT id, data FROM products
+     WHERE price_source = 'rule' AND NOT ('price' = ANY(manual_fields)) AND NOT ('compareAtPrice' = ANY(manual_fields))`,
+  );
+  const changes = r.rows
+    .map(({ id, data }) => {
+      const subject = { name: data.name, category: data.category, kids: data.gender === 'infantil' };
+      const compare = data.price === rulePrice(subject) ? regularPrice(subject) : undefined;
+      return { id, compare };
+    })
+    .filter((c): c is { id: string; compare: number } => c.compare !== undefined);
+  if (changes.length) {
+    await db.query(
+      `UPDATE products p SET data = jsonb_set(p.data, '{compareAtPrice}', to_jsonb(x.compare)), updated_at = now()
+       FROM jsonb_to_recordset($1::jsonb) AS x(id text, compare integer) WHERE p.id = x.id`,
+      [JSON.stringify(changes)],
+    );
+  }
+  await db.query('INSERT INTO app_kv (key, value) VALUES ($1, $2)', [BLACK_FRIDAY_COMPARE_AT, JSON.stringify({ at: new Date().toISOString(), updated: changes.length })]);
 }
 
 /** Só para testes: encerra o pool. */
