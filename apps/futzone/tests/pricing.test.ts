@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { DEFAULT_PRICE_RULES, priceKeyFor, REGULAR_PRICE_RULES, regularPrice, rulePrice, sanitizePriceRules } from '@/lib/pricing';
 import { seedProducts } from '@/data/products';
+import { withRegularPrice } from '@/server/catalog/store';
 
 describe('tabela de preços', () => {
   it('classifica cada tipo de camisa', () => {
@@ -35,6 +36,16 @@ describe('tabela de preços', () => {
     expect(regularPrice({ name: 'Camisa Retrô Flamengo 1995', category: 'retro', kids: false })).toBe(20990);
     // Sem desconto, não há preço riscado.
     expect(regularPrice({ name: 'Camisa Retrô Flamengo 1995', category: 'retro', kids: false }, { ...DEFAULT_PRICE_RULES, retro: 20990 })).toBeUndefined();
+  });
+
+  it('catálogo do banco: produto a R$ 150,00 sem preço anterior ganha o riscado do tipo', () => {
+    const p = seedProducts.find((x) => x.category === 'retro')!;
+    const { compareAtPrice: _, ...bare } = p;
+    expect(withRegularPrice(bare).compareAtPrice).toBe(20990);
+    // Preço anterior já definido (à mão) é mantido.
+    expect(withRegularPrice({ ...bare, compareAtPrice: 25000 }).compareAtPrice).toBe(25000);
+    // Preço fora da tabela (editado à mão) não ganha riscado.
+    expect(withRegularPrice({ ...bare, price: 18000 }).compareAtPrice).toBeUndefined();
   });
 
   it('tabela gravada no formato antigo volta aos valores novos', () => {

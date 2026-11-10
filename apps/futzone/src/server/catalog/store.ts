@@ -3,7 +3,7 @@ import type { Product, Size } from '@/types/catalog';
 import { ALL_SIZES } from '@/types/catalog';
 import type { AdminProduct, IntegrationSettings } from '@/types/supplier';
 import { DEFAULT_INTEGRATION_SETTINGS } from '@/types/supplier';
-import { DEFAULT_PRICE_RULES, sanitizePriceRules, type PriceRules } from '@/lib/pricing';
+import { DEFAULT_PRICE_RULES, regularPrice, rulePrice, sanitizePriceRules, type PriceRules } from '@/lib/pricing';
 import type { Db } from '@/server/db/client';
 import type { CurrentRecord, StockState } from '@/server/supplier/diff';
 
@@ -110,7 +110,22 @@ export function toCurrentRecord({ row, stock }: StoredProduct): CurrentRecord {
 /** Catálogo público: só produtos publicados e aprovados, arquivados de fora. */
 export async function queryPublicProducts(db: Db): Promise<Product[]> {
   const all = await loadProducts(db);
-  return all.filter((sp) => !sp.row.archived && sp.row.review_state === 'none').map(toStoreProduct).filter((p) => p.status === 'published');
+  return all
+    .filter((sp) => !sp.row.archived && sp.row.review_state === 'none')
+    .map(toStoreProduct)
+    .filter((p) => p.status === 'published')
+    .map(withRegularPrice);
+}
+
+/**
+ * Black Friday: produto no preço da tabela atual mostra riscado o preço antigo do
+ * seu tipo (calculado na leitura, vale para todo produto, novo ou antigo).
+ */
+export function withRegularPrice(p: Product): Product {
+  if (p.compareAtPrice !== undefined) return p;
+  const subject = { name: p.name, category: p.category, kids: p.gender === 'infantil' };
+  const compare = p.price === rulePrice(subject) ? regularPrice(subject) : undefined;
+  return compare ? { ...p, compareAtPrice: compare } : p;
 }
 
 // Configurações da integração (tabela app_kv)
