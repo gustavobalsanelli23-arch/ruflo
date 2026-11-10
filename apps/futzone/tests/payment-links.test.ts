@@ -6,15 +6,16 @@ import { seedProducts } from '@/data/products';
 describe('links de pagamento da Stripe', () => {
   it('cada tipo de camisa tem o seu link, com o preço da tabela', () => {
     const expected: Record<PriceKey, string> = {
-      torcedor: '3cIcN7alF6g0grD7GK4ZG00',
-      jogador: 'bJe5kFeBVgUEejv5yC4ZG01',
-      conjunto: '14A4gBfFZeMwgrD6CG4ZG02',
-      infantil: '28E3cx51lfQA6R35yC4ZG03',
-      especial: '5kQ14p51ldIs0sFgdg4ZG04',
-      retro: '3cI5kF1P9fQAcbn1im4ZG05',
+      torcedor: '9B66oJfFZ5bWgrDaSW4ZG07',
+      jogador: '9B6bJ3eBV5bW1wJe584ZG08',
+      conjunto: 'dRmbJ32Td0VG0sF6CG4ZG09',
+      infantil: '14A5kF1P96g0b7je584ZG0a',
+      especial: '8x2cN7alFeMwb7j5yC4ZG0b',
+      retro: '14AbJ365p0VGcbnf9c4ZG0c',
     };
     for (const key of Object.keys(expected) as PriceKey[]) {
       expect(PAYMENT_LINKS[key].url).toBe(`https://buy.stripe.com/${expected[key]}`);
+      expect(PAYMENT_LINKS[key].price).toBe(15000);
       expect(PAYMENT_LINKS[key].price).toBe(DEFAULT_PRICE_RULES[key]);
     }
   });
@@ -46,7 +47,7 @@ describe('links de pagamento da Stripe', () => {
 
   it('o link leva a referência do pedido e o e-mail do cliente, codificados', () => {
     const url = new URL(paymentUrl({ key: 'jogador', reference: 'FZ-10002-jogador' }, 'ana+teste@exemplo.com'));
-    expect(url.origin + url.pathname).toBe('https://buy.stripe.com/bJe5kFeBVgUEejv5yC4ZG01');
+    expect(url.origin + url.pathname).toBe('https://buy.stripe.com/9B6bJ3eBV5bW1wJe584ZG08');
     expect(url.searchParams.get('client_reference_id')).toBe('FZ-10002-jogador');
     expect(url.searchParams.get('prefilled_email')).toBe('ana+teste@exemplo.com');
     // A Stripe só aceita letras, números, - e _ na referência.

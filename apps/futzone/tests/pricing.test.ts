@@ -19,12 +19,12 @@ describe('tabela de preços', () => {
   });
 
   it('valores definidos pela loja (frete à parte)', () => {
-    expect(DEFAULT_PRICE_RULES).toEqual({ torcedor: 16990, infantil: 16990, conjunto: 16990, jogador: 18990, especial: 18990, retro: 20990 });
-    expect(rulePrice({ name: 'Camisa Jogador Arsenal - Edição Especial 25/26', category: 'clubes', kids: false })).toBe(18990);
+    expect(DEFAULT_PRICE_RULES).toEqual({ torcedor: 15000, infantil: 15000, conjunto: 15000, jogador: 15000, especial: 15000, retro: 15000 });
+    expect(rulePrice({ name: 'Camisa Jogador Arsenal - Edição Especial 25/26', category: 'clubes', kids: false })).toBe(15000);
   });
 
   it('o catálogo inicial só tem os preços novos', () => {
-    expect(new Set(seedProducts.map((p) => p.price))).toEqual(new Set([16990, 18990, 20990]));
+    expect(new Set(seedProducts.map((p) => p.price))).toEqual(new Set([15000]));
   });
 
   it('tabela gravada no formato antigo volta aos valores novos', () => {

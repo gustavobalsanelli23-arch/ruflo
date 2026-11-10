@@ -11,13 +11,14 @@ export type PriceKey = 'torcedor' | 'infantil' | 'conjunto' | 'jogador' | 'espec
 
 export type PriceRules = Record<PriceKey, Cents>;
 
+/** Black Friday: R$ 150,00 em todos os tipos (igual aos links da Stripe). */
 export const DEFAULT_PRICE_RULES: PriceRules = {
-  torcedor: 16990,
-  infantil: 16990,
-  conjunto: 16990,
-  jogador: 18990,
-  especial: 18990,
-  retro: 20990,
+  torcedor: 15000,
+  infantil: 15000,
+  conjunto: 15000,
+  jogador: 15000,
+  especial: 15000,
+  retro: 15000,
 };
 
 export const PRICE_KEY_LABEL: Record<PriceKey, string> = {

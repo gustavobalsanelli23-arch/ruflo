@@ -31,7 +31,8 @@ export async function migrateDatabase(): Promise<void> {
     await db.query(SCHEMA_SQL);
     const done = await db.query(`SELECT value FROM app_kv WHERE key = 'seeded'`);
     if (!done.rowCount) await seed(db);
-    await applyPriceTableV2(db);
+    await applyPriceTable(db, PRICE_TABLE_V2, 'Nova tabela de preços');
+    await applyPriceTable(db, PRICE_TABLE_BLACK_FRIDAY, 'Black Friday');
   });
 }
 
@@ -56,15 +57,16 @@ async function seed(db: PoolClient): Promise<void> {
 }
 
 const PRICE_TABLE_V2 = 'price_table_v2';
+const PRICE_TABLE_BLACK_FRIDAY = 'price_table_black_friday';
 const brl = (c: number) => `R$ ${(c / 100).toFixed(2).replace('.', ',')}`;
 
 /**
- * Tabela de preços definida pela loja (Torcedor, Infantil e Conjunto R$ 169,90;
- * Jogador e Especial R$ 189,90; Retrô R$ 209,90). Roda uma vez só: grava a tabela
- * e aplica nos produtos com preço pela tabela. Preço editado à mão não muda.
+ * Aplica a tabela de preços atual (DEFAULT_PRICE_RULES, hoje a da Black Friday:
+ * R$ 150,00 em todos os tipos). Cada `flagKey` roda uma vez só: grava a tabela e
+ * aplica nos produtos com preço pela tabela. Preço editado à mão não muda.
  */
-async function applyPriceTableV2(db: PoolClient): Promise<void> {
-  const flag = await db.query('SELECT 1 FROM app_kv WHERE key = $1', [PRICE_TABLE_V2]);
+async function applyPriceTable(db: PoolClient, flagKey: string, label: string): Promise<void> {
+  const flag = await db.query('SELECT 1 FROM app_kv WHERE key = $1', [flagKey]);
   if (flag.rowCount) return;
 
   await db.query(
@@ -92,12 +94,12 @@ async function applyPriceTableV2(db: PoolClient): Promise<void> {
       `INSERT INTO sync_changes (product_id, kind, summary, before, after, state, decided_at)
        SELECT x.id, 'preco', x.summary, to_jsonb(x.before), to_jsonb(x.price), 'applied', now()
        FROM jsonb_to_recordset($1::jsonb) AS x(id text, before integer, price integer, summary text)`,
-      [JSON.stringify(changes.map((c) => ({ ...c, summary: `Nova tabela de preços: ${brl(c.before)} → ${brl(c.price)}` })))],
+      [JSON.stringify(changes.map((c) => ({ ...c, summary: `${label}: ${brl(c.before)} → ${brl(c.price)}` })))],
     );
   }
   // Propostas de preço da tabela antiga ficam sem efeito.
   await db.query(`UPDATE sync_changes SET state = 'rejected', decided_at = now() WHERE state = 'pending' AND kind = 'preco'`);
-  await db.query('INSERT INTO app_kv (key, value) VALUES ($1, $2)', [PRICE_TABLE_V2, JSON.stringify({ at: new Date().toISOString(), updated: changes.length })]);
+  await db.query('INSERT INTO app_kv (key, value) VALUES ($1, $2)', [flagKey, JSON.stringify({ at: new Date().toISOString(), updated: changes.length })]);
 }
 
 /** Só para testes: encerra o pool. */

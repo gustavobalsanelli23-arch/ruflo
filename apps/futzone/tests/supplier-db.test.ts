@@ -113,15 +113,15 @@ describe.skipIf(!URL_)('integração com banco (Postgres)', () => {
   });
 
   it('tabela de preços nova: aplicada uma vez nos preços pela tabela, preço manual preservado', async () => {
-    const [a, b] = seedProducts.filter((p) => p.price === 16990).slice(0, 2);
+    const [a, b] = seedProducts.filter((p) => p.price === 15000).slice(0, 2);
     // Simula um banco criado com a tabela antiga: preços antigos, um deles manual, e uma pendência velha.
-    await db.query(`DELETE FROM app_kv WHERE key = 'price_table_v2'`);
+    await db.query(`DELETE FROM app_kv WHERE key = ANY($1)`, [['price_table_v2', 'price_table_black_friday']]);
     await db.query(`UPDATE products SET data = jsonb_set(data, '{price}', '34990') WHERE id = $1`, [a.id]);
     await db.query(`UPDATE products SET data = jsonb_set(data, '{price}', '29990'), price_source = 'manual' WHERE id = $1`, [b.id]);
     await db.query(`INSERT INTO sync_changes (product_id, kind, summary, before, after, state) VALUES ($1, 'preco', 'velha', '34990', '39990', 'pending')`, [a.id]);
     await mod.migrateDatabase();
     const price = async (id: string) => Number((await db.query(`SELECT data->>'price' AS p FROM products WHERE id = $1`, [id])).rows[0].p);
-    expect(await price(a.id)).toBe(16990);
+    expect(await price(a.id)).toBe(15000);
     expect(await price(b.id)).toBe(29990);
     expect((await db.query(`SELECT count(*)::int AS n FROM sync_changes WHERE state = 'pending' AND kind = 'preco'`)).rows[0].n).toBe(0);
     expect((await db.query(`SELECT count(*)::int AS n FROM sync_changes WHERE product_id = $1 AND kind = 'preco' AND state = 'applied'`, [a.id])).rows[0].n).toBe(1);
@@ -130,7 +130,7 @@ describe.skipIf(!URL_)('integração com banco (Postgres)', () => {
     await mod.migrateDatabase();
     expect(await price(a.id)).toBe(34990);
     // Volta ao normal para os próximos testes.
-    await db.query(`UPDATE products SET data = jsonb_set(data, '{price}', '16990'), price_source = 'rule' WHERE id = ANY($1)`, [[a.id, b.id]]);
+    await db.query(`UPDATE products SET data = jsonb_set(data, '{price}', '15000'), price_source = 'rule' WHERE id = ANY($1)`, [[a.id, b.id]]);
     await db.query(`DELETE FROM sync_changes`);
   });
 

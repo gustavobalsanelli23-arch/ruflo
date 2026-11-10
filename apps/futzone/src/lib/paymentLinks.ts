@@ -18,13 +18,14 @@ export interface PaymentLink {
   label: string;
 }
 
+/** Links da Black Friday: R$ 150,00 em todos os tipos. */
 export const PAYMENT_LINKS: Record<PriceKey, PaymentLink> = {
-  torcedor: { url: 'https://buy.stripe.com/3cIcN7alF6g0grD7GK4ZG00', price: 16990, label: 'Camisa Torcedor' },
-  jogador: { url: 'https://buy.stripe.com/bJe5kFeBVgUEejv5yC4ZG01', price: 18990, label: 'Camisa Jogador' },
-  conjunto: { url: 'https://buy.stripe.com/14A4gBfFZeMwgrD6CG4ZG02', price: 16990, label: 'Conjunto' },
-  infantil: { url: 'https://buy.stripe.com/28E3cx51lfQA6R35yC4ZG03', price: 16990, label: 'Camisa Infantil' },
-  especial: { url: 'https://buy.stripe.com/5kQ14p51ldIs0sFgdg4ZG04', price: 18990, label: 'Camisa Especial' },
-  retro: { url: 'https://buy.stripe.com/3cI5kF1P9fQAcbn1im4ZG05', price: 20990, label: 'Camisa Retrô' },
+  torcedor: { url: 'https://buy.stripe.com/9B66oJfFZ5bWgrDaSW4ZG07', price: 15000, label: 'Camisa Torcedor' },
+  jogador: { url: 'https://buy.stripe.com/9B6bJ3eBV5bW1wJe584ZG08', price: 15000, label: 'Camisa Jogador' },
+  conjunto: { url: 'https://buy.stripe.com/dRmbJ32Td0VG0sF6CG4ZG09', price: 15000, label: 'Conjunto' },
+  infantil: { url: 'https://buy.stripe.com/14A5kF1P96g0b7je584ZG0a', price: 15000, label: 'Camisa Infantil' },
+  especial: { url: 'https://buy.stripe.com/8x2cN7alFeMwb7j5yC4ZG0b', price: 15000, label: 'Camisa Especial' },
+  retro: { url: 'https://buy.stripe.com/14AbJ365p0VGcbnf9c4ZG0c', price: 15000, label: 'Camisa Retrô' },
 };
 
 /** Ordem em que os pagamentos aparecem para o cliente. */
