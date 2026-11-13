@@ -231,7 +231,7 @@ export async function runDataTool(
   source: AnalystDataSource,
   context: SourceContext,
 ): Promise<ToolOutput | Failure> {
-  if (!(name in INPUTS)) return { error: `Ferramenta desconhecida: ${name}.` };
+  if (!(Object.hasOwn(INPUTS, name))) return { error: `Ferramenta desconhecida: ${name}.` };
   const parsed = INPUTS[name as DataToolName].safeParse(input);
   if (!parsed.success) return { error: `Parâmetros inválidos: ${parsed.error.issues.map((issue) => `${issue.path.join('.') || 'entrada'}: ${issue.message}`).join('; ')}.` };
   const value = parsed.data;

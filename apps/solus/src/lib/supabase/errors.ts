@@ -95,7 +95,9 @@ const DB_MESSAGES: Record<string, MappedError> = {
   invalid_status: { code: 'validation', message: 'Escolha um status válido.' },
   invalid_note: { code: 'validation', message: 'A observação pode ter até 500 caracteres.' },
   invalid_opportunities: { code: 'unknown', message: GENERIC_ERROR },
-  ai_daily_limit: { code: 'rate_limited', message: 'A organização chegou ao limite diário de perguntas ao analista. O limite volta amanhã.' },
+  ai_daily_limit: { code: 'rate_limited', message: 'A organização chegou ao limite diário de perguntas ao analista do seu plano. O limite volta amanhã; veja os planos em Configurações.' },
+  plan_member_limit: { code: 'conflict', message: 'O plano da organização chegou ao limite de pessoas (membros e convites pendentes). Remova alguém ou mude de plano.' },
+  plan_row_limit: { code: 'conflict', message: 'Esta importação passaria do limite de linhas do plano da organização. Desfaça importações antigas ou mude de plano.' },
   invalid_ai_request: { code: 'validation', message: 'Pedido inválido ao analista.' },
   ai_request_not_found: { code: 'not_found', message: GENERIC_ERROR },
 };

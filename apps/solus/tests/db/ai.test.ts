@@ -1,5 +1,5 @@
 import { afterAll, describe, expect, inject, it } from 'vitest';
-import { asUser, closePool, type Session } from './support/session';
+import { asServiceRole, asUser, closePool, type Session } from './support/session';
 
 /**
  * Analyst conversations, AI usage limits and summaries, through RLS as the
@@ -152,20 +152,27 @@ describe('uso do modelo', () => {
 });
 
 describe('resumos', () => {
-  it('analyst grava; toda a organização lê; leitor e outras organizações não gravam', async () => {
+  const SAVE = 'select public.save_ai_summary($1, $2, $3, $4, $5, $6)';
+
+  it('só o servidor grava (chave secreta), em nome de um analyst da organização; toda a organização lê', async () => {
     const content = JSON.stringify([{ kind: 'summary', text: 'Receita estável.' }]);
     await asUser(users.analystA, async (s) => {
-      await s.query('select public.save_ai_summary($1, $2, $3, $4, $5)', [orgs.a, '30d', 'sig-1', content, 'claude-opus-5-5']);
-      await s.query('select public.save_ai_summary($1, $2, $3, $4, $5)', [orgs.a, '30d', 'sig-2', content, 'claude-opus-5-5']);
-      await s.become(users.viewerA);
+      // Nem um analyst grava direto: o resumo só vem do servidor, depois do modelo e da conferência dos números.
+      expect(await errorOf(s, SAVE, [users.analystA, orgs.a, '30d', 'sig-0', content, 'x'])).toMatch(/permission denied/);
+    });
+    await asServiceRole(async (s) => {
+      await s.become('service_role');
+      await s.query(SAVE, [users.analystA, orgs.a, '30d', 'sig-1', content, 'claude-opus-5-5']);
+      await s.query(SAVE, [users.analystA, orgs.a, '30d', 'sig-2', content, 'claude-opus-5-5']);
+      expect(await errorOf(s, SAVE, [users.viewerA, orgs.a, '30d', 'sig-3', content, null])).toContain('solus:forbidden');
+      expect(await errorOf(s, SAVE, [users.ownerB, orgs.a, '30d', 'sig-3', content, null])).toContain('solus:forbidden');
+      expect(await errorOf(s, SAVE, [users.analystA, orgs.a, 'sempre', 'sig', content, null])).toContain('ai_summaries_period');
+      expect(await errorOf(s, SAVE, [users.analystA, orgs.a, '7d', 'sig', '{"x":1}', null])).toContain('ai_summaries_content');
+    });
+    await asUser(users.viewerA, async (s) => {
       expect(await s.query('select period_key, data_signature from public.ai_summaries')).toEqual([{ period_key: '30d', data_signature: 'sig-2' }]);
-      expect(await errorOf(s, 'select public.save_ai_summary($1, $2, $3, $4, $5)', [orgs.a, '30d', 'sig-3', content, null])).toContain('solus:forbidden');
       await s.become(users.ownerB);
       expect(await s.query('select period_key from public.ai_summaries')).toEqual([]);
-      expect(await errorOf(s, 'select public.save_ai_summary($1, $2, $3, $4, $5)', [orgs.a, '30d', 'sig-3', content, null])).toContain('solus:forbidden');
-      await s.become(users.analystA);
-      expect(await errorOf(s, 'select public.save_ai_summary($1, $2, $3, $4, $5)', [orgs.a, 'sempre', 'sig', content, null])).toContain('ai_summaries_period');
-      expect(await errorOf(s, 'select public.save_ai_summary($1, $2, $3, $4, $5)', [orgs.a, '7d', 'sig', '{"x":1}', null])).toContain('ai_summaries_content');
     });
   });
 });

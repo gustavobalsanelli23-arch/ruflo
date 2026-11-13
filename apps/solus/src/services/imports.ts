@@ -237,3 +237,25 @@ export async function listImportHistory(supabase: SolusClient, organizationId: s
     author: row.author?.full_name ?? row.author?.email ?? null,
   }));
 }
+
+/**
+ * Removes every original spreadsheet of an organization from Storage, which
+ * the database cascade cannot reach. Run before deleting the organization;
+ * false means nothing should be deleted yet.
+ */
+export async function removeOrganizationFiles(supabase: SolusClient, organizationId: string): Promise<boolean> {
+  const files = await supabase.from('data_imports').select('storage_path').eq('organization_id', organizationId).not('storage_path', 'is', null);
+  if (files.error) {
+    logServerError('organização: listar arquivos', files.error);
+    return false;
+  }
+  const paths = files.data.map((row) => row.storage_path).filter((path): path is string => Boolean(path));
+  for (let start = 0; start < paths.length; start += 100) {
+    const removed = await supabase.storage.from(IMPORTS_BUCKET).remove(paths.slice(start, start + 100));
+    if (removed.error) {
+      logServerError('organização: remover arquivos', removed.error);
+      return false;
+    }
+  }
+  return true;
+}

@@ -68,6 +68,8 @@ export async function buildWorld(client: ClientBase): Promise<World> {
   const [a] = await asUserOnce<{ id: string }>(client, users.ownerA, 'select public.create_organization($1) as id', ['Empório Aurora']);
   const [b] = await asUserOnce<{ id: string }>(client, users.ownerB, 'select public.create_organization($1) as id', ['Mercado Boreal']);
   const orgs = { a: a!.id, b: b!.id };
+  // Plan limits have their own tests; the shared world needs room for everyone.
+  await client.query(`update public.organizations set plan = 'premium' where id = any($1)`, [[orgs.a, orgs.b]]);
 
   // Other memberships are arranged directly (system context).
   const seats: [Person, keyof typeof orgs, string][] = [

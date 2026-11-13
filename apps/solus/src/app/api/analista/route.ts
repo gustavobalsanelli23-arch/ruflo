@@ -70,7 +70,7 @@ export async function POST(request: Request) {
         onProgress: send,
       });
       const blocks = answerBlocks(run);
-      if (run.answer) await saveSummary(supabase, organizationId, period.key, signature, blocks, run.models[0] ?? null);
+      if (run.answer) await saveSummary(workspace.user.id, organizationId, period.key, signature, blocks, run.models[0] ?? null);
       await finishAiRequest(supabase, begun.id, run);
       send({ type: 'answer', status: run.status, at: new Date().toISOString(), blocks });
     });

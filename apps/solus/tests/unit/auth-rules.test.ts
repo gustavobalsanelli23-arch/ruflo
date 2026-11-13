@@ -42,7 +42,7 @@ describe('validação de entrada (Zod)', () => {
   });
 
   it('exige senha com 8+ caracteres, letras e números, e no máximo 72', () => {
-    const base = { fullName: 'Ana Souza', email: 'ana@empresa.com.br' };
+    const base = { fullName: 'Ana Souza', email: 'ana@empresa.com.br', acceptTerms: 'on' };
     expect(signUpSchema.safeParse({ ...base, password: 'abcdefgh' }).success).toBe(false);
     expect(signUpSchema.safeParse({ ...base, password: '12345678' }).success).toBe(false);
     expect(signUpSchema.safeParse({ ...base, password: 'abc123' }).success).toBe(false);

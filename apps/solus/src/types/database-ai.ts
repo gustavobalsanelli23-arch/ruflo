@@ -105,7 +105,7 @@ export type AiFunctions = {
     Returns: undefined;
   };
   save_ai_summary: {
-    Args: { p_organization_id: string; p_period_key: AiSummaryRow['period_key']; p_data_signature: string; p_content: Json; p_model: string | null };
+    Args: { p_actor: string; p_organization_id: string; p_period_key: AiSummaryRow['period_key']; p_data_signature: string; p_content: Json; p_model: string | null };
     Returns: undefined;
   };
 };

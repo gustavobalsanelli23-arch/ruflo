@@ -48,6 +48,7 @@ export type Database = {
           id: string;
           name: string;
           slug: string;
+          plan: 'free' | 'basic' | 'pro' | 'premium';
           created_by: string | null;
           created_at: string;
           updated_at: string;
@@ -56,6 +57,7 @@ export type Database = {
           id?: string;
           name: string;
           slug: string;
+          plan?: 'free' | 'basic' | 'pro' | 'premium';
           created_by?: string | null;
           created_at?: string;
           updated_at?: string;
@@ -287,6 +289,7 @@ export type Database = {
     };
     Enums: {
       org_role: OrgRole;
+      org_plan: 'free' | 'basic' | 'pro' | 'premium';
       import_dataset: ImportDataset;
       import_status: ImportStatus;
     };

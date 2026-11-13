@@ -20,6 +20,7 @@ import {
   renameOrganizationSchema,
   updateProfileSchema,
 } from '@/schemas/organization';
+import { removeOrganizationFiles } from '@/services/imports';
 import { getSessionUser } from '@/services/session';
 import { ACTIVE_ORG_COOKIE, authorize, loadWorkspace, PENDING_INVITE_COOKIE } from '@/services/workspace';
 import type { FormState } from '@/modules/auth/form-state';
@@ -113,7 +114,15 @@ export async function deleteOrganizationAction(_previous: FormState, formData: F
     return { status: 'error', fieldErrors: { confirmation: 'Digite o nome exatamente como aparece.' } };
   }
 
-  const { data, error } = await auth.supabase.from('organizations').delete().eq('id', auth.workspace.active.organizationId).select('id');
+  // The original spreadsheets live in Storage, which the database cascade
+  // cannot reach: remove them first, as the confirmation screen promises.
+  // If that fails, nothing is deleted and the owner can try again.
+  const organizationId = auth.workspace.active.organizationId;
+  if (!(await removeOrganizationFiles(auth.supabase, organizationId))) {
+    return { status: 'error', code: 'unavailable', message: 'Não foi possível apagar os arquivos importados. Nada foi excluído; tente de novo em instantes.' };
+  }
+
+  const { data, error } = await auth.supabase.from('organizations').delete().eq('id', organizationId).select('id');
   if (error) return failure(error, 'organização: excluir');
   if (!data.length) return { status: 'error', code: 'forbidden', message: 'Somente proprietários podem excluir a organização.' };
 

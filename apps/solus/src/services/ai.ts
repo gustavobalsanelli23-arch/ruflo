@@ -4,7 +4,9 @@ import type { AnalystDataSource, DateRange } from '@/lib/ai/types';
 import type { Coverage } from '@/lib/analytics/mappers';
 import type { AnalystMessage, AnalystThread, AnswerBlock, PeriodKey } from '@/lib/data/types';
 import { logServerError } from '@/lib/log';
+import { createSupabaseAdminClient } from '@/lib/supabase/admin';
 import { mapDatabaseError, type MappedError } from '@/lib/supabase/errors';
+import { z } from 'zod';
 import type { SolusClient } from '@/lib/supabase/server';
 import type { Json } from '@/types/database';
 import { getAllInventory, getAllProducts, getCategories, getCoverage, getDaily, getInventoryTotals, getParameters, getSuppliers, getTotals } from './analytics';
@@ -118,7 +120,43 @@ export async function listThreads(supabase: SolusClient, organizationId: string)
   return data.map((row) => ({ id: row.id, title: row.title, updatedAt: row.updated_at, messages: [] }));
 }
 
-const asBlocks = (value: Json | null): AnswerBlock[] => (Array.isArray(value) ? (value as unknown as AnswerBlock[]) : []);
+const str = z.string().max(4000);
+const items = z.array(str).max(50);
+const answerBlockSchema = z.discriminatedUnion('kind', [
+  z.object({ kind: z.literal('summary'), text: str }),
+  z.object({
+    kind: z.literal('metrics'),
+    items: z.array(z.object({ label: str, value: str, delta: str.optional(), tone: z.enum(['positive', 'negative', 'neutral']).optional() })).max(50),
+  }),
+  z.object({
+    kind: z.literal('chart'),
+    title: str,
+    unit: z.enum(['currency', 'percent']),
+    points: z.array(z.object({ label: str, value: z.number().finite() })).max(500),
+    layout: z.enum(['bars', 'line']).optional(),
+  }),
+  z.object({
+    kind: z.literal('table'),
+    title: str,
+    columns: z.array(z.object({ key: str, label: str, align: z.enum(['left', 'right']).optional() })).max(20),
+    rows: z.array(z.record(z.string(), str)).max(200),
+    note: str.optional(),
+  }),
+  z.object({ kind: z.literal('findings'), facts: items, hypotheses: items }),
+  z.object({ kind: z.literal('recommendation'), items }),
+  z.object({ kind: z.literal('sources'), items: z.array(z.object({ name: str, detail: str })).max(50) }),
+  z.object({ kind: z.literal('next'), items }),
+  z.object({ kind: z.literal('notice'), tone: z.enum(['info', 'warning']), title: str, items }),
+]);
+
+/** Stored blocks are re-validated: a malformed one is dropped instead of breaking the page for every member. */
+export function asBlocks(value: Json | null): AnswerBlock[] {
+  if (!Array.isArray(value)) return [];
+  return value.flatMap((block) => {
+    const parsed = answerBlockSchema.safeParse(block);
+    return parsed.success ? [parsed.data as AnswerBlock] : [];
+  });
+}
 
 export async function threadMessages(supabase: SolusClient, organizationId: string, threadId: string): Promise<AnalystMessage[] | null> {
   const { data: thread } = await supabase.from('analyst_threads').select('id').eq('id', threadId).eq('organization_id', organizationId).maybeSingle();
@@ -222,8 +260,20 @@ export async function getSummary(supabase: SolusClient, organizationId: string, 
   return data ? { blocks: asBlocks(data.content), signature: data.data_signature, createdAt: data.created_at } : null;
 }
 
-export async function saveSummary(supabase: SolusClient, organizationId: string, period: PeriodKey, signature: string, blocks: AnswerBlock[], model: string | null) {
-  const { error } = await supabase.rpc('save_ai_summary', {
+/**
+ * Written with the secret key, after the server ran the model and checked the
+ * numbers: users cannot call save_ai_summary themselves (it would let anyone
+ * publish arbitrary text as the org-wide "Resumo da IA"). The database checks
+ * again that `actorId` is an analyst or above in the organization.
+ */
+export async function saveSummary(actorId: string, organizationId: string, period: PeriodKey, signature: string, blocks: AnswerBlock[], model: string | null) {
+  const admin = createSupabaseAdminClient();
+  if (!admin) {
+    logServerError('ia: salvar resumo', { code: 'missing_secret' });
+    return false;
+  }
+  const { error } = await admin.rpc('save_ai_summary', {
+    p_actor: actorId,
     p_organization_id: organizationId,
     p_period_key: period,
     p_data_signature: signature,

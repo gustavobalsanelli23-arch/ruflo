@@ -30,6 +30,7 @@ export default async function SettingsPage() {
             data={{
               organization: { name: active.name, slug: active.slug },
               role: active.role,
+              plan: active.plan ?? 'free',
               user: { id: user.id, email: user.email, fullName: user.fullName },
               members,
               invitations,

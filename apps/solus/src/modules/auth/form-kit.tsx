@@ -116,6 +116,33 @@ export function Field({
   );
 }
 
+/** Required consent: a native checkbox with its own label and error message. */
+export function ConsentCheckbox({ name, error, onClear, children }: { name: string; error?: string; onClear?: (name: string) => void; children: React.ReactNode }) {
+  return (
+    <div className="flex flex-col gap-1.5">
+      <div className="flex items-start gap-3">
+        <input
+          id={name}
+          name={name}
+          type="checkbox"
+          aria-invalid={error ? true : undefined}
+          aria-describedby={error ? `${name}-error` : undefined}
+          onChange={() => onClear?.(name)}
+          className="mt-0 size-6 shrink-0 cursor-pointer rounded border-input accent-[var(--primary)] outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+        />
+        <label htmlFor={name} className="text-sm leading-6 text-foreground">
+          {children}
+        </label>
+      </div>
+      {error && (
+        <p id={`${name}-error`} className="text-xs text-critical-text">
+          {error}
+        </p>
+      )}
+    </div>
+  );
+}
+
 export function describedBy(name: string, error?: string, hint?: string) {
   if (error) return `${name}-error`;
   return hint ? `${name}-hint` : undefined;

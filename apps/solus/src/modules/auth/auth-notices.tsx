@@ -9,6 +9,7 @@ const REASONS: Record<string, { tone: 'info' | 'success' | 'warning' | 'error'; 
   saiu: { tone: 'success', title: 'Você saiu da SOLUS', body: 'Até a próxima.' },
   'link-invalido': { tone: 'error', title: 'Link inválido', body: 'O link expirou ou já foi usado. Peça um novo.' },
   'senha-redefinida': { tone: 'success', title: 'Senha redefinida', body: 'Entre com a nova senha. As outras sessões foram encerradas.' },
+  'conta-excluida': { tone: 'success', title: 'Conta excluída', body: 'Sua conta e os dados ligados só a ela foram apagados.' },
   'link-expirado': { tone: 'warning', title: 'O link expirou', body: 'Links de recuperação valem por 1 hora e funcionam uma vez. Peça um novo.' },
 };
 

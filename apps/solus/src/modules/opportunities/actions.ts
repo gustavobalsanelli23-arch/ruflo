@@ -6,6 +6,7 @@ import { mapDatabaseError, type MappedError } from '@/lib/supabase/errors';
 import { analysisSettingsSchema, opportunityStatusSchema } from '@/schemas/imports';
 import { fieldErrors } from '@/schemas/auth';
 import { runAnalysis } from '@/services/intelligence';
+import { consumeRateLimits } from '@/services/rate-limit';
 import { authorize } from '@/services/workspace';
 import type { FormState } from '@/modules/auth/form-state';
 import { toDbStatus } from './mapping';
@@ -43,9 +44,19 @@ export async function setOpportunityStatusAction(input: unknown): Promise<Result
   return { ok: true, message: 'Status atualizado.' };
 }
 
+// Each run re-reads every metric of the organization; imports and settings
+// changes already run it, so a manual run is needed rarely.
+const ANALYSIS_LIMITED: MappedError = { code: 'rate_limited', message: 'A análise foi executada há pouco. Aguarde alguns minutos para rodar de novo.' };
+
 export async function runAnalysisAction(): Promise<Result> {
   const auth = await authorize('analyst');
   if (!auth.ok) return auth;
+  const verdict = await consumeRateLimits([
+    { bucket: `analysis:user:${auth.workspace.user.id}`, limit: 3, windowSeconds: 10 * 60 },
+    { bucket: `analysis:org:${auth.workspace.active.organizationId}`, limit: 10, windowSeconds: 60 * 60 },
+  ]);
+  if (verdict === 'limited') return { ok: false, error: ANALYSIS_LIMITED };
+  if (verdict === 'unavailable') return { ok: false, error: NO_SECRET };
   const outcome = await runAnalysis({
     supabase: auth.supabase,
     organizationId: auth.workspace.active.organizationId,

@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { EclipseArt } from '@/components/brand/eclipse';
 import { Logo, LogoMark } from '@/components/brand/logo';
 import { ThemeToggle } from '@/components/shell/theme-toggle';
+import { LEGAL_PAGES } from '@/config/legal';
 
 /**
  * Sign-in, sign-up and onboarding screens. The navy panel is the app's
@@ -11,6 +12,12 @@ import { ThemeToggle } from '@/components/shell/theme-toggle';
 export function AuthShell({ children }: { children: React.ReactNode }) {
   return (
     <div className="grid min-h-dvh lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)]">
+      <a
+        href="#conteudo"
+        className="fixed top-2 left-2 z-[60] -translate-y-16 rounded-md bg-primary px-3 py-2 text-sm font-medium text-primary-foreground transition-transform focus:translate-y-0"
+      >
+        Pular para o conteúdo
+      </a>
       <aside
         aria-label="Sobre a SOLUS"
         className="relative isolate hidden overflow-hidden border-r border-sidebar-border bg-[#101923] text-sidebar-foreground lg:flex lg:flex-col"
@@ -47,9 +54,22 @@ export function AuthShell({ children }: { children: React.ReactNode }) {
           </Link>
           <ThemeToggle />
         </header>
-        <main id="conteudo" className="flex flex-1 items-start px-5 pt-6 pb-16 sm:px-8 sm:pt-[8vh] lg:items-center lg:pt-0">
+        <main id="conteudo" tabIndex={-1} className="flex flex-1 items-start px-5 outline-none pt-6 pb-16 sm:px-8 sm:pt-[8vh] lg:items-center lg:pt-0">
           <div className="mx-auto w-full max-w-[23.5rem]">{children}</div>
         </main>
+        <footer className="px-5 pb-6 sm:px-8">
+          <nav aria-label="Planos e documentos legais">
+            <ul className="flex flex-wrap justify-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
+              {LEGAL_PAGES.map((page) => (
+                <li key={page.href}>
+                  <Link href={page.href} className="relative -my-1.5 inline-block rounded-sm py-1.5 underline-offset-4 outline-none hover:underline focus-visible:underline focus-visible:ring-2 focus-visible:ring-ring">
+                    {page.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </nav>
+        </footer>
       </div>
     </div>
   );

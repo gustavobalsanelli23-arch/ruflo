@@ -1,4 +1,5 @@
 import 'server-only';
+import type { PlanId } from '@/config/plans';
 import { cookies, headers } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { cache } from 'react';
@@ -24,6 +25,8 @@ export interface Membership {
   name: string;
   slug: string;
   role: Role;
+  /** Plan of the organization; missing for older callers means Free. */
+  plan?: PlanId;
 }
 
 export interface WorkspaceUser {
@@ -61,7 +64,7 @@ export const loadWorkspace = cache(async (): Promise<Workspace | null> => {
     supabase.from('profiles').select('full_name, email').eq('id', session.id).maybeSingle(),
     supabase
       .from('organization_members')
-      .select('id, role, organization:organizations(id, name, slug)')
+      .select('id, role, organization:organizations(id, name, slug, plan)')
       .eq('user_id', session.id)
       .order('created_at'),
   ]);
@@ -72,7 +75,7 @@ export const loadWorkspace = cache(async (): Promise<Workspace | null> => {
 
   const memberships: Membership[] = members.data.flatMap((row) =>
     row.organization
-      ? [{ memberId: row.id, organizationId: row.organization.id, name: row.organization.name, slug: row.organization.slug, role: row.role }]
+      ? [{ memberId: row.id, organizationId: row.organization.id, name: row.organization.name, slug: row.organization.slug, role: row.role, plan: row.organization.plan }]
       : [],
   );
 

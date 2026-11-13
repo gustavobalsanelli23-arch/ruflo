@@ -6,7 +6,7 @@ import { useState } from 'react';
 import { Notice } from '@/components/data/states';
 import { PASSWORD_MIN, signUpSchema } from '@/schemas/auth';
 import { signUpAction } from './actions';
-import { AuthHeading, Field, PasswordInput, SubmitButton, TextInput, useValidatedAction } from './form-kit';
+import { AuthHeading, ConsentCheckbox, Field, PasswordInput, SubmitButton, TextInput, useValidatedAction } from './form-kit';
 import { IDLE } from './form-state';
 import { ResendConfirmation } from './resend-confirmation';
 
@@ -89,6 +89,17 @@ function SignUpAttempt({ next, enabled, onRestart }: { next?: string; enabled: b
               onClear={clearError}
             />
           </Field>
+          <ConsentCheckbox name="acceptTerms" error={errors.acceptTerms} onClear={clearError}>
+            Li e aceito os{' '}
+            <Link href="/termos" target="_blank" className="relative -my-1 inline-block py-1 font-medium text-brand underline underline-offset-4">
+              Termos de uso<span className="sr-only"> (abre em nova aba)</span>
+            </Link>{' '}
+            e a{' '}
+            <Link href="/privacidade" target="_blank" className="relative -my-1 inline-block py-1 font-medium text-brand underline underline-offset-4">
+              Política de privacidade<span className="sr-only"> (abre em nova aba)</span>
+            </Link>
+            .
+          </ConsentCheckbox>
           <SubmitButton pending={pending} pendingLabel="Criando conta…">
             Criar conta
           </SubmitButton>

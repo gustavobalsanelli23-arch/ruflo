@@ -46,6 +46,7 @@ vi.mock('@/services/recovery', () => ({
   RECOVERY_COOKIE: 'solus-recuperacao',
   RECOVERY_WINDOW_SECONDS: 900,
   hasRecoveryGrant: async (userId: string) => state.recoveryGrant === userId,
+  recoveryGrantValue: (userId: string) => `signed(${userId})`,
 }));
 vi.mock('next/headers', () => ({ cookies: async () => cookieStore, headers: async () => new Headers() }));
 vi.mock('next/navigation', () => ({
@@ -104,7 +105,8 @@ describe('entrar', () => {
     expect(auth.signInWithPassword).not.toHaveBeenCalled();
     expect(limits).toHaveBeenCalledWith([
       { bucket: 'signin:ip:203.0.113.7', limit: 30, windowSeconds: 900 },
-      { bucket: 'signin:email:fp(ana@empresa.com.br)', limit: 10, windowSeconds: 900 },
+      { bucket: 'signin:email-ip:fp(ana@empresa.com.br):203.0.113.7', limit: 10, windowSeconds: 900 },
+      { bucket: 'signin:email:fp(ana@empresa.com.br)', limit: 50, windowSeconds: 900 },
     ]);
   });
 
@@ -142,7 +144,7 @@ describe('entrar', () => {
 });
 
 describe('cadastro', () => {
-  const valid = { fullName: '  Ana   Souza ', email: 'ana@empresa.com.br', password: 'mercado2026' };
+  const valid = { fullName: '  Ana   Souza ', email: 'ana@empresa.com.br', password: 'mercado2026', acceptTerms: 'on' };
 
   it('envia o link de confirmação para /auth/confirm em SITE_URL, com o nome nos metadados', async () => {
     auth.signUp.mockResolvedValue({ data: { user: { id: 'u1' }, session: null }, error: null });
@@ -151,8 +153,19 @@ describe('cadastro', () => {
     expect(auth.signUp).toHaveBeenCalledWith({
       email: 'ana@empresa.com.br',
       password: 'mercado2026',
-      options: { emailRedirectTo: 'https://app.solus.example/auth/confirm', data: { full_name: 'Ana Souza' } },
+      options: {
+        emailRedirectTo: 'https://app.solus.example/auth/confirm',
+        data: { full_name: 'Ana Souza', terms_version: expect.any(String), terms_accepted_at: expect.any(String) },
+      },
     });
+  });
+
+  it('sem aceitar os termos e a privacidade não cria conta', async () => {
+    const withoutConsent: Record<string, string> = { ...valid };
+    delete withoutConsent.acceptTerms;
+    const result = await signUpAction(IDLE, form(withoutConsent));
+    expect(result.fieldErrors?.acceptTerms).toMatch(/aceite os Termos/);
+    expect(auth.signUp).not.toHaveBeenCalled();
   });
 
   it('e-mail já cadastrado recebe exatamente a mesma resposta (sem enumeração)', async () => {
@@ -182,7 +195,15 @@ describe('recuperação e redefinição de senha', () => {
     const url = await redirectOf(confirmEmailLinkAction(IDLE, form({ token_hash: 'abcdef123456', type: 'recovery' })));
     expect(auth.verifyOtp).toHaveBeenCalledWith({ type: 'recovery', token_hash: 'abcdef123456' });
     expect(url).toBe('/redefinir-senha');
-    expect(cookieStore.set).toHaveBeenCalledWith('solus-recuperacao', 'u1', expect.objectContaining({ httpOnly: true, maxAge: 900, sameSite: 'lax' }));
+    expect(cookieStore.set).toHaveBeenCalledWith('solus-recuperacao', 'signed(u1)', expect.objectContaining({ httpOnly: true, maxAge: 900, sameSite: 'lax' }));
+  });
+
+  it('confirmar link tem limite por IP antes de chegar ao Supabase', async () => {
+    state.limit = 'limited';
+    const result = await confirmEmailLinkAction(IDLE, form({ token_hash: 'abcdef123456', type: 'recovery' }));
+    expect(result.code).toBe('rate_limited');
+    expect(limits).toHaveBeenCalledWith([{ bucket: 'confirm:ip:203.0.113.7', limit: 30, windowSeconds: 900 }]);
+    expect(auth.verifyOtp).not.toHaveBeenCalled();
   });
 
   it('token malformado nem chega ao Supabase', async () => {

@@ -307,7 +307,10 @@ export async function deleteImportAction(importId: unknown): Promise<ActionResul
   if (!['canceled', 'failed', 'reverted'].includes(record.status)) {
     return { ok: false, error: { code: 'conflict', message: 'Desfaça ou cancele a importação antes de removê-la do histórico.' } };
   }
-  if (record.storagePath) await removeStoredFile(auth.supabase, record.storagePath);
+  // The file goes first: if it cannot be removed, the row stays, so the file is never left without a record.
+  if (record.storagePath && !(await removeStoredFile(auth.supabase, record.storagePath))) {
+    return { ok: false, error: { code: 'unavailable', message: 'Não foi possível apagar o arquivo desta importação. Tente de novo em instantes.' } };
+  }
   const { error, count } = await auth.supabase.from('data_imports').delete({ count: 'exact' }).eq('id', record.id);
   if (error || count === 0) return error ? dbFailure(error, 'importação: remover') : { ok: false, error: { code: 'forbidden', message: GENERIC_ERROR } };
   revalidatePath('/dados');
@@ -317,4 +320,5 @@ export async function deleteImportAction(importId: unknown): Promise<ActionResul
 async function removeStoredFile(supabase: SolusClient, path: string) {
   const { error } = await supabase.storage.from(IMPORTS_BUCKET).remove([path]);
   if (error) logServerError('importação: remover arquivo', error);
+  return !error;
 }

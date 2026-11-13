@@ -30,7 +30,7 @@ export function safeNextPath(value: unknown, fallback = DEFAULT_AFTER_LOGIN): st
   return `${parsed.pathname}${parsed.search}${parsed.hash}`;
 }
 
-export type LoginReason = 'sessao-expirada' | 'sessao-encerrada' | 'saiu' | 'link-invalido' | 'senha-redefinida';
+export type LoginReason = 'sessao-expirada' | 'sessao-encerrada' | 'saiu' | 'link-invalido' | 'senha-redefinida' | 'conta-excluida';
 
 export function loginPath(options: { next?: string | null; reason?: LoginReason } = {}) {
   const params = new URLSearchParams();

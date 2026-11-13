@@ -38,6 +38,8 @@ export const signUpSchema = z.object({
   fullName: fullNameSchema,
   email: emailSchema,
   password: newPasswordSchema,
+  // An unchecked checkbox is absent from the form: only the literal "on" passes.
+  acceptTerms: z.literal('on', { error: 'Para criar a conta, aceite os Termos de uso e a Política de privacidade.' }),
 });
 
 export const emailOnlySchema = z.object({ email: emailSchema });
@@ -75,3 +77,9 @@ export function fieldErrors(error: z.ZodError): Record<string, string> {
   }
   return result;
 }
+
+/** Deleting the account: the current password and a typed confirmation. */
+export const deleteAccountSchema = z.object({
+  password: z.string({ error: 'Informe sua senha.' }).min(1, 'Informe sua senha.').max(PASSWORD_MAX),
+  confirmation: z.literal('EXCLUIR', { error: 'Digite EXCLUIR, em maiúsculas, para confirmar.' }),
+});

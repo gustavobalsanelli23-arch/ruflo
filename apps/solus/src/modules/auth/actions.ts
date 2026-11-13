@@ -3,6 +3,7 @@
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { loginPath, safeNextPath } from '@/lib/auth/redirect';
+import { LEGAL } from '@/config/legal';
 import { getSiteUrl } from '@/lib/env';
 import { logServerError } from '@/lib/log';
 import { GENERIC_ERROR, mapAuthError, RATE_LIMITED } from '@/lib/supabase/errors';
@@ -17,7 +18,7 @@ import {
   signUpSchema,
 } from '@/schemas/auth';
 import { clientIp, consumeRateLimits, fingerprint, type RateRule } from '@/services/rate-limit';
-import { hasRecoveryGrant, RECOVERY_COOKIE, RECOVERY_WINDOW_SECONDS } from '@/services/recovery';
+import { hasRecoveryGrant, RECOVERY_COOKIE, RECOVERY_WINDOW_SECONDS, recoveryGrantValue } from '@/services/recovery';
 import { getSessionUser } from '@/services/session';
 import { ACTIVE_ORG_COOKIE } from '@/services/workspace';
 import type { FormState } from './form-state';
@@ -60,7 +61,11 @@ export async function signInAction(_previous: FormState, formData: FormData): Pr
   const ip = await clientIp();
   const blocked = await limit([
     { bucket: `signin:ip:${ip}`, limit: 30, windowSeconds: 15 * MINUTE },
-    { bucket: `signin:email:${fingerprint(parsed.data.email)}`, limit: 10, windowSeconds: 15 * MINUTE },
+    // Per e-mail and IP: someone else's failed attempts cannot lock the owner
+    // out from another network. The wider per-e-mail bucket still stops a
+    // distributed guessing attack on one account.
+    { bucket: `signin:email-ip:${fingerprint(parsed.data.email)}:${ip}`, limit: 10, windowSeconds: 15 * MINUTE },
+    { bucket: `signin:email:${fingerprint(parsed.data.email)}`, limit: 50, windowSeconds: 15 * MINUTE },
   ]);
   if (blocked) return { ...blocked, values };
 
@@ -82,6 +87,7 @@ export async function signUpAction(_previous: FormState, formData: FormData): Pr
     fullName: formData.get('fullName'),
     email: formData.get('email'),
     password: formData.get('password'),
+    acceptTerms: formData.get('acceptTerms'),
   });
   if (!parsed.success) return { status: 'error', fieldErrors: fieldErrors(parsed.error), values };
 
@@ -100,7 +106,8 @@ export async function signUpAction(_previous: FormState, formData: FormData): Pr
     password: parsed.data.password,
     options: {
       emailRedirectTo: `${getSiteUrl()}/auth/confirm`,
-      data: { full_name: parsed.data.fullName },
+      // Which version of the terms and privacy policy was accepted, and when (LGPD: proof of information).
+      data: { full_name: parsed.data.fullName, terms_version: LEGAL.version, terms_accepted_at: new Date().toISOString() },
     },
   });
   if (error) {
@@ -127,7 +134,8 @@ export async function resendConfirmationAction(_previous: FormState, formData: F
   const ip = await clientIp();
   const blocked = await limit([
     { bucket: `resend:ip:${ip}`, limit: 10, windowSeconds: HOUR },
-    { bucket: `resend:email:${fingerprint(parsed.data.email)}`, limit: 3, windowSeconds: HOUR },
+    { bucket: `resend:email-ip:${fingerprint(parsed.data.email)}:${ip}`, limit: 3, windowSeconds: HOUR },
+    { bucket: `resend:email:${fingerprint(parsed.data.email)}`, limit: 10, windowSeconds: HOUR },
   ]);
   if (blocked) return { ...blocked, email: parsed.data.email };
 
@@ -157,7 +165,8 @@ export async function requestPasswordResetAction(_previous: FormState, formData:
   const ip = await clientIp();
   const blocked = await limit([
     { bucket: `recover:ip:${ip}`, limit: 10, windowSeconds: HOUR },
-    { bucket: `recover:email:${fingerprint(parsed.data.email)}`, limit: 3, windowSeconds: HOUR },
+    { bucket: `recover:email-ip:${fingerprint(parsed.data.email)}:${ip}`, limit: 3, windowSeconds: HOUR },
+    { bucket: `recover:email:${fingerprint(parsed.data.email)}`, limit: 10, windowSeconds: HOUR },
   ]);
   if (blocked) return { ...blocked, values };
 
@@ -178,6 +187,11 @@ export async function requestPasswordResetAction(_previous: FormState, formData:
 export async function confirmEmailLinkAction(_previous: FormState, formData: FormData): Promise<FormState> {
   const supabase = await createSupabaseServerClient();
   if (!supabase) return { status: 'error', code: 'unavailable', message: NOT_CONFIGURED };
+
+  // Each attempt costs a Supabase Auth verification, whose own per-IP limit
+  // sees the server's address and is shared by everyone: limit it here per client.
+  const blocked = await limit([{ bucket: `confirm:ip:${await clientIp()}`, limit: 30, windowSeconds: 15 * MINUTE }]);
+  if (blocked) return blocked;
 
   const tokenHash = text(formData, 'token_hash');
   const type = otpTypeSchema.safeParse(formData.get('type'));
@@ -209,7 +223,7 @@ export async function confirmEmailLinkAction(_previous: FormState, formData: For
   }
 
   if (isRecovery && userId) {
-    (await cookies()).set(RECOVERY_COOKIE, userId, {
+    (await cookies()).set(RECOVERY_COOKIE, recoveryGrantValue(userId), {
       path: '/',
       httpOnly: true,
       sameSite: 'lax',

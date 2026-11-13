@@ -188,7 +188,7 @@ describe('analista da organização', () => {
   it('resumo: grava o resumo do período só quando há resposta', async () => {
     await events(await tenant.POST(request('/api/analista', { mode: 'summary', period: '30d' })));
     expect(ai.beginAiRequest).toHaveBeenCalledWith(supabase, ORG, 'summary');
-    expect(ai.saveSummary).toHaveBeenCalledWith(supabase, ORG, '30d', 'sig', [{ kind: 'summary', text: 'Receita de R$ 1.000,00.' }], 'claude-opus-5-5');
+    expect(ai.saveSummary).toHaveBeenCalledWith('u1', ORG, '30d', 'sig', [{ kind: 'summary', text: 'Receita de R$ 1.000,00.' }], 'claude-opus-5-5');
     expect(run.mock.calls[0]![3]).toEqual(expect.objectContaining({ mode: 'summary' }));
   });
 
