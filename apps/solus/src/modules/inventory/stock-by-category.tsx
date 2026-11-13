@@ -41,7 +41,7 @@ export function StockByCategory({ products = [], rows: grouped }: { products?: P
   const rows = grouped ?? byCategory(products);
   const max = Math.max(1, ...rows.map((r) => r.value));
   return (
-    <div className="-mx-5 overflow-x-auto">
+    <div className="relative -mx-5 overflow-x-auto">
       <table className="w-full text-sm">
         <caption className="sr-only">Valor em estoque, cobertura e itens em alerta por categoria</caption>
         <thead>

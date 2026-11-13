@@ -80,7 +80,10 @@ export function ChartFrame({
         </div>
       </div>
       {view === 'chart' ? (
-        <div className="min-w-0">{children}</div>
+        // The picture is for sighted readers; the caption and the table twin carry the same values.
+        <div className="min-w-0" aria-hidden="true">
+          {children}
+        </div>
       ) : (
         <div className="max-h-80 overflow-auto rounded-lg border">
           <Table scrollLabel={`Tabela: ${table.caption}`} className="[&_td:first-child]:pl-3 [&_td:last-child]:pr-3 [&_th:first-child]:pl-3 [&_th:last-child]:pr-3">

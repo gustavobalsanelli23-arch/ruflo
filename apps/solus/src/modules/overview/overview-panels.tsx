@@ -144,7 +144,7 @@ export function CategoryBreakdown({ categories }: { categories: CategoryPerforma
       action={<TextLink href="/lucratividade">Ver lucratividade</TextLink>}
       className="h-full"
     >
-      <div className="-mx-5 overflow-x-auto">
+      <div className="relative -mx-5 overflow-x-auto">
         <table className="w-full text-sm">
           <caption className="sr-only">Desempenho por categoria no período</caption>
           <thead>

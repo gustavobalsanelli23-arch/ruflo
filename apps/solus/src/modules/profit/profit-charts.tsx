@@ -92,7 +92,7 @@ export function ProfitabilityMap({ products, threshold }: { products: ProductPro
     >
       <div className="h-80">
         <ResponsiveContainer width="100%" height="100%">
-          <ScatterChart margin={{ top: 12, right: 28, bottom: 4, left: 0 }}>
+          <ScatterChart accessibilityLayer={false} margin={{ top: 12, right: 28, bottom: 4, left: 0 }}>
             <CartesianGrid stroke="var(--chart-grid)" />
             <ReferenceArea y1={y.domain[0]} y2={0} fill="var(--critical-soft)" fillOpacity={1} ifOverflow="hidden" />
             <ReferenceLine
@@ -172,7 +172,7 @@ export function CategoryMargins({ categories, threshold }: { categories: Categor
     >
       <div className="h-80">
         <ResponsiveContainer width="100%" height="100%">
-          <BarChart data={data} layout="vertical" margin={{ top: 0, right: 48, bottom: 0, left: 0 }} barCategoryGap="28%">
+          <BarChart accessibilityLayer={false} data={data} layout="vertical" margin={{ top: 0, right: 48, bottom: 0, left: 0 }} barCategoryGap="28%">
             <CartesianGrid stroke="var(--chart-grid)" horizontal={false} />
             <XAxis type="number" hide domain={axis.domain} />
             <YAxis type="category" dataKey="name" tick={AXIS_TICK} tickLine={false} axisLine={false} width={124} />
@@ -233,7 +233,7 @@ export function MarginTrend({ points }: { points: MarginPoint[] }) {
     >
       <div className="h-72 xl:h-80">
         <ResponsiveContainer width="100%" height="100%">
-          <LineChart data={points} margin={{ top: 8, right: 8, bottom: 0, left: 0 }}>
+          <LineChart accessibilityLayer={false} data={points} margin={{ top: 8, right: 8, bottom: 0, left: 0 }}>
             <CartesianGrid {...GRID_PROPS} />
             <XAxis dataKey="date" tick={AXIS_TICK} tickLine={false} axisLine={false} tickFormatter={(v: string) => formatMonth(v)} tickMargin={8} />
             <YAxis tick={AXIS_TICK} tickLine={false} axisLine={false} width={48} {...axis} />

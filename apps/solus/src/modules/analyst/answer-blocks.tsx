@@ -32,7 +32,7 @@ function AnswerChart({ block }: { block: ChartBlock }) {
       <div className={horizontal ? 'h-56' : 'h-52'}>
         <ResponsiveContainer width="100%" height="100%">
           {horizontal ? (
-            <BarChart data={block.points} layout="vertical" margin={{ top: 0, right: 72, bottom: 0, left: 0 }} barCategoryGap="30%">
+            <BarChart accessibilityLayer={false} data={block.points} layout="vertical" margin={{ top: 0, right: 72, bottom: 0, left: 0 }} barCategoryGap="30%">
               <CartesianGrid stroke="var(--chart-grid)" horizontal={false} />
               <XAxis type="number" hide />
               <YAxis type="category" dataKey="label" tick={AXIS_TICK} tickLine={false} axisLine={false} width={176} />
@@ -57,7 +57,7 @@ function AnswerChart({ block }: { block: ChartBlock }) {
               />
             </BarChart>
           ) : (
-            <LineChart data={block.points} margin={{ top: 8, right: 12, bottom: 0, left: 0 }}>
+            <LineChart accessibilityLayer={false} data={block.points} margin={{ top: 8, right: 12, bottom: 0, left: 0 }}>
               <CartesianGrid {...GRID_PROPS} />
               <XAxis dataKey="label" tick={AXIS_TICK} tickLine={false} axisLine={false} tickMargin={8} />
               <YAxis tick={AXIS_TICK} tickLine={false} axisLine={false} width={48} {...axis} />

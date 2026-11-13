@@ -94,7 +94,7 @@ export function PriorityMap({
     >
       <div className="h-80">
         <ResponsiveContainer width="100%" height="100%">
-          <ScatterChart margin={{ top: 12, right: 16, bottom: 4, left: 0 }}>
+          <ScatterChart accessibilityLayer={false} margin={{ top: 12, right: 16, bottom: 4, left: 0 }}>
             <CartesianGrid stroke="var(--chart-grid)" />
             <ReferenceArea x1={CONFIDENCE_CUT} x2={1} y1={IMPACT_CUT} y2={maxY} fill="var(--brand-soft)" fillOpacity={1} ifOverflow="hidden" label={{ value: 'Fazer agora', position: 'insideTopRight', ...quadrant }} />
             <ReferenceArea x1={0.3} x2={CONFIDENCE_CUT} y1={IMPACT_CUT} y2={maxY} fillOpacity={0} label={{ value: 'Validar antes', position: 'insideTopLeft', ...quadrant }} />
@@ -166,7 +166,7 @@ export function EvidenceChart({ series }: { series: EvidenceSeries }) {
     >
       <div className="h-48">
         <ResponsiveContainer width="100%" height="100%">
-          <LineChart data={series.points} margin={{ top: 8, right: 8, bottom: 0, left: 0 }}>
+          <LineChart accessibilityLayer={false} data={series.points} margin={{ top: 8, right: 8, bottom: 0, left: 0 }}>
             <CartesianGrid {...GRID_PROPS} />
             <XAxis dataKey="date" tick={AXIS_TICK} tickLine={false} axisLine={false} tickFormatter={(v: string) => formatMonth(v)} minTickGap={16} />
             <YAxis tick={AXIS_TICK} tickLine={false} axisLine={false} width={52} {...axis} />

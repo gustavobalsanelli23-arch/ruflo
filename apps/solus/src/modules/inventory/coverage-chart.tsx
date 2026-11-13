@@ -35,7 +35,7 @@ export function CoverageChart({ buckets }: { buckets: CoverageBucket[] }) {
     >
       <div className="h-64 xl:h-[26rem]">
         <ResponsiveContainer width="100%" height="100%">
-          <BarChart data={buckets} layout="vertical" margin={{ top: 0, right: 72, bottom: 0, left: 0 }} barCategoryGap="26%">
+          <BarChart accessibilityLayer={false} data={buckets} layout="vertical" margin={{ top: 0, right: 72, bottom: 0, left: 0 }} barCategoryGap="26%">
             <CartesianGrid stroke="var(--chart-grid)" horizontal={false} />
             <XAxis type="number" hide />
             <YAxis type="category" dataKey="bucket" tick={AXIS_TICK} tickLine={false} axisLine={false} width={104} />

@@ -123,7 +123,7 @@ export function RevenueProfitChart({ period, trend }: { period: Period; trend: T
     >
       <div className="h-64 sm:h-72">
         <ResponsiveContainer width="100%" height="100%">
-          <ComposedChart data={data} margin={{ top: 8, right: 4, bottom: 0, left: 0 }} barCategoryGap="22%">
+          <ComposedChart accessibilityLayer={false} data={data} margin={{ top: 8, right: 4, bottom: 0, left: 0 }} barCategoryGap="22%">
             <CartesianGrid {...GRID_PROPS} />
             <XAxis
               dataKey="date"
