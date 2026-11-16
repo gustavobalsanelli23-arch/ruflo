@@ -63,6 +63,10 @@ export default function PrivacyPage() {
           <li>Criar e manter sua conta e sua organização, e prestar o serviço contratado (execução de contrato, art. 7º, V).</li>
           <li>Enviar e-mails de confirmação, convite e recuperação de senha (execução de contrato).</li>
           <li>Proteger o serviço contra abuso, fraude e acessos indevidos (legítimo interesse, art. 7º, IX).</li>
+          <li>
+            Entender como o app é usado, para melhorá-lo, só se você aceitar no aviso de cookies (consentimento, art. 7º, I). Você pode
+            mudar a escolha na Política de cookies.
+          </li>
           <li>Cumprir obrigações legais e atender autoridades quando exigido (art. 7º, II).</li>
         </ul>
       </Section>
@@ -80,6 +84,10 @@ export default function PrivacyPage() {
             <strong>Provedor de IA</strong> (hoje, Groq): recebe a pergunta, até seis trocas anteriores da conversa, o nome da organização
             e os resultados das consultas aos seus dados (totais, produtos, categorias, fornecedores, estoque e oportunidades). Não recebe
             e-mails nem dados de conta. Configuramos o provedor para não guardar esse conteúdo.
+          </li>
+          <li>
+            <strong>PostHog</strong> (União Europeia), só com o seu consentimento: páginas visitadas, cliques e gravações da tela com os
+            textos ocultos, ligados ao identificador da sua conta. Não recebe e-mails, nomes nem os dados da sua empresa.
           </li>
         </ul>
         <p>

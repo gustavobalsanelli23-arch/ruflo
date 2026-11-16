@@ -18,6 +18,12 @@ describe('buildContentSecurityPolicy', () => {
     expect(csp).not.toContain("'unsafe-eval'");
     expect(csp).toContain("'nonce-n' 'strict-dynamic'");
   });
+
+  it('só libera o PostHog (EU) quando a análise de uso está configurada', () => {
+    expect(buildContentSecurityPolicy('n', false)).not.toContain('posthog');
+    const csp = buildContentSecurityPolicy('n', false, 'https://x.supabase.co', false, true);
+    expect(csp).toContain("connect-src 'self' https://x.supabase.co https://eu.i.posthog.com https://eu-assets.i.posthog.com");
+  });
 });
 
 describe('isLoopbackHost', () => {

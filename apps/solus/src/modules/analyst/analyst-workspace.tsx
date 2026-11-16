@@ -10,6 +10,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sh
 import { Textarea } from '@/components/ui/textarea';
 import type { AnalystData, AnalystMessage, AnalystThread, AnswerBlock } from '@/lib/data/types';
 import { formatDateTime } from '@/lib/format';
+import { track } from '@/lib/tracking/product-analytics';
 import { useReturnFocus } from '@/lib/use-return-focus';
 import { loadThreadAction } from './actions';
 import { AnswerHeader, ThreadList, Thinking, type Feedback, type ScopeInfo } from './analyst-parts';
@@ -140,6 +141,7 @@ export function AnalystWorkspace({
 
   const askLive = async (text: string, fresh: boolean, opportunityId: string | null) => {
     if (!live) return;
+    track('pergunta_ia', { escopo: live.scope });
     const { threadId: localId, thread } = startQuestion(text, fresh);
     let threadId = localId;
     setSteps(['Lendo a pergunta']);

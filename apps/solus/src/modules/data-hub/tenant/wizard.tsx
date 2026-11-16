@@ -8,6 +8,7 @@ import { UPLOAD_BATCH_ROWS } from '@/lib/ingest/limits';
 import { applyMapping, describeMapping, mappingProblems, suggestMapping, type MappedRow } from '@/lib/ingest/mapping';
 import { detectDateOrder, detectDecimalStyle } from '@/lib/ingest/normalize';
 import type { Dataset, Mapping, ReadOptions } from '@/lib/ingest/types';
+import { track } from '@/lib/tracking/product-analytics';
 import type { ImportRecordRow, IssueGroup } from '@/services/imports';
 import {
   cancelImportAction,
@@ -251,6 +252,7 @@ export function ImportWizard({ resume, onShowHistory }: { resume: { importId: st
     const finished = await finalizeImportAction(id);
     setBusy(null);
     if (!finished.ok) return setError(finished.error.message);
+    track('importacao_concluida', { dataset });
     setResult(finished.data);
     router.refresh();
     go(6);

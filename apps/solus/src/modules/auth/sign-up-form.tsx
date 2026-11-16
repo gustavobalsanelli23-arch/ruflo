@@ -2,8 +2,9 @@
 
 import { MailCheck } from 'lucide-react';
 import Link from 'next/link';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Notice } from '@/components/data/states';
+import { track } from '@/lib/tracking/product-analytics';
 import { PASSWORD_MIN, signUpSchema } from '@/schemas/auth';
 import { signUpAction } from './actions';
 import { AuthHeading, ConsentCheckbox, Field, PasswordInput, SubmitButton, TextInput, useValidatedAction } from './form-kit';
@@ -18,6 +19,10 @@ export function SignUpForm({ next, enabled }: { next?: string; enabled: boolean 
 function SignUpAttempt({ next, enabled, onRestart }: { next?: string; enabled: boolean; onRestart: () => void }) {
   const { state, formAction, pending, errors, onSubmit, clearError, formRef } = useValidatedAction(signUpSchema, signUpAction, IDLE);
   const query = next ? `?next=${encodeURIComponent(next)}` : '';
+  const succeeded = state.status === 'success';
+  useEffect(() => {
+    if (succeeded) track('cadastro_enviado');
+  }, [succeeded]);
 
   if (state.status === 'success' && state.email) {
     return (

@@ -4,6 +4,7 @@ import { GeistSans } from 'geist/font/sans';
 import { headers } from 'next/headers';
 import { Providers } from '@/components/providers';
 import { SIDEBAR_BOOT_SCRIPT } from '@/components/shell/sidebar-boot';
+import { getAnalyticsKey } from '@/lib/env';
 import './globals.css';
 
 export const metadata: Metadata = {
@@ -28,7 +29,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <script nonce={nonce} dangerouslySetInnerHTML={{ __html: SIDEBAR_BOOT_SCRIPT }} />
       </head>
       <body>
-        <Providers nonce={nonce}>{children}</Providers>
+        <Providers nonce={nonce} analyticsKey={getAnalyticsKey()}>{children}</Providers>
       </body>
     </html>
   );

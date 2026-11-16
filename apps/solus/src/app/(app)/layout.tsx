@@ -3,6 +3,7 @@ import type { ShellContext } from '@/components/shell/types';
 import { getAiConfig } from '@/lib/ai/config';
 import { logServerError } from '@/lib/log';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
+import { AnalyticsIdentity } from '@/lib/tracking/product-analytics';
 import { getCoverage } from '@/services/analytics';
 import { requireWorkspace } from '@/services/workspace';
 
@@ -30,7 +31,12 @@ export default async function WorkspaceLayout({ children }: { children: React.Re
     signedIn: true,
   };
 
-  return <AppShell context={context}>{children}</AppShell>;
+  return (
+    <>
+      <AnalyticsIdentity userId={user.id} organizationId={active.organizationId} plan={active.plan ?? 'free'} />
+      <AppShell context={context}>{children}</AppShell>
+    </>
+  );
 }
 
 /** Last day with data and the open opportunities, for the top bar and the command menu. */

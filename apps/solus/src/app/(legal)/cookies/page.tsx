@@ -1,4 +1,6 @@
 import type { Metadata } from 'next';
+import { ConsentReset } from '@/components/shell/consent-reset';
+import { getAnalyticsKey } from '@/lib/env';
 import { LegalDocument, Section } from '@/modules/legal/legal-shell';
 
 export const metadata: Metadata = { title: 'Política de cookies' };
@@ -15,17 +17,26 @@ const STORAGE = [
   { name: 'theme', purpose: 'Tema claro ou escuro escolhido.' },
   { name: 'solus-sidebar', purpose: 'Menu lateral aberto ou recolhido.' },
   { name: 'solus-aviso-cookies', purpose: 'Registra que você já viu o aviso de cookies.' },
+  { name: 'solus-consentimento', purpose: 'Guarda se você aceitou ou recusou a análise de uso.' },
 ];
 
 export default function CookiesPage() {
+  const analytics = getAnalyticsKey() !== null;
   return (
     <LegalDocument
       title="Política de cookies"
       intro={
-        <p>
-          O SOLUS usa apenas cookies estritamente necessários para funcionar. Não usamos cookies de análise, de publicidade ou de
-          terceiros. Por isso eles não dependem de consentimento, e não há nada para ligar ou desligar.
-        </p>
+        analytics ? (
+          <p>
+            O SOLUS usa cookies estritamente necessários para funcionar e, só se você aceitar, uma ferramenta de análise de uso. Não usamos
+            cookies de publicidade.
+          </p>
+        ) : (
+          <p>
+            O SOLUS usa apenas cookies estritamente necessários para funcionar. Não usamos cookies de análise, de publicidade ou de
+            terceiros. Por isso eles não dependem de consentimento, e não há nada para ligar ou desligar.
+          </p>
+        )
       }
     >
       <Section title="Cookies">
@@ -52,6 +63,21 @@ export default function CookiesPage() {
         </div>
         <p>Todos são do próprio SOLUS, protegidos contra leitura por scripts (HttpOnly) e enviados só ao SOLUS.</p>
       </Section>
+
+      {analytics && (
+        <Section title="Análise de uso (opcional)">
+          <p>
+            Se você aceitar, o PostHog, com servidores na União Europeia, registra as páginas visitadas, os cliques e gravações da tela
+            com todos os textos e campos ocultos. Assim vemos onde as pessoas travam e melhoramos o SOLUS. Ele não recebe os dados da sua
+            empresa, nem valores, produtos ou e-mails, e não é usado para anúncios.
+          </p>
+          <p>
+            Ele grava o cookie <code className="font-mono text-[13px]">ph_…_posthog</code> (1 ano) e uma cópia no armazenamento local, com
+            um identificador aleatório do navegador. Se você recusar, nada disso é criado.
+          </p>
+          <ConsentReset />
+        </Section>
+      )}
 
       <Section title="Armazenamento no navegador">
         <p>Algumas preferências ficam no armazenamento local do navegador, sem sair do seu aparelho:</p>

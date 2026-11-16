@@ -71,3 +71,13 @@ export function getSiteUrl() {
   if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`;
   return 'http://localhost:3000';
 }
+
+/**
+ * PostHog project key (phc_…), read at runtime and handed to the browser by
+ * the root layout. It is a public key by design: it can only send events.
+ * Absent = no analytics and the cookie notice stays informative only.
+ */
+export function getAnalyticsKey(): string | null {
+  const key = process.env.POSTHOG_KEY?.trim();
+  return key && /^phc_[A-Za-z0-9]{20,}$/.test(key) ? key : null;
+}

@@ -6,6 +6,7 @@ import { RefreshCw } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import type { Opportunity, OpportunityStatus } from '@/lib/data/types';
+import { track } from '@/lib/tracking/product-analytics';
 import { runAnalysisAction, setOpportunityStatusAction } from './actions';
 import { OpportunityCenter } from './opportunity-center';
 
@@ -43,6 +44,7 @@ export function RunAnalysisButton() {
         start(async () => {
           const result = await runAnalysisAction();
           if (result.ok) {
+            track('analise_executada');
             toast.success(result.message);
             router.refresh();
           } else {

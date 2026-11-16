@@ -14,15 +14,29 @@
  * and Firefox, applies upgrade-insecure-requests to localhost too, sending
  * every script and stylesheet to https://localhost, where nothing answers. A
  * deployed site is never on loopback, so it always keeps the directive.
+ *
+ * `analytics` adds PostHog's EU hosts (events and its lazily loaded scripts,
+ * which 'strict-dynamic' already admits) only when a PostHog key is set. The
+ * browser talks to PostHog directly rather than through a rewrite on this
+ * origin, which would forward the session cookies to a third party.
  */
-export function buildContentSecurityPolicy(nonce: string, isDev: boolean, uploadOrigin: string | null = null, loopback = false) {
+export const ANALYTICS_ORIGINS = ['https://eu.i.posthog.com', 'https://eu-assets.i.posthog.com'] as const;
+
+export function buildContentSecurityPolicy(
+  nonce: string,
+  isDev: boolean,
+  uploadOrigin: string | null = null,
+  loopback = false,
+  analytics = false,
+) {
+  const connect = ["'self'", ...(uploadOrigin ? [uploadOrigin] : []), ...(analytics ? ANALYTICS_ORIGINS : [])];
   const directives = [
     `default-src 'self'`,
     `script-src 'self' 'nonce-${nonce}' 'strict-dynamic'${isDev ? ` 'unsafe-eval'` : ''}`,
     `style-src 'self' 'unsafe-inline'`,
     `img-src 'self' blob: data:`,
     `font-src 'self'`,
-    `connect-src 'self'${uploadOrigin ? ` ${uploadOrigin}` : ''}`,
+    `connect-src ${connect.join(' ')}`,
     `object-src 'none'`,
     `base-uri 'self'`,
     `form-action 'self'`,
