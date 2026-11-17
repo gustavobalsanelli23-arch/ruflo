@@ -26,6 +26,7 @@ create policy organization_billing_select_member on public.organization_billing
   for select to authenticated
   using (organization_id in (select private.user_org_ids()));
 
+revoke all on table public.organization_billing from public, anon, authenticated;
 grant select on public.organization_billing to authenticated;
 
 -- Eventos já processados, para um reenvio da Stripe não aplicar nada duas vezes.
@@ -37,6 +38,7 @@ create table public.stripe_events (
 
 alter table public.stripe_events enable row level security;
 -- Sem políticas nem grants: só o service_role lê e escreve.
+revoke all on table public.stripe_events from public, anon, authenticated;
 
 create function public.link_billing_customer(p_actor uuid, p_organization_id uuid, p_customer_id text)
 returns void
