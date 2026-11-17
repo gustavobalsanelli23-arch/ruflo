@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { Notice } from '@/components/data/states';
 import { formatCount, formatPrice, planById, type PlanId } from '@/config/plans';
 import { deleteAccountAction } from '@/modules/auth/account-actions';
+import { PlanBilling, type BillingInfo } from '@/modules/billing/plan-billing';
 import { PasswordInput, SubmitButton, TextInput, useValidatedAction } from '@/modules/auth/form-kit';
 import { IDLE } from '@/modules/auth/form-state';
 import { deleteAccountSchema } from '@/schemas/auth';
@@ -11,7 +12,7 @@ import { SettingsField } from './settings-frame';
 
 const linkClass = 'font-medium text-brand underline-offset-4 outline-none hover:underline focus-visible:underline';
 
-export function PlanSection({ plan: planId }: { plan: PlanId }) {
+export function PlanSection({ plan: planId, billing }: { plan: PlanId; billing: BillingInfo }) {
   const plan = planById(planId);
   return (
     <div className="flex flex-col gap-5">
@@ -35,6 +36,7 @@ export function PlanSection({ plan: planId }: { plan: PlanId }) {
           </div>
         </dl>
       </div>
+      <PlanBilling plan={planId} billing={billing} />
       <p className="text-sm text-muted-foreground">
         Compare os planos e veja como mudar na{' '}
         <Link href="/planos" className={linkClass}>

@@ -86,6 +86,10 @@ export default function PrivacyPage() {
             e-mails nem dados de conta. Configuramos o provedor para não guardar esse conteúdo.
           </li>
           <li>
+            <strong>Stripe</strong>: processa os pagamentos das assinaturas. Recebe o nome da organização, o e-mail de quem assina e os
+            dados do cartão, digitados direto na página da Stripe. O SOLUS não vê nem guarda o número do cartão.
+          </li>
+          <li>
             <strong>PostHog</strong> (União Europeia), só com o seu consentimento: páginas visitadas, cliques e gravações da tela com os
             textos ocultos, ligados ao identificador da sua conta. Não recebe e-mails, nomes nem os dados da sua empresa.
           </li>

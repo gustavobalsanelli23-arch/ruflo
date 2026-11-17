@@ -3,14 +3,17 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { LEGAL } from '@/config/legal';
 import { COMMON_FEATURES, formatCount, formatPrice, PLANS, type Plan } from '@/config/plans';
+import { isBillingEnabled } from '@/lib/billing/stripe';
 import { cn } from '@/lib/utils';
 
 export const metadata: Metadata = { title: 'Planos' };
 
 const contactReady = LEGAL.supportEmail.includes('@') && !LEGAL.supportEmail.includes('[');
 
-function planAction(plan: Plan) {
+function planAction(plan: Plan, billing: boolean) {
   if (plan.monthlyPrice === 0) return { href: '/cadastro', label: 'Começar no Free' };
+  // Online billing: subscribing happens in Configurações > Plano (login first if needed).
+  if (billing) return { href: '/configuracoes?secao=plano', label: `Assinar o ${plan.name}` };
   if (contactReady) {
     const subject = encodeURIComponent(`Quero o plano ${plan.name} do SOLUS`);
     return { href: `mailto:${LEGAL.supportEmail}?subject=${subject}`, label: `Pedir o plano ${plan.name}` };
@@ -20,6 +23,7 @@ function planAction(plan: Plan) {
 }
 
 export default function PlansPage() {
+  const billing = isBillingEnabled();
   return (
     <div className="mx-auto max-w-5xl px-5 py-10 sm:px-8 sm:py-14">
       <h1 className="text-3xl font-semibold tracking-tight text-foreground">Planos</h1>
@@ -30,7 +34,7 @@ export default function PlansPage() {
 
       <ul className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {PLANS.map((plan) => {
-          const action = planAction(plan);
+          const action = planAction(plan, billing);
           return (
             <li
               key={plan.id}

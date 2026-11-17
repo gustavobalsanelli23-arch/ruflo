@@ -5,6 +5,7 @@ import type { PlanId } from '@/config/plans';
 import { Notice } from '@/components/data/states';
 import { PERMISSION_MATRIX } from '@/lib/auth/permissions';
 import type { Role } from '@/lib/data/types';
+import type { BillingInfo } from '@/modules/billing/plan-billing';
 import type { InvitationRow, MemberRow } from '@/services/organization-data';
 import { ProfileSection, SecuritySection } from './account-sections';
 import { AnalysisSection, type AnalysisSettings } from './analysis-section';
@@ -30,6 +31,7 @@ export interface TenantSettingsData {
   organization: OrganizationInfo;
   role: Role;
   plan: PlanId;
+  billing: BillingInfo;
   user: { id: string; email: string; fullName: string | null };
   members: MemberRow[];
   invitations: InvitationRow[];
@@ -44,7 +46,7 @@ export function TenantSettings({ data }: { data: TenantSettingsData }) {
       {(section) => (
         <>
           {section === 'organizacao' && <OrganizationSection organization={data.organization} role={data.role} />}
-          {section === 'plano' && <PlanSection plan={data.plan} />}
+          {section === 'plano' && <PlanSection plan={data.plan} billing={data.billing} />}
           {section === 'privacidade' && <PrivacySection />}
           {section === 'perfil' && <ProfileSection fullName={data.user.fullName} email={data.user.email} />}
           {section === 'seguranca' && <SecuritySection />}
