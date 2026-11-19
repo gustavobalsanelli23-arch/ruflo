@@ -1,10 +1,8 @@
 import { ArrowRight, Boxes, Calculator, FileSpreadsheet, Lightbulb, LineChart, MessageSquareText, ShieldCheck, Store } from 'lucide-react';
 import Link from 'next/link';
-import { EclipseArt } from '@/components/brand/eclipse';
-import { Logo } from '@/components/brand/logo';
-import { ThemeToggle } from '@/components/shell/theme-toggle';
 import { formatPrice, PLANS } from '@/config/plans';
 import { LegalFooter } from '@/modules/legal/legal-shell';
+import { LandingHero } from './landing-hero';
 
 /**
  * Public home for visitors (signed-in people go straight to the app). Every
@@ -13,8 +11,8 @@ import { LegalFooter } from '@/modules/legal/legal-shell';
  */
 
 const FOCUS = 'outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background';
-const PRIMARY = `inline-flex h-11 items-center justify-center gap-2 rounded-lg bg-primary px-5 text-[15px] font-medium text-primary-foreground hover:bg-primary/85 ${FOCUS}`;
-const SECONDARY = `inline-flex h-11 items-center justify-center gap-2 rounded-lg border border-border px-5 text-[15px] font-medium text-foreground hover:bg-muted ${FOCUS}`;
+const PRIMARY = `inline-flex h-11 items-center justify-center gap-2 bg-primary px-5 text-[15px] font-medium text-primary-foreground hover:bg-primary/85 ${FOCUS}`;
+const SECONDARY = `inline-flex h-11 items-center justify-center gap-2 border border-border px-5 text-[15px] font-medium text-foreground hover:bg-muted ${FOCUS}`;
 
 const STEPS = [
   {
@@ -66,46 +64,7 @@ export function LandingPage() {
         Pular para o conteúdo
       </a>
 
-      <header className="relative isolate overflow-hidden bg-[#101923] text-sidebar-foreground">
-        <div className="relative z-10 mx-auto flex h-16 max-w-6xl items-center justify-between gap-4 px-5 sm:px-8">
-          <Link href="/" aria-label="SOLUS, início" className="rounded-md outline-none focus-visible:ring-2 focus-visible:ring-sidebar-ring/70">
-            <Logo />
-          </Link>
-          <nav aria-label="Conta" className="flex items-center gap-2 text-sm sm:gap-4">
-            <Link href="/planos" className="hidden rounded-sm px-1 py-1.5 text-sidebar-foreground hover:text-sidebar-accent-foreground sm:inline-block">
-              Planos
-            </Link>
-            <Link href="/entrar" className="rounded-sm px-1 py-1.5 font-medium text-sidebar-accent-foreground hover:underline underline-offset-4">
-              Entrar
-            </Link>
-            <ThemeToggle />
-          </nav>
-        </div>
-
-        <div className="relative z-10 mx-auto max-w-6xl px-5 pt-12 pb-20 sm:px-8 sm:pt-20 sm:pb-28">
-          <h1 className="max-w-3xl text-[2.25rem] leading-[1.08] font-medium tracking-[-0.03em] text-sidebar-accent-foreground sm:text-[3.25rem]">
-            Veja onde sua empresa ganha e onde perde dinheiro.
-          </h1>
-          <p className="mt-6 max-w-xl text-lg leading-8 text-sidebar-foreground">
-            O SOLUS lê as planilhas de vendas e estoque que você já tem e mostra lucro, estoque parado e oportunidades. Cada número vem
-            dos seus dados, nada é estimado.
-          </p>
-          <div className="mt-9 flex flex-col gap-3 sm:flex-row">
-            <Link href="/cadastro" className={PRIMARY}>
-              Criar conta grátis
-              <ArrowRight aria-hidden="true" className="size-4" />
-            </Link>
-            <Link
-              href="/demo/visao-geral"
-              className="inline-flex h-11 items-center justify-center rounded-lg border border-sidebar-border px-5 text-[15px] font-medium text-sidebar-accent-foreground outline-none hover:bg-white/5 focus-visible:ring-2 focus-visible:ring-sidebar-ring/70"
-            >
-              Ver a demonstração
-            </Link>
-          </div>
-          <p className="mt-4 text-sm text-sidebar-foreground">O plano Free não pede cartão. A demonstração usa uma empresa fictícia.</p>
-        </div>
-        <EclipseArt className="absolute -right-[38%] -bottom-[45%] z-0 w-[110%] max-w-[760px] text-sidebar-primary sm:-right-[12%] sm:-bottom-[60%] sm:w-[60%]" />
-      </header>
+      <LandingHero />
 
       <main id="conteudo" tabIndex={-1} className="flex-1 outline-none">
         <section aria-labelledby="como-funciona" className="mx-auto max-w-6xl px-5 py-16 sm:px-8 sm:py-20">
@@ -114,9 +73,9 @@ export function LandingPage() {
           </h2>
           <ol className="mt-8 grid gap-4 md:grid-cols-3">
             {STEPS.map((step, index) => (
-              <li key={step.title} className="rounded-xl border border-border bg-card p-6">
+              <li key={step.title} className="border border-border bg-card p-6">
                 <div className="flex items-center gap-3">
-                  <span className="flex size-8 items-center justify-center rounded-full bg-brand/10 text-sm font-semibold text-brand">{index + 1}</span>
+                  <span className="flex size-8 items-center justify-center bg-brand/10 text-sm font-semibold text-brand">{index + 1}</span>
                   <step.icon aria-hidden="true" className="size-5 text-muted-foreground" />
                 </div>
                 <h3 className="mt-4 text-base font-semibold text-foreground">{step.title}</h3>
@@ -133,7 +92,7 @@ export function LandingPage() {
             </h2>
             <ul className="mt-8 grid gap-4 sm:grid-cols-2">
               {MODULES.map((module) => (
-                <li key={module.title} className="flex gap-4 rounded-xl border border-border bg-card p-6">
+                <li key={module.title} className="flex gap-4 border border-border bg-card p-6">
                   <module.icon aria-hidden="true" className="mt-0.5 size-5 shrink-0 text-brand" />
                   <div>
                     <h3 className="text-base font-semibold text-foreground">{module.title}</h3>
@@ -155,7 +114,7 @@ export function LandingPage() {
           </h2>
           <ul className="mt-8 grid gap-4 md:grid-cols-2">
             {AUDIENCES.map((audience) => (
-              <li key={audience.title} className="rounded-xl border border-border bg-card p-6">
+              <li key={audience.title} className="border border-border bg-card p-6">
                 <audience.icon aria-hidden="true" className="size-6 text-brand" />
                 <h3 className="mt-4 text-lg font-semibold text-foreground">{audience.title}</h3>
                 <p className="mt-2 text-[15px] leading-7 text-muted-foreground">{audience.text}</p>
@@ -165,25 +124,23 @@ export function LandingPage() {
         </section>
 
         <section aria-labelledby="seus-dados" className="border-y border-border bg-muted/40">
-          <div className="mx-auto flex max-w-6xl flex-col gap-6 px-5 py-16 sm:px-8 md:flex-row md:items-start md:gap-12">
-            <ShieldCheck aria-hidden="true" className="size-8 shrink-0 text-brand" />
-            <div>
-              <h2 id="seus-dados" className="text-2xl font-semibold tracking-tight text-foreground">
-                Seus dados continuam seus
-              </h2>
-              <ul className="mt-5 grid gap-3 text-[15px] leading-7 text-foreground sm:grid-cols-2">
-                <li>Cada empresa vê só os próprios dados, separados no banco de dados.</li>
-                <li>Você escolhe quem da equipe acessa e com qual papel.</li>
-                <li>Desfazer uma importação apaga as linhas dela.</li>
-                <li>
-                  Tratamento conforme a LGPD. Leia a{' '}
-                  <Link href="/privacidade" className="font-medium text-brand underline underline-offset-4">
-                    política de privacidade
-                  </Link>
-                  .
-                </li>
-              </ul>
-            </div>
+          <div className="mx-auto max-w-6xl px-5 py-16 sm:px-8 sm:py-20">
+            <h2 id="seus-dados" className="flex items-center gap-3 text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
+              <ShieldCheck aria-hidden="true" className="size-7 shrink-0 text-brand" />
+              Seus dados continuam seus
+            </h2>
+            <ul className="mt-8 grid gap-4 text-[15px] leading-7 text-foreground sm:grid-cols-2">
+              <li className="border-l-2 border-brand pl-4">Cada empresa vê só os próprios dados, separados no banco de dados.</li>
+              <li className="border-l-2 border-brand pl-4">Você escolhe quem da equipe acessa e com qual papel.</li>
+              <li className="border-l-2 border-brand pl-4">Desfazer uma importação apaga as linhas dela.</li>
+              <li className="border-l-2 border-brand pl-4">
+                Tratamento conforme a LGPD. Leia a{' '}
+                <Link href="/privacidade" className="font-medium text-brand underline underline-offset-4">
+                  política de privacidade
+                </Link>
+                .
+              </li>
+            </ul>
           </div>
         </section>
 
