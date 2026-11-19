@@ -1,7 +1,16 @@
+import type { Metadata } from 'next';
 import { redirect } from 'next/navigation';
+import { LandingPage } from '@/modules/landing/landing-page';
 import { getSessionUser } from '@/services/session';
 
-/** The proxy already routes `/`; this is the fallback when it does not run. */
+export const metadata: Metadata = {
+  title: { absolute: 'SOLUS: veja onde sua empresa ganha e perde dinheiro' },
+  description:
+    'O SOLUS lê as planilhas de vendas e estoque que você já tem e mostra lucro, estoque parado e oportunidades, com cada número vindo dos seus dados.',
+};
+
+/** Public home; the proxy already sends signed-in people to the app, this is the fallback. */
 export default async function Home() {
-  redirect((await getSessionUser()) ? '/visao-geral' : '/entrar');
+  if (await getSessionUser()) redirect('/visao-geral');
+  return <LandingPage />;
 }

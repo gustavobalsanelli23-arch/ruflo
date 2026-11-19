@@ -43,8 +43,10 @@ function acknowledge() {
   listeners.forEach((listener) => listener());
 }
 
+// Above the phone tab bar (h-14 + safe area, hidden from lg) and on the right on
+// wide screens, so it never covers the bottom bar or the sidebar controls.
 const PANEL =
-  'fixed inset-x-3 bottom-3 z-50 rounded-xl border border-border bg-popover p-4 text-popover-foreground shadow-lg sm:inset-x-auto sm:left-4 sm:max-w-sm';
+  'fixed inset-x-3 bottom-[calc(4.25rem+env(safe-area-inset-bottom))] z-50 rounded-xl border border-border bg-popover p-4 text-popover-foreground shadow-lg sm:inset-x-auto sm:right-4 sm:max-w-sm lg:bottom-4';
 const LINK =
   'relative -my-1.5 inline-block py-1.5 font-medium text-brand underline underline-offset-4 outline-none focus-visible:ring-2 focus-visible:ring-ring';
 const BUTTON =

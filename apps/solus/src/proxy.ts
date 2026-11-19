@@ -84,7 +84,8 @@ export async function proxy(request: NextRequest) {
 
   if (!isServerAction) {
     if (pathname === '/') {
-      redirectTo = userId ? '/visao-geral' : '/entrar';
+      // Visitors see the public home; signed-in people go to the app.
+      if (userId) redirectTo = '/visao-geral';
     } else if (!userId && matches(pathname, PRIVATE_PREFIXES)) {
       if (pathname === '/redefinir-senha') {
         redirectTo = '/recuperar-senha?motivo=link-expirado';

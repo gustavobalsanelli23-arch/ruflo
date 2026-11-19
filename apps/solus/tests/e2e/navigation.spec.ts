@@ -39,9 +39,12 @@ test.describe('módulos', () => {
     await expect(page.getByRole('heading', { level: 1 })).toHaveText('Esta página não existe');
   });
 
-  test('a raiz leva quem não entrou para a tela de entrar', async ({ page }) => {
+  test('a raiz mostra a página inicial pública para quem não entrou', async ({ page }) => {
     await page.goto('/');
-    await expect(page).toHaveURL(/\/entrar$/);
+    await expect(page).toHaveURL(/\/$/);
+    await expect(page.getByRole('heading', { level: 1 })).toHaveText('Veja onde sua empresa ganha e onde perde dinheiro.');
+    await page.getByRole('link', { name: 'Ver a demonstração' }).click();
+    await expect(page).toHaveURL(/\/demo\/visao-geral$/);
   });
 
   test('rota inexistente mostra a página 404 com saída', async ({ page }) => {
