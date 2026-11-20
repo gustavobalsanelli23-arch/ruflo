@@ -13,7 +13,9 @@ import { useEffect, useRef } from 'react';
  *     (the hero toggles it on click); closing brings the moon back.
  *
  * Static for reduced motion (open/close still switch, without the slide);
- * paused off screen and in hidden tabs.
+ * paused off screen and in hidden tabs. Adaptive: if the first frames run
+ * slow (a modest phone), fewer points are drawn; if even that is slow, the
+ * corona stops turning and is redrawn only while it opens or closes.
  */
 
 interface Point {
@@ -22,6 +24,7 @@ interface Point {
   size: number;
   alpha: number;
   tone: number; // 0..TONES-1, from cool silver to white
+  level: number; // alpha level, 0..LEVELS-1 (one colour string per tone × level)
   sx: number;
   sy: number;
   delay: number;
@@ -31,6 +34,7 @@ interface Point {
 }
 
 const TONES = 6;
+const LEVELS = 4;
 const GATHER_MS = 2200;
 const PUSH_RADIUS = 110;
 
@@ -65,17 +69,22 @@ function makePoints(count: number): Point[] {
       delay: Math.random() * 0.45,
       dx: 0,
       dy: 0,
+      level: 0,
     });
   }
-  // Sorted by tone, so a frame changes fillStyle once per tone.
-  return points.sort((a, b) => a.tone - b.tone);
+  for (const point of points) point.level = Math.min(LEVELS - 1, Math.floor(point.alpha * LEVELS));
+  // Sorted by colour, so a frame changes fillStyle once per tone × level
+  // (no per-point globalAlpha, the costly state change on phones).
+  return points.sort((a, b) => a.tone * LEVELS + a.level - (b.tone * LEVELS + b.level));
 }
 
-/** Cool silver (tone 0) to pure white. */
-function toneColor(tone: number) {
+/** Cool silver (tone 0) to pure white, at one of the alpha levels. */
+function toneColor(tone: number, alpha: number) {
   const t = tone / (TONES - 1);
-  return `hsl(212 ${Math.round(28 - t * 28)}% ${Math.round(68 + t * 32)}%)`;
+  return `hsl(212 ${Math.round(28 - t * 28)}% ${Math.round(68 + t * 32)}% / ${alpha.toFixed(3)})`;
 }
+
+const levelAlpha = (level: number) => (level + 0.5) / LEVELS;
 
 const easeOut = (t: number) => 1 - Math.pow(1 - t, 4);
 const easeInOut = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
@@ -97,8 +106,13 @@ export function ParticleEclipse({ className, open = false }: { className?: strin
 
     const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     const small = window.matchMedia('(max-width: 767px)').matches;
-    const points = makePoints(small ? 2200 : 5200);
-    const colors = Array.from({ length: TONES }, (_, tone) => toneColor(tone));
+    const points = makePoints(small ? 1400 : 5200);
+    const palette = (boost: number) =>
+      Array.from({ length: TONES * LEVELS }, (_, key) => toneColor(Math.floor(key / LEVELS), Math.min(1, levelAlpha(key % LEVELS) * boost)));
+    let colors = palette(1);
+    let colorsBoost = 1;
+    const xs = new Float32Array(points.length);
+    const ys = new Float32Array(points.length);
     const threads: [number, number][] = [];
     for (let i = 0; i < (small ? 40 : 90); i++) {
       const a = Math.floor(Math.random() * points.length);
@@ -119,7 +133,7 @@ export function ParticleEclipse({ className, open = false }: { className?: strin
     let width = 0;
     let height = 0;
     const resize = () => {
-      const ratio = Math.min(window.devicePixelRatio || 1, 2);
+      const ratio = Math.min(window.devicePixelRatio || 1, small ? 1.5 : 2);
       const box = canvas.getBoundingClientRect();
       width = box.width;
       height = box.height;
@@ -148,11 +162,30 @@ export function ParticleEclipse({ className, open = false }: { className?: strin
     let running = true;
     let visible = true;
     let last = start;
+    // Frame-time budget: measured over the first frames, then fixed.
+    let stride = 1;
+    let still = false; // the slowest phones: no continuous turning
+    let sampled = 0;
+    let sampledTime = 0;
 
     const draw = (now: number) => {
       frame = 0;
       const step = Math.min(64, now - last);
       last = now;
+      // Between 0.6 s and 2.1 s after start, measure; slow → lighter (twice at most).
+      const age = now - start;
+      if (!reduced && age > 600 && stride < 3) {
+        sampled++;
+        sampledTime += step;
+        if (age > 600 + 1500 * stride && sampled >= 6) {
+          if (sampledTime / sampled > 28) {
+            if (stride === 2) still = true;
+            stride++;
+          }
+          sampled = 0;
+          sampledTime = 0;
+        }
+      }
       const elapsed = reduced ? GATHER_MS * 2 : now - start;
       const turn = reduced ? 0 : elapsed * 0.000018;
 
@@ -166,11 +199,7 @@ export function ParticleEclipse({ className, open = false }: { className?: strin
       const spread = 1 + o * 0.22; // the corona widens as it opens
 
       context.clearRect(0, 0, width, height);
-      context.globalCompositeOperation = 'lighter';
-
-      const xs = new Float32Array(points.length);
-      const ys = new Float32Array(points.length);
-      for (let i = 0; i < points.length; i++) {
+      for (let i = 0; i < points.length; i += stride) {
         const point = points[i]!;
         const t = easeOut(Math.min(1, Math.max(0, (elapsed / GATHER_MS - point.delay) / (1 - point.delay))));
         const angle = point.angle + turn * (1.4 - point.radius * 0.4);
@@ -206,21 +235,28 @@ export function ParticleEclipse({ className, open = false }: { className?: strin
         context.globalAlpha = threadAlpha;
         context.beginPath();
         for (const [a, b] of threads) {
+          // In the lighter mode only computed points have a position.
+          if (a % stride || b % stride) continue;
           context.moveTo(xs[a]!, ys[a]!);
           context.lineTo(xs[b]!, ys[b]!);
         }
         context.stroke();
       }
 
-      const boost = 1 + o * 0.35;
+      const boost = Math.round((1 + o * 0.35) * 20) / 20;
+      if (boost !== colorsBoost) {
+        colors = palette(boost);
+        colorsBoost = boost;
+      }
+      context.globalAlpha = 1;
       let current = -1;
-      for (let i = 0; i < points.length; i++) {
+      for (let i = 0; i < points.length; i += stride) {
         const point = points[i]!;
-        if (point.tone !== current) {
-          current = point.tone;
+        const key = point.tone * LEVELS + point.level;
+        if (key !== current) {
+          current = key;
           context.fillStyle = colors[current]!;
         }
-        context.globalAlpha = Math.min(1, point.alpha * boost);
         context.fillRect(xs[i]! - point.size / 2, ys[i]! - point.size / 2, point.size, point.size);
       }
 
@@ -245,8 +281,10 @@ export function ParticleEclipse({ className, open = false }: { className?: strin
       context.arc(cx - disc * (0.035 + o * 2.6), cy + disc * (0.035 + o * 1.7), disc * (0.985 - o * 0.12), 0, Math.PI * 2);
       context.fill();
 
-      // The corona keeps turning, so the loop runs while the hero is on screen.
-      if (!reduced && running && visible) frame = requestAnimationFrame(draw);
+      // The corona keeps turning, so the loop runs while the hero is on screen
+      // (on the slowest phones only while the eclipse opens or closes).
+      const settling = Math.abs(target - opening) > 0.002 || now - start < GATHER_MS * 1.6;
+      if (!reduced && running && visible && (!still || settling)) frame = requestAnimationFrame(draw);
     };
 
     const wake = () => {
