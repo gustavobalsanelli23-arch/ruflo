@@ -1,949 +1,354 @@
 /*
- * Landing hero: full-viewport, always dark ("midnight"), sharp corners, with
- * the SOLUS eclipse behind. Entrance animations use fill-mode backwards so the
- * resting state is the normal layout; reduced motion turns them all off.
+ * Public hero. Always black, in both themes: white type, hairline-free
+ * flat controls with square corners, and the spectrum only in the headline
+ * and the particle eclipse.
  */
 
 .hero {
-  --ease: cubic-bezier(0.16, 1, 0.3, 1);
-  --text: #f2f5f8;
-  --muted: #8a97a5;
-  --soft: #c6cfd8;
-  --brand: #7fb6e6;
-  --brand-pale: #d3e7f8;
-  --btn: #2a6fb8;
-  --btn-icon: #1f5a99;
-  --btn-wipe: #235f9e;
-  --glass: rgb(255 255 255 / 0.06);
-  --glass-border: rgb(255 255 255 / 0.09);
-  --pad-x: clamp(20px, 3.52vw, 64px);
-  --nav-top: clamp(16px, 2.05vw, 28px);
-
+  --ink: #ffffff;
+  --ink-muted: #a1a1a1;
   position: relative;
   isolation: isolate;
   display: flex;
+  min-height: 100svh;
   flex-direction: column;
-  min-height: 100vh;
-  min-height: 100dvh;
   overflow: hidden;
-  padding: var(--nav-top) var(--pad-x) clamp(28px, 4.9vw, 48px);
-  background: #070c12;
-  color: var(--text);
-}
-
-/* ---------- Background: night sky and the eclipse ---------- */
-
-.sky {
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  pointer-events: none;
-  background:
-    radial-gradient(1px 1px at 12% 18%, rgb(255 255 255 / 0.5), transparent 60%),
-    radial-gradient(1px 1px at 27% 64%, rgb(255 255 255 / 0.3), transparent 60%),
-    radial-gradient(1px 1px at 41% 9%, rgb(255 255 255 / 0.35), transparent 60%),
-    radial-gradient(1px 1px at 58% 82%, rgb(255 255 255 / 0.25), transparent 60%),
-    radial-gradient(1px 1px at 69% 14%, rgb(255 255 255 / 0.4), transparent 60%),
-    radial-gradient(1px 1px at 86% 71%, rgb(255 255 255 / 0.3), transparent 60%),
-    radial-gradient(1.5px 1.5px at 93% 26%, rgb(255 255 255 / 0.45), transparent 60%),
-    radial-gradient(1px 1px at 6% 88%, rgb(255 255 255 / 0.25), transparent 60%),
-    radial-gradient(120% 90% at 78% 45%, #13202e 0%, #0b131c 45%, #070c12 75%);
-}
-
-.eclipse {
-  position: absolute;
-  z-index: 0;
-  top: 50%;
-  right: -7vw;
-  width: min(86vh, 58vw);
-  aspect-ratio: 1;
-  transform: translateY(-50%);
-  pointer-events: none;
-  color: var(--brand);
-  animation: eclipse-in 1.6s var(--ease) 0.1s backwards;
-}
-
-/*
- * Total eclipse (eclipse-corona.tsx). Layers, bottom to top: the streamers
- * and their mirrored echo turning slowly in opposite directions, the static
- * glow with the prominences, the Moon, a flicker running round the limb and
- * the diamond ring. The Moon radius is 12% of the box (MOON in the TSX).
- */
-.coronaSpin,
-.coronaCanvas {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-}
-
-.coronaSpin {
-  will-change: transform;
-  animation:
-    corona-in 2.4s var(--ease) 1.1s backwards,
-    spin 420s linear infinite;
-}
-
-.coronaEcho {
-  opacity: 0.45;
-  animation:
-    corona-in 2.4s var(--ease) 1.3s backwards,
-    spin 300s linear infinite reverse;
-}
-
-.coronaGlow {
-  mix-blend-mode: screen;
-  animation:
-    corona-in 2s var(--ease) 0.9s backwards,
-    corona-breathe 8s ease-in-out 3s infinite alternate;
-}
-
-.moon {
-  position: absolute;
-  inset: 38%;
-  border-radius: 50%;
-  /* A whisper of earthshine, never brighter than the sky behind the text. */
-  background: radial-gradient(circle at 38% 36%, #0d141d 0%, #070b10 55%, #04070a 100%);
-  box-shadow: inset 0 0 18px rgb(0 0 0 / 0.8);
-  animation: moon-in 2.2s var(--ease) 0.1s backwards;
-}
-
-/* Light trembling along the limb: a short bright arc that keeps circling. */
-.limb {
-  position: absolute;
-  inset: 0;
-  border-radius: 50%;
-  background: conic-gradient(
-    from 0deg,
-    rgb(255 255 255 / 0) 0deg,
-    rgb(255 255 255 / 0) 230deg,
-    rgb(255 214 226 / 0.35) 320deg,
-    rgb(255 255 255 / 0.85) 355deg,
-    rgb(255 255 255 / 0) 360deg
-  );
-  -webkit-mask-image: radial-gradient(closest-side, transparent 22.9%, #000 23.9%, #000 24.5%, transparent 26.4%);
-  mask-image: radial-gradient(closest-side, transparent 22.9%, #000 23.9%, #000 24.5%, transparent 26.4%);
-  mix-blend-mode: screen;
-  filter: blur(1px);
-  will-change: transform;
-  animation:
-    corona-in 1.6s var(--ease) 2s backwards,
-    spin 14s linear infinite;
-}
-
-/* The diamond ring: the last bead of sunlight on the lower-right limb. */
-.diamond {
-  position: absolute;
-  left: 58.8%;
-  top: 58.2%;
-  width: 0;
-  height: 0;
-  animation: diamond-flash 2.6s var(--ease) 1.6s backwards;
-}
-
-.diamond::before,
-.diamond::after {
-  content: "";
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  translate: -50% -50%;
-  pointer-events: none;
-}
-
-.diamond::before {
-  width: clamp(48px, 7vw, 120px);
-  aspect-ratio: 1;
-  border-radius: 50%;
-  background: radial-gradient(circle, #fff 0%, #fff 4%, rgb(236 245 255 / 0.55) 9%, rgb(200 224 252 / 0.22) 20%, rgb(160 200 245 / 0.07) 36%, transparent 58%);
-  animation: diamond-pulse 5s ease-in-out 4s infinite alternate;
-}
-
-/* Lens flare: long thin streaks, the way a camera sees it. */
-.diamond::after {
-  width: clamp(160px, 26vw, 420px);
-  height: clamp(160px, 26vw, 420px);
-  background:
-    linear-gradient(90deg, transparent, rgb(235 244 255 / 0.4) 50%, transparent) center / 100% 1px no-repeat,
-    linear-gradient(180deg, transparent, rgb(235 244 255 / 0.25) 50%, transparent) center / 1px 34% no-repeat;
-  rotate: -18deg;
-  opacity: 0.8;
-  animation: diamond-pulse 5s ease-in-out 4s infinite alternate;
-}
-
-/* Keeps the text side readable over the glow. */
-.scrim {
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  pointer-events: none;
-  background: linear-gradient(90deg, rgb(7 12 18 / 0.85) 0%, rgb(7 12 18 / 0.35) 45%, transparent 70%);
+  background: #000000;
+  color: var(--ink);
+  color-scheme: dark;
 }
 
 /* ---------- Nav ---------- */
 
-.nav,
-.main,
-.lede,
-.mobileMenu {
+.nav {
   position: relative;
-  z-index: 1;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+  padding: 1.5rem clamp(1.25rem, 3.6vw, 3rem);
 }
 
-.nav {
-  display: grid;
-  grid-template-columns: 1fr auto 1fr;
+.wordmark {
+  display: inline-flex;
   align-items: center;
-  gap: 16px;
+  gap: 0.6rem;
+  font-size: 1.375rem;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  color: var(--ink);
+  outline: none;
+}
+
+.mark {
+  width: 1.5rem;
+  height: 1.5rem;
+  color: var(--ink);
 }
 
 .links {
-  justify-self: start;
-  display: flex;
-  gap: clamp(22px, 2.6vw, 32px);
-  padding: 18px 30px;
-  border-radius: 999px;
-  background: var(--glass);
-  border: 1px solid var(--glass-border);
-  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.06);
-  -webkit-backdrop-filter: blur(18px);
-  backdrop-filter: blur(18px);
+  display: none;
+  margin-left: auto;
+  gap: 1.75rem;
 }
 
 .link {
-  position: relative;
-  display: inline-block;
-  padding-bottom: 2px;
-  color: var(--soft);
-  font-size: clamp(13px, 1.37vw, 15px);
+  font-size: 0.875rem;
   font-weight: 500;
-  letter-spacing: -0.01em;
-  line-height: 1;
-  white-space: nowrap;
+  color: var(--ink);
   outline: none;
-  transition:
-    color 0.22s var(--ease),
-    transform 0.22s var(--ease);
-  animation: link-in 0.55s var(--ease) var(--d, 0s) backwards;
-}
-
-.link::after {
-  content: '';
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: -6px;
-  height: 2px;
-  border-radius: 2px;
-  background: var(--brand);
-  transform: scaleX(0);
-  transform-origin: left;
-  transition: transform 0.28s var(--ease);
+  text-underline-offset: 6px;
 }
 
 .link:hover,
 .link:focus-visible {
-  color: var(--brand);
-  transform: translateY(-2px);
-}
-
-.link:hover::after,
-.link:focus-visible::after {
-  transform: scaleX(1);
-}
-
-.logo {
-  justify-self: center;
-  display: inline-flex;
-  outline: none;
-  transition: transform 0.35s var(--ease);
-  animation: mark-in 0.6s var(--ease) 0.04s backwards;
-}
-
-.logo:hover {
-  transform: scale(1.06);
-}
-
-.logo:focus-visible,
-.burger:focus-visible,
-.btn:focus-visible,
-.mobileLinks a:focus-visible {
-  outline: 2px solid var(--brand);
-  outline-offset: 3px;
+  text-decoration: underline;
 }
 
 .end {
-  justify-self: end;
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 0.75rem;
+  margin-left: auto;
 }
 
-.endFade {
-  animation: link-in 0.5s var(--ease) 0.16s backwards;
+.toggle {
+  display: inline-flex;
 }
+
+/* The shared theme toggle, squared and white like the reference controls. */
+.toggle :global(button) {
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 0;
+  background: var(--ink);
+  color: #000000;
+}
+
+.toggle :global(button):hover {
+  background: #d9d9d9;
+  color: #000000;
+}
+
+@media (min-width: 1024px) {
+  .links {
+    display: flex;
+  }
+
+  .end {
+    margin-left: 1rem;
+  }
+}
+
+/* ---------- Buttons ---------- */
+
+.btn {
+  display: inline-flex;
+  height: 2.25rem;
+  align-items: center;
+  justify-content: center;
+  padding: 0 0.9rem;
+  border: 1px solid var(--ink);
+  font-size: 0.875rem;
+  font-weight: 600;
+  white-space: nowrap;
+  outline: none;
+  transition:
+    background-color 0.15s ease,
+    color 0.15s ease;
+}
+
+.btnSolid {
+  background: var(--ink);
+  color: #000000;
+}
+
+.btnSolid:hover {
+  background: transparent;
+  color: var(--ink);
+}
+
+.btnOutline {
+  background: transparent;
+  color: var(--ink);
+}
+
+.btnOutline:hover {
+  background: var(--ink);
+  color: #000000;
+}
+
+.btnLarge {
+  height: 3rem;
+  padding: 0 1.4rem;
+  font-size: 1rem;
+}
+
+.btn:focus-visible,
+.wordmark:focus-visible,
+.link:focus-visible,
+.burger:focus-visible,
+.mobileLinks a:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 3px;
+}
+
+.btn:active {
+  transform: translateY(1px);
+}
+
+.hideSmall {
+  display: none;
+}
+
+@media (min-width: 640px) {
+  .hideSmall {
+    display: inline-flex;
+  }
+}
+
+/* ---------- Mobile menu ---------- */
 
 .burger {
-  display: none;
-  width: 36px;
-  height: 36px;
+  display: inline-flex;
+  width: 2.25rem;
+  height: 2.25rem;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 5px;
-  transition: transform 0.22s var(--ease);
-  animation: link-in 0.5s var(--ease) 0.16s backwards;
+  gap: 6px;
+  border: 1px solid var(--ink);
+  background: transparent;
 }
 
 .burger span {
   display: block;
-  width: 18px;
+  width: 16px;
   height: 1.5px;
-  background: var(--text);
-  transition:
-    width 0.22s var(--ease),
-    background-color 0.22s var(--ease);
+  background: var(--ink);
+  transition: transform 0.2s ease;
 }
 
-.burger:hover {
-  transform: scale(1.08);
+.burger[aria-expanded="true"] span:first-child {
+  transform: translateY(3.75px) rotate(45deg);
 }
 
-.burger:hover span {
-  background: var(--brand);
+.burger[aria-expanded="true"] span:last-child {
+  transform: translateY(-3.75px) rotate(-45deg);
 }
 
-.burger:hover span:first-child,
-.burger:hover span:last-child {
-  width: 14px;
+@media (min-width: 1024px) {
+  .burger {
+    display: none;
+  }
 }
 
 .mobileMenu {
-  display: none;
-  flex-direction: column;
-  gap: 1.25rem;
-  padding: 1.25rem 0 0.5rem;
+  position: absolute;
+  inset: 5.25rem 0 auto;
+  z-index: 4;
+  border-top: 1px solid rgb(255 255 255 / 0.14);
+  border-bottom: 1px solid rgb(255 255 255 / 0.14);
+  background: #000000;
 }
 
 .mobileMenu[hidden] {
-  display: none !important;
+  display: none;
 }
 
 .mobileLinks {
   display: flex;
   flex-direction: column;
-  gap: 0.9rem;
-  padding: 18px 22px;
-  border-radius: 22px;
-  background: var(--glass);
-  border: 1px solid var(--glass-border);
-  -webkit-backdrop-filter: blur(18px);
-  backdrop-filter: blur(18px);
+  padding: 0.5rem clamp(1.25rem, 3.6vw, 3rem);
 }
 
 .mobileLinks a {
-  color: var(--text);
-  font-size: 1.05rem;
-  font-weight: 500;
+  padding: 0.9rem 0;
+  border-bottom: 1px solid rgb(255 255 255 / 0.1);
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--ink);
 }
 
-/* ---------- Buttons ---------- */
-
-/*
- * Premium pills: an inner top highlight, a streak of light running round the
- * border (the same light as the eclipse rim), a sheen that crosses the face
- * every few seconds, and a lift with a brighter glow on hover.
- */
-@property --flow-angle {
-  syntax: '<angle>';
-  initial-value: 0deg;
-  inherits: false;
+.mobileLinks a:last-child {
+  border-bottom: 0;
 }
 
-.btn {
-  --ring: rgb(255 255 255 / 0.95);
-  --ring-base: rgb(255 255 255 / 0.14);
-  --sheen: rgb(255 255 255 / 0.45);
-  --glow: rgb(127 182 230 / 0.3);
-  --glow-hover: rgb(127 182 230 / 0.5);
+/* ---------- Particle eclipse ---------- */
 
-  position: relative;
-  isolation: isolate;
-  display: inline-flex;
-  align-items: center;
-  justify-content: space-between;
-  height: 56px;
-  gap: 16px;
-  padding: 8px 8px 8px 24px;
-  overflow: hidden;
-  border-radius: 999px;
-  font-size: 16px;
-  font-weight: 500;
-  letter-spacing: -0.015em;
-  line-height: 1;
-  white-space: nowrap;
-  box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 0.35),
-    0 10px 30px -10px var(--glow);
-  transition:
-    transform 0.35s var(--ease),
-    box-shadow 0.35s var(--ease);
-}
-
-/* Border: a faint ring with a bright streak flowing round it. */
-.btn::before {
-  content: '';
+.cloud {
   position: absolute;
-  inset: 0;
-  z-index: 2;
-  padding: 1.5px;
-  border-radius: inherit;
-  background: conic-gradient(
-    from var(--flow-angle),
-    var(--ring-base) 0deg,
-    var(--ring-base) 250deg,
-    var(--ring) 320deg,
-    var(--ring-base) 360deg
-  );
-  -webkit-mask:
-    linear-gradient(#000 0 0) content-box,
-    linear-gradient(#000 0 0);
-  -webkit-mask-composite: xor;
-  mask:
-    linear-gradient(#000 0 0) content-box exclude,
-    linear-gradient(#000 0 0);
-  pointer-events: none;
-  animation: border-flow 4.5s linear infinite;
-}
-
-/* Sheen: a soft band of light crossing the face, then a pause. */
-.btn::after {
-  content: '';
-  position: absolute;
-  inset: 0;
   z-index: 1;
-  border-radius: inherit;
-  background: linear-gradient(105deg, transparent 38%, var(--sheen) 50%, transparent 62%) no-repeat;
-  background-size: 250% 100%;
-  background-position: 160% 0;
+  inset: 3rem -30% auto;
+  height: 56svh;
   pointer-events: none;
-  animation: sheen 5.5s var(--ease) 1.6s infinite;
+  /* On phones the corona sits behind the headline: a backdrop, not a picture. */
+  opacity: 0.5;
 }
 
-.btn:hover {
-  transform: translateY(-2px);
-  box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 0.45),
-    0 18px 40px -12px var(--glow-hover);
+.canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
 }
 
-.btn:hover::before {
-  animation-duration: 2.2s;
+@media (min-width: 1024px) {
+  .cloud {
+    inset: 0 -6% 0 42%;
+    height: auto;
+    opacity: 1;
+  }
 }
 
-.btn:active {
-  transform: translateY(0) scale(0.98);
-}
-
-.btnLabel,
-.btnIcon {
-  position: relative;
-  z-index: 3;
-}
-
-.btnIcon {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.3);
-  transition:
-    transform 0.35s var(--ease),
-    background-color 0.3s var(--ease),
-    color 0.3s var(--ease);
-}
-
-.btnIcon svg {
-  width: 15px;
-  height: 15px;
-  transition: transform 0.35s var(--ease);
-}
-
-.btn:hover .btnIcon svg {
-  transform: translateX(2px);
-}
-
-.btnNav {
-  height: 48px;
-  gap: 12px;
-  padding: 6px 6px 6px 20px;
-  font-size: 15px;
-  background: linear-gradient(180deg, #3f87d1 0%, var(--btn) 100%);
-  color: #fff;
-  --glow: rgb(42 111 184 / 0.45);
-  --glow-hover: rgb(63 135 209 / 0.65);
-  --ring-base: rgb(255 255 255 / 0.18);
-  animation: wipe-right 0.65s var(--ease) 0.16s backwards;
-}
-
-.btnNav .btnIcon {
-  width: 36px;
-  height: 36px;
-  background: rgb(255 255 255 / 0.16);
-  color: #fff;
-}
-
-.btnNav:hover .btnIcon {
-  background: #fff;
-  color: var(--btn);
-}
-
-.btnLight {
-  background: linear-gradient(180deg, #ffffff 0%, #e3eef9 100%);
-  color: #1f5a99;
-  --ring: rgb(42 111 184 / 0.9);
-  --ring-base: rgb(42 111 184 / 0.12);
-  --sheen: rgb(255 255 255 / 0.95);
-  --glow: rgb(127 182 230 / 0.4);
-  --glow-hover: rgb(127 182 230 / 0.7);
-}
-
-.btnLight .btnIcon {
-  background: linear-gradient(180deg, #3f87d1 0%, var(--btn) 100%);
-  color: #fff;
-}
-
-.btnGhost {
-  justify-content: center;
-  padding: 8px 28px;
-  color: var(--text);
-  background: rgb(255 255 255 / 0.06);
-  -webkit-backdrop-filter: blur(24px);
-  backdrop-filter: blur(24px);
-  --ring: rgb(127 182 230 / 0.95);
-  --ring-base: rgb(255 255 255 / 0.16);
-  --sheen: rgb(255 255 255 / 0.12);
-  --glow: rgb(0 0 0 / 0);
-  --glow-hover: rgb(127 182 230 / 0.3);
-}
-
-.btnGhost:hover {
-  background: rgb(255 255 255 / 0.1);
-}
-
-/* ---------- Hero copy ---------- */
+/* ---------- Headline ---------- */
 
 .main {
-  margin-top: clamp(52px, 10.15vh, 92px);
-}
-
-.badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  height: clamp(34px, 3.6vw, 42px);
-  padding: 0 18px 0 14px;
-  border-radius: 999px;
-  color: var(--soft);
-  background: rgb(255 255 255 / 0.05);
-  border: 1px solid rgb(127 182 230 / 0.28);
-  -webkit-backdrop-filter: blur(18px);
-  backdrop-filter: blur(18px);
-  font-size: clamp(13px, 1.35vw, 15px);
-  font-weight: 500;
-  letter-spacing: -0.01em;
-}
-
-.badgeMark {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: var(--brand);
-  box-shadow: 0 0 0 0 rgb(127 182 230 / 0.6);
-  animation: dot-pulse 2.4s ease-out 1s infinite;
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 0 clamp(1.25rem, 3.6vw, 3rem) clamp(2rem, 6vh, 4rem);
 }
 
 .headline {
-  margin-top: clamp(22px, 2.8vw, 36px);
-  max-width: 15.5em;
-  color: var(--text);
-  font-size: calc(clamp(2.9rem, 5.9vw, 5rem) + 3px);
-  font-weight: 600;
-  line-height: 1.14;
-  letter-spacing: -0.038em;
-}
-
-.mask {
-  display: block;
-  overflow: hidden;
-  /* Room for descenders inside the mask. */
-  padding-bottom: 0.06em;
-}
-
-.rise {
-  display: block;
-  animation: type-rise 0.85s var(--ease) var(--d, 0s) backwards;
-}
-
-.muted {
-  color: var(--muted);
+  max-width: 13ch;
+  margin: 0;
+  font-size: clamp(2.75rem, min(7vw, 11.5vh), 7.25rem);
+  font-weight: 700;
+  line-height: 0.92;
+  letter-spacing: -0.055em;
+  text-wrap: balance;
 }
 
 /*
- * Glass lettering: a translucent fill that is brighter at the top, a hairline
- * of light on the edges, depth below, and a reflection that crosses the
- * words now and then. Where the headline passes over the corona, its light
- * shows through the letters.
+ * The spectrum is painted on each line, not on the block: Safari does not
+ * clip a parent's background to text inside animated (composited) children.
+ * Every line spans the full width of the headline, so all of them start in
+ * red and run the same spectrum.
  */
-.glass {
-  --glass-fill: linear-gradient(180deg, rgb(255 255 255 / 0.98) 0%, rgb(240 246 252 / 0.78) 38%, rgb(214 230 248 / 0.5) 72%, rgb(190 214 242 / 0.62) 100%);
-  --glass-edge: rgb(255 255 255 / 0.4);
-  color: transparent;
-  background-image:
-    linear-gradient(105deg, transparent 38%, rgb(255 255 255 / 0.95) 50%, transparent 62%),
-    var(--glass-fill);
-  background-size:
-    260% 100%,
-    100% 100%;
-  background-position:
-    160% 0,
-    0 0;
-  background-repeat: no-repeat;
+.line {
+  display: block;
+  padding-bottom: 0.04em;
+  background-image: linear-gradient(90deg, #ff5a4e 0%, #ff9a3c 16%, #f5d63d 30%, #74dd6a 44%, #3cd3c8 58%, #4f8dff 74%, #9b6bff 88%, #ef6bd0 100%);
   -webkit-background-clip: text;
   background-clip: text;
-  -webkit-text-stroke: 1px var(--glass-edge);
-  filter: drop-shadow(0 6px 14px rgb(0 0 0 / 0.38));
-  animation: glass-sheen 8s ease-in-out 2.2s infinite;
-}
-
-.glassMuted {
-  --glass-fill: linear-gradient(180deg, rgb(178 192 207 / 0.9) 0%, rgb(138 151 165 / 0.72) 55%, rgb(120 134 150 / 0.5) 100%);
-  --glass-edge: rgb(255 255 255 / 0.22);
-  animation-delay: 2.5s;
-}
-
-.accent {
-  position: relative;
-  display: inline-block;
-  color: var(--muted);
-  /* Glow on the word itself (a filter on the masked layer would show the mask's box). */
-  filter: drop-shadow(0 0 12px rgb(127 182 230 / 0.28));
-}
-
-.accent::before,
-.accent::after {
-  content: attr(data-text);
-  position: absolute;
-  inset: 0;
-  white-space: nowrap;
-  -webkit-mask-image: linear-gradient(90deg, #000 0%, #000 calc(100% - 72px), transparent 100%);
-  mask-image: linear-gradient(90deg, #000 0%, #000 calc(100% - 72px), transparent 100%);
-  -webkit-mask-repeat: no-repeat;
-  mask-repeat: no-repeat;
-  -webkit-mask-size: 0% 100%;
-  mask-size: 0% 100%;
-}
-
-.accent::before {
-  color: var(--brand-pale);
-  animation: accent-fill 1.05s cubic-bezier(0.4, 0, 0.2, 1) 0.7s forwards;
-}
-
-.accent::after {
-  /* The final pass is blue glass, nearly opaque so the passes below stay hidden. */
   color: transparent;
-  background-image:
-    linear-gradient(105deg, transparent 38%, rgb(255 255 255 / 0.9) 50%, transparent 62%),
-    linear-gradient(180deg, #e2f0fc 0%, #9cc8ee 45%, #6fa9de 100%);
-  background-size:
-    260% 100%,
-    100% 100%;
-  background-position:
-    160% 0,
-    0 0;
-  background-repeat: no-repeat;
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-stroke: 1px rgb(226 240 252 / 0.45);
-  animation:
-    accent-fill 1.05s cubic-bezier(0.4, 0, 0.2, 1) 1.08s forwards,
-    glass-sheen 8s ease-in-out 2.9s infinite;
+  animation: rise 1s var(--ease-out-quint) both;
+}
+
+.line:nth-child(2) {
+  animation-delay: 0.08s;
+}
+
+.line:nth-child(3) {
+  animation-delay: 0.16s;
+}
+
+.line:nth-child(4) {
+  animation-delay: 0.24s;
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(0.25em);
+  }
+}
+
+.below {
+  display: grid;
+  gap: 1.25rem;
+  margin-top: clamp(1.75rem, 4vh, 2.75rem);
+  padding-top: 1.25rem;
+  border-top: 1px solid rgb(255 255 255 / 0.18);
+  max-width: 40rem;
+}
+
+.lede {
+  margin: 0;
+  max-width: 34rem;
+  font-size: 1.0625rem;
+  line-height: 1.6;
+  color: var(--ink);
 }
 
 .actions {
   display: flex;
   flex-wrap: wrap;
-  gap: 12px;
-  margin-top: clamp(28px, 3.4vw, 42px);
-}
-
-.wipe {
-  animation: wipe-left 0.7s var(--ease) var(--d, 0s) backwards;
+  gap: 0.75rem;
 }
 
 .note {
-  margin-top: 16px;
-  color: var(--muted);
-  font-size: 14px;
+  margin: 0;
+  font-size: 0.8125rem;
+  color: var(--ink-muted);
 }
 
-.lede {
-  margin-top: auto;
-  padding-top: 48px;
-  max-width: 700px;
-  overflow: hidden;
-  color: #fff;
-  font-size: clamp(17px, 1.8vw, 20px);
-  font-weight: 300;
-  line-height: 1.5;
-  letter-spacing: -0.01em;
-}
-
-/* ---------- Keyframes ---------- */
-
-@keyframes link-in {
-  from {
-    opacity: 0;
-    transform: translate3d(-16px, 0, 0);
-  }
-}
-
-@keyframes mark-in {
-  from {
-    opacity: 0;
-    transform: translate3d(-12px, 8px, 0);
-  }
-}
-
-@keyframes wipe-right {
-  from {
-    clip-path: inset(0 0 0 100% round 999px);
-  }
-  to {
-    clip-path: inset(0 0 0 0 round 999px);
-  }
-}
-
-@keyframes wipe-left {
-  from {
-    clip-path: inset(0 100% 0 0 round 999px);
-  }
-  to {
-    clip-path: inset(0 0 0 0 round 999px);
-  }
-}
-
-@keyframes dot-pulse {
-  0% {
-    box-shadow: 0 0 0 0 rgb(127 182 230 / 0.6);
-  }
-  70%,
-  100% {
-    box-shadow: 0 0 0 8px rgb(127 182 230 / 0);
-  }
-}
-
-@keyframes border-flow {
-  to {
-    --flow-angle: 360deg;
-  }
-}
-
-@keyframes sheen {
-  0% {
-    background-position: 160% 0;
-  }
-  45%,
-  100% {
-    background-position: -60% 0;
-  }
-}
-
-@keyframes glass-sheen {
-  0% {
-    background-position:
-      160% 0,
-      0 0;
-  }
-  28%,
-  100% {
-    background-position:
-      -60% 0,
-      0 0;
-  }
-}
-
-@keyframes type-rise {
-  from {
-    transform: translate3d(0, 118%, 0);
-  }
-}
-
-@keyframes accent-fill {
-  to {
-    -webkit-mask-size: calc(100% + 72px) 100%;
-    mask-size: calc(100% + 72px) 100%;
-  }
-}
-
-@keyframes eclipse-in {
-  from {
-    opacity: 0;
-    transform: translateY(-50%) scale(0.94);
-  }
-}
-
-@keyframes spin {
-  to {
-    transform: rotate(1turn);
-  }
-}
-
-@keyframes corona-breathe {
-  from {
-    opacity: 0.82;
-    transform: scale(0.985);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1.02);
-  }
-}
-
-@keyframes corona-in {
-  from {
-    opacity: 0;
-  }
-}
-
-/* The Moon slides the last stretch onto the Sun: totality. */
-@keyframes moon-in {
-  from {
-    translate: 7% -5%;
-  }
-}
-
-@keyframes diamond-flash {
-  0% {
-    opacity: 0;
-    scale: 0.2;
-  }
-  35% {
-    opacity: 1;
-    scale: 1.8;
-  }
-}
-
-@keyframes diamond-pulse {
-  from {
-    opacity: 0.7;
-    scale: 0.92;
-  }
-  to {
-    opacity: 1;
-    scale: 1.06;
-  }
-}
-
-/* ---------- Responsive ---------- */
-
-@media (max-width: 820px) {
-  .hero {
-    min-height: 0;
-  }
-
-  .links,
-  .btnNav {
-    display: none;
-  }
-
-  .nav {
-    grid-template-columns: auto 1fr auto;
-  }
-
-  .logo {
-    justify-self: start;
-  }
-
-  .burger {
-    display: inline-flex;
-  }
-
-  .mobileMenu {
-    display: flex;
-  }
-
-  .main {
-    margin-top: 48px;
-  }
-
-  .headline {
-    font-size: calc(clamp(2.5rem, 10vw, 3.85rem) + 3px);
-  }
-
-  .lede {
-    width: 100%;
-    margin-top: 64px;
-  }
-
-  .eclipse {
-    top: -6%;
-    right: -38%;
-    width: 118vw;
-    transform: none;
-  }
-
-  @keyframes eclipse-in {
-    from {
-      opacity: 0;
-    }
-  }
-
-  .scrim {
-    background: linear-gradient(180deg, transparent 0%, rgb(7 12 18 / 0.45) 40%, rgb(7 12 18 / 0.85) 75%);
-  }
-}
-
-@media (max-width: 480px) {
-  .actions .btn {
-    width: 100%;
-  }
-}
-
-@media (max-height: 700px) and (min-width: 821px) {
-  .main {
-    margin-top: 36px;
-  }
-
-  .headline {
-    font-size: calc(clamp(2.75rem, 7.2vh, 4.15rem) + 3px);
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .hero *,
-  .hero ::before,
-  .hero ::after,
-  .eclipse {
-    animation: none !important;
-    opacity: initial;
-    clip-path: none;
-  }
-
-  .accent {
-    color: var(--brand);
-  }
-
-  .accent::before,
-  .accent::after {
-    content: none;
-  }
-
-  .glass {
-    background-position:
-      -60% 0,
-      0 0;
+@media (forced-colors: active) {
+  .line {
+    background: none;
+    color: CanvasText;
   }
 }

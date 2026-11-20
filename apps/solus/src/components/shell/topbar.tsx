@@ -35,7 +35,7 @@ export function Topbar({
           aria-label="SOLUS, ir para a visão executiva"
         >
           <LogoMark className="size-6 text-brand" />
-          <span className="text-[12px] font-semibold tracking-[0.22em]" translate="no">
+          <span className="text-[17px] font-bold tracking-[-0.03em]" translate="no">
             SOLUS
           </span>
         </AppLink>
@@ -43,9 +43,9 @@ export function Topbar({
         <button
           type="button"
           onClick={onOpenCommand}
-          className="group/search hidden h-9 w-full max-w-sm items-center gap-2.5 rounded-lg border border-border bg-muted/60 px-3 text-sm text-muted-foreground shadow-[inset_0_1px_0_rgb(255_255_255/0.03)] outline-none transition-[border-color,color,box-shadow] duration-300 hover:border-brand/40 hover:text-foreground hover:shadow-[0_0_0_3px_color-mix(in_oklab,var(--brand)_12%,transparent)] focus-visible:ring-2 focus-visible:ring-ring md:flex"
+          className="group/search relative hidden h-9 w-full max-w-sm items-center gap-2.5 border border-border bg-transparent px-3 text-sm text-muted-foreground outline-none transition-colors duration-200 after:absolute after:inset-x-[-1px] after:-bottom-px after:h-0.5 after:bg-(image:--spectrum) hover:border-foreground hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring md:flex"
         >
-          <Search aria-hidden="true" className="size-4 transition-transform duration-300 group-hover/search:scale-110 group-hover/search:text-brand" />
+          <Search aria-hidden="true" className="size-4" />
           <span className="flex-1 text-left">Buscar ou ir para…</span>
           <kbd className="rounded border border-border bg-card px-1.5 font-sans text-2xs text-subtle-foreground">⌘&nbsp;K</kbd>
         </button>

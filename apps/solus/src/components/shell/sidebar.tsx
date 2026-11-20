@@ -46,22 +46,15 @@ function NavLink({ item, active, count, collapsed }: { item: NavItem; active: bo
         aria-current={active ? 'page' : undefined}
         className={cn(
           'group relative isolate flex h-9 items-center justify-center gap-3 rounded-lg px-2.5 text-sm text-sidebar-foreground outline-none',
-          'transition-colors duration-150 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground',
+          'transition-colors duration-150 hover:text-sidebar-accent-foreground',
           'focus-visible:ring-2 focus-visible:ring-sidebar-ring/70 expanded:justify-start',
-          active && 'font-medium text-sidebar-accent-foreground',
+          active && 'font-semibold text-sidebar-accent-foreground',
         )}
       >
         {active && (
           <motion.span
-            layoutId="sidebar-active"
-            className="absolute inset-0 -z-10 rounded-lg bg-sidebar-accent bg-linear-to-r from-sidebar-primary/[0.16] to-transparent shadow-[inset_0_1px_0_rgb(255_255_255/0.06),inset_0_0_0_1px_rgb(127_182_230/0.1)]"
-            transition={{ type: 'spring', stiffness: 520, damping: 42 }}
-          />
-        )}
-        {active && (
-          <motion.span
             layoutId="sidebar-marker"
-            className="absolute top-2 bottom-2 -left-3 w-0.5 rounded-r bg-sidebar-primary shadow-[0_0_10px_1px_var(--sidebar-primary)]"
+            className="absolute top-1.5 bottom-1.5 -left-3 w-[3px] bg-linear-to-b from-[#ff5a4e] via-[#f5d63d] to-[#4f8dff]"
             transition={{ type: 'spring', stiffness: 520, damping: 42 }}
           />
         )}

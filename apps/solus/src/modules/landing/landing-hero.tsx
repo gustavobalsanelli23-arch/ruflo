@@ -2,46 +2,24 @@
 
 import Link from 'next/link';
 import { useEffect, useRef, useState } from 'react';
-import { Logo } from '@/components/brand/logo';
+import { LogoMark } from '@/components/brand/logo';
 import { ThemeToggle } from '@/components/shell/theme-toggle';
-import { EclipseCorona } from './eclipse-corona';
+import { ParticleEclipse } from './particle-eclipse';
 import styles from './landing-hero.module.css';
 
 /**
- * Full-viewport hero of the public home: glass nav, badge, two-line headline
- * whose accent is painted in two passes, two calls to action and a lede at
- * the bottom, over a total solar eclipse. Always dark, in both themes.
+ * Full-viewport hero of the public home, always black: a flat nav, the
+ * headline set large in the light spectrum, and the eclipse drawn as a
+ * cloud of particles. The particles gathering into the corona is the one
+ * orchestrated moment of the page.
  */
 
 const LINKS = [
   { href: '#como-funciona', label: 'Como funciona' },
+  { href: '#o-que-voce-ve', label: 'O que você vê' },
   { href: '#para-quem', label: 'Para quem é' },
   { href: '/planos', label: 'Planos' },
-  { href: '/entrar', label: 'Entrar' },
 ];
-
-type Delay = React.CSSProperties & { '--d': string };
-const delay = (seconds: number): Delay => ({ '--d': `${seconds}s` });
-
-function Arrow() {
-  return (
-    <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <path d="M4 10h10.2M10.4 5.6 15.2 10l-4.8 4.4" />
-    </svg>
-  );
-}
-
-function SignUpButton({ variant, style }: { variant: 'nav' | 'light'; style?: React.CSSProperties }) {
-  const tone = variant === 'nav' ? styles.btnNav : `${styles.btnLight} ${styles.wipe}`;
-  return (
-    <Link href="/cadastro" className={`${styles.btn} ${tone}`} style={style}>
-      <span className={styles.btnLabel}>Criar conta grátis</span>
-      <span className={styles.btnIcon}>
-        <Arrow />
-      </span>
-    </Link>
-  );
-}
 
 export function LandingHero() {
   const [open, setOpen] = useState(false);
@@ -60,30 +38,30 @@ export function LandingHero() {
 
   return (
     <header className={styles.hero}>
-      <div className={styles.sky} aria-hidden="true" />
-      <div className={styles.eclipse} aria-hidden="true">
-        <EclipseCorona />
-      </div>
-      <div className={styles.scrim} aria-hidden="true" />
-
       <div className={styles.nav}>
+        <Link href="/" aria-label="SOLUS, início" className={styles.wordmark} translate="no">
+          <LogoMark className={styles.mark} />
+          SOLUS
+        </Link>
+
         <nav aria-label="Principal" className={styles.links}>
-          {LINKS.map((link, index) => (
-            <Link key={link.href} href={link.href} className={styles.link} style={delay(0.02 + index * 0.06)}>
+          {LINKS.map((link) => (
+            <Link key={link.href} href={link.href} className={styles.link}>
               {link.label}
             </Link>
           ))}
         </nav>
 
-        <Link href="/" aria-label="SOLUS, início" className={styles.logo}>
-          <Logo />
-        </Link>
-
         <div className={styles.end}>
-          <span className={styles.endFade}>
+          <Link href="/entrar" className={`${styles.btn} ${styles.btnOutline} ${styles.hideSmall}`}>
+            Entrar
+          </Link>
+          <Link href="/cadastro" className={`${styles.btn} ${styles.btnSolid}`}>
+            Criar conta
+          </Link>
+          <span className={styles.toggle}>
             <ThemeToggle />
           </span>
-          <SignUpButton variant="nav" />
           <button
             ref={burger}
             type="button"
@@ -95,14 +73,13 @@ export function LandingHero() {
           >
             <span />
             <span />
-            <span />
           </button>
         </div>
       </div>
 
       <div id="menu-celular" className={styles.mobileMenu} hidden={!open}>
         <nav aria-label="Principal no celular" className={styles.mobileLinks}>
-          {LINKS.map((link) => (
+          {[...LINKS, { href: '/entrar', label: 'Entrar' }].map((link) => (
             <Link key={link.href} href={link.href} onClick={() => setOpen(false)}>
               {link.label}
             </Link>
@@ -110,45 +87,34 @@ export function LandingHero() {
         </nav>
       </div>
 
-      <div className={styles.main}>
-        <p className={`${styles.badge} ${styles.wipe}`} style={delay(0.18)}>
-          <span className={styles.badgeMark} aria-hidden="true" />
-          Lucro e estoque a partir das suas planilhas
-        </p>
-
-        <h1 className={styles.headline}>
-          <span className={styles.mask}>
-            <span className={styles.rise} style={delay(0.26)}>
-              <span className={styles.glass}>Veja onde sua empresa ganha </span>
-            </span>
-          </span>
-          <span className={styles.mask}>
-            <span className={styles.rise} style={delay(0.4)}>
-              <span className={`${styles.muted} ${styles.glass} ${styles.glassMuted}`}>e onde </span>
-              <span className={styles.accent} data-text="perde dinheiro.">
-                perde dinheiro.
-              </span>
-            </span>
-          </span>
-        </h1>
-
-        <div className={styles.actions}>
-          <SignUpButton variant="light" style={delay(0.56)} />
-          <Link href="/demo/visao-geral" className={`${styles.btn} ${styles.btnGhost} ${styles.wipe}`} style={delay(0.66)}>
-            <span className={styles.btnLabel}>Ver a demonstração</span>
-          </Link>
-        </div>
-        <p className={`${styles.note} ${styles.wipe}`} style={delay(0.72)}>
-          O plano Free não pede cartão. A demonstração usa uma empresa fictícia.
-        </p>
+      <div className={styles.cloud} aria-hidden="true">
+        <ParticleEclipse className={styles.canvas} />
       </div>
 
-      <p className={styles.lede}>
-        <span className={styles.rise} style={delay(0.78)}>
-          O SOLUS lê as planilhas de vendas e estoque que você já tem e mostra lucro, estoque parado e oportunidades. Cada número vem
-          dos seus dados, nada é estimado.
-        </span>
-      </p>
+      <div className={styles.main}>
+        <h1 className={styles.headline}>
+          <span className={styles.line}>Veja onde</span>
+          <span className={styles.line}>sua empresa</span>
+          <span className={styles.line}>ganha e perde</span>
+          <span className={styles.line}>dinheiro.</span>
+        </h1>
+
+        <div className={styles.below}>
+          <p className={styles.lede}>
+            O SOLUS lê as planilhas de vendas e estoque que você já tem e mostra lucro, estoque parado e oportunidades. Cada número vem
+            dos seus dados.
+          </p>
+          <div className={styles.actions}>
+            <Link href="/cadastro" className={`${styles.btn} ${styles.btnSolid} ${styles.btnLarge}`}>
+              Criar conta grátis
+            </Link>
+            <Link href="/demo/visao-geral" className={`${styles.btn} ${styles.btnOutline} ${styles.btnLarge}`}>
+              Ver a demonstração
+            </Link>
+          </div>
+          <p className={styles.note}>O plano Free não pede cartão. A demonstração usa uma empresa fictícia.</p>
+        </div>
+      </div>
     </header>
   );
 }
