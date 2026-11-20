@@ -99,15 +99,24 @@ export async function saveAnalysisSettingsAction(_previous: FormState, formData:
     return { status: 'error', code: mapped.code, message: mapped.message, values: raw };
   }
 
-  const outcome = await runAnalysis({
-    supabase: auth.supabase,
-    organizationId: auth.workspace.active.organizationId,
-    actorId: auth.workspace.user.id,
-    trigger: 'settings',
-  });
+  // Saving is always allowed; the recalculation shares the manual run's quota,
+  // so repeated saves cannot start one full recomputation each.
+  const verdict = await consumeRateLimits([
+    { bucket: `analysis:user:${auth.workspace.user.id}`, limit: 3, windowSeconds: 10 * 60 },
+    { bucket: `analysis:org:${auth.workspace.active.organizationId}`, limit: 10, windowSeconds: 60 * 60 },
+  ]);
+  const outcome =
+    verdict === 'allowed'
+      ? await runAnalysis({
+          supabase: auth.supabase,
+          organizationId: auth.workspace.active.organizationId,
+          actorId: auth.workspace.user.id,
+          trigger: 'settings',
+        })
+      : null;
   revalidatePath('/', 'layout');
   return {
     status: 'success',
-    message: outcome.ok ? 'Parâmetros salvos e oportunidades recalculadas.' : 'Parâmetros salvos. As oportunidades serão recalculadas na próxima análise.',
+    message: outcome?.ok ? 'Parâmetros salvos e oportunidades recalculadas.' : 'Parâmetros salvos. As oportunidades serão recalculadas na próxima análise.',
   };
 }

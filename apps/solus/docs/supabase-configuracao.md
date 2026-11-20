@@ -28,7 +28,8 @@ Depois, confira em **Database → Tables** que as cinco tabelas aparecem com **R
 |---|---|
 | URL Configuration → Site URL | o domínio do app, ex.: `https://solus-psi.vercel.app` |
 | URL Configuration → Redirect URLs | `https://<domínio>/auth/confirm` e, para previews, `https://*-<time>.vercel.app/auth/confirm` |
-| Sign In / Providers → Email | habilitado, **Confirm email** ligado |
+| Sign In / Providers → Email | habilitado, **Confirm email** ligado (obrigatório: o aceite de convite prova a posse do e-mail só pela confirmação) |
+| Sign In / Providers → Email | **Secure email change** ligado |
 | Sign In / Providers → Email | **Secure password change** ligado |
 | Passwords | mínimo 8 caracteres, "letters and digits"; ligar **Leaked password protection** (plano Pro) |
 | Sessions | manter o refresh token rotation ligado (padrão) |

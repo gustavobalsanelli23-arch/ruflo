@@ -39,16 +39,61 @@ export function isBillingEnabled() {
   return getStripe() !== null && getWebhookSecret() !== null;
 }
 
+/** Statuses in which the organization keeps the plan it subscribed to. */
+export const PAID_STATUSES = new Set<Stripe.Subscription.Status>(['active', 'trialing', 'past_due']);
+
+const PLAN_RANK: Record<Exclude<PlanId, 'free'>, number> = { basic: 1, pro: 2, premium: 3 };
+
+const customerIdOf = (subscription: Stripe.Subscription) =>
+  typeof subscription.customer === 'string' ? subscription.customer : subscription.customer.id;
+
 /** The fields SOLUS keeps from a subscription, read straight from Stripe. */
-export function subscriptionState(subscription: Stripe.Subscription) {
-  const item = subscription.items.data[0];
-  const periodEnd = item?.current_period_end;
+export function subscriptionState(subscription: Stripe.Subscription, plan = planFromLookupKey(subscription.items.data[0]?.price.lookup_key)) {
+  const periodEnd = subscription.items.data[0]?.current_period_end;
   return {
-    customerId: typeof subscription.customer === 'string' ? subscription.customer : subscription.customer.id,
+    customerId: customerIdOf(subscription),
     subscriptionId: subscription.id,
     status: subscription.status,
-    plan: planFromLookupKey(item?.price.lookup_key),
+    plan,
     currentPeriodEnd: periodEnd ? new Date(periodEnd * 1000).toISOString() : null,
     cancelAtPeriodEnd: subscription.cancel_at_period_end || subscription.cancel_at !== null,
   };
+}
+
+/**
+ * The plan a subscription pays for. The lookup key says it for current
+ * prices; a price created before a price change has lost its key (it moved
+ * to the new price), so the product's `solus_plan` metadata, set by
+ * scripts/stripe-setup.mjs, still names the plan.
+ */
+async function planOf(stripe: Stripe, subscription: Stripe.Subscription, products: Map<string, string | null>) {
+  const price = subscription.items.data[0]?.price;
+  const byKey = planFromLookupKey(price?.lookup_key);
+  if (byKey || !price) return byKey;
+  const product = price.product;
+  const productId = typeof product === 'string' ? product : product.id;
+  if (!products.has(productId)) {
+    const meta = typeof product === 'string' ? (await stripe.products.retrieve(productId)).metadata : 'metadata' in product ? product.metadata : {};
+    products.set(productId, meta?.solus_plan ?? null);
+  }
+  const named = products.get(productId);
+  return named && named in PLAN_RANK ? (named as Exclude<PlanId, 'free'>) : null;
+}
+
+/**
+ * The billing state of a Stripe customer, from all of its subscriptions,
+ * not only the one an event is about. With more than one subscription
+ * (two checkouts before the first webhook) the best paid one counts, so the
+ * end of one never drops a plan the customer is still paying for.
+ */
+export async function customerBillingState(stripe: Stripe, subscription: Stripe.Subscription) {
+  const listed = await stripe.subscriptions.list({ customer: customerIdOf(subscription), status: 'all', limit: 100 });
+  const all = listed.data.some((item) => item.id === subscription.id) ? listed.data : [subscription, ...listed.data];
+  const products = new Map<string, string | null>();
+  const states = await Promise.all(all.map(async (item) => subscriptionState(item, await planOf(stripe, item, products))));
+  const paid = states.filter((state) => PAID_STATUSES.has(state.status));
+  const chosen =
+    paid.sort((a, b) => (b.plan ? PLAN_RANK[b.plan] : 0) - (a.plan ? PLAN_RANK[a.plan] : 0))[0] ??
+    states.find((state) => state.subscriptionId === subscription.id)!;
+  return { state: chosen, paidCount: paid.length };
 }

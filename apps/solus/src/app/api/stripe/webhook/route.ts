@@ -1,13 +1,14 @@
 import type Stripe from 'stripe';
-import { getStripe, getWebhookSecret, subscriptionState } from '@/lib/billing/stripe';
+import { customerBillingState, getStripe, getWebhookSecret, PAID_STATUSES } from '@/lib/billing/stripe';
 import { logServerError } from '@/lib/log';
 import { createSupabaseAdminClient } from '@/lib/supabase/admin';
 
 /**
  * Stripe webhook. The signature is checked against the raw body; then, for
- * any event about a subscription, the subscription is read again from Stripe
- * and its current state applied, so events arriving late or out of order
- * cannot leave an old state behind.
+ * any event about a subscription, the customer's subscriptions are read again
+ * from Stripe and their current state applied (the best paid one, see
+ * customerBillingState), so events arriving late, out of order or about a
+ * duplicate subscription cannot leave a wrong plan behind.
  *
  * 2xx = handled or nothing to do; 400 = not from Stripe; 500 = try again
  * (Stripe retries for up to three days).
@@ -56,7 +57,11 @@ export async function POST(request: Request) {
   if (!admin) return new Response('Banco indisponível.', { status: 500 });
 
   try {
-    const state = subscriptionState(await stripe.subscriptions.retrieve(subscriptionId));
+    const { state, paidCount } = await customerBillingState(stripe, await stripe.subscriptions.retrieve(subscriptionId));
+    if (paidCount > 1) logServerError('stripe: cliente com mais de uma assinatura paga', new Error(state.customerId));
+    // Paid but for no known plan (a price outside the setup script): never
+    // downgrade a paying customer; fail so Stripe retries once it is fixed.
+    if (PAID_STATUSES.has(state.status) && !state.plan) throw new Error(`plano não identificado: ${state.subscriptionId}`);
     const { error } = await admin.rpc('apply_subscription', {
       p_event_id: event.id,
       p_event_type: event.type,

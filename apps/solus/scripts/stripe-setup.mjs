@@ -104,7 +104,9 @@ const portal = {
       enabled: true,
       default_allowed_updates: ['price'],
       products: priceIds,
-      proration_behavior: 'create_prorations',
+      // Upgrades are invoiced and charged at once: with deferred prorations an
+      // upgrade followed by cancel-at-period-end would grant the plan unpaid.
+      proration_behavior: 'always_invoice',
     },
   },
 };

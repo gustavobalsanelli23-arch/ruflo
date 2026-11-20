@@ -20,6 +20,7 @@ import {
   renameOrganizationSchema,
   updateProfileSchema,
 } from '@/schemas/organization';
+import { closeBillingAccount } from '@/modules/billing/lifecycle';
 import { removeOrganizationFiles } from '@/services/imports';
 import { getSessionUser } from '@/services/session';
 import { ACTIVE_ORG_COOKIE, authorize, loadWorkspace, PENDING_INVITE_COOKIE } from '@/services/workspace';
@@ -118,6 +119,10 @@ export async function deleteOrganizationAction(_previous: FormState, formData: F
   // cannot reach: remove them first, as the confirmation screen promises.
   // If that fails, nothing is deleted and the owner can try again.
   const organizationId = auth.workspace.active.organizationId;
+  // Stripe first: if it fails, nothing has been deleted yet.
+  if (!(await closeBillingAccount(auth.supabase, organizationId))) {
+    return { status: 'error', code: 'unavailable', message: 'Não foi possível encerrar a assinatura. Nada foi excluído; tente de novo em instantes.' };
+  }
   if (!(await removeOrganizationFiles(auth.supabase, organizationId))) {
     return { status: 'error', code: 'unavailable', message: 'Não foi possível apagar os arquivos importados. Nada foi excluído; tente de novo em instantes.' };
   }

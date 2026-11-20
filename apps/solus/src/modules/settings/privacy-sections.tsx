@@ -73,7 +73,7 @@ export function PrivacySection() {
           <h3 className="text-sm font-semibold text-foreground">Excluir minha conta</h3>
           <p className="mt-1 text-sm text-muted-foreground">
             Apaga sua conta para sempre. Organizações em que você é a única pessoa são apagadas junto, com os dados e as planilhas
-            importadas. Nas outras, você só deixa de fazer parte. Se for o único proprietário de uma organização com outras pessoas, torne
+            importadas, e a assinatura delas é cancelada na hora. Nas outras, você só deixa de fazer parte. Se for o único proprietário de uma organização com outras pessoas, torne
             outra pessoa proprietária antes.
           </p>
         </div>

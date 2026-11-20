@@ -26,9 +26,12 @@ afterEach(() => {
   rpc.mockReset();
 });
 
-async function stubRetrieve() {
+/** Stubs the Stripe reads the webhook makes: the event's subscription and the customer's list. */
+async function stubRetrieve(list: object[] = [subscription], event: object = subscription) {
   const { getStripe } = await import('@/lib/billing/stripe');
-  return vi.spyOn(getStripe()!.subscriptions, 'retrieve').mockResolvedValue(subscription as never);
+  const stripe = getStripe()!;
+  vi.spyOn(stripe.subscriptions, 'list').mockResolvedValue({ data: list } as never);
+  return vi.spyOn(stripe.subscriptions, 'retrieve').mockResolvedValue(event as never);
 }
 
 function signed(payload: object) {
@@ -89,5 +92,78 @@ describe('webhook da Stripe', () => {
       signed({ id: 'evt_3', object: 'event', type: 'customer.subscription.deleted', data: { object: { id: 'sub_1', object: 'subscription' } } }),
     );
     expect(response.status).toBe(500);
+  });
+
+  it('depois de uma troca de preço (sem lookup key) lê o plano no produto e não rebaixa', async () => {
+    const legacy = { ...subscription, items: { data: [{ current_period_end: 1_800_000_000, price: { lookup_key: null, product: 'prod_pro' } }] } };
+    await stubRetrieve([legacy], legacy);
+    const { getStripe } = await import('@/lib/billing/stripe');
+    vi.spyOn(getStripe()!.products, 'retrieve').mockResolvedValue({ id: 'prod_pro', metadata: { solus_plan: 'pro' } } as never);
+    const { POST } = await import('@/app/api/stripe/webhook/route');
+    const response = await POST(
+      signed({ id: 'evt_4', object: 'event', type: 'customer.subscription.updated', data: { object: { id: 'sub_1', object: 'subscription' } } }),
+    );
+    expect(response.status).toBe(200);
+    expect(rpc).toHaveBeenCalledWith('apply_subscription', expect.objectContaining({ p_plan: 'pro', p_status: 'active' }));
+  });
+
+  it('com duas assinaturas, o fim de uma não derruba o plano que a outra ainda paga', async () => {
+    const ended = { ...subscription, id: 'sub_2', status: 'canceled', items: { data: [{ current_period_end: 1_800_000_000, price: { lookup_key: 'solus_basic_mensal' } }] } };
+    const premium = { ...subscription, items: { data: [{ current_period_end: 1_800_000_000, price: { lookup_key: 'solus_premium_mensal' } }] } };
+    await stubRetrieve([ended, premium], ended);
+    const { POST } = await import('@/app/api/stripe/webhook/route');
+    const response = await POST(
+      signed({ id: 'evt_5', object: 'event', type: 'customer.subscription.deleted', data: { object: { id: 'sub_2', object: 'subscription' } } }),
+    );
+    expect(response.status).toBe(200);
+    expect(rpc).toHaveBeenCalledWith('apply_subscription', expect.objectContaining({ p_subscription_id: 'sub_1', p_plan: 'premium', p_status: 'active' }));
+  });
+
+  it('assinatura paga de um plano desconhecido não rebaixa ninguém: pede nova tentativa', async () => {
+    const unknown = { ...subscription, items: { data: [{ current_period_end: 1_800_000_000, price: { lookup_key: 'outro', product: { id: 'prod_x', metadata: {} } } }] } };
+    await stubRetrieve([unknown], unknown);
+    const { POST } = await import('@/app/api/stripe/webhook/route');
+    const response = await POST(
+      signed({ id: 'evt_6', object: 'event', type: 'customer.subscription.updated', data: { object: { id: 'sub_1', object: 'subscription' } } }),
+    );
+    expect(response.status).toBe(500);
+    expect(rpc).not.toHaveBeenCalled();
+  });
+});
+
+describe('encerrar a cobrança antes de excluir a organização', () => {
+  function client(row: object | null, error: object | null = null) {
+    const chain = { select: () => chain, eq: () => chain, maybeSingle: async () => ({ data: row, error }) };
+    return { from: () => chain } as never;
+  }
+
+  it('apaga o cliente na Stripe, o que cancela a assinatura e os dados dele', async () => {
+    const { getStripe } = await import('@/lib/billing/stripe');
+    const del = vi.spyOn(getStripe()!.customers, 'del').mockResolvedValue({ id: 'cus_1', deleted: true } as never);
+    const { closeBillingAccount } = await import('@/modules/billing/lifecycle');
+    expect(await closeBillingAccount(client({ stripe_customer_id: 'cus_1', status: 'active' }), 'org')).toBe(true);
+    expect(del).toHaveBeenCalledWith('cus_1');
+  });
+
+  it('sem cobrança registrada, segue sem chamar a Stripe', async () => {
+    const { getStripe } = await import('@/lib/billing/stripe');
+    const del = vi.spyOn(getStripe()!.customers, 'del');
+    const { closeBillingAccount } = await import('@/modules/billing/lifecycle');
+    expect(await closeBillingAccount(client(null), 'org')).toBe(true);
+    expect(del).not.toHaveBeenCalled();
+  });
+
+  it('se a Stripe falha, a organização não é excluída', async () => {
+    const { getStripe } = await import('@/lib/billing/stripe');
+    vi.spyOn(getStripe()!.customers, 'del').mockRejectedValue(Object.assign(new Error('fora do ar'), { code: 'api_error' }));
+    const { closeBillingAccount } = await import('@/modules/billing/lifecycle');
+    expect(await closeBillingAccount(client({ stripe_customer_id: 'cus_1', status: 'active' }), 'org')).toBe(false);
+  });
+
+  it('cliente já apagado numa tentativa anterior: segue', async () => {
+    const { getStripe } = await import('@/lib/billing/stripe');
+    vi.spyOn(getStripe()!.customers, 'del').mockRejectedValue(Object.assign(new Error('No such customer'), { code: 'resource_missing' }));
+    const { closeBillingAccount } = await import('@/modules/billing/lifecycle');
+    expect(await closeBillingAccount(client({ stripe_customer_id: 'cus_1', status: 'canceled' }), 'org')).toBe(true);
   });
 });

@@ -31,6 +31,14 @@ describe('NF-e para planilha', () => {
     ]);
   });
 
+  it('um CNPJ que não é só dígitos nunca vira caminho de arquivo', () => {
+    for (const hostile of ['/../../escaped', '&#47;..&#47;x', '..\\..\\x', '1234567800019']) {
+      const parsed = parseNfe(nfe().replace('<CNPJ>12345678000199</CNPJ>', `<CNPJ>${hostile}</CNPJ>`));
+      expect(parsed.type).toBe('note');
+      if (parsed.type === 'note') expect(parsed.note.issuer).toBe('');
+    }
+  });
+
   it('nunca leva dados do destinatário para a planilha', () => {
     const result = combine([parseNfe(nfe())]);
     const csv = toCsv(result.byIssuer.get('12345678000199')!.lines);

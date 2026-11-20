@@ -138,7 +138,7 @@ function DeleteOrganization({ name }: { name: string }) {
   return (
     <div className="rounded-xl border border-critical/30 p-4">
       <p className="text-sm font-semibold text-foreground">Excluir organização</p>
-      <p className="mt-0.5 text-sm text-muted-foreground">Remove a organização, os membros, os convites e os dados importados. Não pode ser desfeito.</p>
+      <p className="mt-0.5 text-sm text-muted-foreground">Remove a organização, os membros, os convites e os dados importados, e cancela na hora a assinatura paga, sem reembolso dos dias restantes. Não pode ser desfeito.</p>
       <Button variant="destructive" className="mt-3" onClick={() => setOpen(true)}>
         Excluir organização
       </Button>
@@ -153,7 +153,7 @@ function DeleteOrganization({ name }: { name: string }) {
           <form ref={formRef} action={formAction} onSubmit={onSubmit} noValidate className="flex flex-col gap-4">
             <DialogHeader>
               <DialogTitle>Excluir {name}?</DialogTitle>
-              <DialogDescription>Todos os dados e acessos serão apagados de forma permanente. Para confirmar, digite o nome da organização.</DialogDescription>
+              <DialogDescription>Todos os dados e acessos serão apagados de forma permanente, e a assinatura, se houver, é cancelada na hora. Para confirmar, digite o nome da organização.</DialogDescription>
             </DialogHeader>
             {state.status === 'error' && state.message && (
               <Notice tone="error" title="Não foi possível excluir">

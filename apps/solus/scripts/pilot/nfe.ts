@@ -19,7 +19,7 @@
  *   node scripts/pilot/nfe.ts <pasta-com-xml> [pasta-de-saida]
  */
 import { mkdirSync, readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs';
-import { basename, join, resolve } from 'node:path';
+import { basename, join, resolve, sep } from 'node:path';
 import { pathToFileURL } from 'node:url';
 
 export interface NfeLine {
@@ -140,7 +140,10 @@ export function parseNfe(raw: string): NfeParse {
   const channel = value(ide, 'mod') === '65' ? 'NFC-e' : 'NF-e';
 
   const emit = block(inf, 'emit');
-  const issuer = value(emit, 'CNPJ') || value(emit, 'CPF');
+  // The issuer names the output file: only a well-formed CNPJ (14 digits) or
+  // CPF (11) is kept, so XML text can never become a path.
+  const taxId = value(emit, 'CNPJ') || value(emit, 'CPF');
+  const issuer = /^(\d{11}|\d{14})$/.test(taxId) ? taxId : '';
   const issuerName = value(emit, 'xFant') || value(emit, 'xNome');
 
   const lines: NfeLine[] = [];
@@ -266,6 +269,7 @@ function main() {
   console.log(`${files.length} arquivos lidos, ${result.notes} notas aproveitadas.`);
   for (const [issuer, group] of result.byIssuer) {
     const file = join(resolve(output), `vendas-${issuer || 'sem-documento'}.csv`);
+    if (!file.startsWith(resolve(output) + sep)) throw new Error(`Caminho de saída inválido: ${file}`);
     writeFileSync(file, toCsv(group.lines));
     console.log(`  ${group.name || issuer}: ${group.lines.length} linhas -> ${basename(file)}`);
   }

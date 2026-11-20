@@ -6,6 +6,7 @@ import { getSiteUrl } from '@/lib/env';
 import { logServerError } from '@/lib/log';
 import type { MappedError } from '@/lib/supabase/errors';
 import { createSupabaseAdminClient } from '@/lib/supabase/admin';
+import { consumeRateLimits } from '@/services/rate-limit';
 import { authorize } from '@/services/workspace';
 
 /**
@@ -25,6 +26,20 @@ const FAILED: Result = {
 };
 
 const ACTIVE_STATUSES = new Set(['active', 'trialing', 'past_due', 'unpaid', 'incomplete', 'paused']);
+const LIMITED: Result = {
+  ok: false,
+  error: { code: 'rate_limited', message: 'Muitas tentativas seguidas. Aguarde alguns minutos e tente de novo.' },
+};
+
+/** Every action calls the Stripe API, whose rate limit all organizations share. */
+async function billingQuota(userId: string, organizationId: string): Promise<Result | null> {
+  const verdict = await consumeRateLimits([
+    { bucket: `billing:user:${userId}`, limit: 10, windowSeconds: 10 * 60 },
+    { bucket: `billing:org:${organizationId}`, limit: 20, windowSeconds: 60 * 60 },
+  ]);
+  if (verdict === 'allowed') return null;
+  return verdict === 'limited' ? LIMITED : FAILED;
+}
 
 export async function startCheckoutAction(plan: unknown): Promise<Result> {
   const parsed = planSchema.safeParse(plan);
@@ -37,6 +52,8 @@ export async function startCheckoutAction(plan: unknown): Promise<Result> {
   if (!auth.ok) return auth;
   const { workspace, supabase } = auth;
   const { organizationId, name } = workspace.active;
+  const quota = await billingQuota(workspace.user.id, organizationId);
+  if (quota) return quota;
 
   try {
     const { data: billing } = await supabase
@@ -65,6 +82,15 @@ export async function startCheckoutAction(plan: unknown): Promise<Result> {
       if (error) throw error;
       customerId = customer.id;
     }
+
+    // The database learns about a new subscription only when its webhook
+    // lands; Stripe knows at once. Asking Stripe closes the window in which a
+    // second checkout (another tab, a double click) would create a second
+    // subscription, and expiring the checkouts still open leaves one to pay.
+    const existing = await stripe.subscriptions.list({ customer: customerId, status: 'all', limit: 100 });
+    if (existing.data.some((subscription) => ACTIVE_STATUSES.has(subscription.status))) return portal(customerId);
+    const open = await stripe.checkout.sessions.list({ customer: customerId, status: 'open', limit: 100 });
+    await Promise.all(open.data.map((session) => stripe.checkout.sessions.expire(session.id)));
 
     const prices = await stripe.prices.list({ lookup_keys: [PRICE_LOOKUP_KEYS[parsed.data]], active: true, limit: 1 });
     const price = prices.data[0];
@@ -98,6 +124,8 @@ export async function openBillingPortalAction(): Promise<Result> {
   if (!isBillingEnabled()) return OFF;
   const auth = await authorize('owner');
   if (!auth.ok) return auth;
+  const quota = await billingQuota(auth.workspace.user.id, auth.workspace.active.organizationId);
+  if (quota) return quota;
   const { data: billing } = await auth.supabase
     .from('organization_billing')
     .select('stripe_customer_id')

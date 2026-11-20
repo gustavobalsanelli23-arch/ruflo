@@ -7,6 +7,7 @@ import { logServerError } from '@/lib/log';
 import { createSupabaseAdminClient } from '@/lib/supabase/admin';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { deleteAccountSchema, fieldErrors } from '@/schemas/auth';
+import { closeBillingAccount } from '@/modules/billing/lifecycle';
 import { removeOrganizationFiles } from '@/services/imports';
 import { consumeRateLimits } from '@/services/rate-limit';
 import { RECOVERY_COOKIE } from '@/services/recovery';
@@ -72,6 +73,7 @@ export async function deleteAccountAction(_previous: FormState, formData: FormDa
   }
 
   for (const organizationId of toDelete) {
+    if (!(await closeBillingAccount(supabase, organizationId))) return { status: 'error', code: 'unavailable', message: UNAVAILABLE };
     if (!(await removeOrganizationFiles(supabase, organizationId))) return { status: 'error', code: 'unavailable', message: UNAVAILABLE };
     const removed = await supabase.from('organizations').delete().eq('id', organizationId);
     if (removed.error) {

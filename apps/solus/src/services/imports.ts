@@ -244,12 +244,25 @@ export async function listImportHistory(supabase: SolusClient, organizationId: s
  * false means nothing should be deleted yet.
  */
 export async function removeOrganizationFiles(supabase: SolusClient, organizationId: string): Promise<boolean> {
-  const files = await supabase.from('data_imports').select('storage_path').eq('organization_id', organizationId).not('storage_path', 'is', null);
-  if (files.error) {
-    logServerError('organização: listar arquivos', files.error);
-    return false;
+  // Paged: the API caps every response (max_rows), and a truncated list
+  // would leave files behind once the cascade drops their only references.
+  const PAGE = 1000;
+  const paths: string[] = [];
+  for (let from = 0; ; from += PAGE) {
+    const files = await supabase
+      .from('data_imports')
+      .select('storage_path')
+      .eq('organization_id', organizationId)
+      .not('storage_path', 'is', null)
+      .order('id')
+      .range(from, from + PAGE - 1);
+    if (files.error) {
+      logServerError('organização: listar arquivos', files.error);
+      return false;
+    }
+    paths.push(...files.data.map((row) => row.storage_path).filter((path): path is string => Boolean(path)));
+    if (files.data.length < PAGE) break;
   }
-  const paths = files.data.map((row) => row.storage_path).filter((path): path is string => Boolean(path));
   for (let start = 0; start < paths.length; start += 100) {
     const removed = await supabase.storage.from(IMPORTS_BUCKET).remove(paths.slice(start, start + 100));
     if (removed.error) {
