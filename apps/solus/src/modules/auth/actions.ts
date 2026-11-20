@@ -17,6 +17,7 @@ import {
   signInSchema,
   signUpSchema,
 } from '@/schemas/auth';
+import { verifyCaptcha } from '@/services/captcha';
 import { clientIp, consumeRateLimits, fingerprint, type RateRule } from '@/services/rate-limit';
 import { hasRecoveryGrant, RECOVERY_COOKIE, RECOVERY_WINDOW_SECONDS, recoveryGrantValue } from '@/services/recovery';
 import { getSessionUser } from '@/services/session';
@@ -44,6 +45,16 @@ async function limit(rules: RateRule[]): Promise<FormState | null> {
   if (verdict === 'limited') return { status: 'error', code: 'rate_limited', message: RATE_LIMITED };
   if (verdict === 'unavailable') return { status: 'error', code: 'unavailable', message: UNAVAILABLE };
   return null;
+}
+
+const CAPTCHA_FAILED = 'Confirme que você não é um robô e tente de novo.';
+
+/** Turnstile check (no-op until configured). */
+async function captcha(formData: FormData, rawIp: string): Promise<FormState | null> {
+  const verdict = await verifyCaptcha(formData, rawIp);
+  if (verdict === 'ok') return null;
+  if (verdict === 'failed') logSecurityEvent('captcha_failed');
+  return { status: 'error', code: verdict === 'failed' ? 'validation' : 'unavailable', message: verdict === 'failed' ? CAPTCHA_FAILED : UNAVAILABLE };
 }
 
 const MINUTE = 60;
@@ -100,12 +111,15 @@ export async function signUpAction(_previous: FormState, formData: FormData): Pr
   const supabase = await createSupabaseServerClient();
   if (!supabase) return { status: 'error', code: 'unavailable', message: NOT_CONFIGURED, values };
 
-  const ip = fingerprint(await clientIp());
+  const rawIp = await clientIp();
+  const ip = fingerprint(rawIp);
   const blocked = await limit([
     { bucket: `signup:ip:${ip}`, limit: 10, windowSeconds: HOUR },
     { bucket: `signup:email:${fingerprint(parsed.data.email)}`, limit: 3, windowSeconds: HOUR },
   ]);
   if (blocked) return { ...blocked, values };
+  const unverified = await captcha(formData, rawIp);
+  if (unverified) return { ...unverified, values };
 
   const { data, error } = await supabase.auth.signUp({
     email: parsed.data.email,
@@ -172,13 +186,16 @@ export async function requestPasswordResetAction(_previous: FormState, formData:
   const supabase = await createSupabaseServerClient();
   if (!supabase) return { status: 'error', code: 'unavailable', message: NOT_CONFIGURED, values };
 
-  const ip = fingerprint(await clientIp());
+  const rawIp = await clientIp();
+  const ip = fingerprint(rawIp);
   const blocked = await limit([
     { bucket: `recover:ip:${ip}`, limit: 10, windowSeconds: HOUR },
     { bucket: `recover:email-ip:${fingerprint(parsed.data.email)}:${ip}`, limit: 3, windowSeconds: HOUR },
     { bucket: `recover:email:${fingerprint(parsed.data.email)}`, limit: 10, windowSeconds: HOUR },
   ]);
   if (blocked) return { ...blocked, values };
+  const unverified = await captcha(formData, rawIp);
+  if (unverified) return { ...unverified, values };
 
   const { error } = await supabase.auth.resetPasswordForEmail(parsed.data.email, {
     redirectTo: `${getSiteUrl()}/auth/confirm?fluxo=recuperacao`,

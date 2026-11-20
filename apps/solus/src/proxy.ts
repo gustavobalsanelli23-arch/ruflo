@@ -2,7 +2,7 @@ import { createServerClient } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
 import { loginPath } from '@/lib/auth/redirect';
 import { ACTIVITY_COOKIE, SESSION_IDLE, sessionExpired } from '@/lib/auth/session-expiry';
-import { getAnalyticsKey, getSupabaseConfig } from '@/lib/env';
+import { getAnalyticsKey, getCaptchaSiteKey, getSupabaseConfig } from '@/lib/env';
 import { logSecurityEvent } from '@/lib/log';
 import { buildContentSecurityPolicy, createNonce, isLoopbackHost } from '@/lib/security/headers';
 import { hardenCookie, isSessionCookie, SESSION_COOKIE_OPTIONS } from '@/lib/supabase/cookies';
@@ -55,6 +55,7 @@ export async function proxy(request: NextRequest) {
     supabaseUrl ? new URL(supabaseUrl).origin : null,
     isLoopbackHost(request.nextUrl.hostname),
     getAnalyticsKey() !== null,
+    getCaptchaSiteKey() !== null,
   );
 
   const pending: PendingCookie[] = [];

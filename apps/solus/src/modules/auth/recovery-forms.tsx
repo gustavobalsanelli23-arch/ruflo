@@ -7,11 +7,12 @@ import { emailOnlySchema, PASSWORD_MIN, resetPasswordSchema } from '@/schemas/au
 import { requestPasswordResetAction, resetPasswordAction } from './actions';
 import { AuthHeading, Field, PasswordInput, SubmitButton, TextInput, useValidatedAction } from './form-kit';
 import { IDLE } from './form-state';
+import { Captcha } from './captcha';
 import { Honeypot } from './honeypot';
 
 const linkClass = 'font-medium text-brand underline-offset-4 outline-none hover:underline focus-visible:underline';
 
-export function RequestResetForm({ enabled }: { enabled: boolean }) {
+export function RequestResetForm({ enabled, captchaSiteKey = null }: { enabled: boolean; captchaSiteKey?: string | null }) {
   const { state, formAction, pending, errors, onSubmit, clearError, formRef } = useValidatedAction(emailOnlySchema, requestPasswordResetAction, IDLE);
 
   if (state.status === 'success' && state.email) {
@@ -61,6 +62,7 @@ export function RequestResetForm({ enabled }: { enabled: boolean }) {
               placeholder="nome@empresa.com.br"
             />
           </Field>
+          <Captcha siteKey={captchaSiteKey} resetKey={state} />
           <SubmitButton pending={pending} pendingLabel="Enviando…">
             Enviar link
           </SubmitButton>

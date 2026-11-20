@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { isSupabaseConfigured } from '@/lib/env';
+import { getCaptchaSiteKey, isSupabaseConfigured } from '@/lib/env';
 import { NotConfiguredNotice, ReasonNotice } from '@/modules/auth/auth-notices';
 import { RequestResetForm } from '@/modules/auth/recovery-forms';
 
@@ -11,7 +11,7 @@ export default async function RecoverPage({ searchParams }: { searchParams: Prom
   return (
     <>
       {configured ? <ReasonNotice reason={typeof params.motivo === 'string' ? params.motivo : undefined} /> : <NotConfiguredNotice />}
-      <RequestResetForm enabled={configured} />
+      <RequestResetForm enabled={configured} captchaSiteKey={getCaptchaSiteKey()} />
     </>
   );
 }

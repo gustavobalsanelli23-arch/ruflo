@@ -10,14 +10,25 @@ import { signUpAction } from './actions';
 import { AuthHeading, ConsentCheckbox, Field, PasswordInput, SubmitButton, TextInput, useValidatedAction } from './form-kit';
 import { IDLE } from './form-state';
 import { ResendConfirmation } from './resend-confirmation';
+import { Captcha } from './captcha';
 import { Honeypot } from './honeypot';
 
-export function SignUpForm({ next, enabled }: { next?: string; enabled: boolean }) {
+export function SignUpForm({ next, enabled, captchaSiteKey = null }: { next?: string; enabled: boolean; captchaSiteKey?: string | null }) {
   const [attempt, setAttempt] = useState(0);
-  return <SignUpAttempt key={attempt} next={next} enabled={enabled} onRestart={() => setAttempt((n) => n + 1)} />;
+  return <SignUpAttempt key={attempt} next={next} enabled={enabled} captchaSiteKey={captchaSiteKey} onRestart={() => setAttempt((n) => n + 1)} />;
 }
 
-function SignUpAttempt({ next, enabled, onRestart }: { next?: string; enabled: boolean; onRestart: () => void }) {
+function SignUpAttempt({
+  next,
+  enabled,
+  captchaSiteKey,
+  onRestart,
+}: {
+  next?: string;
+  enabled: boolean;
+  captchaSiteKey: string | null;
+  onRestart: () => void;
+}) {
   const { state, formAction, pending, errors, onSubmit, clearError, formRef } = useValidatedAction(signUpSchema, signUpAction, IDLE);
   const query = next ? `?next=${encodeURIComponent(next)}` : '';
   const succeeded = state.status === 'success';
@@ -107,6 +118,7 @@ function SignUpAttempt({ next, enabled, onRestart }: { next?: string; enabled: b
             </Link>
             .
           </ConsentCheckbox>
+          <Captcha siteKey={captchaSiteKey} resetKey={state} />
           <SubmitButton pending={pending} pendingLabel="Criando conta…">
             Criar conta
           </SubmitButton>

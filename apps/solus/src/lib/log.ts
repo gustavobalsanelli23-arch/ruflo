@@ -16,7 +16,7 @@ export function logServerError(scope: string, error: unknown) {
   console.error(`[solus] ${scope}`, detail);
 }
 
-export type SecurityEvent = 'rate_limited' | 'bot_trap' | 'webhook_bad_signature' | 'session_expired';
+export type SecurityEvent = 'rate_limited' | 'bot_trap' | 'captcha_failed' | 'webhook_bad_signature' | 'session_expired';
 
 /**
  * Security events (blocked attempts), one line each, searchable in the

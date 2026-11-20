@@ -19,7 +19,11 @@
  * which 'strict-dynamic' already admits) only when a PostHog key is set. The
  * browser talks to PostHog directly rather than through a rewrite on this
  * origin, which would forward the session cookies to a third party.
+ *
+ * `captcha` allows Cloudflare Turnstile's challenge frame (its script is
+ * added by our own nonce'd code, which 'strict-dynamic' admits).
  */
+export const CAPTCHA_ORIGIN = 'https://challenges.cloudflare.com';
 export const ANALYTICS_ORIGINS = ['https://eu.i.posthog.com', 'https://eu-assets.i.posthog.com'] as const;
 
 export function buildContentSecurityPolicy(
@@ -28,6 +32,7 @@ export function buildContentSecurityPolicy(
   uploadOrigin: string | null = null,
   loopback = false,
   analytics = false,
+  captcha = false,
 ) {
   const connect = ["'self'", ...(uploadOrigin ? [uploadOrigin] : []), ...(analytics ? ANALYTICS_ORIGINS : [])];
   const directives = [
@@ -40,6 +45,7 @@ export function buildContentSecurityPolicy(
     `object-src 'none'`,
     `base-uri 'self'`,
     `form-action 'self'`,
+    `frame-src ${captcha ? `'self' ${CAPTCHA_ORIGIN}` : `'self'`}`,
     `frame-ancestors 'none'`,
     `manifest-src 'self'`,
     `worker-src 'self' blob:`,

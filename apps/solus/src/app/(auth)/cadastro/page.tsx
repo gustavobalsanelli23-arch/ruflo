@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import { safeNextPath } from '@/lib/auth/redirect';
-import { isSupabaseConfigured } from '@/lib/env';
+import { getCaptchaSiteKey, isSupabaseConfigured } from '@/lib/env';
 import { DemoLink, NotConfiguredNotice } from '@/modules/auth/auth-notices';
 import { SignUpForm } from '@/modules/auth/sign-up-form';
 
@@ -13,7 +13,7 @@ export default async function SignUpPage({ searchParams }: { searchParams: Promi
   return (
     <>
       {!configured && <NotConfiguredNotice />}
-      <SignUpForm next={next || undefined} enabled={configured} />
+      <SignUpForm next={next || undefined} enabled={configured} captchaSiteKey={getCaptchaSiteKey()} />
       {!configured && <DemoLink />}
     </>
   );

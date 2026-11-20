@@ -81,3 +81,16 @@ export function getAnalyticsKey(): string | null {
   const key = process.env.POSTHOG_KEY?.trim();
   return key && /^phc_[A-Za-z0-9]{20,}$/.test(key) ? key : null;
 }
+
+/**
+ * Cloudflare Turnstile (bot check on sign-up and password recovery). On only
+ * when both keys are set; the secret never leaves the server.
+ */
+export function getCaptchaSiteKey(): string | null {
+  const key = process.env.TURNSTILE_SITE_KEY?.trim();
+  return key && /^[0-9A-Za-z_-]{10,100}$/.test(key) && getCaptchaSecret() ? key : null;
+}
+
+export function getCaptchaSecret(): string | null {
+  return process.env.TURNSTILE_SECRET_KEY?.trim() || null;
+}
