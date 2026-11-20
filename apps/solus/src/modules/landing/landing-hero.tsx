@@ -1,9 +1,10 @@
 'use client';
 
 import Link from 'next/link';
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { LogoMark } from '@/components/brand/logo';
 import { ThemeToggle } from '@/components/shell/theme-toggle';
+import { EclipseAnalyst } from './eclipse-analyst';
 import { ParticleEclipse } from './particle-eclipse';
 import styles from './landing-hero.module.css';
 
@@ -11,8 +12,12 @@ import styles from './landing-hero.module.css';
  * Full-viewport hero of the public home, always black: a flat nav, the
  * headline in glass lettering, and the eclipse drawn as a cloud of white
  * particles. The pointer stirs the corona; a click opens the eclipse (the
- * moon slides away) and another closes it.
+ * moon slides away) and, behind it, the analyst drawn as a nervous system
+ * growing out of the eclipse. Closing the analyst closes the eclipse.
  */
+
+/** Time for the moon to slide away before the analyst grows out of the light. */
+const REVEAL_MS = 650;
 
 const LINKS = [
   { href: '#como-funciona', label: 'Como funciona' },
@@ -24,7 +29,29 @@ const LINKS = [
 export function LandingHero() {
   const [open, setOpen] = useState(false);
   const [eclipseOpen, setEclipseOpen] = useState(false);
+  const [analystAt, setAnalystAt] = useState<{ x: number; y: number } | null>(null);
   const burger = useRef<HTMLButtonElement>(null);
+  const cloud = useRef<HTMLButtonElement>(null);
+  const reveal = useRef(0);
+
+  const openEclipse = () => {
+    const box = cloud.current?.getBoundingClientRect();
+    if (!box) return;
+    const origin = { x: box.left + box.width / 2, y: box.top + box.height / 2 };
+    setEclipseOpen(true);
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    window.clearTimeout(reveal.current);
+    reveal.current = window.setTimeout(() => setAnalystAt(origin), reduced ? 0 : REVEAL_MS);
+  };
+
+  // Stable, so the analyst's focus handling does not re-run on every render.
+  const closeAnalyst = useCallback(() => {
+    window.clearTimeout(reveal.current);
+    setAnalystAt(null);
+    setEclipseOpen(false);
+  }, []);
+
+  useEffect(() => () => window.clearTimeout(reveal.current), []);
 
   useEffect(() => {
     if (!open) return;
@@ -89,17 +116,20 @@ export function LandingHero() {
       </div>
 
       <button
+        ref={cloud}
         type="button"
         className={styles.cloud}
-        aria-pressed={eclipseOpen}
-        aria-label={eclipseOpen ? 'Fechar o eclipse' : 'Abrir o eclipse'}
-        onClick={() => setEclipseOpen((value) => !value)}
+        aria-haspopup="dialog"
+        aria-label="Abrir o analista de IA"
+        onClick={() => (eclipseOpen ? closeAnalyst() : openEclipse())}
       >
         <ParticleEclipse className={styles.canvas} open={eclipseOpen} />
         <span className={styles.cloudHint} aria-hidden="true">
-          {eclipseOpen ? 'Clique para fechar' : 'Clique no eclipse'}
+          Clique no eclipse para abrir o analista
         </span>
       </button>
+
+      {analystAt && <EclipseAnalyst origin={analystAt} onClose={closeAnalyst} />}
 
       <div className={styles.main}>
         <h1 className={styles.headline}>
