@@ -288,6 +288,8 @@ export type AnalyticsFunctions = {
     previous_import_status: ImportStatusV2 | null;
   }>;
   confirm_import_upload: { Args: { p_import_id: string }; Returns: undefined };
+  /** service_role only: confirms after the server checked the content. */
+  confirm_verified_upload: { Args: { p_actor: string; p_import_id: string }; Returns: undefined };
   save_import_mapping: { Args: { p_import_id: string; p_mapping: Json; p_options: Json; p_sheet_name: string | null }; Returns: undefined };
   stage_import_batch: Rows<{ staged_rows: number; rejected_rows: number; warnings: number }>;
   finish_validation: { Args: { p_import_id: string; p_expected_batches: number }; Returns: Json };

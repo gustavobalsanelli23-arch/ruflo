@@ -3,7 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 const rpc = vi.fn();
 vi.mock('@/lib/supabase/admin', () => ({ createSupabaseAdminClient: () => ({ rpc }) }));
-vi.mock('@/lib/log', () => ({ logServerError: vi.fn() }));
+vi.mock('@/lib/log', () => ({ logServerError: vi.fn(), logSecurityEvent: vi.fn() }));
 
 const SECRET = 'whsec_teste';
 const subscription = {

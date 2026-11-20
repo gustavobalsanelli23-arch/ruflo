@@ -10,6 +10,7 @@ import { signUpAction } from './actions';
 import { AuthHeading, ConsentCheckbox, Field, PasswordInput, SubmitButton, TextInput, useValidatedAction } from './form-kit';
 import { IDLE } from './form-state';
 import { ResendConfirmation } from './resend-confirmation';
+import { Honeypot } from './honeypot';
 
 export function SignUpForm({ next, enabled }: { next?: string; enabled: boolean }) {
   const [attempt, setAttempt] = useState(0);
@@ -58,6 +59,7 @@ function SignUpAttempt({ next, enabled, onRestart }: { next?: string; enabled: b
     <div>
       <AuthHeading title="Criar conta" description="Depois de confirmar o e-mail, você cria a organização da sua empresa." />
       <form ref={formRef} action={formAction} onSubmit={onSubmit} noValidate className="flex flex-col gap-5">
+        <Honeypot />
         {state.status === 'error' && state.message && (
           <Notice tone="error" title="Não foi possível criar a conta">
             {state.message}

@@ -5,7 +5,7 @@ import { redirect } from 'next/navigation';
 import { loginPath, safeNextPath } from '@/lib/auth/redirect';
 import { LEGAL } from '@/config/legal';
 import { getSiteUrl } from '@/lib/env';
-import { logServerError } from '@/lib/log';
+import { logSecurityEvent, logServerError } from '@/lib/log';
 import { GENERIC_ERROR, mapAuthError, RATE_LIMITED } from '@/lib/supabase/errors';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 import {
@@ -22,6 +22,7 @@ import { hasRecoveryGrant, RECOVERY_COOKIE, RECOVERY_WINDOW_SECONDS, recoveryGra
 import { getSessionUser } from '@/services/session';
 import { ACTIVE_ORG_COOKIE } from '@/services/workspace';
 import type { FormState } from './form-state';
+import { HONEYPOT_FIELD } from './honeypot';
 
 /**
  * Authentication Server Actions. Next.js only accepts them as POST requests
@@ -58,7 +59,7 @@ export async function signInAction(_previous: FormState, formData: FormData): Pr
   const supabase = await createSupabaseServerClient();
   if (!supabase) return { status: 'error', code: 'unavailable', message: NOT_CONFIGURED, values };
 
-  const ip = await clientIp();
+  const ip = fingerprint(await clientIp());
   const blocked = await limit([
     { bucket: `signin:ip:${ip}`, limit: 30, windowSeconds: 15 * MINUTE },
     // Per e-mail and IP: someone else's failed attempts cannot lock the owner
@@ -90,11 +91,16 @@ export async function signUpAction(_previous: FormState, formData: FormData): Pr
     acceptTerms: formData.get('acceptTerms'),
   });
   if (!parsed.success) return { status: 'error', fieldErrors: fieldErrors(parsed.error), values };
+  // Bot trap filled: the usual answer, nothing sent.
+  if (text(formData, HONEYPOT_FIELD)) {
+    logSecurityEvent('bot_trap', 'recover');
+    return { status: 'success', email: parsed.data.email };
+  }
 
   const supabase = await createSupabaseServerClient();
   if (!supabase) return { status: 'error', code: 'unavailable', message: NOT_CONFIGURED, values };
 
-  const ip = await clientIp();
+  const ip = fingerprint(await clientIp());
   const blocked = await limit([
     { bucket: `signup:ip:${ip}`, limit: 10, windowSeconds: HOUR },
     { bucket: `signup:email:${fingerprint(parsed.data.email)}`, limit: 3, windowSeconds: HOUR },
@@ -131,7 +137,7 @@ export async function resendConfirmationAction(_previous: FormState, formData: F
   const supabase = await createSupabaseServerClient();
   if (!supabase) return { status: 'error', code: 'unavailable', message: NOT_CONFIGURED };
 
-  const ip = await clientIp();
+  const ip = fingerprint(await clientIp());
   const blocked = await limit([
     { bucket: `resend:ip:${ip}`, limit: 10, windowSeconds: HOUR },
     { bucket: `resend:email-ip:${fingerprint(parsed.data.email)}:${ip}`, limit: 3, windowSeconds: HOUR },
@@ -158,11 +164,15 @@ export async function requestPasswordResetAction(_previous: FormState, formData:
   const values = { email: text(formData, 'email').slice(0, 254) };
   const parsed = emailOnlySchema.safeParse({ email: formData.get('email') });
   if (!parsed.success) return { status: 'error', fieldErrors: fieldErrors(parsed.error), values };
+  if (text(formData, HONEYPOT_FIELD)) {
+    logSecurityEvent('bot_trap', 'recover');
+    return { status: 'success', email: parsed.data.email };
+  }
 
   const supabase = await createSupabaseServerClient();
   if (!supabase) return { status: 'error', code: 'unavailable', message: NOT_CONFIGURED, values };
 
-  const ip = await clientIp();
+  const ip = fingerprint(await clientIp());
   const blocked = await limit([
     { bucket: `recover:ip:${ip}`, limit: 10, windowSeconds: HOUR },
     { bucket: `recover:email-ip:${fingerprint(parsed.data.email)}:${ip}`, limit: 3, windowSeconds: HOUR },
@@ -190,13 +200,15 @@ export async function confirmEmailLinkAction(_previous: FormState, formData: For
 
   // Each attempt costs a Supabase Auth verification, whose own per-IP limit
   // sees the server's address and is shared by everyone: limit it here per client.
-  const blocked = await limit([{ bucket: `confirm:ip:${await clientIp()}`, limit: 30, windowSeconds: 15 * MINUTE }]);
+  const blocked = await limit([{ bucket: `confirm:ip:${fingerprint(await clientIp())}`, limit: 30, windowSeconds: 15 * MINUTE }]);
   if (blocked) return blocked;
 
   const tokenHash = text(formData, 'token_hash');
   const type = otpTypeSchema.safeParse(formData.get('type'));
   const code = text(formData, 'code');
-  const isRecovery = (type.success && type.data === 'recovery') || text(formData, 'fluxo') === 'recuperacao';
+  // A token_hash link says its own type; only the PKCE code link (no type)
+  // relies on the flow marker that recovery e-mails carry.
+  const isRecovery = tokenHash ? type.success && type.data === 'recovery' : text(formData, 'fluxo') === 'recuperacao';
 
   let error: { code?: string; status?: number } | null = null;
   let userId: string | undefined;

@@ -3,6 +3,7 @@
 import { useEffect } from 'react';
 import type { PostHog } from 'posthog-js';
 import { useConsent } from './consent';
+import { redactEvent } from './redact';
 
 /**
  * Product analytics (PostHog, EU region), loaded only after the visitor
@@ -12,6 +13,8 @@ import { useConsent } from './consent';
  * Business data never leaves through here: every text and attribute is
  * masked in autocapture and in session replay, inputs are masked, and events
  * carry only names, counts and ids, never figures, products or e-mails.
+ * Addresses are redacted: tokens in recovery and invitation links are removed,
+ * and replay frames recorded on those pages are dropped.
  */
 
 let client: PostHog | null = null;
@@ -38,6 +41,9 @@ function load(apiKey: string) {
       session_recording: { maskAllInputs: true, maskTextSelector: '*' },
       disable_surveys: true,
       persistence: 'localStorage+cookie',
+      // Recovery, confirmation and invitation links carry one-time tokens in
+      // the address: they never reach PostHog (lib/tracking/redact.ts).
+      before_send: (event) => (event ? redactEvent(event, window.location) : null),
     });
     client = posthog;
     if (pendingIdentity) applyIdentity(pendingIdentity);

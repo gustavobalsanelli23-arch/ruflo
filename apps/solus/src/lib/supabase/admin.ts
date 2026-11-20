@@ -5,12 +5,16 @@ import type { Database } from '@/types/database';
 
 /**
  * Client with the secret (service_role) key. It bypasses RLS, so it is used
- * for exactly three things, both RPCs only service_role may execute:
+ * for these things only, all RPCs only service_role may execute:
  *   * the pre-authentication rate limiter (public.check_rate_limit);
  *   * writing the Intelligence Engine's results (public.sync_opportunities),
  *     after the server checked the user's role;
  *   * saving the org-wide AI summary (public.save_ai_summary), after the
- *     server ran the model and checked the numbers.
+ *     server ran the model and checked the numbers;
+ *   * confirming an upload (public.confirm_verified_upload), after the server
+ *     checked the stored file's SHA-256 and format;
+ *   * billing (link_billing_customer, apply_subscription), from Stripe's
+ *     answers and the webhook.
  * The `server-only` import makes the build fail if this module ever reaches
  * a client bundle.
  */

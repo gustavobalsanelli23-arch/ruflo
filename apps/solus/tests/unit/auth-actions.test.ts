@@ -104,8 +104,8 @@ describe('entrar', () => {
     expect(result.message).toMatch(/Muitas tentativas/);
     expect(auth.signInWithPassword).not.toHaveBeenCalled();
     expect(limits).toHaveBeenCalledWith([
-      { bucket: 'signin:ip:203.0.113.7', limit: 30, windowSeconds: 900 },
-      { bucket: 'signin:email-ip:fp(ana@empresa.com.br):203.0.113.7', limit: 10, windowSeconds: 900 },
+      { bucket: 'signin:ip:fp(203.0.113.7)', limit: 30, windowSeconds: 900 },
+      { bucket: 'signin:email-ip:fp(ana@empresa.com.br):fp(203.0.113.7)', limit: 10, windowSeconds: 900 },
       { bucket: 'signin:email:fp(ana@empresa.com.br)', limit: 50, windowSeconds: 900 },
     ]);
   });
@@ -160,6 +160,12 @@ describe('cadastro', () => {
     });
   });
 
+  it('robô que preenche o campo-isca recebe a resposta de sucesso, sem conta nem e-mail', async () => {
+    const result = await signUpAction(IDLE, form({ ...valid, referencia_extra: 'http://spam.example' }));
+    expect(result).toEqual({ status: 'success', email: 'ana@empresa.com.br' });
+    expect(auth.signUp).not.toHaveBeenCalled();
+  });
+
   it('sem aceitar os termos e a privacidade não cria conta', async () => {
     const withoutConsent: Record<string, string> = { ...valid };
     delete withoutConsent.acceptTerms;
@@ -202,7 +208,7 @@ describe('recuperação e redefinição de senha', () => {
     state.limit = 'limited';
     const result = await confirmEmailLinkAction(IDLE, form({ token_hash: 'abcdef123456', type: 'recovery' }));
     expect(result.code).toBe('rate_limited');
-    expect(limits).toHaveBeenCalledWith([{ bucket: 'confirm:ip:203.0.113.7', limit: 30, windowSeconds: 900 }]);
+    expect(limits).toHaveBeenCalledWith([{ bucket: 'confirm:ip:fp(203.0.113.7)', limit: 30, windowSeconds: 900 }]);
     expect(auth.verifyOtp).not.toHaveBeenCalled();
   });
 

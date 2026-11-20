@@ -1,7 +1,9 @@
 import { createServerClient } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
 import { loginPath } from '@/lib/auth/redirect';
+import { ACTIVITY_COOKIE, SESSION_IDLE, sessionExpired } from '@/lib/auth/session-expiry';
 import { getAnalyticsKey, getSupabaseConfig } from '@/lib/env';
+import { logSecurityEvent } from '@/lib/log';
 import { buildContentSecurityPolicy, createNonce, isLoopbackHost } from '@/lib/security/headers';
 import { hardenCookie, isSessionCookie, SESSION_COOKIE_OPTIONS } from '@/lib/supabase/cookies';
 import type { Database } from '@/types/database';
@@ -12,7 +14,8 @@ import type { Database } from '@/types/database';
  *      expired) and verifies the JWT with getClaims();
  *   2. keeps anonymous visitors out of private routes and signed-in people out
  *      of the sign-in screens;
- *   3. sets a per-request CSP nonce.
+ *   3. ends sessions past their lifetime (lib/auth/session-expiry.ts);
+ *   4. sets a per-request CSP nonce.
  * Pages and Server Actions check the session again: this is the first gate,
  * not the only one.
  */
@@ -75,7 +78,16 @@ export async function proxy(request: NextRequest) {
       },
     });
     const { data } = await supabase.auth.getClaims();
-    if (data?.claims?.sub && data.claims.role === 'authenticated') userId = data.claims.sub;
+    if (data?.claims?.sub && data.claims.role === 'authenticated') {
+      userId = data.claims.sub;
+      const expired = sessionExpired(data.claims, request.cookies.get(ACTIVITY_COOKIE)?.value);
+      if (expired) {
+        logSecurityEvent('session_expired', expired);
+        // Revokes this session's refresh token and clears its cookies (setAll).
+        await supabase.auth.signOut({ scope: 'local' });
+        userId = null;
+      }
+    }
   }
 
   const isServerAction = request.headers.has('next-action');
@@ -111,6 +123,11 @@ export async function proxy(request: NextRequest) {
 
   for (const { name, value, options } of pending) response.cookies.set(name, value, hardenCookie(options));
   for (const [key, value] of Object.entries(extraHeaders)) response.headers.set(key, value);
+  if (userId) {
+    response.cookies.set(ACTIVITY_COOKIE, String(Math.floor(Date.now() / 1000)), { ...SESSION_COOKIE_OPTIONS, maxAge: SESSION_IDLE });
+  } else if (request.cookies.has(ACTIVITY_COOKIE)) {
+    response.cookies.delete(ACTIVITY_COOKIE);
+  }
   if (rememberInvite) {
     response.cookies.set('solus-convite', rememberInvite, { ...SESSION_COOKIE_OPTIONS, maxAge: 60 * 60 * 24 });
   }

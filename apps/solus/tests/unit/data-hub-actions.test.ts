@@ -75,7 +75,9 @@ vi.mock('@/services/imports', () => ({
 const runAnalysis = vi.fn(async () => state.analysis);
 vi.mock('@/services/intelligence', () => ({ runAnalysis: (...args: unknown[]) => runAnalysis(...(args as [])) }));
 vi.mock('next/cache', () => ({ revalidatePath: vi.fn() }));
-vi.mock('@/lib/log', () => ({ logServerError: vi.fn() }));
+vi.mock('@/lib/log', () => ({ logServerError: vi.fn(), logSecurityEvent: vi.fn() }));
+// The upload is confirmed with the service key, after the content check.
+vi.mock('@/lib/supabase/admin', () => ({ createSupabaseAdminClient: () => supabase }));
 
 const hub = await import('@/modules/data-hub/actions');
 const opportunities = await import('@/modules/opportunities/actions');
@@ -169,7 +171,8 @@ describe('envio do arquivo', () => {
 
   it('confirma o envio só depois de conferir o arquivo', async () => {
     expect(await hub.confirmUploadAction(IMPORT)).toEqual({ ok: true, data: null });
-    expect(rpcNames()).toEqual(['confirm_import_upload']);
+    expect(rpcNames()).toEqual(['confirm_verified_upload']);
+    expect(calls[0]?.args).toEqual({ p_actor: expect.any(String), p_import_id: IMPORT });
   });
 });
 

@@ -31,6 +31,7 @@ import {
 } from '@/services/imports';
 import { runAnalysis, type AnalysisOutcome } from '@/services/intelligence';
 import { authorize, type Authorized } from '@/services/workspace';
+import { createSupabaseAdminClient } from '@/lib/supabase/admin';
 
 /**
  * Import pipeline, one Server Action per step. Each one re-checks the
@@ -120,7 +121,11 @@ export async function confirmUploadAction(importId: unknown): Promise<ActionResu
       return { ok: false, error: mapDatabaseError({ message: check === 'missing' ? 'solus:upload_missing' : 'solus:upload_mismatch' }) };
     }
   }
-  const { error } = await auth.supabase.rpc('confirm_import_upload', { p_import_id: record.id });
+  // Only the server confirms, after verifyStoredFile: the database function
+  // is not callable by users, so the content check cannot be skipped.
+  const admin = createSupabaseAdminClient();
+  if (!admin) return { ok: false, error: { code: 'unavailable', message: GENERIC_ERROR } };
+  const { error } = await admin.rpc('confirm_verified_upload', { p_actor: auth.workspace.user.id, p_import_id: record.id });
   return error ? dbFailure(error, 'importação: confirmar envio') : { ok: true, data: null };
 }
 

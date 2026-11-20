@@ -15,3 +15,15 @@ export function logServerError(scope: string, error: unknown) {
   }
   console.error(`[solus] ${scope}`, detail);
 }
+
+export type SecurityEvent = 'rate_limited' | 'bot_trap' | 'webhook_bad_signature' | 'session_expired';
+
+/**
+ * Security events (blocked attempts), one line each, searchable in the
+ * runtime logs as `[solus] seguranca`. Same rule as logServerError: only the
+ * event, a stable label (e.g. the rate-limit bucket family) and no personal
+ * data, values or tokens.
+ */
+export function logSecurityEvent(event: SecurityEvent, label?: string) {
+  console.warn('[solus] seguranca', label ? { event, label } : { event });
+}

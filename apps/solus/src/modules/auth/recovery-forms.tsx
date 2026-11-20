@@ -7,6 +7,7 @@ import { emailOnlySchema, PASSWORD_MIN, resetPasswordSchema } from '@/schemas/au
 import { requestPasswordResetAction, resetPasswordAction } from './actions';
 import { AuthHeading, Field, PasswordInput, SubmitButton, TextInput, useValidatedAction } from './form-kit';
 import { IDLE } from './form-state';
+import { Honeypot } from './honeypot';
 
 const linkClass = 'font-medium text-brand underline-offset-4 outline-none hover:underline focus-visible:underline';
 
@@ -40,6 +41,7 @@ export function RequestResetForm({ enabled }: { enabled: boolean }) {
     <div>
       <AuthHeading title="Recuperar acesso" description="Informe o e-mail da sua conta. Enviaremos um link para criar uma nova senha." />
       <form ref={formRef} action={formAction} onSubmit={onSubmit} noValidate className="flex flex-col gap-5">
+        <Honeypot />
         {state.status === 'error' && state.message && (
           <Notice tone="error" title="Não foi possível enviar o link">
             {state.message}

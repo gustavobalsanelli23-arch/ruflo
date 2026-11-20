@@ -1,6 +1,6 @@
 import type Stripe from 'stripe';
 import { customerBillingState, getStripe, getWebhookSecret, PAID_STATUSES } from '@/lib/billing/stripe';
-import { logServerError } from '@/lib/log';
+import { logSecurityEvent, logServerError } from '@/lib/log';
 import { createSupabaseAdminClient } from '@/lib/supabase/admin';
 
 /**
@@ -47,6 +47,7 @@ export async function POST(request: Request) {
   try {
     event = stripe.webhooks.constructEvent(await request.text(), signature, secret);
   } catch {
+    logSecurityEvent('webhook_bad_signature');
     return new Response('Assinatura inválida.', { status: 400 });
   }
 
