@@ -54,20 +54,20 @@ function NavLink({ item, active, count, collapsed }: { item: NavItem; active: bo
         {active && (
           <motion.span
             layoutId="sidebar-active"
-            className="absolute inset-0 -z-10 rounded-lg bg-sidebar-accent shadow-[inset_0_1px_0_rgb(255_255_255/0.05)]"
+            className="absolute inset-0 -z-10 rounded-lg bg-sidebar-accent bg-linear-to-r from-sidebar-primary/[0.16] to-transparent shadow-[inset_0_1px_0_rgb(255_255_255/0.06),inset_0_0_0_1px_rgb(127_182_230/0.1)]"
             transition={{ type: 'spring', stiffness: 520, damping: 42 }}
           />
         )}
         {active && (
           <motion.span
             layoutId="sidebar-marker"
-            className="absolute top-2 bottom-2 -left-3 w-0.5 rounded-r bg-sidebar-primary"
+            className="absolute top-2 bottom-2 -left-3 w-0.5 rounded-r bg-sidebar-primary shadow-[0_0_10px_1px_var(--sidebar-primary)]"
             transition={{ type: 'spring', stiffness: 520, damping: 42 }}
           />
         )}
         <item.icon
           aria-hidden="true"
-          className={cn('relative size-[17px] shrink-0', active ? 'text-sidebar-primary' : 'text-sidebar-muted group-hover:text-sidebar-foreground')}
+          className={cn('relative size-[17px] shrink-0 transition-transform duration-200 ease-(--ease-out-quint) group-hover:scale-110', active ? 'text-sidebar-primary' : 'text-sidebar-muted group-hover:text-sidebar-foreground')}
         />
         <span className="sr-only truncate expanded:not-sr-only">{item.label}</span>
         {count !== undefined && count > 0 && (

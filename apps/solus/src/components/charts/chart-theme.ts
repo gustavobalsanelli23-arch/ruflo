@@ -35,7 +35,7 @@ export const MONEY = {
 /** Charts animate in once, and not at all when the person prefers reduced motion. */
 export function useChartAnimation() {
   const reduce = useReducedMotion();
-  return { isAnimationActive: !reduce, animationDuration: 600, animationEasing: 'ease-out' as const };
+  return { isAnimationActive: !reduce, animationDuration: 900, animationEasing: 'ease-out' as const };
 }
 
 type AxisOptions = { intervals?: number; includeZero?: boolean };

@@ -278,7 +278,7 @@ export function AnalystWorkspace({
                     <button
                       type="button"
                       onClick={() => ask(suggestion.question)}
-                      className="surface group flex h-full w-full flex-col rounded-xl p-4 text-left outline-none transition-[border-color,background-color] hover:border-border-strong focus-visible:ring-2 focus-visible:ring-ring/60"
+                      className="surface flow-card group flex h-full w-full flex-col rounded-xl p-4 text-left outline-none focus-visible:ring-2 focus-visible:ring-ring/60"
                     >
                       <span className="text-xs text-subtle-foreground">{suggestion.theme}</span>
                       <span className="mt-1 text-base leading-6 font-medium text-foreground">{suggestion.question}</span>

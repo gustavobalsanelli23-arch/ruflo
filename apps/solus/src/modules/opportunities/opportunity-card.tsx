@@ -38,8 +38,8 @@ export function OpportunityCard({
     <article
       aria-labelledby={titleId}
       className={cn(
-        'surface group relative flex h-full flex-col rounded-xl p-5 transition-[border-color,box-shadow] duration-150',
-        'hover:border-border-strong hover:shadow-raised focus-within:ring-2 focus-within:ring-ring/60',
+        'surface flow-card group relative flex h-full flex-col rounded-xl p-5',
+        'focus-within:ring-2 focus-within:ring-ring/60',
         selected && 'border-brand/50',
       )}
     >

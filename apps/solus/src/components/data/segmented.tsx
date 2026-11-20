@@ -63,7 +63,7 @@ export function Segmented<T extends string>({
               <motion.span
                 layoutId={layoutId}
                 aria-hidden="true"
-                className="absolute inset-0 rounded-md border border-border-strong bg-card shadow-[0_1px_2px_rgb(0_0_0/0.08)] dark:bg-white/[0.08]"
+                className="absolute inset-0 rounded-md border border-brand/30 bg-card bg-linear-to-b from-brand/12 to-brand/[0.04] shadow-[inset_0_1px_0_rgb(255_255_255/0.08),0_2px_10px_-4px_color-mix(in_oklab,var(--brand)_45%,transparent)] dark:bg-white/[0.06]"
                 transition={{ type: 'spring', stiffness: 560, damping: 44 }}
               />
             )}

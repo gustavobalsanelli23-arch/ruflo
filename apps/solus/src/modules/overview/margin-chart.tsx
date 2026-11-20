@@ -1,6 +1,7 @@
 'use client';
 
-import { CartesianGrid, Line, LineChart, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
+import { useId } from 'react';
+import { Area, CartesianGrid, ComposedChart, Line, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import { ChartFrame } from '@/components/charts/chart-frame';
 import { AXIS_TICK, CURSOR_LINE, GRID_PROPS, MONEY, percentAxis, useChartAnimation } from '@/components/charts/chart-theme';
 import { ChartTooltip } from '@/components/charts/chart-tooltip';
@@ -13,6 +14,7 @@ import { formatDay, formatMonth, formatPercent } from '@/lib/format';
  */
 export function MarginChart({ period, trend, previousMargin }: { period: Period; trend: TrendPoint[]; previousMargin: number | null }) {
   const animation = useChartAnimation();
+  const fill = `margem-${useId().replace(/:/g, '')}`;
   // Buckets without revenue have no margin: a gap, never a zero.
   const data = trend.map((point) => ({ date: point.date, margin: point.revenue > 0 ? point.grossProfit / point.revenue : null }));
   const known = data.filter((d): d is { date: string; margin: number } => d.margin !== null);
@@ -45,7 +47,13 @@ export function MarginChart({ period, trend, previousMargin }: { period: Period;
     >
       <div className="h-56">
         <ResponsiveContainer width="100%" height="100%">
-          <LineChart accessibilityLayer={false} data={data} margin={{ top: 8, right: 8, bottom: 0, left: 0 }}>
+          <ComposedChart accessibilityLayer={false} data={data} margin={{ top: 8, right: 8, bottom: 0, left: 0 }}>
+            <defs>
+              <linearGradient id={fill} x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor={MONEY.profit} stopOpacity={0.28} />
+                <stop offset="100%" stopColor={MONEY.profit} stopOpacity={0} />
+              </linearGradient>
+            </defs>
             <CartesianGrid {...GRID_PROPS} />
             <XAxis
               dataKey="date"
@@ -70,6 +78,16 @@ export function MarginChart({ period, trend, previousMargin }: { period: Period;
                 />
               )}
             />
+            {/* A soft wash under the line: decorative, so out of the tooltip. */}
+            <Area
+              type={period.granularity === 'day' ? 'linear' : 'monotone'}
+              dataKey="margin"
+              stroke="none"
+              fill={`url(#${fill})`}
+              tooltipType="none"
+              activeDot={false}
+              {...animation}
+            />
             <Line
               type={period.granularity === 'day' ? 'linear' : 'monotone'}
               dataKey="margin"
@@ -79,7 +97,7 @@ export function MarginChart({ period, trend, previousMargin }: { period: Period;
               activeDot={{ r: 4, strokeWidth: 2, stroke: 'var(--card)' }}
               {...animation}
             />
-          </LineChart>
+          </ComposedChart>
         </ResponsiveContainer>
       </div>
     </ChartFrame>

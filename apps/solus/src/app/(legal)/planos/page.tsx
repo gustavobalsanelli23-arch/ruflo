@@ -67,7 +67,7 @@ export default function PlansPage() {
                 href={action.href}
                 className={cn(
                   'mt-6 inline-flex h-10 items-center justify-center rounded-lg px-4 text-center text-sm font-medium outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background',
-                  plan.highlight ? 'bg-primary text-primary-foreground hover:bg-primary/85' : 'border border-border text-foreground hover:bg-muted',
+                  plan.highlight ? 'btn-primary' : 'btn-soft border',
                 )}
               >
                 {action.label}

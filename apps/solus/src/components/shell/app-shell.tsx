@@ -38,7 +38,8 @@ export function AppShell({ context, children }: { context: ShellContext; childre
           }}
         />
         {context.mode === 'demo' && <DemoBanner signedIn={context.signedIn} />}
-        <main id="conteudo" tabIndex={-1} className="flex-1 outline-none">
+        <main id="conteudo" tabIndex={-1} className="relative isolate flex-1 outline-none">
+          <div className="app-grid" aria-hidden="true" />
           <div className="mx-auto w-full max-w-[1480px] px-4 pt-6 pb-28 sm:px-6 lg:px-8 lg:pt-8 lg:pb-16">{children}</div>
         </main>
       </div>

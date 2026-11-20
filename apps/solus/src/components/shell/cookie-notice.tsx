@@ -68,7 +68,7 @@ function EssentialNotice() {
           Saiba mais
         </Link>
       </p>
-      <button type="button" onClick={acknowledge} className={`mt-3 bg-primary text-primary-foreground hover:bg-primary/85 ${BUTTON}`}>
+      <button type="button" onClick={acknowledge} className={`mt-3 btn-primary ${BUTTON}`}>
         Entendi
       </button>
     </section>
@@ -89,7 +89,7 @@ function ConsentBanner() {
         </Link>
       </p>
       <div className="mt-3 flex gap-2">
-        <button type="button" onClick={() => setConsent(true)} className={`bg-primary text-primary-foreground hover:bg-primary/85 ${BUTTON}`}>
+        <button type="button" onClick={() => setConsent(true)} className={`btn-primary ${BUTTON}`}>
           Aceitar
         </button>
         <button type="button" onClick={() => setConsent(false)} className={`border border-border bg-transparent hover:bg-accent ${BUTTON}`}>
