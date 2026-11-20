@@ -155,8 +155,29 @@ describe('encerrar a cobrança antes de excluir a organização', () => {
     const { getStripe } = await import('@/lib/billing/stripe');
     const del = vi.spyOn(getStripe()!.customers, 'del').mockResolvedValue({ id: 'cus_1', deleted: true } as never);
     const { closeBillingAccount } = await import('@/modules/billing/lifecycle');
-    expect(await closeBillingAccount(client({ stripe_customer_id: 'cus_1', status: 'active' }), 'org')).toBe(true);
+    expect(await closeBillingAccount(client({ stripe_customer_id: 'cus_1', stripe_subscription_id: 'sub_1', status: 'active' }), 'org')).toBe(true);
     expect(del).toHaveBeenCalledWith('cus_1');
+    // Marked canceled at once, so the database lets the organization go.
+    expect(rpc).toHaveBeenCalledWith(
+      'apply_subscription',
+      expect.objectContaining({ p_event_id: 'solus:closed:cus_1', p_customer_id: 'cus_1', p_subscription_id: 'sub_1', p_status: 'canceled' }),
+    );
+  });
+
+  it('se não consegue marcar a cobrança como encerrada, a organização não é excluída', async () => {
+    const { getStripe } = await import('@/lib/billing/stripe');
+    vi.spyOn(getStripe()!.customers, 'del').mockResolvedValue({ id: 'cus_1', deleted: true } as never);
+    rpc.mockResolvedValue({ error: { message: 'falhou' } });
+    const { closeBillingAccount } = await import('@/modules/billing/lifecycle');
+    expect(await closeBillingAccount(client({ stripe_customer_id: 'cus_1', stripe_subscription_id: 'sub_1', status: 'active' }), 'org')).toBe(false);
+  });
+
+  it('cobrança já encerrada: apaga o cliente e não precisa marcar nada', async () => {
+    const { getStripe } = await import('@/lib/billing/stripe');
+    vi.spyOn(getStripe()!.customers, 'del').mockResolvedValue({ id: 'cus_1', deleted: true } as never);
+    const { closeBillingAccount } = await import('@/modules/billing/lifecycle');
+    expect(await closeBillingAccount(client({ stripe_customer_id: 'cus_1', stripe_subscription_id: 'sub_1', status: 'canceled' }), 'org')).toBe(true);
+    expect(rpc).not.toHaveBeenCalled();
   });
 
   it('sem cobrança registrada, segue sem chamar a Stripe', async () => {
