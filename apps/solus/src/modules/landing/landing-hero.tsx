@@ -63,7 +63,10 @@ export function LandingHero() {
       <div className={styles.sky} aria-hidden="true" />
       <div className={styles.eclipse} aria-hidden="true">
         <div className={styles.corona} />
+        <div className={styles.rays} />
         <EclipseArt className={styles.eclipseArt} />
+        <div className={styles.flow} />
+        <div className={`${styles.flow} ${styles.flowSlow}`} />
       </div>
       <div className={styles.scrim} aria-hidden="true" />
 

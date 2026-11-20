@@ -85,6 +85,58 @@
   height: 100%;
   /* Crescent on the lower right, away from the headline. */
   transform: rotate(90deg);
+  /* Halo around the lit crescent. */
+  filter: drop-shadow(0 0 14px rgb(127 182 230 / 0.55)) drop-shadow(0 0 48px rgb(42 111 184 / 0.45));
+}
+
+/*
+ * Light flowing around the eclipse: soft rays turning slowly behind the disc,
+ * and a bright streak running along its rim. Both only rotate (composited),
+ * so they cost nothing per frame.
+ */
+.rays,
+.flow {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  mix-blend-mode: screen;
+  will-change: transform;
+}
+
+.rays {
+  inset: -14%;
+  /* Two periods that never line up, so the rays read as light, not as a gear. */
+  background:
+    repeating-conic-gradient(from 0deg, rgb(127 182 230 / 0) 0deg, rgb(127 182 230 / 0.13) 4deg, rgb(127 182 230 / 0) 9deg, rgb(127 182 230 / 0) 23deg),
+    repeating-conic-gradient(from 11deg, rgb(160 205 242 / 0) 0deg, rgb(160 205 242 / 0.09) 7deg, rgb(160 205 242 / 0) 15deg, rgb(160 205 242 / 0) 37deg);
+  -webkit-mask-image: radial-gradient(closest-side, transparent 42%, #000 50%, rgb(0 0 0 / 0.3) 72%, transparent 100%);
+  mask-image: radial-gradient(closest-side, transparent 42%, #000 50%, rgb(0 0 0 / 0.3) 72%, transparent 100%);
+  filter: blur(9px);
+  animation: spin 80s linear infinite reverse;
+}
+
+/* The disc's rim sits at 60% of the closest side (r 120 of 200). */
+.flow {
+  background: conic-gradient(
+    from 0deg,
+    rgb(211 231 248 / 0) 0deg,
+    rgb(127 182 230 / 0) 200deg,
+    rgb(127 182 230 / 0.55) 300deg,
+    rgb(236 245 253 / 0.95) 350deg,
+    rgb(211 231 248 / 0) 360deg
+  );
+  -webkit-mask-image: radial-gradient(closest-side, transparent 55%, #000 59.5%, #000 61%, transparent 67%);
+  mask-image: radial-gradient(closest-side, transparent 55%, #000 59.5%, #000 61%, transparent 67%);
+  filter: blur(2px);
+  animation: spin 9s linear infinite;
+}
+
+/* A fainter second streak, out of step, so the flow never looks mechanical. */
+.flowSlow {
+  opacity: 0.55;
+  animation-duration: 15s;
+  /* Starts partway round, opposite the first streak. */
+  animation-delay: -7s;
 }
 
 /* Keeps the text side readable over the glow. */
@@ -527,6 +579,12 @@
   from {
     opacity: 0;
     transform: translateY(-50%) scale(0.94);
+  }
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(1turn);
   }
 }
 
