@@ -11,8 +11,8 @@ import { LandingHero } from './landing-hero';
  */
 
 const FOCUS = 'outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background';
-const PRIMARY = `inline-flex h-11 items-center justify-center gap-2 bg-primary px-5 text-[15px] font-medium text-primary-foreground hover:bg-primary/85 ${FOCUS}`;
-const SECONDARY = `inline-flex h-11 items-center justify-center gap-2 border border-border px-5 text-[15px] font-medium text-foreground hover:bg-muted ${FOCUS}`;
+const PRIMARY = `inline-flex h-11 items-center justify-center gap-2 rounded-full bg-primary px-6 text-[15px] font-medium text-primary-foreground shadow-sm transition hover:-translate-y-0.5 hover:bg-primary/85 hover:shadow-md ${FOCUS}`;
+const SECONDARY = `inline-flex h-11 items-center justify-center gap-2 rounded-full border border-border px-6 text-[15px] font-medium text-foreground transition hover:-translate-y-0.5 hover:bg-muted ${FOCUS}`;
 
 const STEPS = [
   {
