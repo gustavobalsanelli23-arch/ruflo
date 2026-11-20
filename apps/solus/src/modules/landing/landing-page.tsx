@@ -1,7 +1,10 @@
 import Link from 'next/link';
 import { formatPrice, PLANS } from '@/config/plans';
+import { demoRepository } from '@/demo/repository';
+import { formatCurrency, formatRatio } from '@/lib/format';
 import { LegalFooter } from '@/modules/legal/legal-shell';
 import { LandingHero } from './landing-hero';
+import { LiveDemo } from './live-demo';
 
 /**
  * Public home for visitors (signed-in people go straight to the app). Every
@@ -49,7 +52,8 @@ const AUDIENCES = [
   },
 ];
 
-export function LandingPage() {
+export async function LandingPage() {
+  const demo = await demoRepository.getOverview('30d');
   const paid = PLANS.filter((plan) => plan.monthlyPrice > 0);
   const lowest = Math.min(...paid.map((plan) => plan.monthlyPrice));
   return (
@@ -77,6 +81,30 @@ export function LandingPage() {
               </li>
             ))}
           </ol>
+        </section>
+
+        <section aria-labelledby="veja-funcionando" className="border-t border-border">
+          <div className="mx-auto max-w-6xl px-5 py-20 sm:px-8 sm:py-28">
+            <h2 id="veja-funcionando" className={SECTION_TITLE}>
+              Veja funcionando
+            </h2>
+            <p className="mt-5 max-w-xl text-[15px] leading-7 text-muted-foreground">
+              Um empório com {demo.categories.length} categorias, nos últimos 30 dias. Estes números e este gráfico vêm da demonstração do SOLUS.
+            </p>
+            <LiveDemo
+              period={demo.period}
+              trend={demo.trend}
+              facts={[
+                { label: 'Receita líquida', value: formatCurrency(demo.revenue.value, { compact: true }), note: 'vendas menos descontos e devoluções' },
+                { label: 'Margem bruta', value: formatRatio(demo.grossMargin.value), note: 'quanto sobra de cada real vendido' },
+                {
+                  label: 'Oportunidades',
+                  value: formatCurrency(demo.opportunitySummary.monthlyImpact, { whole: true }),
+                  note: `por mês, em ${demo.opportunitySummary.open} oportunidades abertas`,
+                },
+              ]}
+            />
+          </div>
         </section>
 
         <section aria-labelledby="o-que-voce-ve" className="border-t border-border">
