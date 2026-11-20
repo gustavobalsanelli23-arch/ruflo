@@ -54,7 +54,7 @@ function NavLink({ item, active, count, collapsed }: { item: NavItem; active: bo
         {active && (
           <motion.span
             layoutId="sidebar-marker"
-            className="absolute top-1.5 bottom-1.5 -left-3 w-[3px] bg-linear-to-b from-[#ff5a4e] via-[#f5d63d] to-[#4f8dff]"
+            className="absolute top-1.5 bottom-1.5 -left-3 w-[3px] bg-sidebar-primary shadow-[0_0_10px_1px_var(--sidebar-primary)]"
             transition={{ type: 'spring', stiffness: 520, damping: 42 }}
           />
         )}

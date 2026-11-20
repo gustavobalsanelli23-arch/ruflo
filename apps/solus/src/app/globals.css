@@ -125,13 +125,16 @@
 }
 
 /*
- * Spectrum — black page, white type, hairlines, square corners; the only
- * colour is the light spectrum, used for the eclipse, the headline and the
- * active markers. Daylight is the same system inverted.
+ * Black page, white type, hairlines, square corners. No accent colour:
+ * light itself is the accent (glass lettering, a light running round the
+ * controls, a soft light following the pointer). Daylight is the same
+ * system inverted.
  */
 :root {
   color-scheme: light;
-  --spectrum: linear-gradient(90deg, #ff5a4e, #ff9a3c, #f5d63d, #74dd6a, #3cd3c8, #4f8dff, #9b6bff, #ef6bd0);
+  /* A line of light: bright in the middle, fading to both ends. */
+  --spectrum: linear-gradient(90deg, rgb(0 0 0 / 0.12), #000000 50%, rgb(0 0 0 / 0.12));
+  --light: #000000;
   --background: #ffffff;
   --foreground: #000000;
   --card: #ffffff;
@@ -207,6 +210,8 @@
 /* Default theme. */
 .dark {
   color-scheme: dark;
+  --spectrum: linear-gradient(90deg, rgb(255 255 255 / 0.14), #ffffff 50%, rgb(255 255 255 / 0.14));
+  --light: #ffffff;
   --background: #000000;
   --foreground: #ffffff;
   --card: #000000;
@@ -335,13 +340,22 @@
   }
 }
 
-/* Surfaces: a hairline on the page's own ground; the line darkens under the pointer. */
+/* Surfaces: a hairline on the page's own ground, and a soft light that
+   follows the pointer (position set by the app shell, usePointerLight). */
 @utility surface {
   background-color: var(--card);
+  background-image: radial-gradient(
+    360px circle at var(--mx, 50%) var(--my, -400px),
+    color-mix(in oklab, var(--light) var(--spot), transparent),
+    transparent 70%
+  );
   border: 1px solid var(--border);
-  transition: border-color 0.2s ease;
+  transition:
+    --spot 0.45s ease,
+    border-color 0.2s ease;
   @media (hover: hover) {
     &:hover {
+      --spot: 7%;
       border-color: var(--border-strong);
     }
   }
@@ -413,6 +427,43 @@
       transform 0.1s ease;
   }
 
+  /* A light runs round the edge, faster under the pointer; on the solid
+     button it runs just outside, where it can be seen. */
+  .btn-primary::before,
+  .btn-soft::before {
+    content: "";
+    position: absolute;
+    inset: -1px;
+    padding: 1.5px;
+    pointer-events: none;
+    background: conic-gradient(
+      from var(--flow-angle),
+      transparent 0deg,
+      transparent 260deg,
+      color-mix(in oklab, var(--light) 90%, transparent) 330deg,
+      transparent 360deg
+    );
+    -webkit-mask:
+      linear-gradient(#000 0 0) content-box,
+      linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask:
+      linear-gradient(#000 0 0) content-box exclude,
+      linear-gradient(#000 0 0);
+    animation: flow-turn 4.5s linear infinite;
+  }
+
+  .btn-primary::before {
+    inset: -4px;
+  }
+
+  @media (hover: hover) {
+    .btn-primary:hover::before,
+    .btn-soft:hover::before {
+      animation-duration: 1.8s;
+    }
+  }
+
   .btn-primary {
     color: var(--primary-foreground);
     background-color: var(--primary);
@@ -454,8 +505,7 @@
 }
 
 /* ---------- Interactive cards ----------
- * The outline turns solid under the pointer and a spectrum hairline runs
- * along the top edge.
+ * A light runs round the border while the pointer is on the card.
  */
 .flow-card {
   position: relative;
@@ -465,22 +515,38 @@
 .flow-card::before {
   content: "";
   position: absolute;
-  inset: -1px -1px auto;
-  height: 2px;
+  inset: -1px;
+  padding: 1px;
   pointer-events: none;
-  background-image: var(--spectrum);
-  transform: scaleX(0);
-  transform-origin: left center;
-  transition: transform 0.45s var(--ease-out-quint);
+  background: conic-gradient(
+    from var(--flow-angle),
+    transparent 0deg,
+    transparent 250deg,
+    color-mix(in oklab, var(--light) 85%, transparent) 330deg,
+    transparent 360deg
+  );
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask:
+    linear-gradient(#000 0 0) content-box exclude,
+    linear-gradient(#000 0 0);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  animation: flow-turn 3.2s linear infinite paused;
 }
 
 @media (hover: hover) {
-  .flow-card:hover {
-    border-color: var(--foreground);
-  }
-
   .flow-card:hover::before {
-    transform: scaleX(1);
+    opacity: 1;
+    animation-play-state: running;
+  }
+}
+
+@keyframes flow-turn {
+  to {
+    --flow-angle: 360deg;
   }
 }
 
@@ -566,13 +632,6 @@
   );
   background-size: 200% 100%;
   animation: shimmer 1.6s ease-in-out infinite;
-}
-
-/* Stat strip tiles light up under the pointer. */
-@media (hover: hover) {
-  .stat-strip > :hover {
-    background-color: var(--muted);
-  }
 }
 
 /* The working plane is plain: no grid, no beam. */

@@ -9,9 +9,9 @@ import styles from './landing-hero.module.css';
 
 /**
  * Full-viewport hero of the public home, always black: a flat nav, the
- * headline set large in the light spectrum, and the eclipse drawn as a
- * cloud of particles. The particles gathering into the corona is the one
- * orchestrated moment of the page.
+ * headline in glass lettering, and the eclipse drawn as a cloud of white
+ * particles. The pointer stirs the corona; a click opens the eclipse (the
+ * moon slides away) and another closes it.
  */
 
 const LINKS = [
@@ -23,6 +23,7 @@ const LINKS = [
 
 export function LandingHero() {
   const [open, setOpen] = useState(false);
+  const [eclipseOpen, setEclipseOpen] = useState(false);
   const burger = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
@@ -87,9 +88,18 @@ export function LandingHero() {
         </nav>
       </div>
 
-      <div className={styles.cloud} aria-hidden="true">
-        <ParticleEclipse className={styles.canvas} />
-      </div>
+      <button
+        type="button"
+        className={styles.cloud}
+        aria-pressed={eclipseOpen}
+        aria-label={eclipseOpen ? 'Fechar o eclipse' : 'Abrir o eclipse'}
+        onClick={() => setEclipseOpen((value) => !value)}
+      >
+        <ParticleEclipse className={styles.canvas} open={eclipseOpen} />
+        <span className={styles.cloudHint} aria-hidden="true">
+          {eclipseOpen ? 'Clique para fechar' : 'Clique no eclipse'}
+        </span>
+      </button>
 
       <div className={styles.main}>
         <h1 className={styles.headline}>

@@ -3,12 +3,17 @@
 import { useEffect, useRef } from 'react';
 
 /**
- * The SOLUS eclipse drawn as a cloud of light: thousands of points form the
- * corona round a dark disc, coloured by the light spectrum around the ring,
- * with a few faint threads between neighbours. On load the points gather
- * from a scattered cloud (the one orchestrated moment); then the corona
- * turns very slowly. Static for reduced motion; paused off screen and in
- * hidden tabs. Decorative (aria-hidden on the wrapper).
+ * The SOLUS eclipse drawn as a cloud of light: thousands of white and
+ * silver points form the corona round a dark disc, with a few faint
+ * threads between neighbours.
+ *
+ *   * On load the points gather from a scattered cloud.
+ *   * The pointer pushes the points near it aside; they drift back.
+ *   * `open` slides the moon away and lets the corona widen and brighten
+ *     (the hero toggles it on click); closing brings the moon back.
+ *
+ * Static for reduced motion (open/close still switch, without the slide);
+ * paused off screen and in hidden tabs.
  */
 
 interface Point {
@@ -16,15 +21,18 @@ interface Point {
   radius: number; // in units of the disc radius
   size: number;
   alpha: number;
-  bucket: number;
-  // scattered start, as a fraction of the canvas
+  tone: number; // 0..TONES-1, from cool silver to white
   sx: number;
   sy: number;
   delay: number;
+  // pointer displacement, eased back to zero
+  dx: number;
+  dy: number;
 }
 
-const BUCKETS = 48;
+const TONES = 6;
 const GATHER_MS = 2200;
+const PUSH_RADIUS = 110;
 
 function gaussian() {
   let u = 0;
@@ -37,9 +45,6 @@ function gaussian() {
 function makePoints(count: number): Point[] {
   const points: Point[] = [];
   for (let i = 0; i < count; i++) {
-    const angle = Math.random() * Math.PI * 2;
-    // Three layers: a bright, tight inner corona; a wider glow; a faint
-    // halo with streamers reaching out (the volume of the cloud).
     const layer = Math.random();
     const radius =
       layer < 0.55
@@ -49,30 +54,41 @@ function makePoints(count: number): Point[] {
           : 1.08 + Math.abs(gaussian()) * 0.55;
     const fade = Math.max(0, 1 - (radius - 1) / 1.1);
     points.push({
-      angle,
+      angle: Math.random() * Math.PI * 2,
       radius,
       size: Math.random() < 0.05 ? 2.4 : Math.random() < 0.4 ? 1.6 : 1.2,
-      alpha: layer < 0.55 ? 0.55 + fade * 0.45 : 0.18 + fade * 0.6,
-      bucket: Math.floor(((angle / (Math.PI * 2)) * BUCKETS) % BUCKETS),
+      alpha: layer < 0.55 ? 0.55 + fade * 0.45 : 0.16 + fade * 0.55,
+      // The inner corona is the whitest.
+      tone: Math.min(TONES - 1, Math.floor((layer < 0.55 ? 0.55 + Math.random() * 0.45 : Math.random() * 0.8) * TONES)),
       sx: Math.random(),
       sy: Math.random(),
       delay: Math.random() * 0.45,
+      dx: 0,
+      dy: 0,
     });
   }
-  // Sorted by colour, so a frame changes fillStyle once per bucket.
-  return points.sort((a, b) => a.bucket - b.bucket);
+  // Sorted by tone, so a frame changes fillStyle once per tone.
+  return points.sort((a, b) => a.tone - b.tone);
 }
 
-/** Spectrum hue for a position round the ring: red → violet → magenta. */
-function bucketColor(bucket: number) {
-  const hue = (bucket / BUCKETS) * 320;
-  return `hsl(${hue} 92% 66%)`;
+/** Cool silver (tone 0) to pure white. */
+function toneColor(tone: number) {
+  const t = tone / (TONES - 1);
+  return `hsl(212 ${Math.round(28 - t * 28)}% ${Math.round(68 + t * 32)}%)`;
 }
 
 const easeOut = (t: number) => 1 - Math.pow(1 - t, 4);
+const easeInOut = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
 
-export function ParticleEclipse({ className }: { className?: string }) {
+export function ParticleEclipse({ className, open = false }: { className?: string; open?: boolean }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const openRef = useRef(open);
+  const kick = useRef<() => void>(() => {});
+
+  useEffect(() => {
+    openRef.current = open;
+    kick.current();
+  }, [open]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -82,8 +98,7 @@ export function ParticleEclipse({ className }: { className?: string }) {
     const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     const small = window.matchMedia('(max-width: 767px)').matches;
     const points = makePoints(small ? 2200 : 5200);
-    const colors = Array.from({ length: BUCKETS }, (_, bucket) => bucketColor(bucket));
-    // Threads: pairs of points close on the ring.
+    const colors = Array.from({ length: TONES }, (_, tone) => toneColor(tone));
     const threads: [number, number][] = [];
     for (let i = 0; i < (small ? 40 : 90); i++) {
       const a = Math.floor(Math.random() * points.length);
@@ -92,9 +107,7 @@ export function ParticleEclipse({ className }: { className?: string }) {
       for (let tries = 0; tries < 40; tries++) {
         const b = Math.floor(Math.random() * points.length);
         if (b === a) continue;
-        const pa = points[a]!;
-        const pb = points[b]!;
-        const d = Math.abs(pa.angle - pb.angle) + Math.abs(pa.radius - pb.radius);
+        const d = Math.abs(points[a]!.angle - points[b]!.angle) + Math.abs(points[a]!.radius - points[b]!.radius);
         if (d < bestDistance && d > 0.05) {
           bestDistance = d;
           best = b;
@@ -116,17 +129,41 @@ export function ParticleEclipse({ className }: { className?: string }) {
     };
     resize();
 
+    // Pointer, in canvas coordinates (null when away).
+    let pointer: { x: number; y: number } | null = null;
+    const host = canvas.parentElement ?? canvas;
+    const onPointerMove = (event: PointerEvent) => {
+      const box = canvas.getBoundingClientRect();
+      pointer = { x: event.clientX - box.left, y: event.clientY - box.top };
+    };
+    const onPointerLeave = () => {
+      pointer = null;
+    };
+    host.addEventListener('pointermove', onPointerMove, { passive: true });
+    host.addEventListener('pointerleave', onPointerLeave);
+
     const start = performance.now();
+    let opening = openRef.current ? 1 : 0; // 0 closed .. 1 open
     let frame = 0;
     let running = true;
     let visible = true;
+    let last = start;
 
     const draw = (now: number) => {
+      frame = 0;
+      const step = Math.min(64, now - last);
+      last = now;
       const elapsed = reduced ? GATHER_MS * 2 : now - start;
       const turn = reduced ? 0 : elapsed * 0.000018;
+
+      const target = openRef.current ? 1 : 0;
+      opening = reduced ? target : opening + (target - opening) * Math.min(1, step / 260);
+      const o = easeInOut(Math.min(1, Math.max(0, opening)));
+
       const cx = width * 0.5;
       const cy = height * 0.5;
       const disc = Math.min(width, height) * 0.3;
+      const spread = 1 + o * 0.22; // the corona widens as it opens
 
       context.clearRect(0, 0, width, height);
       context.globalCompositeOperation = 'lighter';
@@ -137,61 +174,103 @@ export function ParticleEclipse({ className }: { className?: string }) {
         const point = points[i]!;
         const t = easeOut(Math.min(1, Math.max(0, (elapsed / GATHER_MS - point.delay) / (1 - point.delay))));
         const angle = point.angle + turn * (1.4 - point.radius * 0.4);
-        const tx = cx + Math.cos(angle) * point.radius * disc;
-        const ty = cy + Math.sin(angle) * point.radius * disc * 0.96;
-        xs[i] = point.sx * width + (tx - point.sx * width) * t;
-        ys[i] = point.sy * height + (ty - point.sy * height) * t;
+        const r = point.radius * disc * spread;
+        const tx = cx + Math.cos(angle) * r;
+        const ty = cy + Math.sin(angle) * r * 0.96;
+        let x = point.sx * width + (tx - point.sx * width) * t;
+        let y = point.sy * height + (ty - point.sy * height) * t;
+
+        // Push away from the pointer, then ease back.
+        if (pointer && !reduced) {
+          const ddx = x + point.dx - pointer.x;
+          const ddy = y + point.dy - pointer.y;
+          const distance = Math.hypot(ddx, ddy);
+          if (distance < PUSH_RADIUS && distance > 0.01) {
+            const force = (1 - distance / PUSH_RADIUS) * 2.6;
+            point.dx += (ddx / distance) * force;
+            point.dy += (ddy / distance) * force;
+          }
+        }
+        point.dx *= 0.93;
+        point.dy *= 0.93;
+        x += point.dx;
+        y += point.dy;
+        xs[i] = x;
+        ys[i] = y;
       }
 
-      // Threads first, under the points.
-      const threadAlpha = Math.min(1, elapsed / GATHER_MS) * 0.16;
+      const threadAlpha = Math.min(1, elapsed / GATHER_MS) * (0.12 + o * 0.1);
       if (threadAlpha > 0) {
         context.lineWidth = 0.6;
+        context.strokeStyle = '#ffffff';
+        context.globalAlpha = threadAlpha;
+        context.beginPath();
         for (const [a, b] of threads) {
-          context.strokeStyle = colors[points[a]!.bucket]!;
-          context.globalAlpha = threadAlpha;
-          context.beginPath();
           context.moveTo(xs[a]!, ys[a]!);
           context.lineTo(xs[b]!, ys[b]!);
-          context.stroke();
         }
+        context.stroke();
       }
 
+      const boost = 1 + o * 0.35;
       let current = -1;
       for (let i = 0; i < points.length; i++) {
         const point = points[i]!;
-        if (point.bucket !== current) {
-          current = point.bucket;
+        if (point.tone !== current) {
+          current = point.tone;
           context.fillStyle = colors[current]!;
         }
-        context.globalAlpha = point.alpha;
+        context.globalAlpha = Math.min(1, point.alpha * boost);
         context.fillRect(xs[i]! - point.size / 2, ys[i]! - point.size / 2, point.size, point.size);
       }
 
-      // The moon: a black disc over the centre, slightly off so one rim burns brighter.
+      // The sun behind the moon: a soft white glow that grows as it opens.
+      if (o > 0.01) {
+        const glow = context.createRadialGradient(cx, cy, 0, cx, cy, disc * 1.15);
+        glow.addColorStop(0, `rgb(255 255 255 / ${0.9 * o})`);
+        glow.addColorStop(0.6, `rgb(235 242 255 / ${0.35 * o})`);
+        glow.addColorStop(1, 'rgb(235 242 255 / 0)');
+        context.globalAlpha = 1;
+        context.fillStyle = glow;
+        context.beginPath();
+        context.arc(cx, cy, disc * 1.15, 0, Math.PI * 2);
+        context.fill();
+      }
+
+      // The moon: a black disc, sliding off down and to the left as it opens.
       context.globalCompositeOperation = 'source-over';
       context.globalAlpha = 1;
       context.fillStyle = '#000';
       context.beginPath();
-      context.arc(cx - disc * 0.035, cy + disc * 0.035, disc * 0.985, 0, Math.PI * 2);
+      context.arc(cx - disc * (0.035 + o * 2.6), cy + disc * (0.035 + o * 1.7), disc * (0.985 - o * 0.12), 0, Math.PI * 2);
       context.fill();
 
+      // The corona keeps turning, so the loop runs while the hero is on screen.
       if (!reduced && running && visible) frame = requestAnimationFrame(draw);
     };
 
-    const resume = () => {
-      cancelAnimationFrame(frame);
-      if (running && visible) frame = requestAnimationFrame(draw);
+    const wake = () => {
+      if (!frame && running && visible) frame = requestAnimationFrame(draw);
+    };
+    kick.current = () => {
+      if (reduced) draw(performance.now());
+      else wake();
     };
 
+    const stop = () => {
+      cancelAnimationFrame(frame);
+      frame = 0;
+    };
     const observer = new IntersectionObserver(([entry]) => {
       visible = Boolean(entry?.isIntersecting);
-      if (!reduced) resume();
+      if (visible) wake();
+      else stop();
     });
     observer.observe(canvas);
     const onVisibility = () => {
       running = document.visibilityState === 'visible';
-      if (!reduced) resume();
+      if (running) wake();
+      else stop();
     };
     document.addEventListener('visibilitychange', onVisibility);
     const onResize = () => {
@@ -202,10 +281,13 @@ export function ParticleEclipse({ className }: { className?: string }) {
 
     frame = requestAnimationFrame(draw);
     return () => {
-      cancelAnimationFrame(frame);
+      stop();
       observer.disconnect();
       document.removeEventListener('visibilitychange', onVisibility);
       window.removeEventListener('resize', onResize);
+      host.removeEventListener('pointermove', onPointerMove);
+      host.removeEventListener('pointerleave', onPointerLeave);
+      kick.current = () => {};
     };
   }, []);
 

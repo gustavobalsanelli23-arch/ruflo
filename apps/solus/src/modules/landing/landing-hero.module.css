@@ -1,8 +1,14 @@
 /*
- * Public hero. Always black, in both themes: white type, hairline-free
- * flat controls with square corners, and the spectrum only in the headline
- * and the particle eclipse.
+ * Public hero. Always black, in both themes: white glass lettering, square
+ * controls with a light running round their edge, and the eclipse as a
+ * cloud of white particles that answers the pointer.
  */
+
+@property --hero-flow {
+  syntax: "<angle>";
+  inherits: false;
+  initial-value: 0deg;
+}
 
 .hero {
   --ink: #ffffff;
@@ -116,6 +122,45 @@
   transition:
     background-color 0.15s ease,
     color 0.15s ease;
+}
+
+/* A light runs round the edge of every button, faster under the pointer. */
+.btn {
+  position: relative;
+  isolation: isolate;
+}
+
+.btn::before {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  z-index: -1;
+  padding: 1.5px;
+  pointer-events: none;
+  background: conic-gradient(from var(--hero-flow), transparent 0deg, transparent 260deg, rgb(255 255 255 / 0.95) 330deg, transparent 360deg);
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask:
+    linear-gradient(#000 0 0) content-box exclude,
+    linear-gradient(#000 0 0);
+  animation: hero-flow 4.5s linear infinite;
+}
+
+.btn:hover::before {
+  animation-duration: 1.8s;
+}
+
+/* On the solid button the light runs just outside it, where it can be seen. */
+.btnSolid::before {
+  inset: -5px;
+}
+
+@keyframes hero-flow {
+  to {
+    --hero-flow: 360deg;
+  }
 }
 
 .btnSolid {
@@ -241,7 +286,12 @@
   z-index: 1;
   inset: 3rem -30% auto;
   height: 56svh;
+  padding: 0;
+  border: 0;
+  background: transparent;
   pointer-events: none;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
   /* On phones the corona sits behind the headline: a backdrop, not a picture. */
   opacity: 0.5;
 }
@@ -252,11 +302,39 @@
   height: 100%;
 }
 
+/* Only on large screens is the eclipse beside the text, and clickable. */
 @media (min-width: 1024px) {
   .cloud {
     inset: 0 -6% 0 42%;
     height: auto;
     opacity: 1;
+    pointer-events: auto;
+  }
+}
+
+.cloud:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: -12px;
+}
+
+.cloudHint {
+  position: absolute;
+  /* The eclipse runs 6% past the right edge; the hint stays inside the page. */
+  right: calc(6vw + clamp(1.25rem, 3.6vw, 3rem));
+  bottom: clamp(2rem, 6vh, 4rem);
+  display: none;
+  font-size: 0.8125rem;
+  color: var(--ink-muted);
+  transition: color 0.2s ease;
+}
+
+@media (min-width: 1024px) {
+  .cloudHint {
+    display: block;
+  }
+
+  .cloud:hover .cloudHint {
+    color: var(--ink);
   }
 }
 
@@ -270,6 +348,12 @@
   flex-direction: column;
   justify-content: flex-end;
   padding: 0 clamp(1.25rem, 3.6vw, 3rem) clamp(2rem, 6vh, 4rem);
+  /* The block spans the hero, over the eclipse: only its contents take the pointer. */
+  pointer-events: none;
+}
+
+.main > * {
+  pointer-events: auto;
 }
 
 .headline {
@@ -291,23 +375,52 @@
 .line {
   display: block;
   padding-bottom: 0.04em;
-  background-image: linear-gradient(90deg, #ff5a4e 0%, #ff9a3c 16%, #f5d63d 30%, #74dd6a 44%, #3cd3c8 58%, #4f8dff 74%, #9b6bff 88%, #ef6bd0 100%);
+  /* Glass: a fill brighter at the top, a hairline of light on the edges,
+     depth below, and a reflection crossing the words now and then. */
+  color: transparent;
+  background-image:
+    linear-gradient(105deg, transparent 38%, rgb(255 255 255 / 0.95) 50%, transparent 62%),
+    linear-gradient(180deg, rgb(255 255 255 / 0.98) 0%, rgb(240 244 250 / 0.8) 40%, rgb(214 222 234 / 0.5) 74%, rgb(196 206 222 / 0.64) 100%);
+  background-size:
+    260% 100%,
+    100% 100%;
+  background-position:
+    160% 0,
+    0 0;
+  background-repeat: no-repeat;
   -webkit-background-clip: text;
   background-clip: text;
-  color: transparent;
-  animation: rise 1s var(--ease-out-quint) both;
+  -webkit-text-stroke: 1px rgb(255 255 255 / 0.4);
+  filter: drop-shadow(0 6px 14px rgb(0 0 0 / 0.45));
+  animation:
+    rise 1s var(--ease-out-quint) both,
+    glass-sheen 8s ease-in-out 2.2s infinite;
+}
+
+@keyframes glass-sheen {
+  0% {
+    background-position:
+      160% 0,
+      0 0;
+  }
+  28%,
+  100% {
+    background-position:
+      -60% 0,
+      0 0;
+  }
 }
 
 .line:nth-child(2) {
-  animation-delay: 0.08s;
+  animation-delay: 0.08s, 2.5s;
 }
 
 .line:nth-child(3) {
-  animation-delay: 0.16s;
+  animation-delay: 0.16s, 2.8s;
 }
 
 .line:nth-child(4) {
-  animation-delay: 0.24s;
+  animation-delay: 0.24s, 3.1s;
 }
 
 @keyframes rise {
