@@ -130,11 +130,13 @@ Erros: o adaptador trata o caso do OpenRouter que responde 200 com `{ error }`. 
 
 Cada chamada fica registrada em `ai_requests` (pessoa, tipo, status, modelo, número de chamadas, tokens de entrada, saída e cache), gravada só pelas funções `begin_ai_request` e `finish_ai_request`. A pessoa vê os próprios registros; owner e admin veem os da organização.
 
-## Privacidade: o que vai para a Anthropic
+## Privacidade: o que vai para o provedor de IA
 
-Em cada pergunta são enviados à API do Claude: a pergunta, até 6 trocas anteriores da mesma conversa, o nome da organização, as datas da primeira e da última venda e da última posição de estoque, e os **resultados das consultas** (totais agregados, nomes e SKUs de produtos, categorias, fornecedores, posições de estoque, oportunidades). Não são enviados dados de clientes finais, e-mails nem dados de contas.
+Em produção, o provedor é a Groq (só ela no rodízio desde novembro de 2026); a Política de privacidade pública diz o mesmo. Em cada pergunta são enviados à API do provedor: a pergunta, até 6 trocas anteriores da mesma conversa, o nome da organização, as datas da primeira e da última venda e da última posição de estoque, e os **resultados das consultas** (totais agregados, nomes e SKUs de produtos, categorias, fornecedores, posições de estoque, oportunidades). Não são enviados dados de clientes finais, e-mails nem dados de contas.
 
 O tratamento desses dados segue os termos da API do provedor configurado (Anthropic, DeepSeek, OpenRouter…), contratados por quem fornece a chave. Com o provedor `openai`, os mesmos dados podem ir para qualquer um dos provedores do rodízio, conforme qual estiver disponível. Avise os clientes antes de ligar o analista em produção.
+
+**Groq (conferido em 11/11/2026):** por padrão não guarda os dados das chamadas, mas pode guardar entradas e saídas por até 30 dias para combater abuso e garantir a confiabilidade. A retenção zero (ZDR) fica em `console.groq.com/settings/data-controls`, sem exigir plano pago, e foi ligada para a conta inteira em 11/11/2026. O processamento é na Google Cloud dos EUA: é uma transferência internacional de dados (LGPD, art. 33), já citada na Política de privacidade. Se o provedor mudar, atualize esta seção, a Política de privacidade (`src/app/(legal)/privacidade`) e confira os termos e a retenção do novo provedor.
 
 No banco ficam as perguntas, as respostas montadas e o registro de uso. As conversas são apagadas junto com a organização (cascata); ainda não há tela para a pessoa apagar uma conversa.
 
