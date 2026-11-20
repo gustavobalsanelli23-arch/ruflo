@@ -20,7 +20,7 @@ export function AppShell({ context, children }: { context: ShellContext; childre
 
   return (
     <BasePathProvider value={context.basePath}>
-      <a
+      <a data-print="hide"
         href="#conteudo"
         className="fixed top-2 left-2 z-[60] -translate-y-16 rounded-md bg-primary px-3 py-2 text-sm font-medium text-primary-foreground transition-transform focus:translate-y-0"
       >

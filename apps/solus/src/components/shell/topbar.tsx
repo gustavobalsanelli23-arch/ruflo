@@ -20,7 +20,7 @@ export function Topbar({
   onOpenMenu: () => void;
 }) {
   return (
-    <header className="glass sticky top-0 z-30 border-b">
+    <header data-print="hide" className="glass sticky top-0 z-30 border-b">
       <div className="mx-auto flex h-14 max-w-[1480px] items-center gap-3 px-4 sm:px-6 lg:px-8">
         <Button variant="ghost" size="icon" className="-ml-2 lg:hidden" onClick={onOpenMenu} aria-label="Abrir navegação">
           <Menu aria-hidden="true" />

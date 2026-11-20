@@ -713,6 +713,32 @@
   }
 }
 
+/* Print (the report): only the page content, black on white. */
+@media print {
+  [data-print="hide"] {
+    display: none !important;
+  }
+  /* No entrance motion caught half-way on paper. */
+  *,
+  ::before,
+  ::after {
+    animation: none !important;
+    transition: none !important;
+    opacity: 1 !important;
+    filter: none !important;
+    transform: none !important;
+  }
+  html,
+  body {
+    background: #ffffff !important;
+    color: #000000 !important;
+  }
+  @page {
+    size: A4;
+    margin: 16mm 14mm;
+  }
+}
+
 @media (forced-colors: active) {
   .glass,
   .glass-pop,

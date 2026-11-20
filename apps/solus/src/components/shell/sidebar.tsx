@@ -85,6 +85,7 @@ export function Sidebar({ context }: { context: ShellContext }) {
   const [collapsed, toggle] = useSidebarCollapsed();
   return (
     <aside
+      data-print="hide"
       aria-label="Navegação lateral"
       className="fixed inset-y-0 left-0 z-40 hidden w-[72px] flex-col border-r border-sidebar-border bg-sidebar backdrop-blur-xl backdrop-saturate-150 transition-[width] duration-200 ease-(--ease-out-quint) lg:flex expanded:w-[248px]"
     >

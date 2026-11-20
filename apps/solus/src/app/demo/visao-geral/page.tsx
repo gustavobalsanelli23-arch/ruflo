@@ -16,6 +16,7 @@ import { Greeting } from '@/modules/overview/greeting';
 import { MarginChart } from '@/modules/overview/margin-chart';
 import { CategoryBreakdown, InventoryHealth, RecentActivity, TopOpportunities } from '@/modules/overview/overview-panels';
 import { RevenueProfitChart } from '@/modules/overview/revenue-profit-chart';
+import { ReportLink } from '@/modules/report/report-link';
 
 export const metadata: Metadata = { title: 'Visão executiva' };
 
@@ -47,7 +48,12 @@ export default async function OverviewPage({
       <PageHeader
         title={<Greeting name={firstName} />}
         description={`${organization.name}, ${organization.segment.toLowerCase()} em ${organization.city}, ${organization.state}.`}
-        actions={<PeriodSelect />}
+        actions={
+          <div className="flex flex-wrap items-center gap-2">
+            <ReportLink period={period} />
+            <PeriodSelect />
+          </div>
+        }
       />
 
       <PeriodFrame className="mt-6 flex flex-col gap-6">

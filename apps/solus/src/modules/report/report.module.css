@@ -1,0 +1,201 @@
+/*
+ * The report: on screen it follows the app theme, in print it is always
+ * black on white, A4, with the app shell hidden (see globals.css @media print).
+ */
+
+.report {
+  max-width: 52rem;
+  margin: 0 auto;
+  color: var(--foreground);
+}
+
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  padding: 1rem;
+  border: 1px solid var(--border);
+  font-size: 0.875rem;
+  color: var(--muted-foreground);
+}
+
+.toolbar p {
+  margin: 0;
+  max-width: 34rem;
+}
+
+.head {
+  padding-bottom: 1.25rem;
+  border-bottom: 2px solid var(--foreground);
+}
+
+.brand {
+  margin: 0;
+  font-size: 0.875rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.title {
+  margin: 0.25rem 0 0;
+  font-size: 2.25rem;
+  line-height: 1.05;
+  font-weight: 700;
+  letter-spacing: -0.04em;
+}
+
+.meta {
+  margin: 0.5rem 0 0;
+  font-size: 0.875rem;
+  color: var(--muted-foreground);
+}
+
+.section {
+  margin: 2rem 0 0.75rem;
+  padding-top: 0.6rem;
+  border-top: 1px solid var(--border-strong);
+  font-size: 1.125rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.lede {
+  margin: 0 0 0.75rem;
+  font-size: 0.9375rem;
+  line-height: 1.55;
+}
+
+.kpis {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
+  gap: 1rem 1.5rem;
+  margin: 0;
+}
+
+.kpi dt {
+  font-size: 0.8125rem;
+  color: var(--muted-foreground);
+}
+
+.kpi dd {
+  margin: 0;
+}
+
+.kpiValue {
+  margin-top: 0.2rem !important;
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  font-variant-numeric: tabular-nums;
+}
+
+.kpiDelta {
+  font-size: 0.8125rem;
+  color: var(--muted-foreground);
+  font-variant-numeric: tabular-nums;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+}
+
+.table th,
+.table td {
+  padding: 0.45rem 0.5rem 0.45rem 0;
+  border-bottom: 1px solid var(--border);
+  text-align: left;
+  vertical-align: top;
+}
+
+.table th {
+  font-weight: 600;
+  color: var(--muted-foreground);
+  border-bottom-color: var(--border-strong);
+}
+
+.num {
+  text-align: right !important;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.facts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
+  gap: 0.75rem 1.5rem;
+  margin: 0 0 0.75rem;
+}
+
+.facts dt {
+  font-size: 0.8125rem;
+  color: var(--muted-foreground);
+}
+
+.facts dd {
+  margin: 0.15rem 0 0;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.foot {
+  margin-top: 2.5rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--border);
+  font-size: 0.75rem;
+  line-height: 1.5;
+  color: var(--muted-foreground);
+}
+
+.foot p {
+  margin: 0 0 0.25rem;
+}
+
+@media print {
+  .report {
+    max-width: none;
+    color: #000;
+  }
+
+  .toolbar {
+    display: none;
+  }
+
+  .head {
+    border-bottom-color: #000;
+  }
+
+  .meta,
+  .kpi dt,
+  .kpiDelta,
+  .facts dt,
+  .table th,
+  .foot {
+    color: #444;
+  }
+
+  .section,
+  .table th {
+    border-color: #999;
+  }
+
+  .table th,
+  .table td,
+  .foot {
+    border-color: #ccc;
+  }
+
+  .table tr,
+  .kpi,
+  .facts > div {
+    break-inside: avoid;
+  }
+
+  .section {
+    break-after: avoid;
+  }
+}

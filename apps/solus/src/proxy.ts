@@ -25,6 +25,7 @@ const PRIVATE_PREFIXES = [
   '/lucratividade',
   '/estoque',
   '/oportunidades',
+  '/relatorio',
   '/analista',
   '/dados',
   '/configuracoes',

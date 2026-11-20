@@ -61,7 +61,7 @@ function EssentialNotice() {
   const seen = useSyncExternalStore(subscribe, read, () => true);
   if (seen) return null;
   return (
-    <section aria-label="Aviso de cookies" className={PANEL}>
+    <section data-print="hide" aria-label="Aviso de cookies" className={PANEL}>
       <p className="text-sm leading-6">
         Usamos só cookies essenciais, para manter você conectado e o app funcionando. Nada de anúncios ou rastreamento.{' '}
         <Link href="/cookies" className={LINK}>
@@ -80,7 +80,7 @@ function ConsentBanner() {
   // undefined = still hydrating; anything but null = already answered.
   if (consent !== null) return null;
   return (
-    <section aria-label="Preferências de cookies" className={PANEL}>
+    <section data-print="hide" aria-label="Preferências de cookies" className={PANEL}>
       <p className="text-sm leading-6">
         Usamos cookies essenciais para o app funcionar e, se você permitir, uma ferramenta de análise para entender como o SOLUS é
         usado e melhorá-lo. Ela não vê os dados da sua empresa. Nada de anúncios.{' '}

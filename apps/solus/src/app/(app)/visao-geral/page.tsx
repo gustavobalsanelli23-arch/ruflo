@@ -28,6 +28,7 @@ import { getSummary, summarySignature } from '@/services/ai';
 import { loadBase, loadOverview } from '@/services/dashboards';
 import { lastAnalysisRun } from '@/services/opportunities';
 import { requireWorkspace } from '@/services/workspace';
+import { ReportLink } from '@/modules/report/report-link';
 
 export const metadata: Metadata = { title: 'Visão executiva' };
 
@@ -69,7 +70,12 @@ export default async function OverviewPage({ searchParams }: { searchParams: Pro
 
   return (
     <PeriodScope period={key}>
-      <PageHeader title={<Greeting name={firstName} />} description={`Indicadores de ${workspace.active.name}.`} actions={<PeriodSelect />} />
+      <PageHeader title={<Greeting name={firstName} />} description={`Indicadores de ${workspace.active.name}.`} actions={
+          <div className="flex flex-wrap items-center gap-2">
+            <ReportLink period={key} />
+            <PeriodSelect />
+          </div>
+        } />
 
       <PeriodFrame className="mt-6 flex flex-col gap-6">
         <Briefing
