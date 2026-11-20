@@ -24,6 +24,7 @@ import {
   type FinishedImport,
 } from '../actions';
 import { Stepper } from '../import-steps';
+import { convertSource } from './convert-source';
 import { loadFile, tableOf, uploadFile, type LoadedFile } from './read-file';
 import { ConfirmStep, ProcessingStep, ResultStep, ValidationStep, type Policy } from './review-steps';
 import { FileStep, MappingStep, PreviewStep, type Busy } from './source-steps';
@@ -64,6 +65,7 @@ export function ImportWizard({ resume, onShowHistory }: { resume: { importId: st
   const [step, setStep] = useState(0);
   const [dataset, setDataset] = useState<Dataset>('sales');
   const [loaded, setLoaded] = useState<LoadedFile | null>(null);
+  const [converted, setConverted] = useState<string[] | null>(null);
   const [sheet, setSheet] = useState<string | null>(null);
   const [importId, setImportId] = useState<string | null>(null);
   const [previous, setPrevious] = useState<{ at: string; status: string } | null>(null);
@@ -93,6 +95,7 @@ export function ImportWizard({ resume, onShowHistory }: { resume: { importId: st
 
   const reset = () => {
     setLoaded(null);
+    setConverted(null);
     setSheet(null);
     setImportId(null);
     setPrevious(null);
@@ -133,14 +136,26 @@ export function ImportWizard({ resume, onShowHistory }: { resume: { importId: st
     // eslint-disable-next-line react-hooks/exhaustive-deps -- runs once per resumed import
   }, [resume?.importId]);
 
-  const pick = async (file: File) => {
+  const pick = async (files: File[]) => {
     setError(null);
+    setConverted(null);
     setBusy({ label: 'Lendo o arquivo no seu navegador…', progress: null });
-    const outcome = await loadFile(file);
+    // A Mercado Livre report or NF-e XML become a sales spreadsheet first.
+    const conversion = await convertSource(files).catch(() => ({ ok: false as const, message: 'Não foi possível ler esses arquivos.' }));
+    if (conversion && !conversion.ok) {
+      setBusy(null);
+      setError(conversion.message);
+      return;
+    }
+    const outcome = await loadFile(conversion ? conversion.file : files[0]!);
     setBusy(null);
     if (!outcome.ok) {
       setError(outcome.message);
       return;
+    }
+    if (conversion) {
+      setDataset('sales');
+      setConverted(conversion.summary);
     }
     setLoaded(outcome.loaded);
     setSheet(outcome.loaded.sheets[0]?.name ?? null);
@@ -290,7 +305,8 @@ export function ImportWizard({ resume, onShowHistory }: { resume: { importId: st
               uploaded={importId !== null}
               busy={busy}
               error={error}
-              onPick={(file) => void pick(file)}
+              converted={converted}
+              onPick={(files) => void pick(files)}
               onRemove={() => void remove()}
               onUpload={() => void upload()}
             />

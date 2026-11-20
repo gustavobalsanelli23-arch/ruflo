@@ -48,6 +48,7 @@ export function FileStep({
   uploaded,
   busy,
   error,
+  converted,
   onPick,
   onRemove,
   onUpload,
@@ -58,7 +59,9 @@ export function FileStep({
   uploaded: boolean;
   busy: Busy | null;
   error: string | null;
-  onPick: (file: File) => void;
+  /** What the conversion did (Mercado Livre report or NF-e XML), if any. */
+  converted: string[] | null;
+  onPick: (files: File[]) => void;
   onRemove: () => void;
   onUpload: () => void;
 }) {
@@ -89,8 +92,8 @@ export function FileStep({
           onDrop={(event) => {
             event.preventDefault();
             setDragging(false);
-            const file = event.dataTransfer.files[0];
-            if (file) onPick(file);
+            const files = Array.from(event.dataTransfer.files);
+            if (files.length) onPick(files);
           }}
           className={cn(
             'flex cursor-pointer flex-col items-center justify-center rounded-xl border border-dashed px-6 py-10 text-center transition-colors',
@@ -102,6 +105,9 @@ export function FileStep({
           <UploadCloud aria-hidden="true" className={cn('size-7', dragging ? 'text-brand' : 'text-subtle-foreground')} strokeWidth={1.5} />
           <span className="mt-3 text-base font-medium text-foreground">{dragging ? 'Solte para ler o arquivo' : 'Arraste a planilha aqui ou clique para escolher'}</span>
           <span className="mt-1 text-sm text-muted-foreground">CSV ou Excel (.xlsx), até 25 MB e 200 mil linhas</span>
+          <span className="mt-1 text-sm text-muted-foreground">
+            Também lê o relatório de vendas do Mercado Livre e XML de NF-e ou NFC-e (vários de uma vez)
+          </span>
           <span className="mt-4 flex items-center gap-3 text-xs text-subtle-foreground">
             <span className="inline-flex items-center gap-1">
               <FileText aria-hidden="true" className="size-3.5" /> CSV
@@ -113,14 +119,15 @@ export function FileStep({
           <input
             id={inputId}
             type="file"
-            accept=".csv,.txt,.tsv,.xlsx,text/csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+            accept=".csv,.txt,.tsv,.xlsx,.xml,text/csv,text/xml,application/xml,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+            multiple
             className="sr-only"
             aria-describedby={error ? errorId : undefined}
             aria-invalid={error ? true : undefined}
             disabled={busy !== null}
             onChange={(event) => {
-              const file = event.target.files?.[0];
-              if (file) onPick(file);
+              const files = Array.from(event.target.files ?? []);
+              if (files.length) onPick(files);
               event.target.value = '';
             }}
           />
@@ -142,6 +149,17 @@ export function FileStep({
           <Button variant="ghost" size="icon-sm" onClick={onRemove} aria-label="Remover arquivo" disabled={busy !== null}>
             <X aria-hidden="true" />
           </Button>
+        </div>
+      )}
+
+      {converted && (
+        <div className="-mt-2 border-l-2 border-foreground/60 pl-3 text-sm text-muted-foreground">
+          <p className="font-medium text-foreground">Convertido no seu navegador em uma planilha de vendas</p>
+          <ul className="mt-1 flex flex-col gap-0.5">
+            {converted.map((line) => (
+              <li key={line}>{line}</li>
+            ))}
+          </ul>
         </div>
       )}
 
