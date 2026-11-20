@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { usePointerLight } from '@/lib/use-pointer-light';
 import { useReturnFocus } from '@/lib/use-return-focus';
 import { BasePathProvider } from './base-path';
 import { CommandMenu } from './command-menu';
@@ -15,6 +16,7 @@ export function AppShell({ context, children }: { context: ShellContext; childre
   const [commandOpen, setCommandOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const menuFocus = useReturnFocus();
+  usePointerLight();
 
   return (
     <BasePathProvider value={context.basePath}>

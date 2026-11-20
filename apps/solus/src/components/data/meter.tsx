@@ -43,7 +43,7 @@ export function Meter({
       className={cn('h-1.5 w-full overflow-hidden rounded-full', TRACK[tone], className)}
     >
       <div
-        className={cn('h-full rounded-full transition-[width] duration-500 ease-(--ease-out-quint)', FILL[tone])}
+        className={cn('meter-fill h-full rounded-full transition-[width] duration-500 ease-(--ease-out-quint)', FILL[tone])}
         style={{ width: `${ratio * 100}%` }}
       />
     </div>

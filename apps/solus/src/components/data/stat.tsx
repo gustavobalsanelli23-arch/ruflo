@@ -1,4 +1,5 @@
 import { cn } from '@/lib/utils';
+import { CountUp } from './count-up';
 
 const VALUE_SIZE = {
   sm: 'text-xl leading-7',
@@ -35,7 +36,9 @@ export function Stat({
         <span className="flex min-w-0 items-center gap-2">{label}</span>
         {trend && <span className="-mt-0.5 hidden shrink-0 sm:block">{trend}</span>}
       </dt>
-      <dd className={cn('mt-1.5 font-semibold tracking-[-0.02em] text-foreground', VALUE_SIZE[size])}>{value}</dd>
+      <dd className={cn('mt-1.5 font-semibold tracking-[-0.02em] text-foreground', VALUE_SIZE[size])}>
+        {typeof value === 'string' ? <CountUp value={value} /> : value}
+      </dd>
       {(delta || hint) && (
         <dd className="mt-1 flex min-w-0 flex-wrap items-baseline gap-x-2 gap-y-0.5">
           {delta}
@@ -52,8 +55,8 @@ export function StatStrip({ children, className, label }: { children: React.Reac
     <dl
       aria-label={label}
       className={cn(
-        'grid grid-cols-2 gap-px overflow-hidden rounded-xl border bg-border shadow-card md:grid-cols-4',
-        '*:bg-card *:bg-(image:--card-sheen) *:px-5 *:py-4',
+        'stat-strip grid grid-cols-2 gap-px overflow-hidden rounded-xl border bg-border shadow-card md:grid-cols-4',
+        '*:bg-card *:bg-(image:--card-sheen) *:px-5 *:py-4 *:transition-colors *:duration-300',
         className,
       )}
     >

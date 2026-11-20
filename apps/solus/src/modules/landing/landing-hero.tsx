@@ -2,15 +2,15 @@
 
 import Link from 'next/link';
 import { useEffect, useRef, useState } from 'react';
-import { EclipseArt } from '@/components/brand/eclipse';
 import { Logo } from '@/components/brand/logo';
 import { ThemeToggle } from '@/components/shell/theme-toggle';
+import { EclipseCorona } from './eclipse-corona';
 import styles from './landing-hero.module.css';
 
 /**
  * Full-viewport hero of the public home: glass nav, badge, two-line headline
  * whose accent is painted in two passes, two calls to action and a lede at
- * the bottom, over the SOLUS eclipse. Always dark, in both themes.
+ * the bottom, over a total solar eclipse. Always dark, in both themes.
  */
 
 const LINKS = [
@@ -62,11 +62,7 @@ export function LandingHero() {
     <header className={styles.hero}>
       <div className={styles.sky} aria-hidden="true" />
       <div className={styles.eclipse} aria-hidden="true">
-        <div className={styles.corona} />
-        <div className={styles.rays} />
-        <EclipseArt className={styles.eclipseArt} />
-        <div className={styles.flow} />
-        <div className={`${styles.flow} ${styles.flowSlow}`} />
+        <EclipseCorona />
       </div>
       <div className={styles.scrim} aria-hidden="true" />
 

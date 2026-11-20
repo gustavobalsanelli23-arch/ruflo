@@ -70,7 +70,12 @@ test('no celular, links de texto têm alvo de toque de pelo menos 24px e recebem
   await page.goto('/demo/visao-geral');
   for (const name of ['Ver todas', 'Ver estoque', 'Ver lucratividade']) {
     const link = page.getByRole('link', { name });
-    await link.scrollIntoViewIfNeeded();
+    // Centred, clear of the tab bar; panels arrive with a short animation as
+    // they scroll in, so measure at rest.
+    await link.evaluate((el) => el.scrollIntoView({ block: 'center' }));
+    await page.waitForFunction(() =>
+      document.getAnimations().every((a) => a.playState !== 'running' || a.effect?.getTiming().iterations === Infinity),
+    );
     const result = await link.evaluate((el) => {
       const r = el.getBoundingClientRect();
       const reaches = (y: number) => el.contains(document.elementFromPoint(r.left + r.width / 2, y));

@@ -3,7 +3,8 @@ import { cn } from '@/lib/utils';
 /**
  * 12-point trend in the de-emphasis hue, with the current value in the accent
  * (dataviz stat-tile contract). Decorative next to its number, so hidden from
- * assistive tech; the value and delta carry the information.
+ * assistive tech; the value and delta carry the information. The line draws
+ * itself in, then the current point keeps a slow pulse (globals.css).
  */
 export function Sparkline({
   values,
@@ -33,8 +34,9 @@ export function Sparkline({
       className={cn('overflow-visible', className)}
       aria-hidden="true"
     >
-      <path d={path} fill="none" stroke="var(--series-muted)" strokeWidth="1.5" strokeLinejoin="round" strokeLinecap="round" />
-      <circle cx={x(values.length - 1)} cy={y(last)} r="3" fill="var(--series-1)" stroke="var(--card)" strokeWidth="2" />
+      <path className="spark-line" pathLength={1} d={path} fill="none" stroke="var(--series-muted)" strokeWidth="1.5" strokeLinejoin="round" strokeLinecap="round" />
+      <circle className="spark-ping" cx={x(values.length - 1)} cy={y(last)} r="3" fill="var(--series-1)" />
+      <circle className="spark-dot" cx={x(values.length - 1)} cy={y(last)} r="3" fill="var(--series-1)" stroke="var(--card)" strokeWidth="2" />
     </svg>
   );
 }
