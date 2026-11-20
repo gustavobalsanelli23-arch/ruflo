@@ -591,10 +591,45 @@
   color: var(--muted);
 }
 
+/*
+ * Glass lettering: a translucent fill that is brighter at the top, a hairline
+ * of light on the edges, depth below, and a reflection that crosses the
+ * words now and then. Where the headline passes over the corona, its light
+ * shows through the letters.
+ */
+.glass {
+  --glass-fill: linear-gradient(180deg, rgb(255 255 255 / 0.98) 0%, rgb(240 246 252 / 0.78) 38%, rgb(214 230 248 / 0.5) 72%, rgb(190 214 242 / 0.62) 100%);
+  --glass-edge: rgb(255 255 255 / 0.4);
+  color: transparent;
+  background-image:
+    linear-gradient(105deg, transparent 38%, rgb(255 255 255 / 0.95) 50%, transparent 62%),
+    var(--glass-fill);
+  background-size:
+    260% 100%,
+    100% 100%;
+  background-position:
+    160% 0,
+    0 0;
+  background-repeat: no-repeat;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-stroke: 1px var(--glass-edge);
+  filter: drop-shadow(0 6px 14px rgb(0 0 0 / 0.38));
+  animation: glass-sheen 8s ease-in-out 2.2s infinite;
+}
+
+.glassMuted {
+  --glass-fill: linear-gradient(180deg, rgb(178 192 207 / 0.9) 0%, rgb(138 151 165 / 0.72) 55%, rgb(120 134 150 / 0.5) 100%);
+  --glass-edge: rgb(255 255 255 / 0.22);
+  animation-delay: 2.5s;
+}
+
 .accent {
   position: relative;
   display: inline-block;
   color: var(--muted);
+  /* Glow on the word itself (a filter on the masked layer would show the mask's box). */
+  filter: drop-shadow(0 0 12px rgb(127 182 230 / 0.28));
 }
 
 .accent::before,
@@ -617,8 +652,24 @@
 }
 
 .accent::after {
-  color: var(--brand);
-  animation: accent-fill 1.05s cubic-bezier(0.4, 0, 0.2, 1) 1.08s forwards;
+  /* The final pass is blue glass, nearly opaque so the passes below stay hidden. */
+  color: transparent;
+  background-image:
+    linear-gradient(105deg, transparent 38%, rgb(255 255 255 / 0.9) 50%, transparent 62%),
+    linear-gradient(180deg, #e2f0fc 0%, #9cc8ee 45%, #6fa9de 100%);
+  background-size:
+    260% 100%,
+    100% 100%;
+  background-position:
+    160% 0,
+    0 0;
+  background-repeat: no-repeat;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-stroke: 1px rgb(226 240 252 / 0.45);
+  animation:
+    accent-fill 1.05s cubic-bezier(0.4, 0, 0.2, 1) 1.08s forwards,
+    glass-sheen 8s ease-in-out 2.9s infinite;
 }
 
 .actions {
@@ -707,6 +758,20 @@
   45%,
   100% {
     background-position: -60% 0;
+  }
+}
+
+@keyframes glass-sheen {
+  0% {
+    background-position:
+      160% 0,
+      0 0;
+  }
+  28%,
+  100% {
+    background-position:
+      -60% 0,
+      0 0;
   }
 }
 
@@ -874,5 +939,11 @@
   .accent::before,
   .accent::after {
     content: none;
+  }
+
+  .glass {
+    background-position:
+      -60% 0,
+      0 0;
   }
 }

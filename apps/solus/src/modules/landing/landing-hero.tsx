@@ -119,12 +119,12 @@ export function LandingHero() {
         <h1 className={styles.headline}>
           <span className={styles.mask}>
             <span className={styles.rise} style={delay(0.26)}>
-              Veja onde sua empresa ganha{' '}
+              <span className={styles.glass}>Veja onde sua empresa ganha </span>
             </span>
           </span>
           <span className={styles.mask}>
             <span className={styles.rise} style={delay(0.4)}>
-              <span className={styles.muted}>e onde </span>
+              <span className={`${styles.muted} ${styles.glass} ${styles.glassMuted}`}>e onde </span>
               <span className={styles.accent} data-text="perde dinheiro.">
                 perde dinheiro.
               </span>
