@@ -289,7 +289,6 @@
   padding: 0;
   border: 0;
   background: transparent;
-  pointer-events: none;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
   /* On phones the corona sits behind the headline: a backdrop, not a picture. */
@@ -302,13 +301,13 @@
   height: 100%;
 }
 
-/* Only on large screens is the eclipse beside the text, and clickable. */
+/* On large screens the eclipse sits beside the text. On phones it is behind
+   the headline, and a tap on the headline reaches it too (see .headline). */
 @media (min-width: 1024px) {
   .cloud {
     inset: 0 -6% 0 42%;
     height: auto;
     opacity: 1;
-    pointer-events: auto;
   }
 }
 
@@ -319,18 +318,42 @@
 
 .cloudHint {
   position: absolute;
-  /* The eclipse runs 6% past the right edge; the hint stays inside the page. */
-  right: calc(6vw + clamp(1.25rem, 3.6vw, 3rem));
-  bottom: clamp(2rem, 6vh, 4rem);
-  display: none;
+  /* Phones: centred at the top of the corona (the cloud is wider than the page),
+     clear of the nav. */
+  top: 2.5rem;
+  left: 50%;
+  translate: -50% 0;
+  white-space: nowrap;
   font-size: 0.8125rem;
-  color: var(--ink-muted);
+  color: var(--ink);
   transition: color 0.2s ease;
+}
+
+.hintTouch {
+  display: inline;
+}
+
+.hintPointer {
+  display: none;
 }
 
 @media (min-width: 1024px) {
   .cloudHint {
-    display: block;
+    top: auto;
+    left: auto;
+    translate: none;
+    /* The eclipse runs 6% past the right edge; the hint stays inside the page. */
+    right: calc(6vw + clamp(1.25rem, 3.6vw, 3rem));
+    bottom: clamp(2rem, 6vh, 4rem);
+    color: var(--ink-muted);
+  }
+
+  .hintTouch {
+    display: none;
+  }
+
+  .hintPointer {
+    display: inline;
   }
 
   .cloud:hover .cloudHint {
@@ -357,6 +380,8 @@
 }
 
 .headline {
+  /* Behind the headline is the eclipse: on phones a tap here opens it. */
+  pointer-events: none;
   max-width: 13ch;
   margin: 0;
   font-size: clamp(2.75rem, min(7vw, 11.5vh), 7.25rem);

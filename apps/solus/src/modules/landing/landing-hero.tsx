@@ -125,7 +125,8 @@ export function LandingHero() {
       >
         <ParticleEclipse className={styles.canvas} open={eclipseOpen} />
         <span className={styles.cloudHint} aria-hidden="true">
-          Clique no eclipse para abrir o analista
+          <span className={styles.hintTouch}>Toque no eclipse para abrir o analista</span>
+          <span className={styles.hintPointer}>Clique no eclipse para abrir o analista</span>
         </span>
       </button>
 
