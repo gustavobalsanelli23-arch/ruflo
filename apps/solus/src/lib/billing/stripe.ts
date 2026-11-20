@@ -87,8 +87,16 @@ async function planOf(stripe: Stripe, subscription: Stripe.Subscription, product
  * end of one never drops a plan the customer is still paying for.
  */
 export async function customerBillingState(stripe: Stripe, subscription: Stripe.Subscription) {
-  const listed = await stripe.subscriptions.list({ customer: customerIdOf(subscription), status: 'all', limit: 100 });
-  const all = listed.data.some((item) => item.id === subscription.id) ? listed.data : [subscription, ...listed.data];
+  let listed: Stripe.Subscription[];
+  try {
+    listed = (await stripe.subscriptions.list({ customer: customerIdOf(subscription), status: 'all', limit: 100 })).data;
+  } catch (cause) {
+    // The customer was deleted (closeBillingAccount, when an organization
+    // goes): only the subscription the event is about is left to report.
+    if ((cause as { code?: string }).code !== 'resource_missing') throw cause;
+    listed = [];
+  }
+  const all = listed.some((item) => item.id === subscription.id) ? listed : [subscription, ...listed];
   const products = new Map<string, string | null>();
   const states = await Promise.all(all.map(async (item) => subscriptionState(item, await planOf(stripe, item, products))));
   const paid = states.filter((state) => PAID_STATUSES.has(state.status));

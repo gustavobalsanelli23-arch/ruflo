@@ -129,6 +129,20 @@ describe('webhook da Stripe', () => {
     expect(response.status).toBe(500);
     expect(rpc).not.toHaveBeenCalled();
   });
+
+  it('cliente já apagado (organização excluída): aplica só a assinatura do evento, sem pedir nova tentativa', async () => {
+    const canceled = { ...subscription, status: 'canceled' };
+    const { getStripe } = await import('@/lib/billing/stripe');
+    const stripe = getStripe()!;
+    vi.spyOn(stripe.subscriptions, 'list').mockRejectedValue(Object.assign(new Error('No such customer'), { code: 'resource_missing' }));
+    vi.spyOn(stripe.subscriptions, 'retrieve').mockResolvedValue(canceled as never);
+    const { POST } = await import('@/app/api/stripe/webhook/route');
+    const response = await POST(
+      signed({ id: 'evt_7', object: 'event', type: 'customer.subscription.deleted', data: { object: { id: 'sub_1', object: 'subscription' } } }),
+    );
+    expect(response.status).toBe(200);
+    expect(rpc).toHaveBeenCalledWith('apply_subscription', expect.objectContaining({ p_subscription_id: 'sub_1', p_status: 'canceled' }));
+  });
 });
 
 describe('encerrar a cobrança antes de excluir a organização', () => {
