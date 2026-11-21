@@ -5,7 +5,8 @@ import { redirect } from 'next/navigation';
 import { loginPath, safeNextPath } from '@/lib/auth/redirect';
 import { LEGAL } from '@/config/legal';
 import { getSiteUrl } from '@/lib/env';
-import { logSecurityEvent, logServerError } from '@/lib/log';
+import { logServerError } from '@/lib/log';
+import { reportSecurityEvent } from '@/services/security-events';
 import { GENERIC_ERROR, mapAuthError, RATE_LIMITED } from '@/lib/supabase/errors';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 import {
@@ -53,7 +54,7 @@ const CAPTCHA_FAILED = 'Confirme que você não é um robô e tente de novo.';
 async function captcha(formData: FormData, rawIp: string): Promise<FormState | null> {
   const verdict = await verifyCaptcha(formData, rawIp);
   if (verdict === 'ok') return null;
-  if (verdict === 'failed') logSecurityEvent('captcha_failed');
+  if (verdict === 'failed') await reportSecurityEvent('captcha_failed');
   return { status: 'error', code: verdict === 'failed' ? 'validation' : 'unavailable', message: verdict === 'failed' ? CAPTCHA_FAILED : UNAVAILABLE };
 }
 
@@ -104,7 +105,7 @@ export async function signUpAction(_previous: FormState, formData: FormData): Pr
   if (!parsed.success) return { status: 'error', fieldErrors: fieldErrors(parsed.error), values };
   // Bot trap filled: the usual answer, nothing sent.
   if (text(formData, HONEYPOT_FIELD)) {
-    logSecurityEvent('bot_trap', 'recover');
+    await reportSecurityEvent('bot_trap', 'recover');
     return { status: 'success', email: parsed.data.email };
   }
 
@@ -179,7 +180,7 @@ export async function requestPasswordResetAction(_previous: FormState, formData:
   const parsed = emailOnlySchema.safeParse({ email: formData.get('email') });
   if (!parsed.success) return { status: 'error', fieldErrors: fieldErrors(parsed.error), values };
   if (text(formData, HONEYPOT_FIELD)) {
-    logSecurityEvent('bot_trap', 'recover');
+    await reportSecurityEvent('bot_trap', 'recover');
     return { status: 'success', email: parsed.data.email };
   }
 

@@ -1,7 +1,8 @@
 import 'server-only';
 import { createHmac } from 'node:crypto';
 import { headers } from 'next/headers';
-import { logSecurityEvent, logServerError } from '@/lib/log';
+import { logServerError } from '@/lib/log';
+import { reportSecurityEvent } from '@/services/security-events';
 import { createSupabaseAdminClient } from '@/lib/supabase/admin';
 
 /**
@@ -72,7 +73,7 @@ export async function consumeRateLimits(rules: RateRule[]): Promise<RateVerdict>
     }
     if (data === false) {
       // Only the bucket family (e.g. "signin:ip"), never the fingerprint.
-      logSecurityEvent('rate_limited', rule.bucket.split(':').slice(0, 2).join(':'));
+      await reportSecurityEvent('rate_limited', rule.bucket.split(':').slice(0, 2).join(':'));
       return 'limited';
     }
   }

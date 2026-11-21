@@ -63,7 +63,9 @@ describe('webhook da Stripe', () => {
       new Request('https://solus.test/api/stripe/webhook', { method: 'POST', body: '{}', headers: { 'stripe-signature': 't=1,v1=errado' } }),
     );
     expect(response.status).toBe(400);
-    expect(rpc).not.toHaveBeenCalled();
+    // Nothing about the subscription changes; the attempt goes to the security log.
+    expect(rpc).not.toHaveBeenCalledWith('apply_subscription', expect.anything());
+    expect(rpc).toHaveBeenCalledWith('record_security_event', { p_event: 'webhook_bad_signature', p_label: null });
   });
 
   it('relê a assinatura na Stripe e aplica o estado atual', async () => {
