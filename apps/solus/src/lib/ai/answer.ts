@@ -1,5 +1,6 @@
 import type { AnswerBlock } from '@/lib/data/types';
 import { sentences, unverified, type Ground } from './grounding';
+import { tidyNumbers } from './tidy-numbers';
 import type { AnswerDraft } from './tools';
 import type { ToolOutput } from './types';
 
@@ -77,8 +78,9 @@ export function resolveAnswer(draft: AnswerDraft, outputs: ToolOutput[], ground:
     return false;
   };
   const summaryParts = sentences(draft.resumo).filter(keep);
-  const summary = summaryParts.length > 0 ? summaryParts.join(' ') : 'Não foi possível confirmar nos dados consultados os números desta resposta.';
-  const list = (items: string[]) => items.filter(keep);
+  const summary = summaryParts.length > 0 ? tidyNumbers(summaryParts.join(' ')) : 'Não foi possível confirmar nos dados consultados os números desta resposta.';
+  // Checked first, then written the Brazilian way (the check reads either form).
+  const list = (items: string[]) => items.filter(keep).map(tidyNumbers);
   const facts = list(draft.fatos);
   const hypotheses = list(draft.hipoteses);
   const recommendations = list(draft.recomendacoes);
@@ -90,7 +92,7 @@ export function resolveAnswer(draft: AnswerDraft, outputs: ToolOutput[], ground:
   const visuals: AnswerBlock[] = [];
   for (const block of draft.blocos) {
     const output = byRef.get(block.ref);
-    const title = !strip || unverified(block.titulo, ground).length === 0 ? block.titulo || (output?.source.name ?? '') : (output?.source.name ?? '');
+    const title = tidyNumbers(!strip || unverified(block.titulo, ground).length === 0 ? block.titulo || (output?.source.name ?? '') : (output?.source.name ?? ''));
     const result = visual(block, output, title);
     if (typeof result === 'string') dropped.push(result);
     else visuals.push(result);
