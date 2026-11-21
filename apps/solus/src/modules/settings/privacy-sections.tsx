@@ -8,6 +8,7 @@ import { PlanBilling, type BillingInfo } from '@/modules/billing/plan-billing';
 import { PasswordInput, SubmitButton, TextInput, useValidatedAction } from '@/modules/auth/form-kit';
 import { IDLE } from '@/modules/auth/form-state';
 import { deleteAccountSchema } from '@/schemas/auth';
+import { DigestPreference } from './digest-preference';
 import { SettingsField } from './settings-frame';
 
 const linkClass = 'font-medium text-brand underline-offset-4 outline-none hover:underline focus-visible:underline';
@@ -67,6 +68,8 @@ export function PrivacySection() {
           .
         </p>
       </div>
+
+      <DigestPreference />
 
       <form ref={formRef} action={formAction} onSubmit={onSubmit} noValidate className="flex flex-col gap-5 rounded-xl border border-critical/40 p-4">
         <div>
